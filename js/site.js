@@ -81,6 +81,20 @@ function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
 }
 
+const API_ENDPOINTS = {
+  'data/standings.json': '/api/standings',
+  'data/matches.json': '/api/matches',
+  'data/news.json': '/api/news',
+  'data/results.json': '/api/results',
+};
+
+function getApiBaseUrl() {
+  const runtimeValue = window.BCUP_CONFIG?.apiBaseUrl;
+  const localValue = localStorage.getItem('bcup_api_base_url');
+  const baseUrl = (runtimeValue || localValue || '').trim();
+  return baseUrl.replace(/\/+$/, '');
+}
+
 async function fetchJson(path) {
   const storageKeyMap = {
     'data/standings.json': 'bcup_standings',
@@ -95,6 +109,17 @@ async function fetchJson(path) {
       try {
         return JSON.parse(local);
       } catch (e) {}
+    }
+  }
+  const apiBaseUrl = getApiBaseUrl();
+  const endpoint = API_ENDPOINTS[path];
+  if (apiBaseUrl && endpoint) {
+    try {
+      const response = await fetch(`${apiBaseUrl}${endpoint}`);
+      if (!response.ok) throw new Error(`Failed to load ${endpoint}`);
+      return response.json();
+    } catch (error) {
+      console.warn(`Remote API ${endpoint} is unavailable, falling back to static file.`, error);
     }
   }
   const response = await fetch(path);
@@ -584,4 +609,3 @@ function initResultsUpcomingSlider() {
 
   setTimeout(updateButtons, 80);
 }
-
