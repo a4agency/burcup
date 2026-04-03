@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burchalkin Cup — Главная</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  
+<header class="header">
+  <div class="container header-inner">
+    <a class="header-brand" href="index.html">
+      <span class="header-brand-mark"><img src="images/logo-burchalkin.png" alt="Burchalkin Cup"></span>
+      <span class="header-brand-title">Burchalkin Cup</span>
+    </a>
+
+    <nav class="header-menu">
+      <a href="index.html">Главная</a>
+      <a href="news.html">Новости</a>
+      <a href="teams.html">Команды</a>
+      <a href="matches.html">Расписание</a>
+      <a href="results.html">Результаты</a>
+      <a href="multimedia.html">Трансляции</a>
+      <a href="about-tournament.html">О турнире</a>
+      <a href="about-lev-burchalkin.html">О Льве Бурчалкине</a>
+      <a href="contacts.html">Контакты</a>
+      <div class="lang-switcher" aria-label="Language switcher">
+        <button type="button" class="lang-btn" data-lang="ru" title="Русский">
+          <span class="lang-code">RU</span>
+          <img src="images/lang-ru.png" alt="Русский" class="lang-flag-img" loading="lazy">
+        </button>
+        <button type="button" class="lang-btn" data-lang="en" title="English">
+          <span class="lang-code">EN</span>
+          <img src="images/lang-en.png" alt="English" class="lang-flag-img" loading="lazy">
+        </button>
+      </div>
+
+    </nav>
+  </div>
+</header>
+
+  
+<main class="site-main">
+
+<section class="hero hero-carousel-wrap">
+  <div class="container">
+    <div class="hero-carousel-shell">
+      <div class="hero-carousel-side hero-carousel-side-left" id="hero-carousel-side-left"><img class="hero-carousel-side-img" id="hero-carousel-side-left-img" src="images/hero-carousel-3.png" alt=""></div>
+
+      <div class="hero-carousel-card">
+        <div class="hero-carousel" id="hero-carousel">
+          <div class="hero-carousel-slide active" data-bg="images/hero-carousel-1.png">
+            <img src="images/hero-carousel-1.png" alt="Burchalkin Cup">
+          </div>
+          <div class="hero-carousel-slide" data-bg="images/hero-carousel-2.png">
+            <img src="images/hero-carousel-2.png" alt="Расписание турнира">
+          </div>
+          <div class="hero-carousel-slide" data-bg="images/hero-carousel-3.png">
+            <img src="images/hero-carousel-3.png" alt="Правила турнира">
+          </div>
+        </div>
+
+        <button class="hero-carousel-arrow hero-carousel-prev" id="hero-carousel-prev" type="button" aria-label="Предыдущий слайд">‹</button>
+        <button class="hero-carousel-arrow hero-carousel-next" id="hero-carousel-next" type="button" aria-label="Следующий слайд">›</button>
+
+        <div class="hero-carousel-dots" id="hero-carousel-dots">
+          <button class="hero-carousel-dot active" type="button" aria-label="Слайд 1"></button>
+          <button class="hero-carousel-dot" type="button" aria-label="Слайд 2"></button>
+          <button class="hero-carousel-dot" type="button" aria-label="Слайд 3"></button>
+        </div>
+      </div>
+
+      <div class="hero-carousel-side hero-carousel-side-right" id="hero-carousel-side-right"><img class="hero-carousel-side-img" id="hero-carousel-side-right-img" src="images/hero-carousel-2.png" alt="" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="section home-block">
+  <div class="container">
+    <div class="home-block-head">
+      <div>
+        <h2 class="section-title home-block-title">Ближайшие матчи</h2>
+        <p class="home-block-subtitle">Следите за ближайшими играми турнира и переходите в раздел матчей за полным расписанием.</p>
+      </div>
+      <a class="home-block-link" href="matches.html">Все матчи →</a>
+    </div>
+
+    
+    <div class="home-upcoming-slider">
+      <button class="home-upcoming-arrow home-upcoming-prev" id="home-upcoming-prev" type="button" aria-label="Предыдущие матчи">‹</button>
+      <div class="home-upcoming-viewport">
+        <div id="home-upcoming-matches" class="upcoming-grid home-upcoming-track"></div>
+      </div>
+      <button class="home-upcoming-arrow home-upcoming-next" id="home-upcoming-next" type="button" aria-label="Следующие матчи">›</button>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="section home-block home-news">
+  <div class="container">
+    <div class="home-block-head">
+      <div>
+        <h2 class="section-title home-block-title">Последние новости</h2>
+        <p class="home-block-subtitle">Раздел для анонсов, итогов игрового дня и новостей турнира.</p>
+      </div>
+      <a class="home-block-link" href="news.html">Все новости →</a>
+    </div>
+
+    <div id="home-latest-news" class="home-news-grid"></div></div>
+  </div>
+</section>
+
+
+<section class="section home-block home-table-section">
+  <div class="container">
+    <div class="home-block-head">
+      <div>
+        <h2 class="section-title home-block-title">Турнирная таблица</h2>
+        <p class="home-block-subtitle">Актуальное положение команд после стартовых матчей турнира.</p>
+      </div>
+      <a class="home-block-link" href="results.html">Все результаты →</a>
+    </div>
+
+    <div id="home-standings">
+      <table class="standings-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Команда</th>
+            <th>И</th>
+            <th>М</th>
+            <th>О</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">1</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-zenit.png" alt="Зенит" loading="lazy">
+                <span>Зенит</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">6-3</td>
+            <td class="points">7</td>
+          </tr>
+          <tr>
+            <td class="num">2</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-dinamo-minsk.png" alt="Динамо-Минск" loading="lazy">
+                <span>Динамо-Минск</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">5-4</td>
+            <td class="points">6</td>
+          </tr>
+          <tr>
+            <td class="num">3</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-palmeiras.png" alt="Палмейрас" loading="lazy">
+                <span>Палмейрас</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">4-3</td>
+            <td class="points">5</td>
+          </tr>
+          <tr>
+            <td class="num">4</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-kairat.png" alt="Кайрат" loading="lazy">
+                <span>Кайрат</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">4-4</td>
+            <td class="points">4</td>
+          </tr>
+          <tr>
+            <td class="num">5</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-crvena-zvezda.png" alt="Црвена Звезда" loading="lazy">
+                <span>Црвена Звезда</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">3-3</td>
+            <td class="points">4</td>
+          </tr>
+          <tr>
+            <td class="num">6</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-fenerbahce.png" alt="Фенербахче" loading="lazy">
+                <span>Фенербахче</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">3-5</td>
+            <td class="points">3</td>
+          </tr>
+          <tr>
+            <td class="num">7</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-san-lorenzo.png" alt="Сан-Лоренсо" loading="lazy">
+                <span>Сан-Лоренсо</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">2-5</td>
+            <td class="points">1</td>
+          </tr>
+          <tr>
+            <td class="num">8</td>
+            <td>
+              <div class="standings-team">
+                <img src="images/team-almaz-antey.png" alt="Алмаз-Антей" loading="lazy">
+                <span>Алмаз-Антей</span>
+              </div>
+            </td>
+            <td class="num">3</td>
+            <td class="num">1-6</td>
+            <td class="points">1</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Команды Кубка Бурчалкина 2025</h2>
+    <div class="team-logo-grid">
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-almaz-antey.png" alt="Алмаз-Антей" class="team-logo-img" loading="lazy"></div>
+        <h3>Алмаз-Антей</h3>
+        <div class="muted team-country">Санкт-Петербург</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-zenit.png" alt="Зенит" class="team-logo-img" loading="lazy"></div>
+        <h3>Зенит</h3>
+        <div class="muted team-country">Россия</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-dinamo-minsk.png" alt="Динамо-Минск" class="team-logo-img" loading="lazy"></div>
+        <h3>Динамо-Минск</h3>
+        <div class="muted team-country">Белоруссия</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-crvena-zvezda.png" alt="Црвена Звезда" class="team-logo-img" loading="lazy"></div>
+        <h3>Црвена Звезда</h3>
+        <div class="muted team-country">Сербия</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-fenerbahce.png" alt="Фенербахче" class="team-logo-img" loading="lazy"></div>
+        <h3>Фенербахче</h3>
+        <div class="muted team-country">Турция</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-kairat.png" alt="Кайрат" class="team-logo-img" loading="lazy"></div>
+        <h3>Кайрат</h3>
+        <div class="muted team-country">Казахстан</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-palmeiras.png" alt="Палмейрас" class="team-logo-img" loading="lazy"></div>
+        <h3>Палмейрас</h3>
+        <div class="muted team-country">Бразилия</div>
+      </div>
+      <div class="team-logo-card">
+        <div class="team-logo-wrap"><img src="images/team-san-lorenzo.png" alt="Сан-Лоренсо" class="team-logo-img" loading="lazy"></div>
+        <h3>Сан-Лоренсо</h3>
+        <div class="muted team-country">Аргентина</div>
+      </div>
+</div>
+  </div>
+</section>
+
+
+
+
+
+
+<section class="section history-section-wide">
+  <div class="container">
+    <h2 class="section-title">История участников</h2>
+    <div class="team-logo-grid history-teams-grid">
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-villarreal.png" alt="Вильярреал" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Вильярреал</h3>
+        <div class="muted team-country history-team-country">Испания</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-mtk.png" alt="МТК" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>МТК</h3>
+        <div class="muted team-country history-team-country">Венгрия</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-cruz-azul.png" alt="Крус Асуль" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Крус Асуль</h3>
+        <div class="muted team-country history-team-country">Мексика</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-victoria.png" alt="Виктория" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Виктория</h3>
+        <div class="muted team-country history-team-country">Португалия</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-santos.png" alt="Сантос" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Сантос</h3>
+        <div class="muted team-country history-team-country">Бразилия</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-atalanta.png" alt="Аталанта" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Аталанта</h3>
+        <div class="muted team-country history-team-country">Италия</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-roma.png" alt="Рома" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Рома</h3>
+        <div class="muted team-country history-team-country">Италия</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+
+      <div class="team-logo-card history-team-card">
+        <div class="team-logo-wrap history-team-logo-wrap"><img src="images/history-sepahan.png" alt="Сепахан" class="team-logo-img history-team-logo-img" loading="lazy"></div>
+        <h3>Сепахан</h3>
+        <div class="muted team-country history-team-country">Иран</div>
+        <div class="muted history-note">Исторический участник турнира прошлых лет.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+</main>
+
+  
+<section class="sponsors">
+  <div class="container">
+    <h2>Партнёры</h2>
+    <div class="sponsor-grid">
+      <div class="sponsor-item">Система спортивной аналитики B-SIGHT</div>
+      <div class="sponsor-item">АО «Российская промышленная коллегия»</div>
+      <div class="sponsor-item">БАЗ</div>
+      <div class="sponsor-item">Медиалига</div>
+      <div class="sponsor-item">БФ «ВТБ Страна»</div>
+      <div class="sponsor-item">Банк ВТБ</div>
+      <div class="sponsor-item">Ижора Сталь Инвест</div>
+      <div class="sponsor-item">ООО Фирма «Спринг-Центр»</div>
+      <div class="sponsor-item">ООО «Новые технологии и материалы»</div>
+      <div class="sponsor-item">ПАО Сатурн</div>
+      <div class="sponsor-item">Банк ПСБ</div>
+      <div class="sponsor-item">ТехПром</div>
+    </div>
+    <h2 style="margin-top:24px">Информационные партнёры</h2>
+    <div class="sponsor-grid">
+      <div class="sponsor-item">ТАСС</div>
+      <div class="sponsor-item">Спорт-Экспресс</div>
+      <div class="sponsor-item">РФС</div>
+      <div class="sponsor-item">Фонтанка.ру</div>
+      <div class="sponsor-item">Спорт День за Днем</div>
+      <div class="sponsor-item">Комсомольская правда</div>
+      <div class="sponsor-item">Радио «Зенит»</div>
+      <div class="sponsor-item">Футбол Петербурга</div>
+      <div class="sponsor-item">Санкт-Петербургские ведомости</div>
+      <div class="sponsor-item">Телеканал «Санкт-Петербург»</div>
+    </div>
+  </div>
+</section>
+
+  
+<footer class="footer">
+  <div class="container">© <span id="year"></span> Burchalkin Cup</div>
+</footer>
+
+  <script src="js/site.js"></script>
+  
+  <script src="js/i18n.js"></script>
+</body>
+</html>

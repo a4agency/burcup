@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burchalkin Cup — admin-lkjuft</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="container header-inner">
+    <a class="header-brand" href="index.html">
+      <span class="header-brand-mark"><img src="images/logo-burchalkin.png" alt="Burchalkin Cup"></span>
+      <span class="header-brand-title">Burchalkin Cup</span>
+    </a>
+
+    <nav class="header-menu">
+      <a href="index.html">Главная</a>
+      <a href="news.html">Новости</a>
+      <a href="teams.html">Команды</a>
+      <a href="matches.html">Расписание</a>
+      <a href="results.html">Результаты</a>
+      <a href="multimedia.html">Трансляции</a>
+      <a href="about-tournament.html">О турнире</a>
+      <a href="about-lev-burchalkin.html">О Льве Бурчалкине</a>
+      <a href="contacts.html">Контакты</a>
+      <div class="lang-switcher" aria-label="Language switcher">
+        <button type="button" class="lang-btn" data-lang="ru" title="Русский">
+          <span class="lang-code">RU</span>
+          <img src="images/lang-ru.png" alt="Русский" class="lang-flag-img" loading="lazy">
+        </button>
+        <button type="button" class="lang-btn" data-lang="en" title="English">
+          <span class="lang-code">EN</span>
+          <img src="images/lang-en.png" alt="English" class="lang-flag-img" loading="lazy">
+        </button>
+      </div>
+
+    </nav>
+  </div>
+</header>
+
+<main class="site-main">
+  <section class="page-head">
+    <div class="container">
+      <h1>admin-lkjuft</h1>
+      <p>Эта версия работает локально в браузере. Изменения сохраняются в localStorage и сразу подхватываются сайтом в этом же браузере.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container admin-layout">
+      <aside class="admin-sidebar">
+        <h3>Разделы</h3>
+        <div id="admin-nav" class="admin-nav"></div>
+      </aside>
+
+      <div class="admin-panel">
+        <h2 id="admin-title">Турнирная таблица</h2>
+        <div id="admin-help" class="admin-help"></div>
+
+        <div class="admin-mode-switch">
+          <button id="mode-form" class="active" type="button">Форма</button>
+          <button id="mode-json" type="button">JSON</button>
+        </div>
+        <div class="admin-actions">
+          <button id="admin-save" class="admin-save" type="button">Сохранить</button>
+          <button id="admin-reset" class="admin-reset" type="button">Сбросить</button>
+          <button id="admin-export" class="admin-export" type="button">Экспорт JSON</button>
+        </div>
+
+        <div id="admin-form-wrap" class="admin-form-wrap active"></div>
+        <div id="admin-json-wrap" class="admin-json-wrap">
+          <textarea id="admin-textarea" class="admin-textarea"></textarea>
+        </div>
+        <div id="admin-status" class="admin-status">Загрузка…</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="sponsors">
+  <div class="container">
+    <h2>Партнёры</h2>
+    <div class="sponsor-grid">
+      <div class="sponsor-item">Система спортивной аналитики B-SIGHT</div>
+      <div class="sponsor-item">АО «Российская промышленная коллегия»</div>
+      <div class="sponsor-item">БАЗ</div>
+      <div class="sponsor-item">Медиалига</div>
+      <div class="sponsor-item">БФ «ВТБ Страна»</div>
+      <div class="sponsor-item">Банк ВТБ</div>
+      <div class="sponsor-item">Ижора Сталь Инвест</div>
+      <div class="sponsor-item">ООО Фирма «Спринг-Центр»</div>
+      <div class="sponsor-item">ООО «Новые технологии и материалы»</div>
+      <div class="sponsor-item">ПАО Сатурн</div>
+      <div class="sponsor-item">Банк ПСБ</div>
+      <div class="sponsor-item">ТехПром</div>
+    </div>
+    <h2 style="margin-top:24px">Информационные партнёры</h2>
+    <div class="sponsor-grid">
+      <div class="sponsor-item">ТАСС</div>
+      <div class="sponsor-item">Спорт-Экспресс</div>
+      <div class="sponsor-item">РФС</div>
+      <div class="sponsor-item">Фонтанка.ру</div>
+      <div class="sponsor-item">Спорт День за Днем</div>
+      <div class="sponsor-item">Комсомольская правда</div>
+      <div class="sponsor-item">Радио «Зенит»</div>
+      <div class="sponsor-item">Футбол Петербурга</div>
+      <div class="sponsor-item">Санкт-Петербургские ведомости</div>
+      <div class="sponsor-item">Телеканал «Санкт-Петербург»</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">© <span id="year"></span> Burchalkin Cup</div>
+</footer>
+
+<script src="js/site.js"></script>
+<script src="js/admin.js"></script>
+  <script src="js/i18n.js"></script>
+</body>
+</html>

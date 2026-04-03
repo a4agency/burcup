@@ -1,0 +1,587 @@
+
+function autoFitTeamNames(selector = '.team-name', maxSize = 22, minSize = 12) {
+  document.querySelectorAll(selector).forEach(el => {
+    const mobile = window.innerWidth <= 640;
+    const tablet = window.innerWidth <= 900;
+    let size = mobile ? 16 : (tablet ? 18 : maxSize);
+    el.style.fontSize = size + 'px';
+    el.style.whiteSpace = 'nowrap';
+    while ((el.scrollWidth > el.clientWidth) && size > minSize) {
+      size -= 0.5;
+      el.style.fontSize = size + 'px';
+    }
+  });
+}
+
+
+document.addEventListener('DOMContentLoaded', function(){
+  const year = document.getElementById('year');
+  if(year) year.textContent = new Date().getFullYear();
+});
+
+
+async function renderStandings(selector) {
+  const target = document.querySelector(selector);
+  if (!target) return;
+  try {
+    const data = await fetchJson('data/standings.json');
+    const rows = data.map((item, index) => `
+      <tr>
+        <td class="num">${index + 1}</td>
+        <td>
+          <div class="standings-team">
+            <img src="${item.logo}" alt="${item.team}" loading="lazy">
+            <span>${item.team}</span>
+          </div>
+        </td>
+        <td class="num">${item.played}</td>
+        <td class="num">${item.goals}</td>
+        <td class="points">${item.points}</td>
+      </tr>
+    `).join('');
+
+    target.innerHTML = `
+      <div class="standings-card">
+        <table class="standings-table">
+          <colgroup>
+            <col class="col-rank">
+            <col class="col-team">
+            <col class="col-played">
+            <col class="col-goals">
+            <col class="col-points">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Команда</th>
+              <th>Игры</th>
+              <th>Мячи</th>
+              <th>Очки</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  } catch (error) {
+    target.innerHTML = '<div class="standings-card"><div style="padding:18px">Не удалось загрузить таблицу.</div></div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initResultsUpcomingSlider();
+  initHomeUpcomingSlider();
+  initHeroCarousel();
+  renderStandings('#home-standings');
+  renderStandings('#results-standings');
+});
+
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+}
+
+async function fetchJson(path) {
+  const storageKeyMap = {
+    'data/standings.json': 'bcup_standings',
+    'data/matches.json': 'bcup_matches',
+    'data/news.json': 'bcup_news',
+    'data/results.json': 'bcup_results',
+  };
+  const storageKey = storageKeyMap[path];
+  if (storageKey) {
+    const local = localStorage.getItem(storageKey);
+    if (local) {
+      try {
+        return JSON.parse(local);
+      } catch (e) {}
+    }
+  }
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Failed to load ${path}`);
+  return response.json();
+}
+
+
+function fitTextElements(selector, minSize = 11, maxSize = 18) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.style.whiteSpace = 'nowrap';
+    let size = maxSize;
+    el.style.fontSize = size + 'px';
+    while ((el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) && size > minSize) {
+      size -= 0.5;
+      el.style.fontSize = size + 'px';
+    }
+  });
+}
+
+function runAutoFit() {
+  fitTextElements('.team-logo-card h3', 11, 20);
+  fitTextElements('.upcoming-name', 11, 16);
+  fitTextElements('.standings-team span', 11, 16);
+  fitTextElements('.team-inline span', 11, 16);
+}
+
+async function renderUpcomingMatches() {
+  const target = document.querySelector('#home-upcoming-matches');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/matches.json');
+    target.innerHTML = items.map(item => {
+      const parts = String(item.score || '0:0').split(':');
+      const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
+      const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
+      const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
+      return `
+      <a class="upcoming-card" href="match.html?id=${item.id}">
+        <div class="upcoming-header">
+          <div>
+            <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
+            <div class="upcoming-time">• ${escapeHtml(item.time || '')} ${escapeHtml(item.status_label || '')}</div>
+          </div>
+          <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
+        </div>
+        <div class="upcoming-teams">
+          <div class="upcoming-team-row">
+            <div class="team-left">
+              <img src="${escapeHtml(item.home_logo)}" class="team-logo" alt="${escapeHtml(item.home_team)}" loading="lazy">
+              <div class="team-name">${escapeHtml(item.home_team)}</div>
+            </div>
+            <div class="team-score">${homeScore}</div>
+          </div>
+          <div class="upcoming-team-row">
+            <div class="team-left">
+              <img src="${escapeHtml(item.away_logo)}" class="team-logo" alt="${escapeHtml(item.away_team)}" loading="lazy">
+              <div class="team-name">${escapeHtml(item.away_team)}</div>
+            </div>
+            <div class="team-score">${awayScore}</div>
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+    autoFitTeamNames('.team-name');
+  } catch (e) {
+    target.innerHTML = '<div class="card">Не удалось загрузить матчи.</div>';
+  }
+}
+
+async function renderHomeNews() {
+  const target = document.querySelector('#home-latest-news');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/news.json');
+    target.innerHTML = items.map(item => `
+      <a class="news-preview-card" href="${escapeHtml(item.link)}">
+        <div class="news-preview-cover"${item.image ? ` style="background-image:url('${escapeHtml(item.image)}');background-size:cover;background-position:center"` : ''}></div>
+        <div class="news-preview-content">
+          <div class="news-preview-date">${escapeHtml(item.date)}</div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.excerpt)}</p>
+        </div>
+      </a>
+    `).join('');
+    runAutoFit();
+  } catch (e) {
+    target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
+  }
+}
+
+async function renderMatchesPage() {
+  const target = document.querySelector('#matches-list');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/matches.json');
+    target.innerHTML = items.map(item => {
+      const parts = String(item.score || '0:0').split(':');
+      const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
+      const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
+      const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
+      return `
+      <a class="upcoming-card" href="match.html?id=${item.id}">
+        <div class="upcoming-header">
+          <div>
+            <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
+            <div class="upcoming-time">• ${escapeHtml(item.time || '')} ${escapeHtml(item.status_label || '')}</div>
+          </div>
+          <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
+        </div>
+        <div class="upcoming-teams">
+          <div class="upcoming-team-row">
+            <div class="team-left">
+              <img src="${escapeHtml(item.home_logo)}" class="team-logo" alt="${escapeHtml(item.home_team)}" loading="lazy">
+              <div class="team-name">${escapeHtml(item.home_team)}</div>
+            </div>
+            <div class="team-score">${homeScore}</div>
+          </div>
+          <div class="upcoming-team-row">
+            <div class="team-left">
+              <img src="${escapeHtml(item.away_logo)}" class="team-logo" alt="${escapeHtml(item.away_team)}" loading="lazy">
+              <div class="team-name">${escapeHtml(item.away_team)}</div>
+            </div>
+            <div class="team-score">${awayScore}</div>
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+    autoFitTeamNames('#matches-list .team-name');
+  } catch (e) {
+    target.innerHTML = '<div class="card">Не удалось загрузить список матчей.</div>';
+  }
+}
+
+async function renderNewsPage() {
+  const target = document.querySelector('#news-list');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/news.json');
+    target.innerHTML = items.map(item => `
+      <a class="news-card" href="${escapeHtml(item.link)}">
+        <div class="thumb">${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}">` : `<div class="news-preview-cover" style="height:100%"></div>`}</div>
+        <div class="meta-top"><span>${escapeHtml(item.date)}</span></div>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.excerpt)}</p>
+      </a>
+    `).join('');
+    runAutoFit();
+  } catch (e) {
+    target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
+  }
+}
+
+async function renderResultsList() {
+  const target = document.querySelector('#results-list');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/results.json');
+    target.innerHTML = items.map(item => `
+      <div class="result-card">
+        <div class="result-stage">${escapeHtml(item.stage)}</div>
+        <div class="result-match">${escapeHtml(item.match)}</div>
+        <div class="result-score">${escapeHtml(item.score)}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    target.innerHTML = '<div class="card">Не удалось загрузить результаты.</div>';
+  }
+}
+
+
+async function renderResultsMatches() {
+  const target = document.querySelector('#results-matches');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/matches.json');
+    target.innerHTML = items.map(item => {
+      const parts = String(item.score || '0:0').split(':');
+      const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
+      const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
+      const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
+      return `
+      <a class="upcoming-card" href="match.html?id=${item.id}">
+        <div class="upcoming-header">
+          <div>
+            <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
+            <div class="upcoming-time">• ${escapeHtml(item.time || '')} ${escapeHtml(item.status_label || '')}</div>
+          </div>
+          <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
+        </div>
+        <div class="upcoming-teams">
+          <div class="upcoming-team-row">
+            <div class="team-left">
+              <img src="${escapeHtml(item.home_logo)}" class="team-logo" alt="${escapeHtml(item.home_team)}" loading="lazy">
+              <div class="team-name">${escapeHtml(item.home_team)}</div>
+            </div>
+            <div class="team-score">${homeScore}</div>
+          </div>
+          <div class="upcoming-team-row">
+            <div class="team-left">
+              <img src="${escapeHtml(item.away_logo)}" class="team-logo" alt="${escapeHtml(item.away_team)}" loading="lazy">
+              <div class="team-name">${escapeHtml(item.away_team)}</div>
+            </div>
+            <div class="team-score">${awayScore}</div>
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+    autoFitTeamNames('#results-matches .team-name');
+  } catch (e) {
+    target.innerHTML = '<div class="card">Не удалось загрузить матчи.</div>';
+  }
+}
+
+async function renderMatchPageFromJson() {
+  const target = document.querySelector('#match-page-json');
+  if (!target) return;
+  try {
+    const items = await fetchJson('data/matches.json');
+    const id = Number(new URLSearchParams(window.location.search).get('id') || '1');
+    const item = items.find(x => x.id === id) || items[0];
+    const parts = String(item.score || '0:0').split(':');
+    const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
+    const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
+    target.innerHTML = `
+      <div class="container article-wrap">
+        <div class="breadcrumbs"><span>${escapeHtml(item.stage || item.group || 'Матч')}</span><span>•</span><span>Кубок Бурчалкина</span></div>
+        <h1 class="article-title">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</h1>
+        <div class="author-row">
+          <div class="author-left">
+            <div><div style="font-weight:700">Редакция Burchalkin Cup</div><div class="card-meta">${escapeHtml(item.date)} • ${escapeHtml(item.time)} • ${escapeHtml(item.status_label || '')}</div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="match-stack">
+            <div class="match-row">
+              <div class="match-team">
+                <img src="${escapeHtml(item.home_logo)}" alt="${escapeHtml(item.home_team)}" class="match-team-logo">
+                <div class="match-team-name">${escapeHtml(item.home_team)}</div>
+              </div>
+              <div class="match-team-score">${homeScore}</div>
+            </div>
+            <div class="match-row">
+              <div class="match-team">
+                <img src="${escapeHtml(item.away_logo)}" alt="${escapeHtml(item.away_team)}" class="match-team-logo">
+                <div class="match-team-name">${escapeHtml(item.away_team)}</div>
+              </div>
+              <div class="match-team-score">${awayScore}</div>
+            </div>
+          </div>
+        </div>
+        <iframe class="match-page-video" src="${escapeHtml(item.video)}" allowfullscreen></iframe>
+        <p class="lead">${escapeHtml(item.summary || '')}</p>
+      </div>
+    `;
+    runAutoFit();
+  } catch (e) {
+    target.innerHTML = '<div class="container"><div class="card">Не удалось загрузить матч.</div></div>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderUpcomingMatches();
+  renderHomeNews();
+  renderMatchesPage();
+  renderNewsPage();
+  renderResultsList();
+  renderResultsMatches();
+  renderMatchPageFromJson();
+  runAutoFit();
+});
+
+
+window.addEventListener('resize', () => {
+  autoFitTeamNames('.team-name');
+});
+
+
+function initHeroCarousel() {
+  const root = document.getElementById('hero-carousel');
+  const dotsWrap = document.getElementById('hero-carousel-dots');
+  const prevBtn = document.getElementById('hero-carousel-prev');
+  const nextBtn = document.getElementById('hero-carousel-next');
+  const sideLeft = document.getElementById('hero-carousel-side-left');
+  const sideRight = document.getElementById('hero-carousel-side-right');
+  const sideLeftImg = document.getElementById('hero-carousel-side-left-img');
+  const sideRightImg = document.getElementById('hero-carousel-side-right-img');
+  if (!root || !dotsWrap) return;
+
+  const slides = Array.from(root.querySelectorAll('.hero-carousel-slide'));
+  const dots = Array.from(dotsWrap.querySelectorAll('.hero-carousel-dot'));
+  if (!slides.length) return;
+
+  let index = 0;
+  let timer = null;
+  let touchStartX = 0;
+  let touchDeltaX = 0;
+  let isSwiping = false;
+  let mouseDownX = 0;
+  let mouseDeltaX = 0;
+  let isMouseDragging = false;
+
+  function isMobile() {
+    return window.innerWidth <= 640;
+  }
+
+  function updateSides() {
+    const prevIndex = (index - 1 + slides.length) % slides.length;
+    const nextIndex = (index + 1) % slides.length;
+    const prevImg = slides[prevIndex]?.dataset.bg || '';
+    const nextImg = slides[nextIndex]?.dataset.bg || '';
+    if (sideLeftImg) sideLeftImg.src = prevImg;
+    if (sideRightImg) sideRightImg.src = nextImg;
+  }
+
+  function show(nextIndex) {
+    index = (nextIndex + slides.length) % slides.length;
+    slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+    updateSides();
+  }
+
+  function stop() {
+    if (timer) clearInterval(timer);
+    timer = null;
+  }
+
+  function start() {
+    stop();
+    if (isMobile()) return;
+    timer = setInterval(() => show(index + 1), 30000);
+  }
+
+  function goPrev() { show(index - 1); start(); }
+  function goNext() { show(index + 1); start(); }
+
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => { show(i); start(); });
+  });
+
+  if (prevBtn) prevBtn.addEventListener('click', goPrev);
+  if (nextBtn) nextBtn.addEventListener('click', goNext);
+
+  root.addEventListener('mouseenter', stop);
+  root.addEventListener('mouseleave', start);
+
+  root.addEventListener('touchstart', (e) => {
+    if (!e.touches || !e.touches.length) return;
+    touchStartX = e.touches[0].clientX;
+    touchDeltaX = 0;
+    isSwiping = true;
+    stop();
+  }, { passive: true });
+
+  root.addEventListener('touchmove', (e) => {
+    if (!isSwiping || !e.touches || !e.touches.length) return;
+    touchDeltaX = e.touches[0].clientX - touchStartX;
+  }, { passive: true });
+
+  root.addEventListener('touchend', () => {
+    if (!isSwiping) return;
+    if (touchDeltaX <= -50) goNext();
+    else if (touchDeltaX >= 50) goPrev();
+    isSwiping = false;
+    touchDeltaX = 0;
+    start();
+  });
+
+  root.addEventListener('touchcancel', () => {
+    isSwiping = false;
+    touchDeltaX = 0;
+    start();
+  });
+
+  root.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isMouseDragging = true;
+    mouseDownX = e.clientX;
+    mouseDeltaX = 0;
+    root.classList.add('is-dragging');
+    stop();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isMouseDragging) return;
+    mouseDeltaX = e.clientX - mouseDownX;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isMouseDragging) return;
+    root.classList.remove('is-dragging');
+    if (mouseDeltaX <= -50) goNext();
+    else if (mouseDeltaX >= 50) goPrev();
+    else start();
+    isMouseDragging = false;
+    mouseDeltaX = 0;
+  });
+
+  root.addEventListener('dragstart', (e) => e.preventDefault());
+  root.setAttribute('tabindex', '0');
+  root.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+  });
+
+  window.addEventListener('resize', start);
+
+  show(0);
+  start();
+}
+
+
+
+function initHomeUpcomingSlider() {
+  const track = document.getElementById('home-upcoming-matches');
+  const prevBtn = document.getElementById('home-upcoming-prev');
+  const nextBtn = document.getElementById('home-upcoming-next');
+  if (!track || !prevBtn || !nextBtn) return;
+
+  function getStep() {
+    const firstCard = track.querySelector('.upcoming-card');
+    if (!firstCard) return Math.max(track.clientWidth * 0.9, 280);
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
+    return firstCard.getBoundingClientRect().width + gap;
+  }
+
+  function updateButtons() {
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
+    prevBtn.disabled = track.scrollLeft <= 2;
+    nextBtn.disabled = track.scrollLeft >= maxScroll;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    track.scrollBy({ left: getStep(), behavior: 'smooth' });
+  });
+
+  track.addEventListener('scroll', updateButtons, { passive: true });
+  window.addEventListener('resize', updateButtons);
+
+  const observer = new MutationObserver(updateButtons);
+  observer.observe(track, { childList: true, subtree: true });
+
+  setTimeout(updateButtons, 80);
+}
+
+
+
+
+function initResultsUpcomingSlider() {
+  const track = document.getElementById('results-matches');
+  const prevBtn = document.getElementById('results-upcoming-prev');
+  const nextBtn = document.getElementById('results-upcoming-next');
+  if (!track || !prevBtn || !nextBtn) return;
+
+  function getStep() {
+    const firstCard = track.querySelector('.upcoming-card');
+    if (!firstCard) return Math.max(track.clientWidth * 0.9, 280);
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
+    return firstCard.getBoundingClientRect().width + gap;
+  }
+
+  function updateButtons() {
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
+    prevBtn.disabled = track.scrollLeft <= 2;
+    nextBtn.disabled = track.scrollLeft >= maxScroll;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    track.scrollBy({ left: getStep(), behavior: 'smooth' });
+  });
+
+  track.addEventListener('scroll', updateButtons, { passive: true });
+  window.addEventListener('resize', updateButtons);
+
+  const observer = new MutationObserver(updateButtons);
+  observer.observe(track, { childList: true, subtree: true });
+
+  setTimeout(updateButtons, 80);
+}
+
