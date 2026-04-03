@@ -1,4 +1,3 @@
-
 const TEAM_LOGOS = [
   { name: 'Зенит', path: 'images/team-zenit.png' },
   { name: 'Динамо-Минск', path: 'images/team-dinamo-minsk.png' },
@@ -11,63 +10,194 @@ const TEAM_LOGOS = [
 ];
 
 const ADMIN_SOURCES = {
-  standings: {
-    key: 'bcup_standings',
-    path: 'data/standings.json',
-    title: 'Турнирная таблица',
-    help: 'Визуальный редактор турнирной таблицы.',
-    empty: () => ({ team: '', logo: '', played: 0, goals: '', points: 0 }),
+  tournaments: {
+    key: 'bcup_admin_tournaments',
+    exportName: 'tournaments.json',
+    title: 'Турниры',
+    help: 'Сезоны и карточки турниров по годам. Здесь можно готовить архив и текущий турнир.',
+    defaultData: [
+      {
+        slug: 'burchalkin-cup-2026',
+        name: 'Burchalkin Cup 2026',
+        season_year: 2026,
+        short_label: 'BCUP 2026',
+        status: 'active',
+        location: 'Санкт-Петербург',
+        start_date: '2026-03-15',
+        end_date: '2026-03-20',
+        logo: 'images/logo-burchalkin.png',
+        description: 'Основной турнир сезона 2026 года.',
+      },
+      {
+        slug: 'burchalkin-cup-2025',
+        name: 'Burchalkin Cup 2025',
+        season_year: 2025,
+        short_label: 'BCUP 2025',
+        status: 'completed',
+        location: 'Санкт-Петербург',
+        start_date: '2025-05-16',
+        end_date: '2025-05-20',
+        logo: 'images/logo-burchalkin.png',
+        description: 'Архивный турнир для истории сайта.',
+      }
+    ],
+    empty: () => ({
+      slug: '',
+      name: '',
+      season_year: new Date().getFullYear(),
+      short_label: '',
+      status: 'draft',
+      location: '',
+      start_date: '',
+      end_date: '',
+      logo: 'images/logo-burchalkin.png',
+      description: '',
+    }),
     fields: [
-      ['team', 'Команда', 'text'],
+      ['slug', 'Slug', 'text'],
+      ['name', 'Название', 'text'],
+      ['season_year', 'Год', 'number'],
+      ['short_label', 'Короткая подпись', 'text'],
+      ['status', 'Статус', 'select', ['draft', 'upcoming', 'active', 'completed', 'archived']],
+      ['location', 'Локация', 'text'],
+      ['start_date', 'Дата старта', 'date'],
+      ['end_date', 'Дата окончания', 'date'],
+      ['logo', 'Логотип', 'image'],
+      ['description', 'Описание', 'textarea'],
+    ],
+  },
+  clubs: {
+    key: 'bcup_admin_clubs',
+    exportName: 'clubs.json',
+    title: 'Клубы',
+    help: 'Постоянный каталог клубов. Эти данные лягут в отдельные страницы клубов и историю матчей.',
+    defaultData: [
+      {
+        slug: 'almaz-antey',
+        name: 'Алмаз-Антей',
+        short_name: 'Алмаз-Антей',
+        country: 'Россия',
+        city: 'Санкт-Петербург',
+        founded_year: 2000,
+        logo: 'images/team-almaz-antey.png',
+        description: 'Футбольный клуб, регулярно участвующий в турнирах Burchalkin Cup.',
+      },
+      {
+        slug: 'zenit',
+        name: 'Зенит',
+        short_name: 'Зенит',
+        country: 'Россия',
+        city: 'Санкт-Петербург',
+        founded_year: 1925,
+        logo: 'images/team-zenit.png',
+        description: 'Клуб для сквозной турнирной истории по всем сезонам.',
+      }
+    ],
+    empty: () => ({
+      slug: '',
+      name: '',
+      short_name: '',
+      country: '',
+      city: '',
+      founded_year: '',
+      logo: '',
+      description: '',
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['name', 'Название', 'text'],
+      ['short_name', 'Короткое имя', 'text'],
+      ['country', 'Страна', 'text'],
+      ['city', 'Город', 'text'],
+      ['founded_year', 'Год основания', 'number'],
       ['logo', 'Логотип', 'logo'],
-      ['played', 'Игры', 'number'],
-      ['goals', 'Мячи', 'text'],
-      ['points', 'Очки', 'number'],
+      ['description', 'Описание', 'textarea'],
     ],
   },
   matches: {
     key: 'bcup_matches',
-    path: 'data/matches.json',
+    exportName: 'matches.json',
     title: 'Матчи',
-    help: 'Редактор матчей с выбором логотипов и YouTube embed.',
+    help: 'Матчи теперь живут в логике турнира и клубов. Пока локально сохраняем JSON-формат, совместимый с сайтом.',
+    defaultData: [
+      {
+        id: 1,
+        tournament_slug: 'burchalkin-cup-2026',
+        date: '',
+        time: '10:00',
+        status: 'done',
+        status_label: 'Завершен',
+        home_team: 'Алмаз-Антей',
+        home_team_slug: 'almaz-antey',
+        home_logo: 'images/team-almaz-antey.png',
+        away_team: 'Црвена Звезда',
+        away_team_slug: 'crvena-zvezda',
+        away_logo: 'images/team-crvena-zvezda.png',
+        score: '10:3',
+        group: 'Группа A',
+        venue: 'Стадион «Алмаз-Антей»',
+        video: 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239434&hash=a4ca6ca1e82ce6c4&hd=4',
+        summary: 'Открывающий матч игрового дня.',
+      }
+    ],
     empty: () => ({
       id: Date.now(),
-      date: '2026-03-15',
+      tournament_slug: 'burchalkin-cup-2026',
+      date: '',
       time: '10:00',
       status: 'soon',
       status_label: 'Скоро',
       home_team: '',
+      home_team_slug: '',
       home_logo: '',
       away_team: '',
+      away_team_slug: '',
       away_logo: '',
       score: '0:0',
       group: '',
+      venue: '',
       video: '',
       summary: '',
     }),
     fields: [
       ['id', 'ID', 'number'],
+      ['tournament_slug', 'Турнир', 'text'],
       ['date', 'Дата', 'date'],
       ['time', 'Время', 'time'],
-      ['status', 'Статус', 'select', ['soon', 'live', 'done']],
+      ['status', 'Статус', 'select', ['soon', 'live', 'done', 'postponed', 'cancelled']],
       ['status_label', 'Подпись статуса', 'text'],
-      ['home_team', 'Домашняя команда', 'text'],
-      ['home_logo', 'Логотип домашней', 'logo'],
-      ['away_team', 'Гостевая команда', 'text'],
-      ['away_logo', 'Логотип гостевой', 'logo'],
+      ['home_team', 'Хозяева', 'text'],
+      ['home_team_slug', 'Slug хозяев', 'text'],
+      ['home_logo', 'Логотип хозяев', 'logo'],
+      ['away_team', 'Гости', 'text'],
+      ['away_team_slug', 'Slug гостей', 'text'],
+      ['away_logo', 'Логотип гостей', 'logo'],
       ['score', 'Счёт', 'score'],
       ['group', 'Группа / стадия', 'text'],
-      ['video', 'Видео (embed URL)', 'text'],
+      ['venue', 'Стадион', 'text'],
+      ['video', 'Видео', 'text'],
       ['summary', 'Описание', 'textarea'],
     ],
   },
   news: {
     key: 'bcup_news',
-    path: 'data/news.json',
+    exportName: 'news.json',
     title: 'Новости',
-    help: 'Редактор новостей с изображением и ссылкой.',
+    help: 'Новости теперь можно привязывать к турниру. Локально это остаётся быстрым редактором контента.',
+    defaultData: [
+      {
+        id: 1,
+        tournament_slug: 'burchalkin-cup-2026',
+        date: '',
+        title: 'Стартовал приём заявок на Burchalkin Cup',
+        excerpt: 'Турнир соберёт международный состав команд и продолжит традицию детско-юношеского футбольного фестиваля.',
+        link: 'news.html',
+        image: '',
+      }
+    ],
     empty: () => ({
       id: Date.now(),
+      tournament_slug: 'burchalkin-cup-2026',
       date: '',
       title: '',
       excerpt: '',
@@ -76,38 +206,84 @@ const ADMIN_SOURCES = {
     }),
     fields: [
       ['id', 'ID', 'number'],
+      ['tournament_slug', 'Турнир', 'text'],
       ['date', 'Дата', 'date'],
       ['title', 'Заголовок', 'text'],
       ['excerpt', 'Краткое описание', 'textarea'],
       ['link', 'Ссылка', 'text'],
-      ['image', 'Картинка (URL или data:image)', 'image'],
+      ['image', 'Картинка', 'image'],
     ],
   },
-  results: {
-    key: 'bcup_results',
-    path: 'data/results.json',
-    title: 'Результаты',
-    help: 'Редактор результатов матчей.',
-    empty: () => ({ stage: '', match: '', score: '' }),
+  partners: {
+    key: 'bcup_admin_partners',
+    exportName: 'partners.json',
+    title: 'Партнёры',
+    help: 'Каталог партнёров, категорий и логотипов. Эти данные будут основой для блока футера и будущей истории логотипов.',
+    defaultData: [
+      {
+        slug: 'b-sight',
+        name: 'Система спортивной аналитики B-SIGHT',
+        category: 'general',
+        tournament_slug: 'burchalkin-cup-2026',
+        website_url: '',
+        logo_url: '',
+        alt_text: 'B-SIGHT',
+        sort_order: 1,
+        is_visible: true,
+        note: 'Здесь позже появится история логотипов через API.',
+      },
+      {
+        slug: 'tass',
+        name: 'ТАСС',
+        category: 'media',
+        tournament_slug: 'burchalkin-cup-2026',
+        website_url: '',
+        logo_url: '',
+        alt_text: 'ТАСС',
+        sort_order: 1,
+        is_visible: true,
+        note: '',
+      }
+    ],
+    empty: () => ({
+      slug: '',
+      name: '',
+      category: 'general',
+      tournament_slug: 'burchalkin-cup-2026',
+      website_url: '',
+      logo_url: '',
+      alt_text: '',
+      sort_order: 1,
+      is_visible: true,
+      note: '',
+    }),
     fields: [
-      ['stage', 'Стадия', 'text'],
-      ['match', 'Матч', 'text'],
-      ['score', 'Счёт', 'score'],
+      ['slug', 'Slug', 'text'],
+      ['name', 'Название', 'text'],
+      ['category', 'Категория', 'select', ['general', 'media', 'title', 'official']],
+      ['tournament_slug', 'Турнир', 'text'],
+      ['website_url', 'Сайт', 'text'],
+      ['logo_url', 'Логотип', 'image'],
+      ['alt_text', 'Alt', 'text'],
+      ['sort_order', 'Порядок', 'number'],
+      ['is_visible', 'Показывать', 'checkbox'],
+      ['note', 'Примечание', 'textarea'],
     ],
   },
 };
 
-let currentSource = 'standings';
+let currentSource = 'tournaments';
 let defaultsCache = {};
 let currentMode = 'form';
 
+function cloneDefaultData(sourceName) {
+  return structuredClone(ADMIN_SOURCES[sourceName].defaultData || []);
+}
+
 async function adminLoadDefault(sourceName) {
-  const source = ADMIN_SOURCES[sourceName];
   if (defaultsCache[sourceName]) return structuredClone(defaultsCache[sourceName]);
-  const response = await fetch(source.path);
-  const data = await response.json();
-  defaultsCache[sourceName] = data;
-  return structuredClone(data);
+  defaultsCache[sourceName] = cloneDefaultData(sourceName);
+  return structuredClone(defaultsCache[sourceName]);
 }
 
 function getSourceData(sourceName) {
@@ -181,6 +357,16 @@ function makeField(field, value, itemIndex) {
         </select>
       </div>`;
   }
+  if (type === 'checkbox') {
+    return `
+      <div class="admin-field">
+        <label>${label}</label>
+        <select data-key="${key}" data-index="${itemIndex}">
+          <option value="true" ${value === true || value === 'true' ? 'selected' : ''}>Да</option>
+          <option value="false" ${value === false || value === 'false' ? 'selected' : ''}>Нет</option>
+        </select>
+      </div>`;
+  }
   if (type === 'logo') return makeLogoPicker(value, key, itemIndex);
   if (type === 'image') return makeImageField(value, key, itemIndex);
   if (type === 'score') {
@@ -197,12 +383,37 @@ function makeField(field, value, itemIndex) {
         </div>
       </div>`;
   }
-  const extraClass = key === 'away_team' ? 'guest-team-field' : '';
+  const inputType = type === 'number' ? 'number' : type;
   return `
-    <div class="admin-field ${extraClass}">
+    <div class="admin-field">
       <label>${label}</label>
-      <input type="${type}" value="${value ?? ''}" data-key="${key}" data-index="${itemIndex}">
+      <input type="${inputType}" value="${value ?? ''}" data-key="${key}" data-index="${itemIndex}">
     </div>`;
+}
+
+function readFormData(sourceName) {
+  const source = ADMIN_SOURCES[sourceName];
+  const items = [];
+  const cards = document.querySelectorAll('.admin-item-card');
+  cards.forEach((card, index) => {
+    const item = {};
+    source.fields.forEach(([key, , type]) => {
+      if (type === 'score') {
+        const leftEl = card.querySelector(`[data-key="${key}"][data-score-part="left"][data-index="${index}"]`);
+        const rightEl = card.querySelector(`[data-key="${key}"][data-score-part="right"][data-index="${index}"]`);
+        item[key] = `${leftEl ? leftEl.value || '0' : '0'}:${rightEl ? rightEl.value || '0' : '0'}`;
+        return;
+      }
+      const el = card.querySelector(`[data-key="${key}"][data-index="${index}"]`);
+      if (!el) return;
+      let value = el.value;
+      if (type === 'number') value = value === '' ? 0 : Number(value);
+      if (type === 'checkbox') value = value === 'true';
+      item[key] = value;
+    });
+    items.push(item);
+  });
+  return items;
 }
 
 function renderForm(sourceName, data) {
@@ -263,7 +474,7 @@ function renderForm(sourceName, data) {
   });
 
   wrap.querySelectorAll('[data-upload-image]').forEach(input => {
-    input.addEventListener('change', async (e) => {
+    input.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
@@ -292,32 +503,6 @@ function renderForm(sourceName, data) {
   });
 }
 
-function readFormData(sourceName) {
-  const source = ADMIN_SOURCES[sourceName];
-  const items = [];
-  const cards = document.querySelectorAll('.admin-item-card');
-  cards.forEach((card, index) => {
-    const item = {};
-    source.fields.forEach(([key, , type]) => {
-      if (type === 'score') {
-        const leftEl = card.querySelector(`[data-key="${key}"][data-score-part="left"][data-index="${index}"]`);
-        const rightEl = card.querySelector(`[data-key="${key}"][data-score-part="right"][data-index="${index}"]`);
-        const left = leftEl ? leftEl.value || '0' : '0';
-        const right = rightEl ? rightEl.value || '0' : '0';
-        item[key] = `${left}:${right}`;
-        return;
-      }
-      const el = card.querySelector(`[data-key="${key}"][data-index="${index}"]`);
-      if (!el) return;
-      let value = el.value;
-      if (type === 'number') value = value === '' ? 0 : Number(value);
-      item[key] = value;
-    });
-    items.push(item);
-  });
-  return items;
-}
-
 async function adminShowSource(sourceName) {
   currentSource = sourceName;
   const source = ADMIN_SOURCES[sourceName];
@@ -334,9 +519,7 @@ async function adminShowSource(sourceName) {
   document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
   renderForm(sourceName, data);
   switchMode(currentMode);
-  const fw = document.getElementById('admin-form-wrap'); if (fw && currentMode === 'form') fw.style.display = 'block';
-  const jw = document.getElementById('admin-json-wrap'); if (jw && currentMode === 'form') jw.style.display = 'none';
-  setStatus('Данные загружены.');
+  setStatus('Раздел загружен.');
 }
 
 function switchMode(mode) {
@@ -360,8 +543,8 @@ function adminSave() {
       parsed = JSON.parse(document.getElementById('admin-textarea').value);
       renderForm(currentSource, parsed);
     }
-    localStorage.setItem(source.key, JSON.stringify(parsed));
-    setStatus('Сохранено в браузере. Обнови страницы сайта, чтобы увидеть изменения.');
+    setSourceData(currentSource, parsed);
+    setStatus('Сохранено локально в браузере. Следующий шаг — связать этот раздел с Railway API.');
   } catch (e) {
     setStatus('Ошибка JSON: ' + e.message);
   }
@@ -373,15 +556,14 @@ async function adminReset() {
   const data = await adminLoadDefault(currentSource);
   document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
   renderForm(currentSource, data);
-  setStatus('Сброшено к данным из файла.');
+  setStatus('Сброшено к стартовым данным раздела.');
 }
 
 function adminExport() {
   try {
     let text = document.getElementById('admin-textarea').value;
     if (currentMode === 'form') {
-      const parsed = readFormData(currentSource);
-      text = JSON.stringify(parsed, null, 2);
+      text = JSON.stringify(readFormData(currentSource), null, 2);
       document.getElementById('admin-textarea').value = text;
     } else {
       JSON.parse(text);
@@ -390,7 +572,7 @@ function adminExport() {
     const blob = new Blob([text], {type:'application/json;charset=utf-8'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = source.path.split('/').pop();
+    a.download = source.exportName;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -416,20 +598,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('admin-save').addEventListener('click', adminSave);
   document.getElementById('admin-reset').addEventListener('click', adminReset);
   document.getElementById('admin-export').addEventListener('click', adminExport);
-
   document.getElementById('mode-form').addEventListener('click', () => switchMode('form'));
   document.getElementById('mode-json').addEventListener('click', () => switchMode('json'));
 
-  adminShowSource('standings');
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  const wrap = document.getElementById('admin-form-wrap');
-  const jsonWrap = document.getElementById('admin-json-wrap');
-  const modeForm = document.getElementById('mode-form');
-  if (wrap && !wrap.classList.contains('active')) wrap.classList.add('active');
-  if (jsonWrap && jsonWrap.classList.contains('active') && modeForm && modeForm.classList.contains('active')) {
-    jsonWrap.classList.remove('active');
-  }
+  adminShowSource('tournaments');
 });

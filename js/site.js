@@ -95,6 +95,19 @@ function getApiBaseUrl() {
   return baseUrl.replace(/\/+$/, '');
 }
 
+async function fetchApi(path) {
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl) return null;
+  try {
+    const response = await fetch(`${apiBaseUrl}${path}`);
+    if (!response.ok) throw new Error(`Failed to load ${path}`);
+    return response.json();
+  } catch (error) {
+    console.warn(`Remote API ${path} is unavailable.`, error);
+    return null;
+  }
+}
+
 async function fetchJson(path) {
   const storageKeyMap = {
     'data/standings.json': 'bcup_standings',
@@ -115,9 +128,8 @@ async function fetchJson(path) {
   const endpoint = API_ENDPOINTS[path];
   if (apiBaseUrl && endpoint) {
     try {
-      const response = await fetch(`${apiBaseUrl}${endpoint}`);
-      if (!response.ok) throw new Error(`Failed to load ${endpoint}`);
-      return response.json();
+      const remoteData = await fetchApi(endpoint);
+      if (remoteData) return remoteData;
     } catch (error) {
       console.warn(`Remote API ${endpoint} is unavailable, falling back to static file.`, error);
     }
@@ -125,6 +137,141 @@ async function fetchJson(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`Failed to load ${path}`);
   return response.json();
+}
+
+function renderClubCard(item) {
+  return `
+    <a class="team-logo-card club-card-link" href="club.html?slug=${encodeURIComponent(item.slug)}">
+      <div class="team-logo-wrap"><img src="${escapeHtml(item.logo)}" alt="${escapeHtml(item.name)}" class="team-logo-img" loading="lazy"></div>
+      <h3>${escapeHtml(item.name)}</h3>
+      <div class="muted team-country">${escapeHtml(item.city || item.country || '')}</div>
+      <div class="club-card-meta">${Number(item.matches_count || 0)} матчей в истории</div>
+    </a>
+  `;
+}
+
+async function renderClubsGrid(selector, limit = null) {
+  const target = document.querySelector(selector);
+  if (!target) return;
+  const clubs = await fetchApi('/api/clubs');
+  if (!clubs) return;
+  const items = limit ? clubs.slice(0, limit) : clubs;
+  target.innerHTML = items.map(renderClubCard).join('');
+  runAutoFit();
+}
+
+async function renderTournamentsGrid() {
+  const target = document.querySelector('#home-tournaments');
+  if (!target) return;
+  const tournaments = await fetchApi('/api/tournaments');
+  if (!tournaments) return;
+  target.innerHTML = tournaments.map(item => `
+    <article class="tournament-card">
+      <div class="tournament-card-top">
+        <div class="tournament-card-year">${escapeHtml(item.season_year || '')}</div>
+        <div class="tournament-card-status ${escapeHtml(item.status)}">${escapeHtml(item.status)}</div>
+      </div>
+      <h3>${escapeHtml(item.name)}</h3>
+      <p>${escapeHtml(item.description || '')}</p>
+      <div class="tournament-card-meta">
+        <span>${Number(item.clubs_count || 0)} клубов</span>
+        <span>${Number(item.matches_count || 0)} матчей</span>
+      </div>
+      <div class="tournament-card-dates">${escapeHtml(item.start_date || '')}${item.end_date ? ` - ${escapeHtml(item.end_date)}` : ''}</div>
+    </article>
+  `).join('');
+}
+
+function renderPartnerItem(item) {
+  if (item.logo_url) {
+    return `
+      <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(item.website_url || '#')}" ${item.website_url ? 'target="_blank" rel="noreferrer"' : ''}>
+        <img src="${escapeHtml(item.logo_url)}" alt="${escapeHtml(item.logo_alt || item.name)}" loading="lazy">
+        <span>${escapeHtml(item.name)}</span>
+      </a>
+    `;
+  }
+  return `
+    <a class="sponsor-item" href="${escapeHtml(item.website_url || '#')}" ${item.website_url ? 'target="_blank" rel="noreferrer"' : ''}>
+      ${escapeHtml(item.name)}
+    </a>
+  `;
+}
+
+async function renderPartnersForFeaturedTournament() {
+  const generalTarget = document.querySelector('#partners-general');
+  const mediaTarget = document.querySelector('#partners-media');
+  if (!generalTarget && !mediaTarget) return;
+  const tournaments = await fetchApi('/api/tournaments');
+  if (!tournaments || !tournaments.length) return;
+  const featured = tournaments.find(item => item.is_featured) || tournaments[0];
+  if (!featured) return;
+  const partnerGroups = await fetchApi(`/api/tournaments/${featured.slug}`);
+  if (!partnerGroups || !Array.isArray(partnerGroups.partners)) return;
+  const general = partnerGroups.partners.find(item => item.slug === 'general');
+  const media = partnerGroups.partners.find(item => item.slug === 'media');
+  if (generalTarget && general) generalTarget.innerHTML = general.items.map(renderPartnerItem).join('');
+  if (mediaTarget && media) mediaTarget.innerHTML = media.items.map(renderPartnerItem).join('');
+}
+
+async function renderClubPage() {
+  const target = document.querySelector('#club-page-root');
+  if (!target) return;
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  if (!slug) {
+    target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб не найден</h2><p class="muted">В ссылке не указан slug клуба.</p></div></section>';
+    return;
+  }
+  const club = await fetchApi(`/api/clubs/${encodeURIComponent(slug)}`);
+  if (!club) {
+    target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб недоступен</h2><p class="muted">API ещё не подключён или клуб не найден.</p></div></section>';
+    return;
+  }
+  const matchesMarkup = club.matches.map(item => {
+    const parts = String(item.score || '0:0').split(':');
+    return `
+      <a class="club-history-card" href="match.html?id=${item.id}">
+        <div class="club-history-top">
+          <span>${escapeHtml(item.tournament_name || '')}</span>
+          <span>${escapeHtml(item.date || '')} ${escapeHtml(item.time || '')}</span>
+        </div>
+        <div class="club-history-match">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</div>
+        <div class="club-history-meta">
+          <span>${escapeHtml(item.stage || '')}</span>
+          <strong>${escapeHtml(parts[0] || '0')}:${escapeHtml(parts[1] || '0')}</strong>
+          <span>${escapeHtml(item.status_label || '')}</span>
+        </div>
+      </a>
+    `;
+  }).join('');
+  target.innerHTML = `
+    <section class="page-head club-head">
+      <div class="container club-head-grid">
+        <div class="club-head-logo"><img src="${escapeHtml(club.logo)}" alt="${escapeHtml(club.name)}"></div>
+        <div>
+          <h1>${escapeHtml(club.name)}</h1>
+          <p>${escapeHtml(club.description || '')}</p>
+          <div class="club-head-meta">
+            <span>${escapeHtml(club.city || '')}</span>
+            <span>${escapeHtml(club.country || '')}</span>
+            ${club.founded_year ? `<span>${escapeHtml(String(club.founded_year))}</span>` : ''}
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="home-block-head">
+          <div>
+            <h2 class="section-title home-block-title">История матчей</h2>
+            <p class="home-block-subtitle">Прошедшие и будущие матчи клуба во всех турнирах сайта.</p>
+          </div>
+          <a class="home-block-link" href="teams.html">Все клубы →</a>
+        </div>
+        <div class="club-history-grid">${matchesMarkup || '<div class="card">У клуба пока нет матчей в базе.</div>'}</div>
+      </div>
+    </section>
+  `;
 }
 
 
@@ -389,6 +536,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderResultsList();
   renderResultsMatches();
   renderMatchPageFromJson();
+  renderTournamentsGrid();
+  renderClubsGrid('#clubs-grid-home', 8);
+  renderClubsGrid('#clubs-grid-page');
+  renderPartnersForFeaturedTournament();
+  renderClubPage();
   runAutoFit();
 });
 
