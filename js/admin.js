@@ -9,12 +9,14 @@ const TEAM_LOGOS = [
   { name: 'Алмаз-Антей', path: 'images/team-almaz-antey.png' },
 ];
 
+const ADMIN_TOKEN_KEY = 'bcup_admin_token';
+
 const ADMIN_SOURCES = {
   tournaments: {
     key: 'bcup_admin_tournaments',
     exportName: 'tournaments.json',
     title: 'Турниры',
-    help: 'Сезоны и карточки турниров по годам. Здесь можно готовить архив и текущий турнир.',
+    help: 'Сезоны и карточки турниров по годам. Сохранение теперь уходит в Railway API и базу PostgreSQL.',
     defaultData: [
       {
         slug: 'burchalkin-cup-2026',
@@ -26,19 +28,9 @@ const ADMIN_SOURCES = {
         start_date: '2026-03-15',
         end_date: '2026-03-20',
         logo: 'images/logo-burchalkin.png',
+        hero_image: '',
         description: 'Основной турнир сезона 2026 года.',
-      },
-      {
-        slug: 'burchalkin-cup-2025',
-        name: 'Burchalkin Cup 2025',
-        season_year: 2025,
-        short_label: 'BCUP 2025',
-        status: 'completed',
-        location: 'Санкт-Петербург',
-        start_date: '2025-05-16',
-        end_date: '2025-05-20',
-        logo: 'images/logo-burchalkin.png',
-        description: 'Архивный турнир для истории сайта.',
+        is_featured: true,
       }
     ],
     empty: () => ({
@@ -51,7 +43,9 @@ const ADMIN_SOURCES = {
       start_date: '',
       end_date: '',
       logo: 'images/logo-burchalkin.png',
+      hero_image: '',
       description: '',
+      is_featured: false,
     }),
     fields: [
       ['slug', 'Slug', 'text'],
@@ -63,6 +57,8 @@ const ADMIN_SOURCES = {
       ['start_date', 'Дата старта', 'date'],
       ['end_date', 'Дата окончания', 'date'],
       ['logo', 'Логотип', 'image'],
+      ['hero_image', 'Hero image', 'image'],
+      ['is_featured', 'Текущий турнир', 'checkbox'],
       ['description', 'Описание', 'textarea'],
     ],
   },
@@ -70,7 +66,7 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_clubs',
     exportName: 'clubs.json',
     title: 'Клубы',
-    help: 'Постоянный каталог клубов. Эти данные лягут в отдельные страницы клубов и историю матчей.',
+    help: 'Постоянный каталог клубов. Эти данные идут в карточки команд и их сквозную историю матчей.',
     defaultData: [
       {
         slug: 'almaz-antey',
@@ -80,17 +76,10 @@ const ADMIN_SOURCES = {
         city: 'Санкт-Петербург',
         founded_year: 2000,
         logo: 'images/team-almaz-antey.png',
+        website_url: '',
+        hero_image: '',
         description: 'Футбольный клуб, регулярно участвующий в турнирах Burchalkin Cup.',
-      },
-      {
-        slug: 'zenit',
-        name: 'Зенит',
-        short_name: 'Зенит',
-        country: 'Россия',
-        city: 'Санкт-Петербург',
-        founded_year: 1925,
-        logo: 'images/team-zenit.png',
-        description: 'Клуб для сквозной турнирной истории по всем сезонам.',
+        is_active: true,
       }
     ],
     empty: () => ({
@@ -101,7 +90,10 @@ const ADMIN_SOURCES = {
       city: '',
       founded_year: '',
       logo: '',
+      website_url: '',
+      hero_image: '',
       description: '',
+      is_active: true,
     }),
     fields: [
       ['slug', 'Slug', 'text'],
@@ -111,6 +103,9 @@ const ADMIN_SOURCES = {
       ['city', 'Город', 'text'],
       ['founded_year', 'Год основания', 'number'],
       ['logo', 'Логотип', 'logo'],
+      ['website_url', 'Сайт', 'text'],
+      ['hero_image', 'Hero image', 'image'],
+      ['is_active', 'Активен', 'checkbox'],
       ['description', 'Описание', 'textarea'],
     ],
   },
@@ -118,26 +113,28 @@ const ADMIN_SOURCES = {
     key: 'bcup_matches',
     exportName: 'matches.json',
     title: 'Матчи',
-    help: 'Матчи теперь живут в логике турнира и клубов. Пока локально сохраняем JSON-формат, совместимый с сайтом.',
+    help: 'Матчи сохраняются прямо в PostgreSQL и сразу попадают в расписание, результаты и историю клубов.',
     defaultData: [
       {
-        id: 1,
+        id: Date.now(),
         tournament_slug: 'burchalkin-cup-2026',
         date: '',
         time: '10:00',
-        status: 'done',
-        status_label: 'Завершен',
-        home_team: 'Алмаз-Антей',
-        home_team_slug: 'almaz-antey',
-        home_logo: 'images/team-almaz-antey.png',
-        away_team: 'Црвена Звезда',
-        away_team_slug: 'crvena-zvezda',
-        away_logo: 'images/team-crvena-zvezda.png',
-        score: '10:3',
-        group: 'Группа A',
-        venue: 'Стадион «Алмаз-Антей»',
-        video: 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239434&hash=a4ca6ca1e82ce6c4&hd=4',
-        summary: 'Открывающий матч игрового дня.',
+        status: 'soon',
+        status_label: 'Скоро',
+        home_team: '',
+        home_team_slug: '',
+        home_logo: '',
+        away_team: '',
+        away_team_slug: '',
+        away_logo: '',
+        score: '0:0',
+        group: '',
+        round: '',
+        matchday: '',
+        venue: '',
+        video: '',
+        summary: '',
       }
     ],
     empty: () => ({
@@ -155,6 +152,8 @@ const ADMIN_SOURCES = {
       away_logo: '',
       score: '0:0',
       group: '',
+      round: '',
+      matchday: '',
       venue: '',
       video: '',
       summary: '',
@@ -174,6 +173,8 @@ const ADMIN_SOURCES = {
       ['away_logo', 'Логотип гостей', 'logo'],
       ['score', 'Счёт', 'score'],
       ['group', 'Группа / стадия', 'text'],
+      ['round', 'Раунд', 'text'],
+      ['matchday', 'Игровой день', 'text'],
       ['venue', 'Стадион', 'text'],
       ['video', 'Видео', 'text'],
       ['summary', 'Описание', 'textarea'],
@@ -183,42 +184,51 @@ const ADMIN_SOURCES = {
     key: 'bcup_news',
     exportName: 'news.json',
     title: 'Новости',
-    help: 'Новости теперь можно привязывать к турниру. Локально это остаётся быстрым редактором контента.',
+    help: 'Новости можно редактировать через API и сразу публиковать на сайте.',
     defaultData: [
       {
-        id: 1,
+        id: Date.now(),
         tournament_slug: 'burchalkin-cup-2026',
+        slug: 'new-article',
         date: '',
-        title: 'Стартовал приём заявок на Burchalkin Cup',
-        excerpt: 'Турнир соберёт международный состав команд и продолжит традицию детско-юношеского футбольного фестиваля.',
+        title: '',
+        excerpt: '',
+        body: '',
         link: 'news.html',
         image: '',
+        is_published: true,
       }
     ],
     empty: () => ({
       id: Date.now(),
       tournament_slug: 'burchalkin-cup-2026',
+      slug: '',
       date: '',
       title: '',
       excerpt: '',
+      body: '',
       link: 'news.html',
       image: '',
+      is_published: true,
     }),
     fields: [
       ['id', 'ID', 'number'],
       ['tournament_slug', 'Турнир', 'text'],
+      ['slug', 'Slug', 'text'],
       ['date', 'Дата', 'date'],
       ['title', 'Заголовок', 'text'],
       ['excerpt', 'Краткое описание', 'textarea'],
+      ['body', 'Текст новости', 'textarea'],
       ['link', 'Ссылка', 'text'],
       ['image', 'Картинка', 'image'],
+      ['is_published', 'Опубликовано', 'checkbox'],
     ],
   },
   partners: {
     key: 'bcup_admin_partners',
     exportName: 'partners.json',
     title: 'Партнёры',
-    help: 'Каталог партнёров, категорий и логотипов. Эти данные будут основой для блока футера и будущей истории логотипов.',
+    help: 'Каталог партнёров, категорий и логотипов. Сохранение создаёт или обновляет записи в PostgreSQL.',
     defaultData: [
       {
         slug: 'b-sight',
@@ -228,18 +238,6 @@ const ADMIN_SOURCES = {
         website_url: '',
         logo_url: '',
         alt_text: 'B-SIGHT',
-        sort_order: 1,
-        is_visible: true,
-        note: 'Здесь позже появится история логотипов через API.',
-      },
-      {
-        slug: 'tass',
-        name: 'ТАСС',
-        category: 'media',
-        tournament_slug: 'burchalkin-cup-2026',
-        website_url: '',
-        logo_url: '',
-        alt_text: 'ТАСС',
         sort_order: 1,
         is_visible: true,
         note: '',
@@ -276,21 +274,103 @@ let currentSource = 'tournaments';
 let defaultsCache = {};
 let currentMode = 'form';
 
+function getApiBaseUrl() {
+  return String(window.BCUP_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
+}
+
+function getAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+}
+
+function setAdminToken(token) {
+  const value = String(token || '').trim();
+  if (value) {
+    localStorage.setItem(ADMIN_TOKEN_KEY, value);
+  } else {
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+  }
+  const input = document.getElementById('admin-token');
+  if (input) input.value = value;
+}
+
 function cloneDefaultData(sourceName) {
   return structuredClone(ADMIN_SOURCES[sourceName].defaultData || []);
 }
 
+async function fetchAdminSource(sourceName) {
+  const apiBaseUrl = getApiBaseUrl();
+  const token = getAdminToken();
+
+  if (!apiBaseUrl) {
+    throw new Error('В js/config.js не указан apiBaseUrl');
+  }
+  if (!token) {
+    throw new Error('Сначала вставь ADMIN_TOKEN из Railway');
+  }
+
+  const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
+    headers: {
+      'x-admin-token': token
+    }
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `Ошибка API (${response.status})`);
+  }
+
+  return response.json();
+}
+
+async function pushAdminSource(sourceName, data) {
+  const apiBaseUrl = getApiBaseUrl();
+  const token = getAdminToken();
+
+  if (!apiBaseUrl) {
+    throw new Error('В js/config.js не указан apiBaseUrl');
+  }
+  if (!token) {
+    throw new Error('Сначала вставь ADMIN_TOKEN из Railway');
+  }
+
+  const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-token': token
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `Ошибка API (${response.status})`);
+  }
+
+  return response.json();
+}
+
 async function adminLoadDefault(sourceName) {
   if (defaultsCache[sourceName]) return structuredClone(defaultsCache[sourceName]);
-  defaultsCache[sourceName] = cloneDefaultData(sourceName);
-  return structuredClone(defaultsCache[sourceName]);
+
+  try {
+    const data = await fetchAdminSource(sourceName);
+    defaultsCache[sourceName] = structuredClone(data);
+    setSourceData(sourceName, data);
+    return structuredClone(data);
+  } catch (error) {
+    defaultsCache[sourceName] = cloneDefaultData(sourceName);
+    return structuredClone(defaultsCache[sourceName]);
+  }
 }
 
 function getSourceData(sourceName) {
   const source = ADMIN_SOURCES[sourceName];
   const local = localStorage.getItem(source.key);
   if (local) {
-    try { return JSON.parse(local); } catch (e) {}
+    try {
+      return JSON.parse(local);
+    } catch (e) {}
   }
   return null;
 }
@@ -407,7 +487,7 @@ function readFormData(sourceName) {
       const el = card.querySelector(`[data-key="${key}"][data-index="${index}"]`);
       if (!el) return;
       let value = el.value;
-      if (type === 'number') value = value === '' ? 0 : Number(value);
+      if (type === 'number') value = value === '' ? '' : Number(value);
       if (type === 'checkbox') value = value === 'true';
       item[key] = value;
     });
@@ -444,8 +524,8 @@ function renderForm(sourceName, data) {
       const next = readFormData(sourceName);
       next.splice(idx, 1);
       setSourceData(sourceName, next);
-      adminShowSource(sourceName);
-      setStatus('Запись удалена.');
+      adminShowSource(sourceName, { preferLocal: true });
+      setStatus('Запись удалена из черновика. Нажми «Сохранить», чтобы отправить в API.');
     });
   });
 
@@ -455,8 +535,8 @@ function renderForm(sourceName, data) {
       const next = readFormData(sourceName);
       next.push(source.empty());
       setSourceData(sourceName, next);
-      adminShowSource(sourceName);
-      setStatus('Новая запись добавлена.');
+      adminShowSource(sourceName, { preferLocal: true });
+      setStatus('Новая запись добавлена в черновик. Нажми «Сохранить», чтобы отправить в API.');
     });
   }
 
@@ -469,12 +549,12 @@ function renderForm(sourceName, data) {
       if (input) input.value = value;
       wrap.querySelectorAll(`[data-pick-logo="${key}"][data-index="${index}"]`).forEach(x => x.classList.remove('active'));
       btn.classList.add('active');
-      setStatus('Логотип выбран. Нажми «Сохранить».');
+      setStatus('Логотип выбран. Нажми «Сохранить», чтобы отправить изменения в API.');
     });
   });
 
   wrap.querySelectorAll('[data-upload-image]').forEach(input => {
-    input.addEventListener('change', (e) => {
+    input.addEventListener('change', e => {
       const file = e.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
@@ -486,7 +566,7 @@ function renderForm(sourceName, data) {
           textInput.value = reader.result;
           const previewBox = textInput.parentElement.querySelector('.admin-preview-box');
           if (previewBox) previewBox.innerHTML = `<img src="${reader.result}" alt="preview">`;
-          setStatus('Картинка загружена в форму. Нажми «Сохранить».');
+          setStatus('Картинка загружена в форму. Нажми «Сохранить», чтобы отправить изменения в API.');
         }
       };
       reader.readAsDataURL(file);
@@ -503,7 +583,34 @@ function renderForm(sourceName, data) {
   });
 }
 
-async function adminShowSource(sourceName) {
+async function loadSourceData(sourceName, options = {}) {
+  const { preferLocal = false, forceRemote = false } = options;
+  if (!forceRemote && preferLocal) {
+    const local = getSourceData(sourceName);
+    if (local) return local;
+  }
+
+  if (!forceRemote) {
+    try {
+      const remote = await fetchAdminSource(sourceName);
+      defaultsCache[sourceName] = structuredClone(remote);
+      setSourceData(sourceName, remote);
+      return remote;
+    } catch (error) {
+      const local = getSourceData(sourceName);
+      if (local) return local;
+      const fallback = await adminLoadDefault(sourceName);
+      return fallback;
+    }
+  }
+
+  const remote = await fetchAdminSource(sourceName);
+  defaultsCache[sourceName] = structuredClone(remote);
+  setSourceData(sourceName, remote);
+  return remote;
+}
+
+async function adminShowSource(sourceName, options = {}) {
   currentSource = sourceName;
   const source = ADMIN_SOURCES[sourceName];
 
@@ -511,15 +618,14 @@ async function adminShowSource(sourceName) {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
 
-  let data = getSourceData(sourceName);
-  if (!data) data = await adminLoadDefault(sourceName);
+  const data = await loadSourceData(sourceName, options);
 
   document.getElementById('admin-title').textContent = source.title;
   document.getElementById('admin-help').textContent = source.help;
   document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
   renderForm(sourceName, data);
   switchMode(currentMode);
-  setStatus('Раздел загружен.');
+  setStatus(options.forceRemote ? 'Данные обновлены с Railway API.' : 'Раздел загружен.');
 }
 
 function switchMode(mode) {
@@ -532,8 +638,7 @@ function switchMode(mode) {
   document.getElementById('admin-json-wrap').style.display = mode === 'json' ? 'block' : 'none';
 }
 
-function adminSave() {
-  const source = ADMIN_SOURCES[currentSource];
+async function adminSave() {
   try {
     let parsed;
     if (currentMode === 'form') {
@@ -543,20 +648,38 @@ function adminSave() {
       parsed = JSON.parse(document.getElementById('admin-textarea').value);
       renderForm(currentSource, parsed);
     }
+
     setSourceData(currentSource, parsed);
-    setStatus('Сохранено локально в браузере. Следующий шаг — связать этот раздел с Railway API.');
-  } catch (e) {
-    setStatus('Ошибка JSON: ' + e.message);
+    setStatus('Отправляю изменения в Railway API...');
+
+    const result = await pushAdminSource(currentSource, parsed);
+    const synced = result.data || parsed;
+    defaultsCache[currentSource] = structuredClone(synced);
+    setSourceData(currentSource, synced);
+    document.getElementById('admin-textarea').value = JSON.stringify(synced, null, 2);
+    renderForm(currentSource, synced);
+    switchMode(currentMode);
+    setStatus(`Сохранено в Railway API и PostgreSQL. Записей: ${result.count ?? synced.length}.`);
+  } catch (error) {
+    setStatus('Ошибка сохранения: ' + error.message);
   }
 }
 
 async function adminReset() {
-  const source = ADMIN_SOURCES[currentSource];
-  localStorage.removeItem(source.key);
-  const data = await adminLoadDefault(currentSource);
-  document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
-  renderForm(currentSource, data);
-  setStatus('Сброшено к стартовым данным раздела.');
+  localStorage.removeItem(ADMIN_SOURCES[currentSource].key);
+  try {
+    const data = await loadSourceData(currentSource, { forceRemote: true });
+    document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
+    renderForm(currentSource, data);
+    switchMode(currentMode);
+    setStatus('Черновик очищен. Данные перечитаны из Railway API.');
+  } catch (error) {
+    const fallback = cloneDefaultData(currentSource);
+    document.getElementById('admin-textarea').value = JSON.stringify(fallback, null, 2);
+    renderForm(currentSource, fallback);
+    switchMode(currentMode);
+    setStatus('Не получилось перечитать API. Показаны стартовые данные: ' + error.message);
+  }
 }
 
 function adminExport() {
@@ -569,7 +692,7 @@ function adminExport() {
       JSON.parse(text);
     }
     const source = ADMIN_SOURCES[currentSource];
-    const blob = new Blob([text], {type:'application/json;charset=utf-8'});
+    const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = source.exportName;
@@ -577,9 +700,26 @@ function adminExport() {
     a.click();
     a.remove();
     setStatus('JSON экспортирован.');
-  } catch (e) {
+  } catch (error) {
     setStatus('Сначала исправь данные перед экспортом.');
   }
+}
+
+async function adminReloadFromApi() {
+  try {
+    setStatus('Обновляю данные с Railway API...');
+    await adminShowSource(currentSource, { forceRemote: true });
+  } catch (error) {
+    setStatus('Ошибка загрузки из API: ' + error.message);
+  }
+}
+
+function connectAdminApi() {
+  const input = document.getElementById('admin-token');
+  setAdminToken(input?.value || '');
+  setStatus(getAdminToken()
+    ? 'Токен сохранён локально в браузере. Теперь можно загружать и сохранять через API.'
+    : 'Токен очищен.');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -595,9 +735,13 @@ document.addEventListener('DOMContentLoaded', () => {
     nav.appendChild(btn);
   });
 
+  setAdminToken(getAdminToken());
+
   document.getElementById('admin-save').addEventListener('click', adminSave);
   document.getElementById('admin-reset').addEventListener('click', adminReset);
   document.getElementById('admin-export').addEventListener('click', adminExport);
+  document.getElementById('admin-connect').addEventListener('click', connectAdminApi);
+  document.getElementById('admin-reload').addEventListener('click', adminReloadFromApi);
   document.getElementById('mode-form').addEventListener('click', () => switchMode('form'));
   document.getElementById('mode-json').addEventListener('click', () => switchMode('json'));
 

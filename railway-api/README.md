@@ -24,6 +24,8 @@ This API sits between the static frontend and your PostgreSQL database on Railwa
 - `GET /api/matches`
 - `GET /api/news`
 - `GET /api/results`
+- `GET /api/admin/:resource`
+- `PUT /api/admin/:resource`
 
 The API keeps compatibility with the current `data/*.json` shape, and also exposes the new entities for tournaments, clubs, club history, and partners.
 
@@ -38,6 +40,7 @@ The API keeps compatibility with the current `data/*.json` shape, and also expos
    `DATABASE_URL=${{Postgres.DATABASE_URL}}`
    `DATABASE_SSL=true`
    `CORS_ORIGIN=https://a4agency.github.io`
+   `ADMIN_TOKEN=your-strong-secret`
 7. Deploy the service.
 
 Railway documents:
@@ -72,6 +75,29 @@ window.BCUP_CONFIG = window.BCUP_CONFIG || {
 ```
 
 Then redeploy or push the frontend changes to GitHub Pages.
+
+## Admin API
+
+Protected admin routes are intended for the custom admin page:
+
+- `GET /api/admin/tournaments`
+- `GET /api/admin/clubs`
+- `GET /api/admin/matches`
+- `GET /api/admin/news`
+- `GET /api/admin/partners`
+- `PUT /api/admin/tournaments`
+- `PUT /api/admin/clubs`
+- `PUT /api/admin/matches`
+- `PUT /api/admin/news`
+- `PUT /api/admin/partners`
+
+Send the Railway secret in the request header:
+
+```http
+x-admin-token: your-strong-secret
+```
+
+The admin page `admin-lkjuft.html` now stores this token locally in the browser and uses it to read and write data directly through Railway API.
 
 ## New data model notes
 

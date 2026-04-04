@@ -7,6 +7,7 @@ const { Pool } = require('pg');
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const databaseUrl = process.env.DATABASE_URL;
+const adminToken = (process.env.ADMIN_TOKEN || '').trim();
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is required');
@@ -23,6 +24,13 @@ const pool = new Pool({
   ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
+const CATEGORY_NAMES = {
+  general: 'Партнёры',
+  media: 'Информационные партнёры',
+  title: 'Титульные партнёры',
+  official: 'Официальные партнёры',
+};
+
 app.use(cors({
   origin(origin, callback) {
     if (!origin) return callback(null, true);
@@ -33,7 +41,7 @@ app.use(cors({
   }
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 function normalizeDate(value) {
   return value || '';
@@ -41,6 +49,51 @@ function normalizeDate(value) {
 
 function normalizeTime(value) {
   return value || '';
+}
+
+function normalizeString(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function nullIfEmpty(value) {
+  const normalized = normalizeString(value);
+  return normalized || null;
+}
+
+function parseInteger(value, fallback = 0) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+}
+
+function parseBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
+function parseScore(score) {
+  const parts = String(score || '0:0').split(':');
+  return {
+    home: parseInteger(parts[0], 0),
+    away: parseInteger(parts[1], 0),
+  };
+}
+
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9а-яё]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+}
+
+function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
 }
 
 function formatMatchRow(row) {
@@ -68,6 +121,34 @@ function formatMatchRow(row) {
     summary: row.summary || '',
     events: row.events || [],
   };
+}
+
+async function runInTransaction(work) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+function requireAdminAuth(req, res, next) {
+  if (!adminToken) {
+    return res.status(503).json({ error: 'ADMIN_TOKEN is not configured on the server' });
+  }
+
+  const token = req.get('x-admin-token');
+  if (!token || token !== adminToken) {
+    return res.status(401).json({ error: 'Admin token is invalid or missing' });
+  }
+
+  return next();
 }
 
 const tournamentsQuery = `
@@ -350,6 +431,23 @@ const newsQuery = `
   ORDER BY n.published_on DESC NULLS LAST, n.id DESC;
 `;
 
+const adminNewsQuery = `
+  SELECT
+    n.id,
+    t.slug AS tournament_slug,
+    n.slug,
+    TO_CHAR(n.published_on, 'YYYY-MM-DD') AS published_on,
+    n.title,
+    n.excerpt,
+    n.body,
+    n.link_path,
+    n.image_url,
+    n.is_published
+  FROM news_articles n
+  LEFT JOIN tournaments t ON t.id = n.tournament_id
+  ORDER BY n.published_on DESC NULLS LAST, n.id DESC;
+`;
+
 const resultsQuery = `
   SELECT
     m.stage_name,
@@ -388,6 +486,598 @@ const tournamentPartnersQuery = `
   ORDER BY pc.name, tp.sort_order, p.name;
 `;
 
+const adminPartnersQuery = `
+  SELECT
+    p.slug,
+    p.name,
+    COALESCE(pc.slug, 'general') AS category_slug,
+    t.slug AS tournament_slug,
+    p.website_url,
+    COALESCE(pla.image_url, '') AS logo_url,
+    COALESCE(pla.alt_text, p.name) AS alt_text,
+    tp.sort_order,
+    tp.is_visible,
+    p.description
+  FROM tournament_partners tp
+  JOIN partners p ON p.id = tp.partner_id
+  LEFT JOIN tournaments t ON t.id = tp.tournament_id
+  LEFT JOIN partner_categories pc ON pc.id = tp.category_id
+  LEFT JOIN partner_logo_assets pla ON pla.id = tp.logo_asset_id
+  ORDER BY COALESCE(pc.slug, 'general'), tp.sort_order, p.name;
+`;
+
+async function getAdminTournaments(client) {
+  const { rows } = await client.query(`
+    SELECT
+      slug,
+      name,
+      season_year,
+      short_label,
+      status,
+      location,
+      TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
+      TO_CHAR(end_date, 'YYYY-MM-DD') AS end_date,
+      logo_path,
+      hero_image_url,
+      description,
+      is_featured
+    FROM tournaments
+    ORDER BY season_year DESC NULLS LAST, start_date DESC NULLS LAST, id DESC;
+  `);
+
+  return rows.map(row => ({
+    slug: row.slug,
+    name: row.name,
+    season_year: row.season_year,
+    short_label: row.short_label || '',
+    status: row.status,
+    location: row.location || '',
+    start_date: normalizeDate(row.start_date),
+    end_date: normalizeDate(row.end_date),
+    logo: row.logo_path || '',
+    hero_image: row.hero_image_url || '',
+    description: row.description || '',
+    is_featured: row.is_featured,
+  }));
+}
+
+async function getAdminClubs(client) {
+  const { rows } = await client.query(`
+    SELECT
+      slug,
+      name,
+      short_name,
+      country,
+      city,
+      founded_year,
+      logo_path,
+      website_url,
+      hero_image_url,
+      description,
+      is_active
+    FROM clubs
+    ORDER BY name;
+  `);
+
+  return rows.map(row => ({
+    slug: row.slug,
+    name: row.name,
+    short_name: row.short_name || '',
+    country: row.country || '',
+    city: row.city || '',
+    founded_year: row.founded_year || '',
+    logo: row.logo_path || '',
+    website_url: row.website_url || '',
+    hero_image: row.hero_image_url || '',
+    description: row.description || '',
+    is_active: row.is_active,
+  }));
+}
+
+async function getAdminMatches(client) {
+  const { rows } = await client.query(matchesQuery, [null]);
+  return rows.map(row => ({
+    id: Number(row.id),
+    tournament_slug: row.tournament_slug,
+    date: normalizeDate(row.match_date),
+    time: normalizeTime(row.match_time),
+    status: row.status,
+    status_label: row.status_label,
+    home_team: row.home_team,
+    home_team_slug: row.home_team_slug,
+    home_logo: row.home_logo || '',
+    away_team: row.away_team,
+    away_team_slug: row.away_team_slug,
+    away_logo: row.away_logo || '',
+    score: `${row.home_score}:${row.away_score}`,
+    group: row.stage_name || '',
+    round: row.round_name || '',
+    matchday: row.matchday_label || '',
+    venue: row.venue || '',
+    video: row.video_url || '',
+    summary: row.summary || '',
+  }));
+}
+
+async function getAdminNews(client) {
+  const { rows } = await client.query(adminNewsQuery);
+  return rows.map(row => ({
+    id: Number(row.id),
+    tournament_slug: row.tournament_slug || '',
+    slug: row.slug || '',
+    date: normalizeDate(row.published_on),
+    title: row.title,
+    excerpt: row.excerpt,
+    body: row.body || '',
+    link: row.link_path,
+    image: row.image_url || '',
+    is_published: row.is_published,
+  }));
+}
+
+async function getAdminPartners(client) {
+  const { rows } = await client.query(adminPartnersQuery);
+  return rows.map(row => ({
+    slug: row.slug,
+    name: row.name,
+    category: row.category_slug || 'general',
+    tournament_slug: row.tournament_slug || '',
+    website_url: row.website_url || '',
+    logo_url: row.logo_url || '',
+    alt_text: row.alt_text || row.name,
+    sort_order: parseInteger(row.sort_order, 0),
+    is_visible: row.is_visible,
+    note: row.description || '',
+  }));
+}
+
+async function replaceTournaments(client, payload) {
+  const items = ensureArray(payload);
+  const slugs = [];
+
+  await client.query('UPDATE tournaments SET is_featured = FALSE');
+
+  for (const item of items) {
+    const slug = normalizeString(item.slug);
+    const name = normalizeString(item.name);
+    if (!slug || !name) {
+      throw new Error('Each tournament must have slug and name');
+    }
+    slugs.push(slug);
+    await client.query(`
+      INSERT INTO tournaments (
+        slug,
+        name,
+        season_year,
+        short_label,
+        logo_path,
+        hero_image_url,
+        description,
+        start_date,
+        end_date,
+        location,
+        status,
+        is_featured
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      ON CONFLICT (slug) DO UPDATE
+      SET
+        name = EXCLUDED.name,
+        season_year = EXCLUDED.season_year,
+        short_label = EXCLUDED.short_label,
+        logo_path = EXCLUDED.logo_path,
+        hero_image_url = EXCLUDED.hero_image_url,
+        description = EXCLUDED.description,
+        start_date = EXCLUDED.start_date,
+        end_date = EXCLUDED.end_date,
+        location = EXCLUDED.location,
+        status = EXCLUDED.status,
+        is_featured = EXCLUDED.is_featured
+    `, [
+      slug,
+      name,
+      item.season_year ? parseInteger(item.season_year, null) : null,
+      nullIfEmpty(item.short_label),
+      nullIfEmpty(item.logo),
+      nullIfEmpty(item.hero_image),
+      normalizeString(item.description),
+      nullIfEmpty(item.start_date),
+      nullIfEmpty(item.end_date),
+      nullIfEmpty(item.location),
+      normalizeString(item.status) || 'draft',
+      parseBoolean(item.is_featured, false),
+    ]);
+  }
+
+  if (slugs.length) {
+    await client.query('DELETE FROM tournaments WHERE NOT (slug = ANY($1::text[]))', [slugs]);
+  } else {
+    await client.query('DELETE FROM tournaments');
+  }
+}
+
+async function replaceClubs(client, payload) {
+  const items = ensureArray(payload);
+  const slugs = [];
+
+  for (const item of items) {
+    const slug = normalizeString(item.slug);
+    const name = normalizeString(item.name);
+    const logo = normalizeString(item.logo);
+    if (!slug || !name || !logo) {
+      throw new Error('Each club must have slug, name and logo');
+    }
+    slugs.push(slug);
+    await client.query(`
+      INSERT INTO clubs (
+        slug,
+        name,
+        short_name,
+        logo_path,
+        country,
+        city,
+        founded_year,
+        website_url,
+        hero_image_url,
+        description,
+        is_active
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      ON CONFLICT (slug) DO UPDATE
+      SET
+        name = EXCLUDED.name,
+        short_name = EXCLUDED.short_name,
+        logo_path = EXCLUDED.logo_path,
+        country = EXCLUDED.country,
+        city = EXCLUDED.city,
+        founded_year = EXCLUDED.founded_year,
+        website_url = EXCLUDED.website_url,
+        hero_image_url = EXCLUDED.hero_image_url,
+        description = EXCLUDED.description,
+        is_active = EXCLUDED.is_active
+    `, [
+      slug,
+      name,
+      nullIfEmpty(item.short_name),
+      logo,
+      nullIfEmpty(item.country),
+      nullIfEmpty(item.city),
+      item.founded_year ? parseInteger(item.founded_year, null) : null,
+      nullIfEmpty(item.website_url),
+      nullIfEmpty(item.hero_image),
+      normalizeString(item.description),
+      parseBoolean(item.is_active, true),
+    ]);
+  }
+
+  if (slugs.length) {
+    await client.query('DELETE FROM clubs WHERE NOT (slug = ANY($1::text[]))', [slugs]);
+  } else {
+    await client.query('DELETE FROM clubs');
+  }
+}
+
+async function replaceMatches(client, payload) {
+  const items = ensureArray(payload);
+  const ids = [];
+  const tournaments = await client.query('SELECT id, slug FROM tournaments');
+  const clubs = await client.query('SELECT id, slug FROM clubs');
+  const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
+  const clubMap = new Map(clubs.rows.map(row => [row.slug, Number(row.id)]));
+
+  for (const item of items) {
+    const id = parseInteger(item.id, 0);
+    const tournamentSlug = normalizeString(item.tournament_slug);
+    const homeSlug = normalizeString(item.home_team_slug);
+    const awaySlug = normalizeString(item.away_team_slug);
+    if (!id || !tournamentSlug || !homeSlug || !awaySlug) {
+      throw new Error('Each match must have id, tournament_slug, home_team_slug and away_team_slug');
+    }
+    const tournamentId = tournamentMap.get(tournamentSlug);
+    const homeClubId = clubMap.get(homeSlug);
+    const awayClubId = clubMap.get(awaySlug);
+    if (!tournamentId) throw new Error(`Tournament not found for match: ${tournamentSlug}`);
+    if (!homeClubId) throw new Error(`Home club not found for match: ${homeSlug}`);
+    if (!awayClubId) throw new Error(`Away club not found for match: ${awaySlug}`);
+
+    ids.push(id);
+    const score = parseScore(item.score);
+
+    await client.query(`
+      INSERT INTO matches (
+        id,
+        tournament_id,
+        stage_name,
+        round_name,
+        matchday_label,
+        match_date,
+        match_time,
+        status,
+        status_label,
+        home_club_id,
+        away_club_id,
+        home_score,
+        away_score,
+        venue,
+        video_url,
+        summary,
+        sort_order
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+      ON CONFLICT (id) DO UPDATE
+      SET
+        tournament_id = EXCLUDED.tournament_id,
+        stage_name = EXCLUDED.stage_name,
+        round_name = EXCLUDED.round_name,
+        matchday_label = EXCLUDED.matchday_label,
+        match_date = EXCLUDED.match_date,
+        match_time = EXCLUDED.match_time,
+        status = EXCLUDED.status,
+        status_label = EXCLUDED.status_label,
+        home_club_id = EXCLUDED.home_club_id,
+        away_club_id = EXCLUDED.away_club_id,
+        home_score = EXCLUDED.home_score,
+        away_score = EXCLUDED.away_score,
+        venue = EXCLUDED.venue,
+        video_url = EXCLUDED.video_url,
+        summary = EXCLUDED.summary,
+        sort_order = EXCLUDED.sort_order
+    `, [
+      id,
+      tournamentId,
+      nullIfEmpty(item.group),
+      nullIfEmpty(item.round),
+      nullIfEmpty(item.matchday),
+      nullIfEmpty(item.date),
+      nullIfEmpty(item.time),
+      normalizeString(item.status) || 'soon',
+      normalizeString(item.status_label) || 'Скоро',
+      homeClubId,
+      awayClubId,
+      score.home,
+      score.away,
+      nullIfEmpty(item.venue),
+      nullIfEmpty(item.video),
+      normalizeString(item.summary),
+      parseInteger(item.sort_order, ids.length),
+    ]);
+  }
+
+  if (ids.length) {
+    await client.query('DELETE FROM matches WHERE NOT (id = ANY($1::bigint[]))', [ids]);
+  } else {
+    await client.query('DELETE FROM matches');
+  }
+}
+
+async function replaceNews(client, payload) {
+  const items = ensureArray(payload);
+  const ids = [];
+  const tournaments = await client.query('SELECT id, slug FROM tournaments');
+  const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
+
+  for (const item of items) {
+    const id = parseInteger(item.id, 0);
+    if (!id) {
+      throw new Error('Each news item must have numeric id');
+    }
+    const tournamentSlug = normalizeString(item.tournament_slug);
+    const tournamentId = tournamentSlug ? tournamentMap.get(tournamentSlug) || null : null;
+    if (tournamentSlug && !tournamentId) {
+      throw new Error(`Tournament not found for news: ${tournamentSlug}`);
+    }
+    ids.push(id);
+
+    await client.query(`
+      INSERT INTO news_articles (
+        id,
+        tournament_id,
+        slug,
+        published_on,
+        title,
+        excerpt,
+        body,
+        link_path,
+        image_url,
+        is_published
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      ON CONFLICT (id) DO UPDATE
+      SET
+        tournament_id = EXCLUDED.tournament_id,
+        slug = EXCLUDED.slug,
+        published_on = EXCLUDED.published_on,
+        title = EXCLUDED.title,
+        excerpt = EXCLUDED.excerpt,
+        body = EXCLUDED.body,
+        link_path = EXCLUDED.link_path,
+        image_url = EXCLUDED.image_url,
+        is_published = EXCLUDED.is_published
+    `, [
+      id,
+      tournamentId,
+      normalizeString(item.slug) || slugify(item.title) || `news-${id}`,
+      nullIfEmpty(item.date),
+      normalizeString(item.title),
+      normalizeString(item.excerpt),
+      normalizeString(item.body),
+      normalizeString(item.link) || 'news.html',
+      nullIfEmpty(item.image),
+      parseBoolean(item.is_published, true),
+    ]);
+  }
+
+  if (ids.length) {
+    await client.query('DELETE FROM news_articles WHERE NOT (id = ANY($1::bigint[]))', [ids]);
+  } else {
+    await client.query('DELETE FROM news_articles');
+  }
+}
+
+async function ensurePartnerCategory(client, slug) {
+  const categorySlug = normalizeString(slug) || 'general';
+  const categoryName = CATEGORY_NAMES[categorySlug] || categorySlug;
+  const { rows } = await client.query(`
+    INSERT INTO partner_categories (slug, name)
+    VALUES ($1, $2)
+    ON CONFLICT (slug) DO UPDATE
+    SET name = EXCLUDED.name
+    RETURNING id;
+  `, [categorySlug, categoryName]);
+  return Number(rows[0].id);
+}
+
+async function setPartnerLogo(client, partnerId, logoUrl, altText) {
+  const normalizedLogo = normalizeString(logoUrl);
+  if (!normalizedLogo) {
+    await client.query('UPDATE partner_logo_assets SET is_current = FALSE WHERE partner_id = $1', [partnerId]);
+    return null;
+  }
+
+  const normalizedAlt = normalizeString(altText);
+  const existing = await client.query(`
+    SELECT id
+    FROM partner_logo_assets
+    WHERE partner_id = $1
+      AND image_url = $2
+      AND alt_text = $3
+    ORDER BY uploaded_at DESC, id DESC
+    LIMIT 1;
+  `, [partnerId, normalizedLogo, normalizedAlt]);
+
+  const logoAssetId = existing.rows.length
+    ? Number(existing.rows[0].id)
+    : Number((await client.query(`
+        INSERT INTO partner_logo_assets (
+          partner_id,
+          image_url,
+          alt_text,
+          storage_provider,
+          is_current
+        )
+        VALUES ($1, $2, $3, $4, TRUE)
+        RETURNING id;
+      `, [partnerId, normalizedLogo, normalizedAlt, 'external'])).rows[0].id);
+
+  await client.query(`
+    UPDATE partner_logo_assets
+    SET is_current = CASE WHEN id = $2 THEN TRUE ELSE FALSE END
+    WHERE partner_id = $1;
+  `, [partnerId, logoAssetId]);
+
+  return logoAssetId;
+}
+
+async function replacePartners(client, payload) {
+  const items = ensureArray(payload);
+  const slugs = [];
+  const tournaments = await client.query('SELECT id, slug FROM tournaments');
+  const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
+
+  await client.query('DELETE FROM tournament_partners');
+
+  for (const item of items) {
+    const slug = normalizeString(item.slug);
+    const name = normalizeString(item.name);
+    if (!slug || !name) {
+      throw new Error('Each partner must have slug and name');
+    }
+    slugs.push(slug);
+
+    const partnerResult = await client.query(`
+      INSERT INTO partners (
+        slug,
+        name,
+        website_url,
+        description,
+        is_active
+      )
+      VALUES ($1,$2,$3,$4,$5)
+      ON CONFLICT (slug) DO UPDATE
+      SET
+        name = EXCLUDED.name,
+        website_url = EXCLUDED.website_url,
+        description = EXCLUDED.description,
+        is_active = EXCLUDED.is_active
+      RETURNING id;
+    `, [
+      slug,
+      name,
+      nullIfEmpty(item.website_url),
+      normalizeString(item.note),
+      true,
+    ]);
+
+    const partnerId = Number(partnerResult.rows[0].id);
+    const categoryId = await ensurePartnerCategory(client, item.category);
+    const logoAssetId = await setPartnerLogo(client, partnerId, item.logo_url, item.alt_text || name);
+    const tournamentSlug = normalizeString(item.tournament_slug);
+    const tournamentId = tournamentSlug ? tournamentMap.get(tournamentSlug) || null : null;
+    if (tournamentSlug && !tournamentId) {
+      throw new Error(`Tournament not found for partner: ${tournamentSlug}`);
+    }
+
+    await client.query(`
+      INSERT INTO tournament_partners (
+        tournament_id,
+        partner_id,
+        category_id,
+        logo_asset_id,
+        sort_order,
+        is_visible
+      )
+      VALUES ($1,$2,$3,$4,$5,$6);
+    `, [
+      tournamentId,
+      partnerId,
+      categoryId,
+      logoAssetId,
+      parseInteger(item.sort_order, 0),
+      parseBoolean(item.is_visible, true),
+    ]);
+  }
+
+  if (slugs.length) {
+    await client.query('DELETE FROM partners WHERE NOT (slug = ANY($1::text[]))', [slugs]);
+  } else {
+    await client.query('DELETE FROM partners');
+  }
+}
+
+async function loadAdminResource(client, resource) {
+  switch (resource) {
+    case 'tournaments':
+      return getAdminTournaments(client);
+    case 'clubs':
+      return getAdminClubs(client);
+    case 'matches':
+      return getAdminMatches(client);
+    case 'news':
+      return getAdminNews(client);
+    case 'partners':
+      return getAdminPartners(client);
+    default:
+      throw new Error('Unknown admin resource');
+  }
+}
+
+async function saveAdminResource(client, resource, payload) {
+  switch (resource) {
+    case 'tournaments':
+      return replaceTournaments(client, payload);
+    case 'clubs':
+      return replaceClubs(client, payload);
+    case 'matches':
+      return replaceMatches(client, payload);
+    case 'news':
+      return replaceNews(client, payload);
+    case 'partners':
+      return replacePartners(client, payload);
+    default:
+      throw new Error('Unknown admin resource');
+  }
+}
+
 app.get('/', (req, res) => {
   res.json({
     service: 'burchalkin-cup-railway-api',
@@ -406,7 +1096,8 @@ app.get('/', (req, res) => {
       '/api/standings',
       '/api/matches',
       '/api/news',
-      '/api/results'
+      '/api/results',
+      '/api/admin/:resource'
     ]
   });
 });
@@ -417,6 +1108,39 @@ app.get('/health', async (req, res, next) => {
     res.json({ ok: true });
   } catch (error) {
     next(error);
+  }
+});
+
+app.get('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
+  try {
+    const data = await runInTransaction(client => loadAdminResource(client, req.params.resource));
+    res.json(data);
+  } catch (error) {
+    if (error.message === 'Unknown admin resource') {
+      return res.status(404).json({ error: error.message });
+    }
+    return next(error);
+  }
+});
+
+app.put('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
+  try {
+    if (!Array.isArray(req.body)) {
+      return res.status(400).json({ error: 'Payload must be an array' });
+    }
+    await runInTransaction(client => saveAdminResource(client, req.params.resource, req.body));
+    const data = await runInTransaction(client => loadAdminResource(client, req.params.resource));
+    return res.json({
+      ok: true,
+      resource: req.params.resource,
+      count: data.length,
+      data
+    });
+  } catch (error) {
+    if (error.message === 'Unknown admin resource') {
+      return res.status(404).json({ error: error.message });
+    }
+    return next(error);
   }
 });
 
@@ -709,10 +1433,15 @@ app.get('/api/results', async (req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
-  const statusCode = error.message === 'Origin not allowed by CORS' ? 403 : 500;
+  const statusCode = error.message === 'Origin not allowed by CORS'
+    ? 403
+    : (error.message && error.message.includes('not found') ? 400 : 500);
+
   console.error(error);
   res.status(statusCode).json({
-    error: statusCode === 403 ? 'CORS origin is not allowed' : 'Internal server error'
+    error: statusCode === 403
+      ? 'CORS origin is not allowed'
+      : error.message || 'Internal server error'
   });
 });
 

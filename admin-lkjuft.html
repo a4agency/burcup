@@ -44,7 +44,7 @@
   <section class="page-head">
     <div class="container">
       <h1>admin-lkjuft</h1>
-      <p>Это локальный каркас новой админки. Она уже разбита на турниры, клубы, матчи, новости и партнёров; сейчас данные сохраняются в браузере, а следующим шагом мы свяжем её с Railway API.</p>
+      <p>Это админка Burchalkin Cup. Теперь она может работать не только как локальный черновик в браузере, но и как панель управления данными в Railway API.</p>
     </div>
   </section>
 
@@ -58,6 +58,12 @@
       <div class="admin-panel">
         <h2 id="admin-title">Турнирная таблица</h2>
         <div id="admin-help" class="admin-help"></div>
+
+        <div class="admin-actions" style="margin-top:16px">
+          <input id="admin-token" type="password" placeholder="ADMIN_TOKEN из Railway" style="flex:1;min-width:260px">
+          <button id="admin-connect" class="admin-reset" type="button">Подключить API</button>
+          <button id="admin-reload" class="admin-export" type="button">Обновить с API</button>
+        </div>
 
         <div class="admin-mode-switch">
           <button id="mode-form" class="active" type="button">Форма</button>
