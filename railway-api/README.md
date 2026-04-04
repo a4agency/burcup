@@ -26,6 +26,7 @@ This API sits between the static frontend and your PostgreSQL database on Railwa
 - `GET /api/results`
 - `GET /api/admin/:resource`
 - `PUT /api/admin/:resource`
+- `POST /api/admin/uploads/image`
 
 The API keeps compatibility with the current `data/*.json` shape, and also exposes the new entities for tournaments, clubs, club history, and partners.
 
@@ -41,6 +42,9 @@ The API keeps compatibility with the current `data/*.json` shape, and also expos
    `DATABASE_SSL=true`
    `CORS_ORIGIN=https://a4agency.github.io`
    `ADMIN_TOKEN=your-strong-secret`
+   `CLOUDINARY_CLOUD_NAME=your-cloud-name`
+   `CLOUDINARY_API_KEY=your-api-key`
+   `CLOUDINARY_API_SECRET=your-api-secret`
 7. Deploy the service.
 
 Railway documents:
@@ -90,6 +94,7 @@ Protected admin routes are intended for the custom admin page:
 - `PUT /api/admin/matches`
 - `PUT /api/admin/news`
 - `PUT /api/admin/partners`
+- `POST /api/admin/uploads/image`
 
 Send the Railway secret in the request header:
 
@@ -98,6 +103,8 @@ x-admin-token: your-strong-secret
 ```
 
 The admin page `admin-lkjuft.html` now stores this token locally in the browser and uses it to read and write data directly through Railway API.
+
+For partner logos and other image fields, the admin page can upload files through Railway API into Cloudinary. The server stores only the resulting public URL in PostgreSQL, which keeps the database cleaner than saving long base64 strings.
 
 ## New data model notes
 

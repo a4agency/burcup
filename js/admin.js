@@ -350,6 +350,45 @@ async function pushAdminSource(sourceName, data) {
   return response.json();
 }
 
+async function uploadAdminImage({ file, sourceName, key }) {
+  const apiBaseUrl = getApiBaseUrl();
+  const token = getAdminToken();
+
+  if (!apiBaseUrl) {
+    throw new Error('В js/config.js не указан apiBaseUrl');
+  }
+  if (!token) {
+    throw new Error('Сначала вставь ADMIN_TOKEN из Railway');
+  }
+
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
+    reader.readAsDataURL(file);
+  });
+
+  const response = await fetch(`${apiBaseUrl}/api/admin/uploads/image`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-token': token
+    },
+    body: JSON.stringify({
+      file: dataUrl,
+      folder: `burcup/${sourceName}/${key}`,
+      filename: file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-')
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `Ошибка upload API (${response.status})`);
+  }
+
+  return response.json();
+}
+
 async function adminLoadDefault(sourceName) {
   if (defaultsCache[sourceName]) return structuredClone(defaultsCache[sourceName]);
 
@@ -557,19 +596,39 @@ function renderForm(sourceName, data) {
     input.addEventListener('change', e => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const key = e.target.dataset.uploadImage;
-        const index = e.target.dataset.index;
-        const textInput = wrap.querySelector(`[data-key="${key}"][data-index="${index}"]`);
-        if (textInput) {
-          textInput.value = reader.result;
-          const previewBox = textInput.parentElement.querySelector('.admin-preview-box');
-          if (previewBox) previewBox.innerHTML = `<img src="${reader.result}" alt="preview">`;
-          setStatus('Картинка загружена в форму. Нажми «Сохранить», чтобы отправить изменения в API.');
-        }
-      };
-      reader.readAsDataURL(file);
+      const key = e.target.dataset.uploadImage;
+      const index = e.target.dataset.index;
+      const textInput = wrap.querySelector(`[data-key="${key}"][data-index="${index}"]`);
+      const previewBox = textInput?.parentElement.querySelector('.admin-preview-box');
+
+      setStatus('Загружаю изображение в storage...');
+
+      uploadAdminImage({ file, sourceName, key })
+        .then(result => {
+          if (textInput) {
+            textInput.value = result.url;
+          }
+          if (previewBox) {
+            previewBox.innerHTML = `<img src="${result.url}" alt="preview">`;
+          }
+          setStatus('Изображение загружено в storage. Нажми «Сохранить», чтобы записать URL в базу.');
+        })
+        .catch(async error => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (textInput) {
+              textInput.value = reader.result;
+            }
+            if (previewBox) {
+              previewBox.innerHTML = `<img src="${reader.result}" alt="preview">`;
+            }
+            setStatus(`Storage недоступен: ${error.message}. В форму подставлен base64 как временный fallback.`);
+          };
+          reader.readAsDataURL(file);
+        })
+        .finally(() => {
+          e.target.value = '';
+        });
     });
   });
 

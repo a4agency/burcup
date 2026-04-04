@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -8,6 +9,9 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const databaseUrl = process.env.DATABASE_URL;
 const adminToken = (process.env.ADMIN_TOKEN || '').trim();
+const cloudinaryCloudName = (process.env.CLOUDINARY_CLOUD_NAME || '').trim();
+const cloudinaryApiKey = (process.env.CLOUDINARY_API_KEY || '').trim();
+const cloudinaryApiSecret = (process.env.CLOUDINARY_API_SECRET || '').trim();
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is required');
@@ -94,6 +98,72 @@ function slugify(value) {
 
 function ensureArray(value) {
   return Array.isArray(value) ? value : [];
+}
+
+function getCloudinaryConfig() {
+  if (!cloudinaryCloudName || !cloudinaryApiKey || !cloudinaryApiSecret) {
+    return null;
+  }
+
+  return {
+    cloudName: cloudinaryCloudName,
+    apiKey: cloudinaryApiKey,
+    apiSecret: cloudinaryApiSecret,
+  };
+}
+
+function createCloudinarySignature(params, apiSecret) {
+  const payload = Object.keys(params)
+    .sort()
+    .map(key => `${key}=${params[key]}`)
+    .join('&');
+  return crypto.createHash('sha1').update(payload + apiSecret).digest('hex');
+}
+
+async function uploadImageToCloudinary({ file, folder, publicId }) {
+  const config = getCloudinaryConfig();
+  if (!config) {
+    throw new Error('Cloudinary is not configured on the server');
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const uploadParams = {
+    folder: folder || 'burcup/uploads',
+    public_id: publicId || `asset-${timestamp}`,
+    timestamp,
+  };
+
+  const signature = createCloudinarySignature(uploadParams, config.apiSecret);
+  const body = new URLSearchParams({
+    file,
+    folder: uploadParams.folder,
+    public_id: uploadParams.public_id,
+    timestamp: String(timestamp),
+    api_key: config.apiKey,
+    signature,
+  });
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body,
+  });
+
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(result.error?.message || 'Cloudinary upload failed');
+  }
+
+  return {
+    url: result.secure_url || result.url || '',
+    publicId: result.public_id || '',
+    width: result.width || null,
+    height: result.height || null,
+    format: result.format || '',
+    bytes: result.bytes || 0,
+  };
 }
 
 function formatMatchRow(row) {
@@ -1097,7 +1167,8 @@ app.get('/', (req, res) => {
       '/api/matches',
       '/api/news',
       '/api/results',
-      '/api/admin/:resource'
+      '/api/admin/:resource',
+      '/api/admin/uploads/image'
     ]
   });
 });
@@ -1119,6 +1190,37 @@ app.get('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
     if (error.message === 'Unknown admin resource') {
       return res.status(404).json({ error: error.message });
     }
+    return next(error);
+  }
+});
+
+app.post('/api/admin/uploads/image', requireAdminAuth, async (req, res, next) => {
+  try {
+    const file = typeof req.body?.file === 'string' ? req.body.file.trim() : '';
+    const folder = normalizeString(req.body?.folder) || 'burcup/uploads';
+    const filename = normalizeString(req.body?.filename) || 'image';
+    const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
+
+    if (!file || !file.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Image payload must be a data URL' });
+    }
+
+    const uploaded = await uploadImageToCloudinary({
+      file,
+      folder,
+      publicId,
+    });
+
+    return res.json({
+      ok: true,
+      url: uploaded.url,
+      public_id: uploaded.publicId,
+      width: uploaded.width,
+      height: uploaded.height,
+      format: uploaded.format,
+      bytes: uploaded.bytes,
+    });
+  } catch (error) {
     return next(error);
   }
 });
