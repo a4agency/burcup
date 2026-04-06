@@ -2489,6 +2489,13 @@ button,
   color:#fff;
 }
 
+.header-menu a.is-active,
+.header-menu a[aria-current="page"]{
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);
+}
+
 /* keep old classes from previous header from affecting layout */
 .nav,.brand,.brand-mark,.nav-links{
   all:unset;
@@ -3948,18 +3955,37 @@ button,
   .has-js .header-menu{
     grid-column:1 / -1;
     width:100%;
-    display:none !important;
+    display:flex !important;
     flex-direction:column !important;
     align-items:stretch !important;
     justify-content:flex-start !important;
     flex-wrap:nowrap !important;
     gap:8px !important;
-    margin-top:2px;
-    padding-top:14px;
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    pointer-events:none;
+    transform:translateY(-10px);
+    margin-top:0;
+    padding-top:0;
+    border-top-color:transparent !important;
+    transition:
+      max-height .28s ease,
+      opacity .22s ease,
+      transform .22s ease,
+      margin-top .22s ease,
+      padding-top .22s ease,
+      border-color .22s ease;
   }
 
   .has-js .header-menu.is-open{
-    display:flex !important;
+    max-height:760px;
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0);
+    margin-top:6px;
+    padding-top:14px;
+    border-top-color:rgba(255,255,255,.12) !important;
   }
 
   .has-js .header-menu a{
@@ -3968,6 +3994,18 @@ button,
     font-size:14px !important;
     padding:14px 16px !important;
     background:rgba(255,255,255,.08);
+    transform:translateY(0);
+    transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+
+  .has-js .header-menu.is-open a{
+    animation:headerMenuItemIn .22s ease both;
+  }
+
+  .has-js .header-menu a.is-active,
+  .has-js .header-menu a[aria-current="page"]{
+    background:rgba(255,255,255,.18);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
   }
 
   .has-js .lang-switcher{
@@ -3998,6 +4036,17 @@ button,
   .has-js .header-menu a{
     font-size:13px !important;
     padding:12px 14px !important;
+  }
+}
+
+@keyframes headerMenuItemIn{
+  from{
+    opacity:0;
+    transform:translateY(-6px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
   }
 }
 

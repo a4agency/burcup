@@ -27,6 +27,7 @@ function initHeaderMenu() {
     menu.classList.toggle('is-open', isOpen);
     toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     toggle.setAttribute('aria-label', isOpen ? 'Закрыть меню' : 'Открыть меню');
+    menu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
     document.body.classList.toggle('menu-open', isOpen && window.innerWidth <= mobileBreakpoint);
   }
 
@@ -60,10 +61,29 @@ function initHeaderMenu() {
   });
 }
 
+function initActiveHeaderLink() {
+  const links = Array.from(document.querySelectorAll('.header-menu a[href]'));
+  if (!links.length) return;
+
+  const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+
+  links.forEach((link) => {
+    const linkFile = (link.getAttribute('href') || '').split('/').pop();
+    const isActive = linkFile === currentFile;
+    link.classList.toggle('is-active', isActive);
+    if (isActive) {
+      link.setAttribute('aria-current', 'page');
+    } else {
+      link.removeAttribute('aria-current');
+    }
+  });
+}
+
 
 document.addEventListener('DOMContentLoaded', function(){
   const year = document.getElementById('year');
   if(year) year.textContent = new Date().getFullYear();
+  initActiveHeaderLink();
   initHeaderMenu();
 });
 
