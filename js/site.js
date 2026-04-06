@@ -180,6 +180,12 @@ const NEWS_IMAGE_FALLBACKS = [
   { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.jpg' },
   { id: 3, slug: 'playoff-bracket-coming-soon', src: 'images/news-3.jpg' }
 ];
+const CLUB_LOCATION_OVERRIDES = {
+  palmeiras: {
+    city: 'Сан-Паулу',
+    country: 'Бразилия'
+  }
+};
 const HISTORICAL_CLUB_FALLBACKS = {
   villarreal: {
     slug: 'villarreal',
@@ -323,6 +329,20 @@ function getClubPageUrl(item) {
 
 function getHistoricalClubFallback(slug) {
   return HISTORICAL_CLUB_FALLBACKS[String(slug || '').trim()] || null;
+}
+
+function getClubLocationParts(item = {}) {
+  const slug = String(item?.slug || item?.team_slug || '').trim();
+  const override = CLUB_LOCATION_OVERRIDES[slug] || getHistoricalClubFallback(slug) || {};
+  return {
+    city: String(item?.city || override.city || '').trim(),
+    country: String(item?.country || override.country || '').trim()
+  };
+}
+
+function formatClubLocation(item = {}) {
+  const { city, country } = getClubLocationParts(item);
+  return joinNonEmpty([city, country], ', ');
 }
 
 function getCloudinaryCloudName() {
@@ -617,7 +637,7 @@ function renderClubCard(item) {
     <a class="team-logo-card club-card-link" href="club.html?slug=${encodeURIComponent(item.slug)}">
       <div class="team-logo-wrap">${renderImageMarkup({ src: item.logo, alt: item.name, className: 'team-logo-img', width: 240 })}</div>
       <h3>${escapeHtml(item.name)}</h3>
-      <div class="muted team-country">${escapeHtml(item.city || item.country || '')}</div>
+      <div class="muted team-country">${escapeHtml(formatClubLocation(item))}</div>
       <div class="club-card-meta">${escapeHtml(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей']))} в истории</div>
     </a>
   `;
@@ -701,6 +721,7 @@ async function renderClubPage() {
     target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб недоступен</h2><p class="muted">API ещё не подключён или клуб не найден.</p></div></section>';
     return;
   }
+  const locationLabel = formatClubLocation(clubData);
   const matches = Array.isArray(clubData.matches) ? clubData.matches : [];
   const matchesMarkup = matches.map(item => {
     const parts = String(item.score || '0:0').split(':');
@@ -728,8 +749,7 @@ async function renderClubPage() {
           <h1>${escapeHtml(clubData.name)}</h1>
           <p>${escapeHtml(clubData.description || '')}</p>
           <div class="club-head-meta">
-            <span>${escapeHtml(clubData.city || '')}</span>
-            <span>${escapeHtml(clubData.country || '')}</span>
+            ${locationLabel ? `<span>${escapeHtml(locationLabel)}</span>` : ''}
             ${clubData.founded_year ? `<span>${escapeHtml(String(clubData.founded_year))}</span>` : ''}
           </div>
         </div>
