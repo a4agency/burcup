@@ -2960,45 +2960,38 @@ button,
   transform: translateY(-50%) !important;
   width: 48px !important;
   height: 72px !important;
-  border-radius: 999px !important;
-  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08)) !important;
-  border: 1px solid rgba(255,255,255,.24) !important;
-  box-shadow:
-    0 14px 28px rgba(7,22,56,.18),
-    inset 0 1px 0 rgba(255,255,255,.22) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   color: transparent !important;
   font-size: 0 !important;
   overflow: hidden !important;
   transition:
     transform .22s ease,
-    background .22s ease,
-    border-color .22s ease,
-    box-shadow .22s ease !important;
+    opacity .22s ease !important;
 }
 
 .hero-carousel-arrow::before{
   content:"";
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   display: block;
-  border-top: 2px solid rgba(255,255,255,.95);
-  border-right: 2px solid rgba(255,255,255,.95);
-  filter: drop-shadow(0 1px 4px rgba(7,22,56,.2));
+  border-top: 3px solid rgba(255,255,255,.98);
+  border-right: 3px solid rgba(255,255,255,.98);
+  filter: drop-shadow(0 2px 8px rgba(7,22,56,.35));
 }
 
 .hero-carousel-arrow:hover{
   transform: translateY(-50%) scale(1.04) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.12)) !important;
-  border-color: rgba(255,255,255,.38) !important;
-  box-shadow:
-    0 18px 34px rgba(7,22,56,.24),
-    inset 0 1px 0 rgba(255,255,255,.28) !important;
+  opacity: .78 !important;
 }
 
 .hero-carousel-arrow:active{
   transform: translateY(-50%) scale(.98) !important;
+  opacity: .62 !important;
 }
 
 .hero-carousel-prev{
@@ -3095,8 +3088,10 @@ button,
     height: 52px !important;
   }
   .hero-carousel-arrow::before{
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
+    border-top-width: 2.5px;
+    border-right-width: 2.5px;
   }
   .hero-carousel-dots{
     bottom: -18px !important;
