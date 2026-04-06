@@ -1886,16 +1886,19 @@ button,
 
 .standings-table{
   width:100%;
-  min-width:760px;
+  min-width:1180px;
   table-layout:fixed !important;
   border-collapse:collapse !important;
 }
 
 .standings-table col.col-rank{ width:64px; }
 .standings-table col.col-team{ width:auto; }
-.standings-table col.col-played{ width:110px; }
-.standings-table col.col-goals{ width:110px; }
-.standings-table col.col-points{ width:110px; }
+.standings-table col.col-games{ width:92px; }
+.standings-table col.col-wins{ width:92px; }
+.standings-table col.col-draws{ width:92px; }
+.standings-table col.col-losses{ width:112px; }
+.standings-table col.col-goals{ width:220px; }
+.standings-table col.col-points{ width:92px; }
 
 .standings-table thead tr,
 .standings-table tbody tr{

@@ -1,65 +1,97 @@
 [
   {
+    "position": 1,
     "slug": "almaz-antey",
     "team": "Алмаз-Антей",
     "logo": "images/team-almaz-antey.png",
     "played": 3,
+    "won": 2,
+    "drawn": 1,
+    "lost": 0,
     "goals": "16-3",
     "points": 7
   },
   {
+    "position": 2,
     "slug": "zenit",
     "team": "Зенит",
     "logo": "images/team-zenit.png",
     "played": 3,
+    "won": 2,
+    "drawn": 0,
+    "lost": 1,
     "goals": "5-4",
     "points": 6
   },
   {
+    "position": 3,
     "slug": "palmeiras",
     "team": "Палмейрас",
     "logo": "images/team-palmeiras.png",
     "played": 3,
+    "won": 1,
+    "drawn": 2,
+    "lost": 0,
     "goals": "4-3",
     "points": 5
   },
   {
+    "position": 4,
     "slug": "kairat",
     "team": "Кайрат",
     "logo": "images/team-kairat.png",
     "played": 3,
+    "won": 1,
+    "drawn": 1,
+    "lost": 1,
     "goals": "4-4",
     "points": 4
   },
   {
+    "position": 5,
     "slug": "crvena-zvezda",
     "team": "Црвена Звезда",
     "logo": "images/team-crvena-zvezda.png",
     "played": 3,
+    "won": 1,
+    "drawn": 1,
+    "lost": 1,
     "goals": "3-3",
     "points": 4
   },
   {
+    "position": 6,
     "slug": "fenerbahce",
     "team": "Фенербахче",
     "logo": "images/team-fenerbahce.png",
     "played": 3,
+    "won": 1,
+    "drawn": 0,
+    "lost": 2,
     "goals": "3-5",
     "points": 3
   },
   {
+    "position": 7,
     "slug": "san-lorenzo",
     "team": "Сан-Лоренсо",
     "logo": "images/team-san-lorenzo.png",
     "played": 3,
+    "won": 0,
+    "drawn": 1,
+    "lost": 2,
     "goals": "2-5",
     "points": 1
   },
   {
+    "position": 8,
     "slug": "dinamo-minsk",
     "team": "Динамо-Минск",
     "logo": "images/team-dinamo-minsk.png",
     "played": 3,
+    "won": 0,
+    "drawn": 1,
+    "lost": 2,
     "goals": "1-6",
     "points": 1
   }

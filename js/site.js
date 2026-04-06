@@ -124,10 +124,13 @@ async function renderStandings(selector) {
 
       return `
         <tr>
-          <td class="num">${index + 1}</td>
+          <td class="num">${item.position || index + 1}</td>
           <td>${teamMarkup}</td>
           <td class="num">${item.played}</td>
-          <td class="num">${item.goals}</td>
+          <td class="num">${formatStandingStat(item.won)}</td>
+          <td class="num">${formatStandingStat(item.drawn)}</td>
+          <td class="num">${formatStandingStat(item.lost)}</td>
+          <td class="num">${escapeHtml(formatStandingGoals(item))}</td>
           <td class="points">${item.points}</td>
         </tr>
       `;
@@ -139,7 +142,10 @@ async function renderStandings(selector) {
           <colgroup>
             <col class="col-rank">
             <col class="col-team">
-            <col class="col-played">
+            <col class="col-games">
+            <col class="col-wins">
+            <col class="col-draws">
+            <col class="col-losses">
             <col class="col-goals">
             <col class="col-points">
           </colgroup>
@@ -147,8 +153,11 @@ async function renderStandings(selector) {
             <tr>
               <th>№</th>
               <th>Команда</th>
-              <th>Игры</th>
-              <th>Мячи</th>
+              <th>Игр</th>
+              <th>Побед</th>
+              <th>Ничьих</th>
+              <th>Поражения</th>
+              <th>Мячей забито - пропущено</th>
               <th>Очки</th>
             </tr>
           </thead>
@@ -329,6 +338,33 @@ function getClubPageUrl(item) {
 
 function getHistoricalClubFallback(slug) {
   return HISTORICAL_CLUB_FALLBACKS[String(slug || '').trim()] || null;
+}
+
+function hasExpandedStandingsFields(data) {
+  return Array.isArray(data) && data.every(item =>
+    item
+    && Object.prototype.hasOwnProperty.call(item, 'won')
+    && Object.prototype.hasOwnProperty.call(item, 'drawn')
+    && Object.prototype.hasOwnProperty.call(item, 'lost')
+  );
+}
+
+function formatStandingStat(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? String(numeric) : '—';
+}
+
+function formatStandingGoals(item = {}) {
+  const goalsLabel = String(item.goals || '').trim();
+  if (goalsLabel) return goalsLabel;
+
+  const goalsFor = Number(item.goals_for);
+  const goalsAgainst = Number(item.goals_against);
+  if (Number.isFinite(goalsFor) && Number.isFinite(goalsAgainst)) {
+    return `${goalsFor}-${goalsAgainst}`;
+  }
+
+  return '—';
 }
 
 function getClubLocationParts(item = {}) {
@@ -612,7 +648,10 @@ async function fetchJson(path) {
     const local = localStorage.getItem(storageKey);
     if (local) {
       try {
-        return JSON.parse(local);
+        const parsed = JSON.parse(local);
+        if (path !== 'data/standings.json' || hasExpandedStandingsFields(parsed)) {
+          return parsed;
+        }
       } catch (e) {}
     }
   }
@@ -621,7 +660,9 @@ async function fetchJson(path) {
   if (apiBaseUrl && endpoint) {
     try {
       const remoteData = await fetchApi(endpoint);
-      if (remoteData) return remoteData;
+      if (remoteData && (path !== 'data/standings.json' || hasExpandedStandingsFields(remoteData))) {
+        return remoteData;
+      }
     } catch (error) {
       console.warn(`Remote API ${endpoint} is unavailable, falling back to static file.`, error);
     }
