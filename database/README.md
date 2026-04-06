@@ -20,6 +20,7 @@ This folder now contains the long-term data model for the site.
 - `partner_categories` — partner groups such as general and media
 - `partners` — persistent partner directory
 - `partner_logo_assets` — uploaded logo history for each partner
+  including storage metadata such as public id, dimensions and file info
 - `tournament_partners` — which partners are shown in which tournament
 
 ## Why this structure
@@ -41,7 +42,7 @@ It supports:
 5. Move uploaded images and partner logos to object storage and save their public URLs.
 6. Connect the frontend pages to the new API endpoints.
 
-If you cannot run `psql` scripts and need to paste SQL into a GUI editor, you can still use `postgresql-schema.sql` as a one-shot snapshot.
+If you cannot run `psql` scripts and need to paste SQL into a GUI editor, you can still use `postgresql-schema.sql` as a one-shot snapshot. It also creates `schema_migrations` and marks the current baseline versions as applied.
 
 ## Migration tracking
 

@@ -5,6 +5,12 @@
 
 BEGIN;
 
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  version TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -155,6 +161,13 @@ CREATE TABLE IF NOT EXISTS partner_logo_assets (
   image_url TEXT NOT NULL,
   alt_text TEXT NOT NULL DEFAULT '',
   storage_provider TEXT,
+  public_id TEXT,
+  file_name TEXT,
+  mime_type TEXT,
+  asset_format TEXT,
+  width INTEGER,
+  height INTEGER,
+  bytes INTEGER,
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   is_current BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -221,5 +234,13 @@ CREATE TRIGGER partners_set_updated_at
 BEFORE UPDATE ON partners
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
+
+INSERT INTO schema_migrations (version, name)
+VALUES
+  ('0001', 'create_core_entities'),
+  ('0002', 'create_matches_and_news'),
+  ('0003', 'create_partner_entities'),
+  ('0004', 'add_partner_logo_asset_metadata')
+ON CONFLICT (version) DO NOTHING;
 
 COMMIT;

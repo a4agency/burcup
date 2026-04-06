@@ -273,6 +273,7 @@ const ADMIN_SOURCES = {
 let currentSource = 'tournaments';
 let defaultsCache = {};
 let currentMode = 'form';
+let renderedDataCache = {};
 
 function getApiBaseUrl() {
   return String(window.BCUP_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
@@ -377,7 +378,8 @@ async function uploadAdminImage({ file, sourceName, key }) {
     body: JSON.stringify({
       file: dataUrl,
       folder: `burcup/${sourceName}/${key}`,
-      filename: file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-')
+      filename: file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9_-]+/g, '-'),
+      original_filename: file.name
     })
   });
 
@@ -416,6 +418,26 @@ function getSourceData(sourceName) {
 
 function setSourceData(sourceName, data) {
   localStorage.setItem(ADMIN_SOURCES[sourceName].key, JSON.stringify(data));
+}
+
+function setRenderedData(sourceName, data) {
+  renderedDataCache[sourceName] = structuredClone(data);
+}
+
+function syncTextareaWithRenderedData(sourceName) {
+  const data = renderedDataCache[sourceName];
+  if (!data) return;
+  document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
+  setSourceData(sourceName, data);
+}
+
+function updateRenderedItem(sourceName, index, updater) {
+  const current = renderedDataCache[sourceName] || [];
+  if (!current[index]) return;
+  const next = structuredClone(current);
+  updater(next[index]);
+  setRenderedData(sourceName, next);
+  syncTextareaWithRenderedData(sourceName);
 }
 
 function setStatus(text) {
@@ -512,10 +534,11 @@ function makeField(field, value, itemIndex) {
 
 function readFormData(sourceName) {
   const source = ADMIN_SOURCES[sourceName];
+  const baseItems = renderedDataCache[sourceName] || [];
   const items = [];
   const cards = document.querySelectorAll('.admin-item-card');
   cards.forEach((card, index) => {
-    const item = {};
+    const item = structuredClone(baseItems[index] || {});
     source.fields.forEach(([key, , type]) => {
       if (type === 'score') {
         const leftEl = card.querySelector(`[data-key="${key}"][data-score-part="left"][data-index="${index}"]`);
@@ -538,6 +561,7 @@ function readFormData(sourceName) {
 function renderForm(sourceName, data) {
   const source = ADMIN_SOURCES[sourceName];
   const wrap = document.getElementById('admin-form-wrap');
+  setRenderedData(sourceName, data);
   wrap.innerHTML = `
     <div class="admin-form-list">
       ${data.map((item, index) => `
@@ -611,6 +635,19 @@ function renderForm(sourceName, data) {
           if (previewBox) {
             previewBox.innerHTML = `<img src="${result.url}" alt="preview">`;
           }
+          if (sourceName === 'partners' && key === 'logo_url') {
+            updateRenderedItem(sourceName, Number(index), item => {
+              item.logo_url = result.url;
+              item.logo_storage_provider = result.storage_provider || '';
+              item.logo_public_id = result.public_id || '';
+              item.logo_file_name = result.file_name || '';
+              item.logo_mime_type = result.mime_type || '';
+              item.logo_format = result.format || '';
+              item.logo_width = result.width ?? null;
+              item.logo_height = result.height ?? null;
+              item.logo_bytes = result.bytes ?? null;
+            });
+          }
           setStatus('Изображение загружено в storage. Нажми «Сохранить», чтобы записать URL в базу.');
         })
         .catch(async error => {
@@ -621,6 +658,19 @@ function renderForm(sourceName, data) {
             }
             if (previewBox) {
               previewBox.innerHTML = `<img src="${reader.result}" alt="preview">`;
+            }
+            if (sourceName === 'partners' && key === 'logo_url') {
+              updateRenderedItem(sourceName, Number(index), item => {
+                item.logo_url = String(reader.result || '');
+                item.logo_storage_provider = '';
+                item.logo_public_id = '';
+                item.logo_file_name = file.name || '';
+                item.logo_mime_type = file.type || '';
+                item.logo_format = '';
+                item.logo_width = null;
+                item.logo_height = null;
+                item.logo_bytes = file.size || null;
+              });
             }
             setStatus(`Storage недоступен: ${error.message}. В форму подставлен base64 как временный fallback.`);
           };

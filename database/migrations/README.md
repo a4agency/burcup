@@ -7,6 +7,7 @@
 - `0001_create_core_entities.sql`
 - `0002_create_matches_and_news.sql`
 - `0003_create_partner_entities.sql`
+- `0004_add_partner_logo_asset_metadata.sql`
 - `apply-all.psql.sql`
 
 ## Как применять на пустую базу
@@ -37,4 +38,4 @@ ORDER BY version;
 
 ## Зачем snapshot всё ещё нужен
 
-Файл [postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql) оставлен как быстрый совместимый bootstrap для случаев, когда нужно вставить схему целиком в GUI-редактор или разово поднять базу без psql-скрипта.
+Файл [postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql) оставлен как быстрый совместимый bootstrap для случаев, когда нужно вставить схему целиком в GUI-редактор или разово поднять базу без psql-скрипта. Он также создаёт `schema_migrations` и помечает текущий baseline как применённый.

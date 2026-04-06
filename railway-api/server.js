@@ -163,6 +163,7 @@ async function uploadImageToCloudinary({ file, folder, publicId }) {
     height: result.height || null,
     format: result.format || '',
     bytes: result.bytes || 0,
+    storageProvider: 'cloudinary',
   };
 }
 
@@ -565,6 +566,14 @@ const adminPartnersQuery = `
     p.website_url,
     COALESCE(pla.image_url, '') AS logo_url,
     COALESCE(pla.alt_text, p.name) AS alt_text,
+    COALESCE(pla.storage_provider, '') AS logo_storage_provider,
+    COALESCE(pla.public_id, '') AS logo_public_id,
+    COALESCE(pla.file_name, '') AS logo_file_name,
+    COALESCE(pla.mime_type, '') AS logo_mime_type,
+    COALESCE(pla.asset_format, '') AS logo_format,
+    pla.width AS logo_width,
+    pla.height AS logo_height,
+    pla.bytes AS logo_bytes,
     tp.sort_order,
     tp.is_visible,
     p.description
@@ -695,6 +704,14 @@ async function getAdminPartners(client) {
     website_url: row.website_url || '',
     logo_url: row.logo_url || '',
     alt_text: row.alt_text || row.name,
+    logo_storage_provider: row.logo_storage_provider || '',
+    logo_public_id: row.logo_public_id || '',
+    logo_file_name: row.logo_file_name || '',
+    logo_mime_type: row.logo_mime_type || '',
+    logo_format: row.logo_format || '',
+    logo_width: row.logo_width == null ? null : parseInteger(row.logo_width, null),
+    logo_height: row.logo_height == null ? null : parseInteger(row.logo_height, null),
+    logo_bytes: row.logo_bytes == null ? null : parseInteger(row.logo_bytes, null),
     sort_order: parseInteger(row.sort_order, 0),
     is_visible: row.is_visible,
     note: row.description || '',
@@ -997,7 +1014,7 @@ async function ensurePartnerCategory(client, slug) {
   return Number(rows[0].id);
 }
 
-async function setPartnerLogo(client, partnerId, logoUrl, altText) {
+async function setPartnerLogo(client, partnerId, logoUrl, altText, metadata = {}) {
   const normalizedLogo = normalizeString(logoUrl);
   if (!normalizedLogo) {
     await client.query('UPDATE partner_logo_assets SET is_current = FALSE WHERE partner_id = $1', [partnerId]);
@@ -1005,6 +1022,14 @@ async function setPartnerLogo(client, partnerId, logoUrl, altText) {
   }
 
   const normalizedAlt = normalizeString(altText);
+  const normalizedStorageProvider = normalizeString(metadata.storage_provider) || 'external';
+  const normalizedPublicId = nullIfEmpty(metadata.public_id);
+  const normalizedFileName = nullIfEmpty(metadata.file_name);
+  const normalizedMimeType = nullIfEmpty(metadata.mime_type);
+  const normalizedFormat = nullIfEmpty(metadata.format);
+  const normalizedWidth = metadata.width == null || metadata.width === '' ? null : parseInteger(metadata.width, null);
+  const normalizedHeight = metadata.height == null || metadata.height === '' ? null : parseInteger(metadata.height, null);
+  const normalizedBytes = metadata.bytes == null || metadata.bytes === '' ? null : parseInteger(metadata.bytes, null);
   const existing = await client.query(`
     SELECT id
     FROM partner_logo_assets
@@ -1015,19 +1040,65 @@ async function setPartnerLogo(client, partnerId, logoUrl, altText) {
     LIMIT 1;
   `, [partnerId, normalizedLogo, normalizedAlt]);
 
-  const logoAssetId = existing.rows.length
-    ? Number(existing.rows[0].id)
-    : Number((await client.query(`
+  let logoAssetId;
+
+  if (existing.rows.length) {
+    logoAssetId = Number(existing.rows[0].id);
+    await client.query(`
+      UPDATE partner_logo_assets
+      SET
+        storage_provider = $2,
+        public_id = $3,
+        file_name = $4,
+        mime_type = $5,
+        asset_format = $6,
+        width = $7,
+        height = $8,
+        bytes = $9
+      WHERE id = $1;
+    `, [
+      logoAssetId,
+      normalizedStorageProvider,
+      normalizedPublicId,
+      normalizedFileName,
+      normalizedMimeType,
+      normalizedFormat,
+      normalizedWidth,
+      normalizedHeight,
+      normalizedBytes,
+    ]);
+  } else {
+    logoAssetId = Number((await client.query(`
         INSERT INTO partner_logo_assets (
           partner_id,
           image_url,
           alt_text,
           storage_provider,
+          public_id,
+          file_name,
+          mime_type,
+          asset_format,
+          width,
+          height,
+          bytes,
           is_current
         )
-        VALUES ($1, $2, $3, $4, TRUE)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, TRUE)
         RETURNING id;
-      `, [partnerId, normalizedLogo, normalizedAlt, 'external'])).rows[0].id);
+      `, [
+        partnerId,
+        normalizedLogo,
+        normalizedAlt,
+        normalizedStorageProvider,
+        normalizedPublicId,
+        normalizedFileName,
+        normalizedMimeType,
+        normalizedFormat,
+        normalizedWidth,
+        normalizedHeight,
+        normalizedBytes,
+      ])).rows[0].id);
+  }
 
   await client.query(`
     UPDATE partner_logo_assets
@@ -1080,7 +1151,16 @@ async function replacePartners(client, payload) {
 
     const partnerId = Number(partnerResult.rows[0].id);
     const categoryId = await ensurePartnerCategory(client, item.category);
-    const logoAssetId = await setPartnerLogo(client, partnerId, item.logo_url, item.alt_text || name);
+    const logoAssetId = await setPartnerLogo(client, partnerId, item.logo_url, item.alt_text || name, {
+      storage_provider: item.logo_storage_provider,
+      public_id: item.logo_public_id,
+      file_name: item.logo_file_name,
+      mime_type: item.logo_mime_type,
+      format: item.logo_format,
+      width: item.logo_width,
+      height: item.logo_height,
+      bytes: item.logo_bytes,
+    });
     const tournamentSlug = normalizeString(item.tournament_slug);
     const tournamentId = tournamentSlug ? tournamentMap.get(tournamentSlug) || null : null;
     if (tournamentSlug && !tournamentId) {
@@ -1199,7 +1279,9 @@ app.post('/api/admin/uploads/image', requireAdminAuth, async (req, res, next) =>
     const file = typeof req.body?.file === 'string' ? req.body.file.trim() : '';
     const folder = normalizeString(req.body?.folder) || 'burcup/uploads';
     const filename = normalizeString(req.body?.filename) || 'image';
+    const originalFilename = normalizeString(req.body?.original_filename) || filename;
     const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
+    const mimeType = (file.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/) || [])[1] || '';
 
     if (!file || !file.startsWith('data:image/')) {
       return res.status(400).json({ error: 'Image payload must be a data URL' });
@@ -1215,6 +1297,9 @@ app.post('/api/admin/uploads/image', requireAdminAuth, async (req, res, next) =>
       ok: true,
       url: uploaded.url,
       public_id: uploaded.publicId,
+      storage_provider: uploaded.storageProvider,
+      file_name: originalFilename,
+      mime_type: mimeType,
       width: uploaded.width,
       height: uploaded.height,
       format: uploaded.format,
