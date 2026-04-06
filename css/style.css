@@ -2846,34 +2846,21 @@ button,
   overflow: hidden;
   background: linear-gradient(
     180deg,
-    var(--navy-2) 0%,
-    var(--navy-2) 24%,
-    #244887 40%,
-    #567ab7 58%,
-    #96afd3 76%,
-    #d4e0ef 89%,
-    #f2f6fc 96%,
+    var(--navy-2) 0px,
+    var(--navy-2) 68px,
+    #224584 150px,
+    #5477b3 315px,
+    #96afd3 520px,
+    #d4e0ef 700px,
+    #f2f6fc 820px,
     #ffffff 100%
   ) !important;
   padding: 0 0 28px !important;
   margin-top: 0 !important;
 }
 
-.hero-carousel-wrap::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:22px;
-  background:var(--navy-2);
-  pointer-events:none;
-}
-
 .hero-carousel-wrap .container{
   width: min(1860px, calc(100% - 28px)) !important;
-  position: relative;
-  z-index: 1;
 }
 
 .hero-carousel-shell{
