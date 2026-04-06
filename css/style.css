@@ -2359,9 +2359,17 @@ button,
   padding:22px 24px;
   border:1px solid #e7edf6;
   text-decoration:none;
-  transition:.2s ease;
+  transition:
+    transform .24s ease,
+    box-shadow .24s ease,
+    border-color .24s ease,
+    background-color .24s ease;
 }
-.upcoming-card:hover{transform:translateY(-2px)}
+.upcoming-card:hover,
+.upcoming-card:focus-visible{
+  transform:translateY(-2px);
+  border-color:rgba(45,108,223,.16);
+}
 .upcoming-header{
   display:flex;
   justify-content:space-between;
@@ -4575,6 +4583,13 @@ button,
 #home-upcoming-matches.home-upcoming-track .upcoming-card,
 #results-matches.home-upcoming-track .upcoming-card{
   box-shadow: none !important;
+}
+
+#home-upcoming-matches.home-upcoming-track .upcoming-card:hover,
+#home-upcoming-matches.home-upcoming-track .upcoming-card:focus-visible,
+#results-matches.home-upcoming-track .upcoming-card:hover,
+#results-matches.home-upcoming-track .upcoming-card:focus-visible{
+  box-shadow:0 14px 24px rgba(13,43,99,.06) !important;
 }
 
 
