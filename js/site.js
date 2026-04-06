@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if(year) year.textContent = new Date().getFullYear();
   initActiveHeaderLink();
   initHeaderMenu();
+  upgradeStaticImagesForCloudinary();
 });
 
 
@@ -218,6 +219,15 @@ function getCloudinaryAssetMap() {
   return window.BCUP_CONFIG?.cloudinaryAssetMap || {};
 }
 
+function getCloudinaryCloudName() {
+  return (window.BCUP_CONFIG?.cloudinaryCloudName || '').trim();
+}
+
+function isLocalPreviewPage() {
+  const hostname = window.location.hostname;
+  return hostname === 'localhost' || hostname === '127.0.0.1';
+}
+
 function isCloudinaryUrl(value) {
   return /https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//i.test(String(value || ''));
 }
@@ -265,7 +275,7 @@ function injectCloudinaryTransform(url, options = {}) {
 }
 
 function buildCloudinaryAssetUrl(asset, options = {}) {
-  const cloudName = (window.BCUP_CONFIG?.cloudinaryCloudName || '').trim();
+  const cloudName = getCloudinaryCloudName();
   if (!cloudName) return '';
 
   const normalized = normalizeCloudinaryAsset(asset);
@@ -285,6 +295,44 @@ function buildCloudinaryAssetUrl(asset, options = {}) {
   return `https://res.cloudinary.com/${cloudName}/image/upload/${transform ? `${transform}/` : ''}${version}${normalized.publicId}`;
 }
 
+function canUseCloudinaryFetch() {
+  return Boolean(getCloudinaryCloudName()) && !isLocalPreviewPage();
+}
+
+function buildCloudinaryFetchUrl(source, options = {}) {
+  if (!canUseCloudinaryFetch()) return '';
+  const cloudName = getCloudinaryCloudName();
+  let absoluteUrl = '';
+
+  try {
+    absoluteUrl = new URL(String(source || ''), document.baseURI).href;
+  } catch (error) {
+    return '';
+  }
+
+  if (!/^https?:\/\//i.test(absoluteUrl)) return '';
+
+  const transform = buildCloudinaryTransformSegment(options);
+  return `https://res.cloudinary.com/${cloudName}/image/fetch/${transform ? `${transform}/` : ''}${encodeURIComponent(absoluteUrl)}`;
+}
+
+function optimizeSrcset(srcsetValue, options = {}) {
+  return String(srcsetValue || '')
+    .split(',')
+    .map(item => item.trim())
+    .filter(Boolean)
+    .map(item => {
+      const [url, descriptor = ''] = item.split(/\s+/, 2);
+      const widthMatch = descriptor.match(/^(\d+)w$/);
+      const optimizedUrl = getOptimizedImageUrl(url, {
+        ...options,
+        width: widthMatch ? Number(widthMatch[1]) : options.width
+      });
+      return descriptor ? `${optimizedUrl} ${descriptor}` : optimizedUrl;
+    })
+    .join(', ');
+}
+
 function getOptimizedImageUrl(source, options = {}) {
   const value = String(source || '').trim();
   if (!value || value.startsWith('data:image/')) return value;
@@ -295,6 +343,9 @@ function getOptimizedImageUrl(source, options = {}) {
     const cloudinaryUrl = buildCloudinaryAssetUrl(mappedAsset, options);
     if (cloudinaryUrl) return cloudinaryUrl;
   }
+
+  const fetchUrl = buildCloudinaryFetchUrl(value, options);
+  if (fetchUrl) return fetchUrl;
 
   return value;
 }
@@ -347,10 +398,53 @@ function renderNewsCoverImage(src, alt, className = 'news-preview-cover') {
 function hydrateDeferredImage(image) {
   if (!image || image.dataset.hydrated === 'true') return;
   const { src, srcset, sizes } = image.dataset;
-  if (srcset) image.setAttribute('srcset', srcset);
+  if (srcset) image.setAttribute('srcset', optimizeSrcset(srcset));
   if (sizes) image.setAttribute('sizes', sizes);
-  if (src) image.setAttribute('src', src);
+  if (src) image.setAttribute('src', getOptimizedImageUrl(src));
   image.dataset.hydrated = 'true';
+}
+
+function getStaticImageProfile(image) {
+  if (!image) return null;
+  if (image.classList.contains('lang-flag-img')) return { skip: true };
+  if (image.closest('.header-brand-mark')) return { width: 256 };
+  if (image.closest('.hero-carousel-slide')) {
+    return {
+      width: 1600,
+      srcsetWidths: [960, 1600],
+      sizes: '(max-width: 900px) 100vw, 72vw'
+    };
+  }
+  if (image.classList.contains('hero-carousel-side-img')) return { width: 960, height: 540, crop: 'fill', gravity: 'auto' };
+  if (image.closest('.sponsor-item-logo')) return { width: 320 };
+  if (image.classList.contains('match-team-logo')) return { width: 180 };
+  if (image.classList.contains('team-logo-img')) return { width: 240 };
+  if (image.classList.contains('team-logo')) return { width: 96 };
+  if (image.classList.contains('news-preview-cover-img')) return { width: 960, height: 540, crop: 'fill', gravity: 'auto' };
+  if (image.closest('.thumb')) return { width: 720, height: 480, crop: 'fill', gravity: 'auto' };
+  return null;
+}
+
+function upgradeStaticImagesForCloudinary() {
+  if (!canUseCloudinaryFetch()) return;
+
+  document.querySelectorAll('img').forEach(image => {
+    const profile = getStaticImageProfile(image);
+    if (!profile || profile.skip) return;
+    if (image.closest('.hero-carousel-slide') && image.dataset.src) return;
+
+    const originalSrc = image.dataset.src || image.getAttribute('src') || '';
+    if (!originalSrc || originalSrc.startsWith('data:image/')) return;
+
+    if (profile.srcsetWidths?.length) {
+      image.setAttribute('src', getOptimizedImageUrl(originalSrc, { ...profile, width: Math.max(...profile.srcsetWidths) }));
+      image.setAttribute('srcset', profile.srcsetWidths.map(width => `${getOptimizedImageUrl(originalSrc, { ...profile, width })} ${width}w`).join(', '));
+      if (profile.sizes) image.setAttribute('sizes', profile.sizes);
+      return;
+    }
+
+    image.setAttribute('src', getOptimizedImageUrl(originalSrc, profile));
+  });
 }
 
 async function fetchApi(path) {
@@ -850,8 +944,8 @@ function initHeroCarousel() {
     const nextIndex = (index + 1) % slides.length;
     const prevImg = slides[prevIndex]?.dataset.bg || '';
     const nextImg = slides[nextIndex]?.dataset.bg || '';
-    if (sideLeftImg && prevImg) sideLeftImg.src = prevImg;
-    if (sideRightImg && nextImg) sideRightImg.src = nextImg;
+    if (sideLeftImg && prevImg) sideLeftImg.src = getOptimizedImageUrl(prevImg, { width: 960, height: 540, crop: 'fill', gravity: 'auto' });
+    if (sideRightImg && nextImg) sideRightImg.src = getOptimizedImageUrl(nextImg, { width: 960, height: 540, crop: 'fill', gravity: 'auto' });
   }
 
   function show(nextIndex) {
