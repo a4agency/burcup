@@ -4666,23 +4666,23 @@ button,
 }
 
 
-/* Wider match cards so titles and team names stay on one line more often */
+/* Match sliders: fit whole cards cleanly in the viewport */
 #home-upcoming-matches.home-upcoming-track{
-  grid-auto-columns:minmax(390px, 1fr) !important;
+  grid-auto-columns:calc((100% - 36px) / 3) !important;
 }
 
 #results-matches.home-upcoming-track{
-  grid-auto-columns:minmax(390px, 1fr) !important;
+  grid-auto-columns:calc((100% - 36px) / 3) !important;
 }
 
 .upcoming-tour{
   white-space:nowrap !important;
 }
 
-@media (max-width: 1100px){
+@media (max-width: 1200px){
   #home-upcoming-matches.home-upcoming-track,
   #results-matches.home-upcoming-track{
-    grid-auto-columns:minmax(350px, 1fr) !important;
+    grid-auto-columns:calc((100% - 18px) / 2) !important;
   }
 }
 
