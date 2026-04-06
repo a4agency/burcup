@@ -1228,8 +1228,8 @@ h1,h2,h3,h4,p,span,a,div{
 .news-preview-cover,
 .thumb{
   background:transparent;
-  width:calc(100% - clamp(18px, 2vw, 26px));
-  margin:clamp(10px, 1.3vw, 14px) auto 0;
+  width:calc(100% - clamp(10px, 1.2vw, 14px));
+  margin:clamp(8px, 1vw, 10px) auto 0;
   border-radius:0 !important;
 }
 
@@ -1698,7 +1698,7 @@ h1,h2,h3,h4,p,span,a,div{
 }
 
 .news-preview-content{
-  padding: clamp(16px, 2vw, 20px) !important;
+  padding: clamp(14px, 1.7vw, 16px) !important;
 }
 
 .news-preview-card{
