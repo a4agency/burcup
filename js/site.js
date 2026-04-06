@@ -81,6 +81,39 @@ function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
 }
 
+function pluralizeRu(count, forms) {
+  const value = Math.abs(Number(count) || 0);
+  const mod10 = value % 10;
+  const mod100 = value % 100;
+
+  if (mod100 >= 11 && mod100 <= 19) return forms[2];
+  if (mod10 === 1) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4) return forms[1];
+  return forms[2];
+}
+
+function formatCountLabel(count, forms) {
+  const value = Number(count) || 0;
+  return `${value} ${pluralizeRu(value, forms)}`;
+}
+
+function joinNonEmpty(parts, separator = ' • ') {
+  return parts.map(item => String(item || '').trim()).filter(Boolean).join(separator);
+}
+
+function formatTournamentStatus(status) {
+  const normalized = String(status || '').trim().toLowerCase();
+  const labels = {
+    draft: 'Черновик',
+    upcoming: 'Скоро',
+    active: 'Идёт',
+    completed: 'Завершён',
+    archived: 'Архив',
+  };
+
+  return labels[normalized] || status || '';
+}
+
 const API_ENDPOINTS = {
   'data/standings.json': '/api/standings',
   'data/matches.json': '/api/matches',
@@ -140,12 +173,13 @@ async function fetchJson(path) {
 }
 
 function renderClubCard(item) {
+  const matchesCount = Number(item.matches_count || 0);
   return `
     <a class="team-logo-card club-card-link" href="club.html?slug=${encodeURIComponent(item.slug)}">
       <div class="team-logo-wrap"><img src="${escapeHtml(item.logo)}" alt="${escapeHtml(item.name)}" class="team-logo-img" loading="lazy"></div>
       <h3>${escapeHtml(item.name)}</h3>
       <div class="muted team-country">${escapeHtml(item.city || item.country || '')}</div>
-      <div class="club-card-meta">${Number(item.matches_count || 0)} матчей в истории</div>
+      <div class="club-card-meta">${escapeHtml(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей']))} в истории</div>
     </a>
   `;
 }
@@ -169,13 +203,13 @@ async function renderTournamentsGrid() {
     <article class="tournament-card">
       <div class="tournament-card-top">
         <div class="tournament-card-year">${escapeHtml(item.season_year || '')}</div>
-        <div class="tournament-card-status ${escapeHtml(item.status)}">${escapeHtml(item.status)}</div>
+        <div class="tournament-card-status ${escapeHtml(item.status)}">${escapeHtml(formatTournamentStatus(item.status))}</div>
       </div>
       <h3>${escapeHtml(item.name)}</h3>
       <p>${escapeHtml(item.description || '')}</p>
       <div class="tournament-card-meta">
-        <span>${Number(item.clubs_count || 0)} клубов</span>
-        <span>${Number(item.matches_count || 0)} матчей</span>
+        <span>${escapeHtml(formatCountLabel(item.clubs_count, ['клуб', 'клуба', 'клубов']))}</span>
+        <span>${escapeHtml(formatCountLabel(item.matches_count, ['матч', 'матча', 'матчей']))}</span>
       </div>
       <div class="tournament-card-dates">${escapeHtml(item.start_date || '')}${item.end_date ? ` - ${escapeHtml(item.end_date)}` : ''}</div>
     </article>
@@ -229,11 +263,12 @@ async function renderClubPage() {
   }
   const matchesMarkup = club.matches.map(item => {
     const parts = String(item.score || '0:0').split(':');
+    const dateTime = joinNonEmpty([item.date, item.time], ' ');
     return `
       <a class="club-history-card" href="match.html?id=${item.id}">
         <div class="club-history-top">
           <span>${escapeHtml(item.tournament_name || '')}</span>
-          <span>${escapeHtml(item.date || '')} ${escapeHtml(item.time || '')}</span>
+          <span>${escapeHtml(dateTime)}</span>
         </div>
         <div class="club-history-match">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</div>
         <div class="club-history-meta">
@@ -491,13 +526,14 @@ async function renderMatchPageFromJson() {
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
+    const matchMeta = joinNonEmpty([item.date, item.time, item.status_label || ''], ' • ');
     target.innerHTML = `
       <div class="container article-wrap">
         <div class="breadcrumbs"><span>${escapeHtml(item.stage || item.group || 'Матч')}</span><span>•</span><span>Кубок Бурчалкина</span></div>
         <h1 class="article-title">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</h1>
         <div class="author-row">
           <div class="author-left">
-            <div><div style="font-weight:700">Редакция Burchalkin Cup</div><div class="card-meta">${escapeHtml(item.date)} • ${escapeHtml(item.time)} • ${escapeHtml(item.status_label || '')}</div></div>
+            <div><div style="font-weight:700">Редакция Burchalkin Cup</div><div class="card-meta">${escapeHtml(matchMeta)}</div></div>
           </div>
         </div>
         <div class="card" style="margin-bottom:18px">
