@@ -1,3 +1,4 @@
+document.documentElement.classList.add('has-js');
 
 function autoFitTeamNames(selector = '.team-name', maxSize = 22, minSize = 12) {
   document.querySelectorAll(selector).forEach(el => {
@@ -13,10 +14,57 @@ function autoFitTeamNames(selector = '.team-name', maxSize = 22, minSize = 12) {
   });
 }
 
+function initHeaderMenu() {
+  const header = document.querySelector('.header');
+  const toggle = document.querySelector('.header-toggle');
+  const menu = document.querySelector('.header-menu');
+  const mobileBreakpoint = 900;
+
+  if (!header || !toggle || !menu) return;
+
+  function syncMenu(isOpen) {
+    header.classList.toggle('is-menu-open', isOpen);
+    menu.classList.toggle('is-open', isOpen);
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    toggle.setAttribute('aria-label', isOpen ? 'Закрыть меню' : 'Открыть меню');
+    document.body.classList.toggle('menu-open', isOpen && window.innerWidth <= mobileBreakpoint);
+  }
+
+  function closeMenu() {
+    syncMenu(false);
+  }
+
+  syncMenu(false);
+
+  toggle.addEventListener('click', () => {
+    syncMenu(!menu.classList.contains('is-open'));
+  });
+
+  menu.addEventListener('click', (event) => {
+    if (window.innerWidth > mobileBreakpoint) return;
+    if (event.target.closest('a, .lang-btn')) closeMenu();
+  });
+
+  document.addEventListener('click', (event) => {
+    if (window.innerWidth > mobileBreakpoint) return;
+    if (!menu.classList.contains('is-open')) return;
+    if (!header.contains(event.target)) closeMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > mobileBreakpoint) closeMenu();
+  });
+}
+
 
 document.addEventListener('DOMContentLoaded', function(){
   const year = document.getElementById('year');
   if(year) year.textContent = new Date().getFullYear();
+  initHeaderMenu();
 });
 
 

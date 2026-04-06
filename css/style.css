@@ -3872,6 +3872,136 @@ button,
 }
 
 
+.header-toggle{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  width:48px;
+  height:48px;
+  padding:0;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:14px;
+  background:#fff;
+  color:var(--navy);
+  box-shadow:0 14px 28px rgba(0,0,0,.22);
+  transition:background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.header-toggle::before{
+  content:'≡';
+  font-size:30px;
+  font-weight:900;
+  line-height:1;
+  transform:translateY(-1px);
+}
+
+.header-toggle:hover{
+  background:#f2f6ff;
+  border-color:#fff;
+}
+
+.header-toggle:focus-visible{
+  outline:2px solid rgba(255,255,255,.72);
+  outline-offset:3px;
+}
+
+.header-toggle-lines{
+  display:none;
+}
+
+.header-toggle-lines span{
+  display:none;
+}
+
+.header.is-menu-open .header-toggle::before{
+  content:'×';
+  font-size:28px;
+  transform:translateY(-1px);
+}
+
+@media (max-width: 900px){
+  body.menu-open{
+    overflow:hidden;
+  }
+
+  .header-inner{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:14px 16px;
+  }
+
+  .header-brand{
+    grid-column:1;
+    flex-direction:row;
+    justify-content:flex-start;
+    align-items:center;
+    gap:12px;
+    text-align:left;
+  }
+
+  .header-toggle{
+    display:inline-flex;
+    grid-column:2;
+  }
+
+  .has-js .header-menu{
+    grid-column:1 / -1;
+    width:100%;
+    display:none !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    justify-content:flex-start !important;
+    flex-wrap:nowrap !important;
+    gap:8px !important;
+    margin-top:2px;
+    padding-top:14px;
+  }
+
+  .has-js .header-menu.is-open{
+    display:flex !important;
+  }
+
+  .has-js .header-menu a{
+    width:100%;
+    text-align:left;
+    font-size:14px !important;
+    padding:14px 16px !important;
+    background:rgba(255,255,255,.08);
+  }
+
+  .has-js .lang-switcher{
+    width:100% !important;
+    justify-content:flex-start !important;
+    margin-left:0 !important;
+    margin-top:2px !important;
+    padding-left:0 !important;
+    border-left:none !important;
+  }
+}
+
+@media (max-width: 640px){
+  .header-brand{
+    gap:10px;
+  }
+
+  .header-brand-title{
+    font-size:22px;
+  }
+
+  .header-toggle{
+    width:44px;
+    height:44px;
+    border-radius:12px;
+  }
+
+  .has-js .header-menu a{
+    font-size:13px !important;
+    padding:12px 14px !important;
+  }
+}
+
+
 /* Contacts page map block */
 .contact-map-card{
   display:flex;
