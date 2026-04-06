@@ -492,8 +492,8 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   top:50%;
   transform:translateY(-50%);
   object-fit:contain;
-  filter:grayscale(1) brightness(.2) contrast(1.1);
-  opacity:.92;
+  filter:grayscale(1) brightness(.58) contrast(.92);
+  opacity:.82;
   transition:
     filter .28s ease,
     opacity .28s ease,
@@ -505,7 +505,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   width:100%;
   line-height:1.35;
   text-align:center;
-  color:var(--muted);
+  color:#6c7b95;
   transition:color .24s ease;
 }
 
