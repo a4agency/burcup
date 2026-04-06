@@ -228,7 +228,7 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_partners',
     exportName: 'partners.json',
     title: 'Партнёры',
-    help: 'Каталог партнёров, категорий и логотипов. Сохранение создаёт или обновляет записи в PostgreSQL.',
+    help: 'Каталог партнёров, категорий, логотипов и ссылок. Если ссылка не указана, карточка партнёра ведёт на главную страницу сайта.',
     defaultData: [
       {
         slug: 'b-sight',
@@ -260,7 +260,7 @@ const ADMIN_SOURCES = {
       ['name', 'Название', 'text'],
       ['category', 'Категория', 'select', ['general', 'media', 'title', 'official']],
       ['tournament_slug', 'Турнир', 'text'],
-      ['website_url', 'Сайт', 'text'],
+      ['website_url', 'Ссылка партнёра', 'url'],
       ['logo_url', 'Логотип', 'image'],
       ['alt_text', 'Alt', 'text'],
       ['sort_order', 'Порядок', 'number'],

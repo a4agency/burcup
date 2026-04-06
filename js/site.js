@@ -715,6 +715,23 @@ async function renderTournamentsGrid() {
 }
 
 const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.png';
+const PARTNER_FALLBACK_HREF = 'index.html';
+
+function normalizePartnerLookupKey(value) {
+  return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function normalizePartnerHref(value) {
+  const href = String(value || '').trim();
+  if (!href) return PARTNER_FALLBACK_HREF;
+  if (/^(https?:)?\/\//i.test(href)) return href;
+  if (/^(mailto:|tel:|#|\/|\.\/|\.\.\/)/i.test(href)) return href;
+  return `https://${href}`;
+}
+
+function isExternalPartnerHref(href) {
+  return /^(https?:)?\/\//i.test(String(href || ''));
+}
 
 function renderPartnerLogoMarkup(name, src = PARTNER_PLACEHOLDER_LOGO, alt = '') {
   return renderImageMarkup({
@@ -724,23 +741,47 @@ function renderPartnerLogoMarkup(name, src = PARTNER_PLACEHOLDER_LOGO, alt = '')
   });
 }
 
-function decorateStaticPartnerItems(root = document) {
+function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) {
   root.querySelectorAll('.sponsor-grid .sponsor-item').forEach((node) => {
-    if (node.querySelector('img')) return;
-    const name = node.textContent.trim();
+    const labelNode = node.querySelector('span');
+    const name = (labelNode ? labelNode.textContent : node.textContent).trim();
     if (!name) return;
-    node.classList.add('sponsor-item-logo');
-    node.innerHTML = `
-      ${renderPartnerLogoMarkup(name)}
+    const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || null;
+    const href = normalizePartnerHref(partner?.website_url || '');
+    const logoSrc = String(partner?.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
+    const logoAlt = partner?.logo_alt || name;
+
+    let element = node;
+    if (node.tagName !== 'A') {
+      element = document.createElement('a');
+      element.className = node.className;
+      node.replaceWith(element);
+    }
+
+    element.classList.add('sponsor-item-logo');
+    element.setAttribute('href', href);
+    if (isExternalPartnerHref(href)) {
+      element.setAttribute('target', '_blank');
+      element.setAttribute('rel', 'noreferrer');
+    } else {
+      element.removeAttribute('target');
+      element.removeAttribute('rel');
+    }
+    element.innerHTML = `
+      ${renderPartnerLogoMarkup(name, logoSrc, logoAlt)}
       <span>${escapeHtml(name)}</span>
     `;
   });
+
+  upgradeStaticImagesForCloudinary();
 }
 
 function renderPartnerItem(item) {
   const logoSrc = String(item.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
+  const href = normalizePartnerHref(item.website_url || '');
+  const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
   return `
-    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(item.website_url || '#')}" ${item.website_url ? 'target="_blank" rel="noreferrer"' : ''}>
+    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" ${externalAttrs}>
       ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
       <span>${escapeHtml(item.name)}</span>
     </a>
@@ -750,7 +791,6 @@ function renderPartnerItem(item) {
 async function renderPartnersForFeaturedTournament() {
   const generalTarget = document.querySelector('#partners-general');
   const mediaTarget = document.querySelector('#partners-media');
-  if (!generalTarget && !mediaTarget) return;
   decorateStaticPartnerItems();
   const tournaments = await fetchApi('/api/tournaments');
   if (!tournaments || !tournaments.length) return;
@@ -758,11 +798,20 @@ async function renderPartnersForFeaturedTournament() {
   if (!featured) return;
   const partnerGroups = await fetchApi(`/api/tournaments/${featured.slug}`);
   if (!partnerGroups || !Array.isArray(partnerGroups.partners)) return;
+
+  const partnerLookup = new Map();
+  partnerGroups.partners.forEach((group) => {
+    (group.items || []).forEach((item) => {
+      partnerLookup.set(normalizePartnerLookupKey(item.name), item);
+      if (item.slug) partnerLookup.set(normalizePartnerLookupKey(item.slug), item);
+    });
+  });
+
   const general = partnerGroups.partners.find(item => item.slug === 'general');
   const media = partnerGroups.partners.find(item => item.slug === 'media');
   if (generalTarget && general) generalTarget.innerHTML = general.items.map(renderPartnerItem).join('');
   if (mediaTarget && media) mediaTarget.innerHTML = media.items.map(renderPartnerItem).join('');
-  decorateStaticPartnerItems();
+  decorateStaticPartnerItems(document, partnerLookup);
 }
 
 async function renderClubPage() {
