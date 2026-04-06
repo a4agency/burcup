@@ -3089,8 +3089,8 @@ button,
 
 .hero-carousel-side::after{
   background:
-    linear-gradient(180deg, rgba(7,18,46,.24), rgba(7,18,46,.34)),
-    linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,0)) !important;
+    linear-gradient(180deg, rgba(7,18,46,.34), rgba(7,18,46,.44)),
+    linear-gradient(90deg, rgba(255,255,255,.02), rgba(255,255,255,0)) !important;
 }
 
 .hero-carousel-side-img{
