@@ -505,8 +505,9 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   width:100%;
   line-height:1.35;
   text-align:center;
-  color:#6c7b95;
-  transition:color .24s ease;
+  color:#6c7b95 !important;
+  font-weight:400;
+  transition:color .24s ease, font-weight .24s ease;
 }
 
 .sponsor-item:hover,
@@ -522,6 +523,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 .sponsor-item-logo:hover span,
 .sponsor-item-logo:focus-visible span{
   color:var(--navy);
+  font-weight:700;
 }
 
 .sponsor-item:hover .sponsor-item-logo img,
