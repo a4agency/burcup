@@ -2288,10 +2288,10 @@ button,
 /* Upcoming matches refined card */
 .upcoming-card{
   display:block;
-  background:#fff;
+  background:linear-gradient(180deg, #ffffff 0%, #ffffff 72%, #fbfdff 100%);
   border-radius:18px;
   padding:22px 24px;
-  border:1px solid #e6ebf2;
+  border:1px solid #e7edf6;
   text-decoration:none;
   transition:.2s ease;
 }
@@ -4335,6 +4335,8 @@ button,
   flex:1 1 auto;
   overflow:hidden;
   min-width:0;
+  padding:4px 2px 18px;
+  margin:-4px -2px 0;
 }
 
 #home-upcoming-matches.home-upcoming-track{
@@ -4508,7 +4510,7 @@ button,
 /* Minimal shadows for match cards in sliders */
 #home-upcoming-matches.home-upcoming-track .upcoming-card,
 #results-matches.home-upcoming-track .upcoming-card{
-  box-shadow: 0 6px 12px rgba(13,43,99,.05) !important;
+  box-shadow: 0 12px 26px rgba(13,43,99,.06) !important;
 }
 
 
