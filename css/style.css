@@ -3927,10 +3927,17 @@ button,
 }
 
 @media (max-width: 900px){
-  body::before{
-    content:"";
+  body.menu-open{
+    overflow:hidden;
+  }
+
+  .header-backdrop{
+    appearance:none;
     position:fixed;
     inset:0;
+    border:0;
+    padding:0;
+    margin:0;
     background:rgba(6, 15, 38, .56);
     backdrop-filter:blur(3px);
     opacity:0;
@@ -3939,11 +3946,7 @@ button,
     z-index:45;
   }
 
-  body.menu-open{
-    overflow:hidden;
-  }
-
-  body.menu-open::before{
+  .header-backdrop.is-visible{
     opacity:1;
     pointer-events:auto;
   }
@@ -3982,27 +3985,34 @@ button,
     opacity:0;
     overflow:hidden;
     pointer-events:none;
-    transform:translateY(-10px);
+    transform:translateY(-18px) scale(.985);
+    transform-origin:top center;
     margin-top:0;
     padding-top:0;
-    border-top-color:transparent !important;
+    padding-inline:12px;
+    border:1px solid transparent;
+    border-radius:22px;
+    background:linear-gradient(180deg, rgba(25, 57, 117, .98), rgba(13, 34, 76, .98));
+    box-shadow:0 24px 40px rgba(2, 10, 27, .26);
     transition:
       max-height .28s ease,
       opacity .22s ease,
       transform .22s ease,
       margin-top .22s ease,
-      padding-top .22s ease,
-      border-color .22s ease;
+      padding .22s ease,
+      border-color .22s ease,
+      box-shadow .22s ease;
   }
 
   .has-js .header-menu.is-open{
     max-height:760px;
     opacity:1;
     pointer-events:auto;
-    transform:translateY(0);
-    margin-top:6px;
-    padding-top:14px;
-    border-top-color:rgba(255,255,255,.12) !important;
+    transform:translateY(0) scale(1);
+    margin-top:10px;
+    padding:14px 12px 12px;
+    border-color:rgba(255,255,255,.12);
+    box-shadow:0 32px 48px rgba(2, 10, 27, .34);
   }
 
   .has-js .header-menu a{
@@ -4029,7 +4039,7 @@ button,
     width:100% !important;
     justify-content:flex-start !important;
     margin-left:0 !important;
-    margin-top:2px !important;
+    margin-top:6px !important;
     padding-left:0 !important;
     border-left:none !important;
   }

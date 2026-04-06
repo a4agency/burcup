@@ -22,13 +22,27 @@ function initHeaderMenu() {
 
   if (!header || !toggle || !menu) return;
 
+  let backdrop = document.querySelector('.header-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('button');
+    backdrop.type = 'button';
+    backdrop.className = 'header-backdrop';
+    backdrop.setAttribute('aria-label', 'Закрыть меню');
+    backdrop.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(backdrop);
+  }
+
   function syncMenu(isOpen) {
-    header.classList.toggle('is-menu-open', isOpen);
-    menu.classList.toggle('is-open', isOpen);
-    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    toggle.setAttribute('aria-label', isOpen ? 'Закрыть меню' : 'Открыть меню');
-    menu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-    document.body.classList.toggle('menu-open', isOpen && window.innerWidth <= mobileBreakpoint);
+    const shouldOpen = isOpen && window.innerWidth <= mobileBreakpoint;
+
+    header.classList.toggle('is-menu-open', shouldOpen);
+    menu.classList.toggle('is-open', shouldOpen);
+    toggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    toggle.setAttribute('aria-label', shouldOpen ? 'Закрыть меню' : 'Открыть меню');
+    menu.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+    backdrop.classList.toggle('is-visible', shouldOpen);
+    backdrop.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+    document.body.classList.toggle('menu-open', shouldOpen);
   }
 
   function closeMenu() {
@@ -40,6 +54,8 @@ function initHeaderMenu() {
   toggle.addEventListener('click', () => {
     syncMenu(!menu.classList.contains('is-open'));
   });
+
+  backdrop.addEventListener('click', closeMenu);
 
   menu.addEventListener('click', (event) => {
     if (window.innerWidth > mobileBreakpoint) return;
