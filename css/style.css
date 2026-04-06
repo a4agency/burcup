@@ -3984,23 +3984,25 @@ button,
 
   .header-inner{
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-columns:48px minmax(0,1fr) 48px;
     align-items:center;
     gap:14px 16px;
   }
 
   .header-brand{
-    grid-column:1;
+    grid-column:2;
     flex-direction:row;
-    justify-content:flex-start;
+    justify-content:center;
     align-items:center;
     gap:12px;
-    text-align:left;
+    justify-self:center;
+    text-align:center;
   }
 
   .header-toggle{
     display:inline-flex;
-    grid-column:2;
+    grid-column:1;
+    justify-self:start;
   }
 
   .has-js .header-menu{
