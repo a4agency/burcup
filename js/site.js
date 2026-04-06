@@ -156,7 +156,7 @@ async function renderStandings(selector) {
               <th>Игр</th>
               <th>Побед</th>
               <th>Ничьих</th>
-              <th>Поражения</th>
+              <th>Поражений</th>
               <th>Мячей забито - пропущено</th>
               <th>Очки</th>
             </tr>
