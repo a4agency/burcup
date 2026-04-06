@@ -554,10 +554,7 @@ function renderNewsCoverImage(src, alt, className = 'news-preview-cover') {
         src,
         alt,
         className: `${className}-img`,
-        width: 960,
-        height: 540,
-        crop: 'fill',
-        gravity: 'auto'
+        width: 960
       })}
     </div>
   `;
@@ -605,8 +602,8 @@ function getStaticImageProfile(image) {
   if (image.classList.contains('match-team-logo')) return { width: 180 };
   if (image.classList.contains('team-logo-img')) return { width: 240 };
   if (image.classList.contains('team-logo')) return { width: 96 };
-  if (image.classList.contains('news-preview-cover-img')) return { width: 960, height: 540, crop: 'fill', gravity: 'auto' };
-  if (image.closest('.thumb')) return { width: 720, height: 480, crop: 'fill', gravity: 'auto' };
+  if (image.classList.contains('news-preview-cover-img')) return { width: 960 };
+  if (image.closest('.thumb')) return { width: 720 };
   return null;
 }
 
@@ -1048,7 +1045,7 @@ async function renderNewsPage() {
       const imageSrc = resolveNewsImage(item);
       return `
         <a class="news-card" href="${escapeHtml(item.link)}">
-          <div class="thumb">${imageSrc ? renderImageMarkup({ src: imageSrc, alt: item.title, width: 720, height: 480, crop: 'fill', gravity: 'auto' }) : `<div class="news-preview-cover" style="height:100%"></div>`}</div>
+          <div class="thumb">${imageSrc ? renderImageMarkup({ src: imageSrc, alt: item.title, width: 720, className: 'news-list-thumb-img' }) : `<div class="news-preview-cover" style="height:100%"></div>`}</div>
           <div class="meta-top"><span>${escapeHtml(item.date)}</span></div>
           <h3>${escapeHtml(item.title)}</h3>
           <p>${escapeHtml(item.excerpt)}</p>
