@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function(){
   upgradeStaticImagesForCloudinary();
 });
 
+document.addEventListener('error', handleCloudinaryImageFallback, true);
+
 
 async function renderStandings(selector) {
   const target = document.querySelector(selector);
@@ -525,10 +527,14 @@ function renderImageMarkup({
   fetchpriority = '',
   keepEmptyAlt = false
 } = {}) {
+  const rawSrc = String(src || '').trim();
   const optimizedSrc = getOptimizedImageUrl(src, { width, height, crop, gravity });
   const attrs = [`src="${escapeHtml(optimizedSrc || TRANSPARENT_IMAGE_PLACEHOLDER)}"`];
 
   if (className) attrs.push(`class="${escapeHtml(className)}"`);
+  if (rawSrc && !rawSrc.startsWith('data:image/') && !isCloudinaryUrl(rawSrc)) {
+    attrs.push(`data-original-src="${escapeHtml(rawSrc)}"`);
+  }
   if (keepEmptyAlt || alt) attrs.push(`alt="${escapeHtml(alt || '')}"`);
   if (loading) attrs.push(`loading="${escapeHtml(loading)}"`);
   if (decoding) attrs.push(`decoding="${escapeHtml(decoding)}"`);
@@ -574,6 +580,9 @@ function resolveNewsImage(item) {
 function hydrateDeferredImage(image) {
   if (!image || image.dataset.hydrated === 'true') return;
   const { src, srcset, sizes } = image.dataset;
+  if (src && !image.dataset.originalSrc) image.dataset.originalSrc = src;
+  if (srcset && !image.dataset.originalSrcset) image.dataset.originalSrcset = srcset;
+  if (sizes && !image.dataset.originalSizes) image.dataset.originalSizes = sizes;
   if (srcset) image.setAttribute('srcset', optimizeSrcset(srcset));
   if (sizes) image.setAttribute('sizes', sizes);
   if (src) image.setAttribute('src', getOptimizedImageUrl(src));
@@ -611,8 +620,14 @@ function upgradeStaticImagesForCloudinary() {
 
     const originalSrc = image.dataset.src || image.getAttribute('src') || '';
     if (!originalSrc || originalSrc.startsWith('data:image/')) return;
+    if (!image.dataset.originalSrc && !isCloudinaryUrl(originalSrc)) {
+      image.dataset.originalSrc = originalSrc;
+    }
 
     if (profile.srcsetWidths?.length) {
+      const existingSrcset = image.getAttribute('srcset') || '';
+      if (existingSrcset && !image.dataset.originalSrcset) image.dataset.originalSrcset = existingSrcset;
+      if (profile.sizes && !image.dataset.originalSizes) image.dataset.originalSizes = profile.sizes;
       image.setAttribute('src', getOptimizedImageUrl(originalSrc, { ...profile, width: Math.max(...profile.srcsetWidths) }));
       image.setAttribute('srcset', profile.srcsetWidths.map(width => `${getOptimizedImageUrl(originalSrc, { ...profile, width })} ${width}w`).join(', '));
       if (profile.sizes) image.setAttribute('sizes', profile.sizes);
@@ -621,6 +636,23 @@ function upgradeStaticImagesForCloudinary() {
 
     image.setAttribute('src', getOptimizedImageUrl(originalSrc, profile));
   });
+}
+
+function handleCloudinaryImageFallback(event) {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement)) return;
+  if (image.dataset.cloudinaryFallbackApplied === 'true') return;
+
+  const currentSrc = image.currentSrc || image.getAttribute('src') || '';
+  const originalSrc = image.dataset.originalSrc || '';
+  if (!originalSrc || !isCloudinaryUrl(currentSrc)) return;
+
+  image.dataset.cloudinaryFallbackApplied = 'true';
+  image.removeAttribute('srcset');
+  image.removeAttribute('sizes');
+  if (image.dataset.originalSrcset) image.setAttribute('srcset', image.dataset.originalSrcset);
+  if (image.dataset.originalSizes) image.setAttribute('sizes', image.dataset.originalSizes);
+  image.setAttribute('src', originalSrc);
 }
 
 async function fetchApi(path) {
