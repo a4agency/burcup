@@ -4508,9 +4508,7 @@ button,
 /* Minimal shadows for match cards in sliders */
 #home-upcoming-matches.home-upcoming-track .upcoming-card,
 #results-matches.home-upcoming-track .upcoming-card{
-  box-shadow:
-    0 22px 30px -24px rgba(13,43,99,.28),
-    0 10px 18px rgba(13,43,99,.035) !important;
+  box-shadow: none !important;
 }
 
 
