@@ -455,17 +455,24 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 
 .sponsor-item-logo{
   display:flex;
-  flex-direction:column;
+  flex-direction:row;
   align-items:center;
-  justify-content:center;
-  gap:10px;
+  justify-content:flex-start;
+  gap:14px;
   text-decoration:none;
+  text-align:left;
 }
 
 .sponsor-item-logo img{
-  max-width:120px;
-  max-height:56px;
+  width:56px;
+  height:56px;
+  flex:0 0 56px;
   object-fit:contain;
+}
+
+.sponsor-item-logo span{
+  flex:1 1 auto;
+  line-height:1.35;
 }
 
 @media (max-width: 960px){
