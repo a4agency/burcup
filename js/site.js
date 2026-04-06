@@ -673,13 +673,11 @@ async function fetchJson(path) {
 }
 
 function renderClubCard(item) {
-  const matchesCount = Number(item.matches_count || 0);
   return `
     <a class="team-logo-card club-card-link" href="club.html?slug=${encodeURIComponent(item.slug)}">
       <div class="team-logo-wrap">${renderImageMarkup({ src: item.logo, alt: item.name, className: 'team-logo-img', width: 240 })}</div>
       <h3>${escapeHtml(item.name)}</h3>
       <div class="muted team-country">${escapeHtml(formatClubLocation(item))}</div>
-      <div class="club-card-meta">${escapeHtml(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей']))} в истории</div>
     </a>
   `;
 }
