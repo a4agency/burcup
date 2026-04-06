@@ -230,6 +230,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 .news-preview-cover{
   height:204px;
   background:linear-gradient(135deg,#2563eb 0%, #1f7ac5 45%, #2ac16c 100%);
+  position:relative;
 }
 
 .news-preview-content{
@@ -1133,6 +1134,7 @@ h1,h2,h3,h4,p,span,a,div{
 }
 
 .thumb img,
+.news-preview-cover img,
 .video-thumb img,
 .feature-image img,
 .article-hero img{
