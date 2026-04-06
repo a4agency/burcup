@@ -662,7 +662,7 @@ function renderForm(sourceName, data) {
             if (sourceName === 'partners' && key === 'logo_url') {
               updateRenderedItem(sourceName, Number(index), item => {
                 item.logo_url = String(reader.result || '');
-                item.logo_storage_provider = '';
+                item.logo_storage_provider = 'inline';
                 item.logo_public_id = '';
                 item.logo_file_name = file.name || '';
                 item.logo_mime_type = file.type || '';

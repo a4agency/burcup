@@ -1024,7 +1024,8 @@ async function setPartnerLogo(client, partnerId, logoUrl, altText, metadata = {}
   }
 
   const normalizedAlt = normalizeString(altText);
-  const normalizedStorageProvider = normalizeString(metadata.storage_provider) || 'external';
+  const normalizedStorageProvider = normalizeString(metadata.storage_provider)
+    || (normalizedLogo.startsWith('data:') ? 'inline' : 'external');
   const normalizedPublicId = nullIfEmpty(metadata.public_id);
   const normalizedFileName = nullIfEmpty(metadata.file_name);
   const normalizedMimeType = nullIfEmpty(metadata.mime_type);
