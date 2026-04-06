@@ -3083,14 +3083,24 @@ button,
   border-radius:0 0 26px 26px !important;
 }
 
+.hero-carousel-side::before{
+  display:none !important;
+}
+
+.hero-carousel-side::after{
+  background:
+    linear-gradient(180deg, rgba(7,18,46,.24), rgba(7,18,46,.34)),
+    linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,0)) !important;
+}
+
 .hero-carousel-side-img{
   width:100% !important;
   height:100% !important;
   object-fit:cover !important;
   object-position:center center !important;
-  filter:blur(6px) !important;
-  transform:scale(1.06) !important;
-  opacity:.76 !important;
+  filter:none !important;
+  transform:scale(1.015) !important;
+  opacity:.82 !important;
 }
 
 /* Slightly larger overall block on big screens */
