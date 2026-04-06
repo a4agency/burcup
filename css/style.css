@@ -1228,6 +1228,9 @@ h1,h2,h3,h4,p,span,a,div{
 .news-preview-cover,
 .thumb{
   background:linear-gradient(180deg,#f8fbff 0%, #eef4fd 100%);
+  width:calc(100% - clamp(18px, 2vw, 26px));
+  margin:clamp(10px, 1.3vw, 14px) auto 0;
+  border-radius:20px !important;
 }
 
 .thumb{
@@ -1241,6 +1244,7 @@ h1,h2,h3,h4,p,span,a,div{
 .thumb .news-list-thumb-img{
   object-fit:contain !important;
   object-position:center center;
+  border-radius:18px;
 }
 
 .news-preview-content,
@@ -1737,6 +1741,11 @@ h1,h2,h3,h4,p,span,a,div{
 .feature-image,
 .article-hero{
   border-radius: 16px !important;
+}
+
+.thumb,
+.news-preview-cover{
+  border-radius: 20px !important;
 }
 
 .home-block-link,
