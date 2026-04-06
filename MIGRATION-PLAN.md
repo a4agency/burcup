@@ -11,7 +11,7 @@
 - `api`
   Node/Express API в [railway-api/server.js](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/server.js)
 - `database`
-  PostgreSQL схема и стартовые данные в [database/postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql) и [database/postgresql-seed.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-seed.sql)
+  PostgreSQL migrations в [database/migrations](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/README.md), compatibility snapshot в [database/postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql) и стартовые данные в [database/postgresql-seed.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-seed.sql)
 - `storage`
   Внешнее хранение изображений через Cloudinary, URL сохраняются в базе
 
@@ -91,10 +91,11 @@ API находится в отдельной папке:
 
 База должна подниматься не вручную по таблицам, а через SQL-файлы:
 
-1. Выполнить [database/postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql)
+1. Выполнить [database/migrations/apply-all.psql.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/apply-all.psql.sql)
 2. При необходимости выполнить [database/postgresql-seed.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-seed.sql)
 
 Для уже живого проекта сиды лучше не запускать поверх продакшн-данных без проверки.
+Если нет возможности использовать `psql`, можно временно поднять пустую базу через snapshot [database/postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql).
 
 ## Как переносить проект на новый хостинг
 
@@ -119,7 +120,7 @@ API находится в отдельной папке:
 ### Вариант 3. Полный перенос
 
 1. Поднять новую PostgreSQL-базу
-2. Применить `postgresql-schema.sql`
+2. Применить migrations
 3. Перенести боевые данные
 4. Подключить storage credentials
 5. Задеплоить API
@@ -143,16 +144,24 @@ API находится в отдельной папке:
 5. Протестировать сайт и админку
 6. Только потом переключать основной домен
 
+## Что уже добавлено для переносимости базы
+
+Базовая версия migrations уже добавлена:
+
+- [database/migrations/0001_create_core_entities.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/0001_create_core_entities.sql)
+- [database/migrations/0002_create_matches_and_news.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/0002_create_matches_and_news.sql)
+- [database/migrations/0003_create_partner_entities.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/0003_create_partner_entities.sql)
+- [database/migrations/apply-all.psql.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/apply-all.psql.sql)
+- `schema_migrations` table for tracking applied versions
+
 ## Что стоит сделать следующим техническим этапом
 
 Чтобы следующий перенос был ещё проще, стоит добавить:
 
-1. Нормальные SQL migrations по версиям
-   Сейчас есть один schema-файл, но лучше перейти на папку `migrations/`
-2. Отдельный production config
+1. Отдельный production config
    Например через `.env.production`
-3. Резервное копирование базы
-4. Отдельный staging environment
+2. Резервное копирование базы
+3. Отдельный staging environment
 
 Docker-основа для API уже добавлена:
 
@@ -176,4 +185,4 @@ Docker-основа для API уже добавлена:
 
 Следующий практичный шаг:
 
-перейти от одного большого schema-файла к версионным migrations, чтобы обновления базы переносились так же предсказуемо, как и код API.
+добавить отдельную миграцию под следующую реальную доработку схемы и закрепить процесс: любое изменение таблиц сначала идёт в новый migration-файл, а не редактируется прямо в snapshot.

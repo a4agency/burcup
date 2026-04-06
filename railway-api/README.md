@@ -110,14 +110,16 @@ docker compose up -d --build
 
 ## Run SQL
 
-Create the tables first, then seed them:
+Recommended path for a fresh database:
 
-```sql
-\i ../database/postgresql-schema.sql
-\i ../database/postgresql-seed.sql
+```bash
+psql "$DATABASE_URL" -f ../database/migrations/apply-all.psql.sql
+psql "$DATABASE_URL" -f ../database/postgresql-seed.sql
 ```
 
-If you run SQL from another client, use the files in the top-level `database/` directory.
+If you run SQL from a GUI client and need one big snapshot instead of versioned migrations, use:
+
+- `../database/postgresql-schema.sql`
 
 ## Frontend switch
 

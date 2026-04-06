@@ -4,7 +4,8 @@ This folder now contains the long-term data model for the site.
 
 ## Files
 
-- `postgresql-schema.sql` creates the new core structure
+- `migrations/` contains versioned SQL migrations
+- `postgresql-schema.sql` is a compatibility snapshot of the current structure
 - `postgresql-seed.sql` fills it with the current site content and starter archive data
 
 ## Main entities
@@ -34,11 +35,21 @@ It supports:
 ## Suggested order
 
 1. Create a PostgreSQL database in Railway.
-2. Run `postgresql-schema.sql`.
+2. Run `database/migrations/apply-all.psql.sql`.
 3. Run `postgresql-seed.sql`.
 4. Configure the API service to read from this database.
 5. Move uploaded images and partner logos to object storage and save their public URLs.
 6. Connect the frontend pages to the new API endpoints.
+
+If you cannot run `psql` scripts and need to paste SQL into a GUI editor, you can still use `postgresql-schema.sql` as a one-shot snapshot.
+
+## Migration tracking
+
+Applied migrations are written into:
+
+- `schema_migrations`
+
+This gives you a simple history of which schema steps have already been executed.
 
 ## Migration notes
 

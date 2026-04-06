@@ -1,3 +1,8 @@
+-- Compatibility snapshot of the current schema.
+-- Recommended path for new environments:
+-- 1. apply database/migrations/apply-all.psql.sql
+-- 2. apply database/postgresql-seed.sql if starter content is needed
+
 BEGIN;
 
 CREATE OR REPLACE FUNCTION set_updated_at()
