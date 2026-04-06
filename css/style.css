@@ -2845,9 +2845,12 @@ button,
   background: linear-gradient(
     180deg,
     #14397f 0%,
-    #214d97 22%,
-    #3f66a8 58%,
-    #a9b9d5 100%
+    #214d97 20%,
+    #4a6dab 48%,
+    #8ea8cf 70%,
+    #cdd9eb 84%,
+    #edf2f9 94%,
+    #ffffff 100%
   ) !important;
   padding: 0 0 28px !important;
 }
