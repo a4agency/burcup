@@ -167,6 +167,11 @@ function escapeHtml(str) {
 }
 
 const TRANSPARENT_IMAGE_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+const NEWS_IMAGE_FALLBACKS = [
+  { id: 1, slug: 'applications-open', src: 'images/news-1.jpg' },
+  { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.jpg' },
+  { id: 3, slug: 'playoff-bracket-coming-soon', src: 'images/news-3.jpg' }
+];
 
 function pluralizeRu(count, forms) {
   const value = Math.abs(Number(count) || 0);
@@ -393,6 +398,20 @@ function renderNewsCoverImage(src, alt, className = 'news-preview-cover') {
       })}
     </div>
   `;
+}
+
+function resolveNewsImage(item) {
+  const primaryImage = String(item?.image || '').trim();
+  if (primaryImage) return primaryImage;
+
+  const itemId = Number(item?.id);
+  const itemSlug = String(item?.slug || '').trim();
+  const fallback = NEWS_IMAGE_FALLBACKS.find(entry =>
+    (Number.isFinite(itemId) && entry.id === itemId) ||
+    (itemSlug && entry.slug === itemSlug)
+  );
+
+  return fallback?.src || '';
 }
 
 function hydrateDeferredImage(image) {
@@ -696,16 +715,19 @@ async function renderHomeNews() {
   if (!target) return;
   try {
     const items = await fetchJson('data/news.json');
-    target.innerHTML = items.map(item => `
-      <a class="news-preview-card" href="${escapeHtml(item.link)}">
-        ${renderNewsCoverImage(item.image, item.title)}
-        <div class="news-preview-content">
-          <div class="news-preview-date">${escapeHtml(item.date)}</div>
-          <h3>${escapeHtml(item.title)}</h3>
-          <p>${escapeHtml(item.excerpt)}</p>
-        </div>
-      </a>
-    `).join('');
+    target.innerHTML = items.map(item => {
+      const imageSrc = resolveNewsImage(item);
+      return `
+        <a class="news-preview-card" href="${escapeHtml(item.link)}">
+          ${renderNewsCoverImage(imageSrc, item.title)}
+          <div class="news-preview-content">
+            <div class="news-preview-date">${escapeHtml(item.date)}</div>
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.excerpt)}</p>
+          </div>
+        </a>
+      `;
+    }).join('');
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
@@ -760,14 +782,17 @@ async function renderNewsPage() {
   if (!target) return;
   try {
     const items = await fetchJson('data/news.json');
-    target.innerHTML = items.map(item => `
-      <a class="news-card" href="${escapeHtml(item.link)}">
-        <div class="thumb">${item.image ? renderImageMarkup({ src: item.image, alt: item.title, width: 720, height: 480, crop: 'fill', gravity: 'auto' }) : `<div class="news-preview-cover" style="height:100%"></div>`}</div>
-        <div class="meta-top"><span>${escapeHtml(item.date)}</span></div>
-        <h3>${escapeHtml(item.title)}</h3>
-        <p>${escapeHtml(item.excerpt)}</p>
-      </a>
-    `).join('');
+    target.innerHTML = items.map(item => {
+      const imageSrc = resolveNewsImage(item);
+      return `
+        <a class="news-card" href="${escapeHtml(item.link)}">
+          <div class="thumb">${imageSrc ? renderImageMarkup({ src: imageSrc, alt: item.title, width: 720, height: 480, crop: 'fill', gravity: 'auto' }) : `<div class="news-preview-cover" style="height:100%"></div>`}</div>
+          <div class="meta-top"><span>${escapeHtml(item.date)}</span></div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.excerpt)}</p>
+        </a>
+      `;
+    }).join('');
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
