@@ -3927,8 +3927,25 @@ button,
 }
 
 @media (max-width: 900px){
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(6, 15, 38, .56);
+    backdrop-filter:blur(3px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .24s ease;
+    z-index:45;
+  }
+
   body.menu-open{
     overflow:hidden;
+  }
+
+  body.menu-open::before{
+    opacity:1;
+    pointer-events:auto;
   }
 
   .header-inner{
