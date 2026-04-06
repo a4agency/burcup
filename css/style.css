@@ -1663,6 +1663,22 @@ h1,h2,h3,h4,p,span,a,div{
   padding: clamp(16px, 2vw, 20px) !important;
 }
 
+.news-preview-card{
+  box-shadow: none !important;
+  transition:
+    transform .24s ease,
+    box-shadow .24s ease,
+    border-color .24s ease,
+    background-color .24s ease !important;
+}
+
+.news-preview-card:hover,
+.news-preview-card:focus-visible{
+  transform: translateY(-2px);
+  border-color: rgba(45,108,223,.16) !important;
+  box-shadow: 0 14px 24px rgba(13,43,99,.06) !important;
+}
+
 .thumb,
 .news-preview-cover,
 .video-thumb,
