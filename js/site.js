@@ -95,12 +95,57 @@ function initActiveHeaderLink() {
   });
 }
 
+function initTournamentCountdown() {
+  const root = document.querySelector('[data-countdown-target]');
+  if (!root) return;
+
+  const targetTimestamp = Date.parse(root.getAttribute('data-countdown-target') || '');
+  if (!Number.isFinite(targetTimestamp)) return;
+
+  const daysNode = root.querySelector('[data-countdown-unit="days"]');
+  const hoursNode = root.querySelector('[data-countdown-unit="hours"]');
+  const minutesNode = root.querySelector('[data-countdown-unit="minutes"]');
+  const secondsNode = root.querySelector('[data-countdown-unit="seconds"]');
+  const formatter = new Intl.NumberFormat('ru-RU', {
+    minimumIntegerDigits: 2,
+    useGrouping: false
+  });
+  let timerId = null;
+
+  function setValue(node, value) {
+    if (!node) return;
+    node.textContent = value > 99 ? String(value) : formatter.format(value);
+  }
+
+  function renderCountdown() {
+    const diffMs = Math.max(0, targetTimestamp - Date.now());
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    setValue(daysNode, days);
+    setValue(hoursNode, hours);
+    setValue(minutesNode, minutes);
+    setValue(secondsNode, seconds);
+
+    if (diffMs <= 0) {
+      clearInterval(timerId);
+    }
+  }
+
+  renderCountdown();
+  timerId = window.setInterval(renderCountdown, 1000);
+}
+
 
 document.addEventListener('DOMContentLoaded', function(){
   const year = document.getElementById('year');
   if(year) year.textContent = new Date().getFullYear();
   initActiveHeaderLink();
   initHeaderMenu();
+  initTournamentCountdown();
   upgradeStaticImagesForCloudinary();
 });
 
