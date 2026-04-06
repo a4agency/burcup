@@ -180,6 +180,80 @@ const NEWS_IMAGE_FALLBACKS = [
   { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.jpg' },
   { id: 3, slug: 'playoff-bracket-coming-soon', src: 'images/news-3.jpg' }
 ];
+const HISTORICAL_CLUB_FALLBACKS = {
+  villarreal: {
+    slug: 'villarreal',
+    name: 'Вильярреал',
+    logo: 'images/history-villarreal.png',
+    country: 'Испания',
+    city: 'Вильярреал',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  mtk: {
+    slug: 'mtk',
+    name: 'МТК',
+    logo: 'images/history-mtk.png',
+    country: 'Венгрия',
+    city: 'Будапешт',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  'cruz-azul': {
+    slug: 'cruz-azul',
+    name: 'Крус Асуль',
+    logo: 'images/history-cruz-azul.png',
+    country: 'Мексика',
+    city: 'Мехико',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  victoria: {
+    slug: 'victoria',
+    name: 'Виктория',
+    logo: 'images/history-victoria.png',
+    country: 'Португалия',
+    city: 'Гимарайнш',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  santos: {
+    slug: 'santos',
+    name: 'Сантос',
+    logo: 'images/history-santos.png',
+    country: 'Бразилия',
+    city: 'Сантус',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  atalanta: {
+    slug: 'atalanta',
+    name: 'Аталанта',
+    logo: 'images/history-atalanta.png',
+    country: 'Италия',
+    city: 'Бергамо',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  roma: {
+    slug: 'roma',
+    name: 'Рома',
+    logo: 'images/history-roma.png',
+    country: 'Италия',
+    city: 'Рим',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  sepahan: {
+    slug: 'sepahan',
+    name: 'Сепахан',
+    logo: 'images/history-sepahan.png',
+    country: 'Иран',
+    city: 'Исфахан',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  }
+};
 
 function pluralizeRu(count, forms) {
   const value = Math.abs(Number(count) || 0);
@@ -245,6 +319,10 @@ function getClubPageUrl(item) {
   }
 
   return '';
+}
+
+function getHistoricalClubFallback(slug) {
+  return HISTORICAL_CLUB_FALLBACKS[String(slug || '').trim()] || null;
 }
 
 function getCloudinaryCloudName() {
@@ -618,11 +696,13 @@ async function renderClubPage() {
     return;
   }
   const club = await fetchApi(`/api/clubs/${encodeURIComponent(slug)}`);
-  if (!club) {
+  const clubData = club || getHistoricalClubFallback(slug);
+  if (!clubData) {
     target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб недоступен</h2><p class="muted">API ещё не подключён или клуб не найден.</p></div></section>';
     return;
   }
-  const matchesMarkup = club.matches.map(item => {
+  const matches = Array.isArray(clubData.matches) ? clubData.matches : [];
+  const matchesMarkup = matches.map(item => {
     const parts = String(item.score || '0:0').split(':');
     const dateTime = joinNonEmpty([item.date, item.time], ' ');
     return `
@@ -643,14 +723,14 @@ async function renderClubPage() {
   target.innerHTML = `
     <section class="page-head club-head">
       <div class="container club-head-grid">
-        <div class="club-head-logo">${renderImageMarkup({ src: club.logo, alt: club.name, width: 320, loading: 'eager' })}</div>
+        <div class="club-head-logo">${renderImageMarkup({ src: clubData.logo, alt: clubData.name, width: 320, loading: 'eager' })}</div>
         <div>
-          <h1>${escapeHtml(club.name)}</h1>
-          <p>${escapeHtml(club.description || '')}</p>
+          <h1>${escapeHtml(clubData.name)}</h1>
+          <p>${escapeHtml(clubData.description || '')}</p>
           <div class="club-head-meta">
-            <span>${escapeHtml(club.city || '')}</span>
-            <span>${escapeHtml(club.country || '')}</span>
-            ${club.founded_year ? `<span>${escapeHtml(String(club.founded_year))}</span>` : ''}
+            <span>${escapeHtml(clubData.city || '')}</span>
+            <span>${escapeHtml(clubData.country || '')}</span>
+            ${clubData.founded_year ? `<span>${escapeHtml(String(clubData.founded_year))}</span>` : ''}
           </div>
         </div>
       </div>
