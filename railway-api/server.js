@@ -353,6 +353,7 @@ const matchesQuery = `
     m.id,
     t.slug AS tournament_slug,
     t.name AS tournament_name,
+    t.season_year AS tournament_season_year,
     m.stage_name,
     m.round_name,
     m.matchday_label,
@@ -393,6 +394,7 @@ const matchesQuery = `
     m.id,
     t.slug,
     t.name,
+    t.season_year,
     m.stage_name,
     m.round_name,
     m.matchday_label,
@@ -577,11 +579,11 @@ const adminPartnersQuery = `
     tp.sort_order,
     tp.is_visible,
     p.description
-  FROM tournament_partners tp
-  JOIN partners p ON p.id = tp.partner_id
+  FROM partners p
+  LEFT JOIN tournament_partners tp ON tp.partner_id = p.id
   LEFT JOIN tournaments t ON t.id = tp.tournament_id
   LEFT JOIN partner_categories pc ON pc.id = tp.category_id
-  LEFT JOIN partner_logo_assets pla ON pla.id = tp.logo_asset_id
+  LEFT JOIN partner_logo_assets pla ON pla.partner_id = p.id AND pla.is_current = TRUE
   ORDER BY COALESCE(pc.slug, 'general'), tp.sort_order, p.name;
 `;
 
