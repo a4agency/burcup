@@ -8,6 +8,16 @@ The public site is static and hosted from GitHub. It should not connect directly
 
 This API sits between the static frontend and your PostgreSQL database on Railway.
 
+## Run outside Railway
+
+This API is now packaged so it can run on any Docker-capable host, not only Railway.
+
+Files:
+
+- `Dockerfile`
+- `.dockerignore`
+- `docker-compose.example.yml`
+
 ## Endpoints
 
 - `GET /health`
@@ -52,6 +62,51 @@ Railway documents:
 - [PostgreSQL](https://docs.railway.com/guides/postgresql)
 - [Deploying a Monorepo](https://docs.railway.com/guides/monorepo)
 - [Using Variables](https://docs.railway.com/develop/variables)
+
+## Docker build
+
+Build the image from the `railway-api` directory:
+
+```bash
+docker build -t burcup-api .
+```
+
+Run it with env variables:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL=postgresql://postgres:password@host:5432/railway \
+  -e DATABASE_SSL=true \
+  -e CORS_ORIGIN=https://your-frontend-domain.com \
+  -e ADMIN_TOKEN=your-strong-secret \
+  -e CLOUDINARY_CLOUD_NAME=your-cloud-name \
+  -e CLOUDINARY_API_KEY=your-api-key \
+  -e CLOUDINARY_API_SECRET=your-api-secret \
+  burcup-api
+```
+
+## Docker Compose example
+
+For a portable local or VPS setup, copy:
+
+- `docker-compose.example.yml`
+
+to:
+
+- `docker-compose.yml`
+
+and adjust:
+
+- `DATABASE_URL`
+- `CORS_ORIGIN`
+- `ADMIN_TOKEN`
+- Cloudinary variables
+
+Then start:
+
+```bash
+docker compose up -d --build
+```
 
 ## Run SQL
 

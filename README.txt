@@ -116,6 +116,7 @@ Upcoming matches:
 - PostgreSQL схема и сиды лежат в папке database
 - админка теперь может работать через Railway API и PostgreSQL
 - загрузка изображений для админки поддерживает внешний storage
+- API подготовлен к запуску через Docker и docker compose вне Railway
 
 
 Переезд на другой хостинг:

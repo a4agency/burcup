@@ -149,12 +149,16 @@ API находится в отдельной папке:
 
 1. Нормальные SQL migrations по версиям
    Сейчас есть один schema-файл, но лучше перейти на папку `migrations/`
-2. Docker для API
-   Тогда backend переносится почти в один клик
-3. Отдельный production config
+2. Отдельный production config
    Например через `.env.production`
-4. Резервное копирование базы
-5. Отдельный staging environment
+3. Резервное копирование базы
+4. Отдельный staging environment
+
+Docker-основа для API уже добавлена:
+
+- [railway-api/Dockerfile](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/Dockerfile)
+- [railway-api/docker-compose.example.yml](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/docker-compose.example.yml)
+- [railway-api/.dockerignore](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/.dockerignore)
 
 ## Минимальный чек-лист перед переездом
 
@@ -172,4 +176,4 @@ API находится в отдельной папке:
 
 Следующий практичный шаг:
 
-создать `Dockerfile` для API и подготовить проект к запуску не только на Railway, но и на любом VPS или другом хостинге.
+перейти от одного большого schema-файла к версионным migrations, чтобы обновления базы переносились так же предсказуемо, как и код API.

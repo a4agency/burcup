@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/railway
+      DATABASE_SSL: "false"
+      CORS_ORIGIN: http://localhost:8000
+      ADMIN_TOKEN: change-me-before-production
+      CLOUDINARY_CLOUD_NAME: your-cloud-name
+      CLOUDINARY_API_KEY: your-api-key
+      CLOUDINARY_API_SECRET: your-api-secret
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: railway
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
