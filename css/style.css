@@ -2844,15 +2844,17 @@ button,
 .hero-carousel-wrap{
   background: linear-gradient(
     180deg,
-    #14397f 0%,
-    #214d97 20%,
-    #4a6dab 48%,
-    #8ea8cf 70%,
-    #cdd9eb 84%,
-    #edf2f9 94%,
+    var(--navy) 0%,
+    var(--navy-2) 16%,
+    #2f579d 34%,
+    #5375b0 52%,
+    #93abd0 72%,
+    #d0dceb 86%,
+    #eef3fa 95%,
     #ffffff 100%
   ) !important;
   padding: 0 0 28px !important;
+  margin-top: -1px !important;
 }
 
 .hero-carousel-wrap .container{
