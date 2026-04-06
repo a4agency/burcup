@@ -8,6 +8,7 @@
       ? 'http://127.0.0.1:3000'
       : 'https://burcup-production.up.railway.app',
     cloudinaryCloudName: cloudinaryOverride || 'dcqvo4aoj',
+    cloudinaryFetchEnabled: false,
     cloudinaryAssetMap: {}
   }, window.BCUP_CONFIG || {});
 })();

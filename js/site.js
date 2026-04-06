@@ -460,7 +460,7 @@ function buildCloudinaryAssetUrl(asset, options = {}) {
 }
 
 function canUseCloudinaryFetch() {
-  return Boolean(getCloudinaryCloudName()) && !isLocalPreviewPage();
+  return Boolean(getCloudinaryCloudName()) && Boolean(window.BCUP_CONFIG?.cloudinaryFetchEnabled) && !isLocalPreviewPage();
 }
 
 function buildCloudinaryFetchUrl(source, options = {}) {
