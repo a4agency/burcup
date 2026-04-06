@@ -1,5 +1,6 @@
 [
   {
+    "slug": "almaz-antey",
     "team": "Алмаз-Антей",
     "logo": "images/team-almaz-antey.png",
     "played": 3,
@@ -7,6 +8,7 @@
     "points": 7
   },
   {
+    "slug": "zenit",
     "team": "Зенит",
     "logo": "images/team-zenit.png",
     "played": 3,
@@ -14,6 +16,7 @@
     "points": 6
   },
   {
+    "slug": "palmeiras",
     "team": "Палмейрас",
     "logo": "images/team-palmeiras.png",
     "played": 3,
@@ -21,6 +24,7 @@
     "points": 5
   },
   {
+    "slug": "kairat",
     "team": "Кайрат",
     "logo": "images/team-kairat.png",
     "played": 3,
@@ -28,6 +32,7 @@
     "points": 4
   },
   {
+    "slug": "crvena-zvezda",
     "team": "Црвена Звезда",
     "logo": "images/team-crvena-zvezda.png",
     "played": 3,
@@ -35,6 +40,7 @@
     "points": 4
   },
   {
+    "slug": "fenerbahce",
     "team": "Фенербахче",
     "logo": "images/team-fenerbahce.png",
     "played": 3,
@@ -42,6 +48,7 @@
     "points": 3
   },
   {
+    "slug": "san-lorenzo",
     "team": "Сан-Лоренсо",
     "logo": "images/team-san-lorenzo.png",
     "played": 3,
@@ -49,6 +56,7 @@
     "points": 1
   },
   {
+    "slug": "dinamo-minsk",
     "team": "Динамо-Минск",
     "logo": "images/team-dinamo-minsk.png",
     "played": 3,

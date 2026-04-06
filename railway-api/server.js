@@ -340,7 +340,8 @@ const standingsQuery = `
     ts.goals_against,
     ts.points,
     c.name AS team,
-    c.logo_path AS logo
+    c.logo_path AS logo,
+    c.slug AS team_slug
   FROM tournament_standings ts
   JOIN clubs c ON c.id = ts.club_id
   JOIN tournaments t ON t.id = ts.tournament_id
@@ -1411,6 +1412,7 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       standings: standingsResult.rows.map(row => ({
         group: row.group_name,
         position: row.position,
+        slug: row.team_slug,
         team: row.team,
         logo: row.logo,
         played: row.played,
@@ -1441,6 +1443,7 @@ app.get('/api/tournaments/:slug/standings', async (req, res, next) => {
     res.json(rows.map(row => ({
       group: row.group_name,
       position: row.position,
+      slug: row.team_slug,
       team: row.team,
       logo: row.logo,
       played: row.played,
@@ -1567,6 +1570,7 @@ app.get('/api/standings', async (req, res, next) => {
     res.json(rows.map(row => ({
       group: row.group_name,
       position: row.position,
+      slug: row.team_slug,
       team: row.team,
       logo: row.logo,
       played: row.played,

@@ -110,20 +110,28 @@ async function renderStandings(selector) {
   if (!target) return;
   try {
     const data = await fetchJson('data/standings.json');
-    const rows = data.map((item, index) => `
-      <tr>
-        <td class="num">${index + 1}</td>
-        <td>
-          <div class="standings-team">
+    const rows = data.map((item, index) => {
+      const clubUrl = getClubPageUrl(item);
+      const teamMarkup = clubUrl
+        ? `<a class="standings-team standings-team-link" href="${escapeHtml(clubUrl)}">
             ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
             <span>${item.team}</span>
-          </div>
-        </td>
-        <td class="num">${item.played}</td>
-        <td class="num">${item.goals}</td>
-        <td class="points">${item.points}</td>
-      </tr>
-    `).join('');
+          </a>`
+        : `<div class="standings-team">
+            ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
+            <span>${item.team}</span>
+          </div>`;
+
+      return `
+        <tr>
+          <td class="num">${index + 1}</td>
+          <td>${teamMarkup}</td>
+          <td class="num">${item.played}</td>
+          <td class="num">${item.goals}</td>
+          <td class="points">${item.points}</td>
+        </tr>
+      `;
+    }).join('');
 
     target.innerHTML = `
       <div class="standings-card">
@@ -222,6 +230,21 @@ function getApiBaseUrl() {
 
 function getCloudinaryAssetMap() {
   return window.BCUP_CONFIG?.cloudinaryAssetMap || {};
+}
+
+function getClubPageUrl(item) {
+  const explicitSlug = String(item?.slug || item?.team_slug || '').trim();
+  if (explicitSlug) {
+    return `club.html?slug=${encodeURIComponent(explicitSlug)}`;
+  }
+
+  const logoPath = String(item?.logo || '').trim();
+  const logoSlugMatch = logoPath.match(/team-([a-z0-9-]+)\.(?:png|jpe?g|webp|svg)$/i);
+  if (logoSlugMatch?.[1]) {
+    return `club.html?slug=${encodeURIComponent(logoSlugMatch[1].toLowerCase())}`;
+  }
+
+  return '';
 }
 
 function getCloudinaryCloudName() {
