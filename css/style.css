@@ -3917,6 +3917,18 @@ button,
   min-height: 500px !important;
 }
 
+.contact-map-note{
+  margin-top:14px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.contact-map-note a{
+  color:var(--blue);
+  font-weight:700;
+}
+
 @media (max-width: 960px){
   .contact-map-frame,
   .contact-map-frame iframe{
