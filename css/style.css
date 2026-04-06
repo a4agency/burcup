@@ -20,6 +20,7 @@ a{text-decoration:none;color:inherit}
 img{max-width:100%;display:block}
 .container{width:min(1180px, calc(100% - 32px));margin:0 auto}
 .header{background:linear-gradient(180deg,var(--navy),var(--navy-2));color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.page-home .header{box-shadow:none}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 0}
 .brand{display:flex;align-items:center;gap:14px;font-weight:800;letter-spacing:.02em}
 .brand-mark{width:44px;height:44px;border-radius:12px;background:#fff;color:var(--navy);display:grid;place-items:center;font-size:18px;font-weight:900}
@@ -2846,13 +2847,13 @@ button,
   overflow: hidden;
   background: linear-gradient(
     180deg,
-    var(--navy-2) 0px,
-    var(--navy-2) 68px,
-    #224584 150px,
-    #5477b3 315px,
-    #96afd3 520px,
-    #d4e0ef 700px,
-    #f2f6fc 820px,
+    var(--navy-2) 0%,
+    var(--navy-2) 12%,
+    #2f579d 34%,
+    #5375b0 52%,
+    #93abd0 72%,
+    #d0dceb 86%,
+    #eef3fa 95%,
     #ffffff 100%
   ) !important;
   padding: 0 0 28px !important;
