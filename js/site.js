@@ -941,7 +941,7 @@ async function renderUpcomingMatches() {
         <div class="upcoming-header">
           <div>
             <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
-            <div class="upcoming-time">${escapeHtml(item.time || '')} ${escapeHtml(item.status_label || '')}</div>
+            <div class="upcoming-time">${escapeHtml(item.time || '')}</div>
           </div>
           <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
         </div>
@@ -1008,7 +1008,7 @@ async function renderMatchesPage() {
         <div class="upcoming-header">
           <div>
             <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
-            <div class="upcoming-time">${escapeHtml(item.time || '')} ${escapeHtml(item.status_label || '')}</div>
+            <div class="upcoming-time">${escapeHtml(item.time || '')}</div>
           </div>
           <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
         </div>
@@ -1091,7 +1091,7 @@ async function renderResultsMatches() {
         <div class="upcoming-header">
           <div>
             <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
-            <div class="upcoming-time">${escapeHtml(item.time || '')} ${escapeHtml(item.status_label || '')}</div>
+            <div class="upcoming-time">${escapeHtml(item.time || '')}</div>
           </div>
           <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
         </div>
