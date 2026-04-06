@@ -714,18 +714,35 @@ async function renderTournamentsGrid() {
   `).join('');
 }
 
-function renderPartnerItem(item) {
-  if (item.logo_url) {
-    return `
-      <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(item.website_url || '#')}" ${item.website_url ? 'target="_blank" rel="noreferrer"' : ''}>
-        ${renderImageMarkup({ src: item.logo_url, alt: item.logo_alt || item.name, width: 320 })}
-        <span>${escapeHtml(item.name)}</span>
-      </a>
+const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.png';
+
+function renderPartnerLogoMarkup(name, src = PARTNER_PLACEHOLDER_LOGO, alt = '') {
+  return renderImageMarkup({
+    src,
+    alt: alt || name || 'Burchalkin Cup',
+    width: 320
+  });
+}
+
+function decorateStaticPartnerItems(root = document) {
+  root.querySelectorAll('.sponsor-grid .sponsor-item').forEach((node) => {
+    if (node.querySelector('img')) return;
+    const name = node.textContent.trim();
+    if (!name) return;
+    node.classList.add('sponsor-item-logo');
+    node.innerHTML = `
+      ${renderPartnerLogoMarkup(name)}
+      <span>${escapeHtml(name)}</span>
     `;
-  }
+  });
+}
+
+function renderPartnerItem(item) {
+  const logoSrc = String(item.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
   return `
-    <a class="sponsor-item" href="${escapeHtml(item.website_url || '#')}" ${item.website_url ? 'target="_blank" rel="noreferrer"' : ''}>
-      ${escapeHtml(item.name)}
+    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(item.website_url || '#')}" ${item.website_url ? 'target="_blank" rel="noreferrer"' : ''}>
+      ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
+      <span>${escapeHtml(item.name)}</span>
     </a>
   `;
 }
@@ -734,6 +751,7 @@ async function renderPartnersForFeaturedTournament() {
   const generalTarget = document.querySelector('#partners-general');
   const mediaTarget = document.querySelector('#partners-media');
   if (!generalTarget && !mediaTarget) return;
+  decorateStaticPartnerItems();
   const tournaments = await fetchApi('/api/tournaments');
   if (!tournaments || !tournaments.length) return;
   const featured = tournaments.find(item => item.is_featured) || tournaments[0];
@@ -744,6 +762,7 @@ async function renderPartnersForFeaturedTournament() {
   const media = partnerGroups.partners.find(item => item.slug === 'media');
   if (generalTarget && general) generalTarget.innerHTML = general.items.map(renderPartnerItem).join('');
   if (mediaTarget && media) mediaTarget.innerHTML = media.items.map(renderPartnerItem).join('');
+  decorateStaticPartnerItems();
 }
 
 async function renderClubPage() {
