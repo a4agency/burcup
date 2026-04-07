@@ -66,17 +66,17 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_tournaments',
     exportName: 'tournaments.json',
     title: 'Турниры',
-    help: 'Сезоны и карточки турниров по годам. Сохранение теперь уходит в Railway API и базу PostgreSQL.',
+    help: 'Карточки турниров на главной и в архиве. Все изменения отсюда попадают на сайт.',
     defaultData: [
       {
         slug: 'burchalkin-cup-2026',
         name: 'Burchalkin Cup 2026',
         season_year: 2026,
         short_label: 'BCUP 2026',
-        status: 'active',
+        status: 'upcoming',
         location: 'Санкт-Петербург',
-        start_date: '2026-03-15',
-        end_date: '2026-03-20',
+        start_date: '2026-05-15',
+        end_date: '2026-05-17',
         logo: 'images/logo-burchalkin.png',
         hero_image: '',
         description: 'Основной турнир сезона 2026 года.',
@@ -119,6 +119,7 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_archive_tournaments',
     exportName: 'archive-tournaments.json',
     title: 'Архив турниров',
+    help: 'Архивные карточки турниров и страницы прошлых розыгрышей.',
     filterArchived: true,
     defaultData: [
       {
