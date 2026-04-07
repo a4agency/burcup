@@ -1365,8 +1365,11 @@ async function renderHomeNews() {
 
 function renderNewsPreviewCard(item) {
   const imageSrc = resolveNewsImage(item);
+  const articleHref = item.slug
+    ? `news-article.html?slug=${encodeURIComponent(String(item.slug))}`
+    : `news-article.html?id=${encodeURIComponent(String(item.id || ''))}`;
   return `
-    <a class="news-preview-card" href="${escapeHtml(item.link)}">
+    <a class="news-preview-card" href="${escapeHtml(articleHref)}">
       ${renderNewsCoverImage(imageSrc, item.title)}
       <div class="news-preview-content">
         <div class="news-preview-date">${escapeHtml(item.date)}</div>
@@ -1429,6 +1432,47 @@ async function renderNewsPage() {
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
+  }
+}
+
+async function renderNewsArticlePage() {
+  const root = document.querySelector('#news-article-page');
+  if (!root) return;
+
+  try {
+    const items = await fetchJson('data/news.json');
+    const params = new URLSearchParams(window.location.search);
+    const slug = String(params.get('slug') || '').trim();
+    const id = String(params.get('id') || '').trim();
+
+    const item = (Array.isArray(items) ? items : []).find(entry => {
+      if (slug && String(entry?.slug || '').trim() === slug) return true;
+      if (id && String(entry?.id || '').trim() === id) return true;
+      return false;
+    }) || (Array.isArray(items) ? items[0] : null);
+
+    if (!item) {
+      root.innerHTML = '<div class="card">Не удалось найти новость.</div>';
+      return;
+    }
+
+    document.title = `Burchalkin Cup — ${item.title || 'Новость'}`;
+    const imageSrc = resolveNewsImage(item);
+    const content = Array.isArray(item.content) ? item.content : [];
+
+    root.innerHTML = `
+      <article class="news-article-card">
+        <a class="news-article-back" href="news.html">← Все новости</a>
+        <div class="news-article-date">${escapeHtml(item.date || '')}</div>
+        <h1 class="news-article-title">${escapeHtml(item.title || '')}</h1>
+        ${renderNewsCoverImage(imageSrc, item.title, 'news-article-cover')}
+        <div class="news-article-body">
+          ${content.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+        </div>
+      </article>
+    `;
+  } catch (e) {
+    root.innerHTML = '<div class="card">Не удалось загрузить новость.</div>';
   }
 }
 
@@ -1787,6 +1831,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHomeNews();
   renderMatchesPage();
   renderNewsPage();
+  renderNewsArticlePage();
   renderResultsList();
   renderResultsMatches();
   renderMatchPageFromJson();
