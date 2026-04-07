@@ -1204,36 +1204,51 @@ async function renderMatchPageFromJson() {
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
-    const matchMeta = joinNonEmpty([item.date, item.time, item.status_label || ''], ' • ');
+    const matchMeta = joinNonEmpty([item.date, item.time, item.venue], ' • ');
+    const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
+    const stageLabel = item.stage || item.group || 'Матч';
+    const matchdayLabel = item.matchday || item.round || '';
     target.innerHTML = `
-      <div class="container article-wrap">
-        <div class="breadcrumbs"><span>${escapeHtml(item.stage || item.group || 'Матч')}</span><span>•</span><span>Кубок Бурчалкина</span></div>
-        <h1 class="article-title">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</h1>
-        <div class="author-row">
-          <div class="author-left">
-            <div><div style="font-weight:700">Редакция Burchalkin Cup</div><div class="card-meta">${escapeHtml(matchMeta)}</div></div>
+      <div class="container match-page-shell">
+        <section class="match-page-hero">
+          <div class="match-page-tags">
+            <span class="match-page-tag">${escapeHtml(stageLabel)}</span>
+            <span class="match-page-tag match-page-tag-soft">Кубок Бурчалкина</span>
+            ${matchdayLabel ? `<span class="match-page-tag match-page-tag-soft">${escapeHtml(matchdayLabel)}</span>` : ''}
           </div>
-        </div>
-        <div class="card" style="margin-bottom:18px">
-          <div class="match-stack">
-            <div class="match-row">
-              <div class="match-team">
-                ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'match-team-logo', width: 180 })}
-                <div class="match-team-name">${escapeHtml(item.home_team)}</div>
-              </div>
-              <div class="match-team-score">${homeScore}</div>
+          <div class="match-page-head">
+            <div class="match-page-copy">
+              <h1 class="article-title match-page-title">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</h1>
+              ${matchMeta ? `<div class="match-page-meta">${escapeHtml(matchMeta)}</div>` : ''}
             </div>
-            <div class="match-row">
-              <div class="match-team">
-                ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'match-team-logo', width: 180 })}
-                <div class="match-team-name">${escapeHtml(item.away_team)}</div>
+            <div class="upcoming-status match-page-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
+          </div>
+          <div class="match-page-scorecard">
+            <div class="match-page-team match-page-team-home">
+              <div class="match-page-team-badge">Хозяева</div>
+              <div class="match-page-team-brand">
+                ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'match-page-team-logo', width: 220 })}
+                <div class="match-page-team-name">${escapeHtml(item.home_team)}</div>
               </div>
-              <div class="match-team-score">${awayScore}</div>
+            </div>
+            <div class="match-page-scorebox" aria-label="Счёт матча">
+              <div class="match-page-scoreline">
+                <span class="match-page-score-digit">${homeScore}</span>
+                <span class="match-page-score-separator">:</span>
+                <span class="match-page-score-digit">${awayScore}</span>
+              </div>
+            </div>
+            <div class="match-page-team match-page-team-away">
+              <div class="match-page-team-badge">Гости</div>
+              <div class="match-page-team-brand">
+                ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'match-page-team-logo', width: 220 })}
+                <div class="match-page-team-name">${escapeHtml(item.away_team)}</div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
         <iframe class="match-page-video" src="${escapeHtml(item.video)}" allowfullscreen></iframe>
-        <p class="lead">${escapeHtml(item.summary || '')}</p>
+        ${item.summary ? `<p class="match-page-summary">${escapeHtml(item.summary)}</p>` : ''}
       </div>
     `;
     runAutoFit();

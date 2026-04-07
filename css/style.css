@@ -879,6 +879,239 @@ object-fit:contain;
   background:#000;
 }
 
+.match-page-shell{
+  display:grid;
+  gap:20px;
+}
+
+.match-page-hero{
+  background:linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border:1px solid rgba(13,43,99,.10);
+  border-radius:26px;
+  box-shadow:0 18px 44px rgba(13,43,99,.10);
+  padding:clamp(22px, 3vw, 34px);
+}
+
+.match-page-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.match-page-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(13,43,99,.10);
+  color:var(--navy);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+
+.match-page-tag-soft{
+  background:rgba(13,43,99,.06);
+  color:#55709b;
+}
+
+.match-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  margin-bottom:24px;
+}
+
+.match-page-copy{
+  min-width:0;
+}
+
+.match-page-title{
+  margin:0;
+  font-size:clamp(38px, 5vw, 62px);
+  line-height:1.02;
+  color:var(--navy);
+}
+
+.match-page-meta{
+  margin-top:14px;
+  font-size:clamp(15px, 1.5vw, 18px);
+  line-height:1.45;
+  color:#617594;
+  font-weight:600;
+}
+
+.match-page-status{
+  flex:0 0 auto;
+  margin-top:4px;
+}
+
+.match-page-scorecard{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+  gap:20px;
+  align-items:stretch;
+}
+
+.match-page-team{
+  min-width:0;
+  padding:18px;
+  border-radius:22px;
+  border:1px solid rgba(13,43,99,.10);
+  background:rgba(255,255,255,.78);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  justify-content:space-between;
+}
+
+.match-page-team-home{
+  text-align:left;
+}
+
+.match-page-team-away{
+  text-align:right;
+}
+
+.match-page-team-badge{
+  font-size:12px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#7f8faf;
+}
+
+.match-page-team-brand{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+}
+
+.match-page-team-away .match-page-team-brand{
+  flex-direction:row-reverse;
+}
+
+.match-page-team-logo{
+  width:72px;
+  height:72px;
+  object-fit:contain;
+  flex:0 0 72px;
+}
+
+.match-page-team-name{
+  min-width:0;
+  font-size:clamp(22px, 2.6vw, 34px);
+  line-height:1.1;
+  font-weight:900;
+  color:var(--navy);
+  overflow-wrap:anywhere;
+}
+
+.match-page-scorebox{
+  min-width:170px;
+  padding:18px 22px;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(13,43,99,.95), rgba(23,53,106,.88));
+  box-shadow:0 20px 34px rgba(13,43,99,.20);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.match-page-scoreline{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#fff;
+}
+
+.match-page-score-digit{
+  font-size:clamp(42px, 5.4vw, 64px);
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.04em;
+}
+
+.match-page-score-separator{
+  font-size:clamp(28px, 3vw, 40px);
+  font-weight:800;
+  line-height:1;
+  opacity:.72;
+}
+
+.match-page-summary{
+  margin:0;
+  padding:22px 24px;
+  border-radius:22px;
+  border:1px solid rgba(13,43,99,.08);
+  background:#fff;
+  box-shadow:0 12px 26px rgba(13,43,99,.06);
+  font-size:clamp(16px, 1.7vw, 19px);
+  line-height:1.7;
+  color:#233a61;
+}
+
+@media (max-width: 900px){
+  .match-page-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .match-page-scorecard{
+    grid-template-columns:1fr;
+  }
+
+  .match-page-scorebox{
+    min-width:0;
+    order:-1;
+  }
+
+  .match-page-team,
+  .match-page-team-home,
+  .match-page-team-away{
+    text-align:left;
+  }
+
+  .match-page-team-away .match-page-team-brand{
+    flex-direction:row;
+  }
+}
+
+@media (max-width: 640px){
+  .match-page-hero{
+    padding:18px;
+    border-radius:22px;
+  }
+
+  .match-page-team{
+    padding:16px;
+  }
+
+  .match-page-team-brand{
+    gap:12px;
+  }
+
+  .match-page-team-logo{
+    width:56px;
+    height:56px;
+    flex-basis:56px;
+  }
+
+  .match-page-scorebox{
+    padding:16px 18px;
+    border-radius:20px;
+  }
+
+  .match-page-summary{
+    padding:18px;
+    border-radius:18px;
+  }
+}
+
 
 .admin-layout{
   display:grid;
