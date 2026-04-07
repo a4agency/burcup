@@ -609,6 +609,157 @@ const standingsQuery = `
   ORDER BY ts.group_name, ts.position;
 `;
 
+const computedStandingsQuery = `
+  WITH participants AS (
+    SELECT DISTINCT c.id, c.name, c.logo_path, c.slug, c.country, c.city
+    FROM clubs c
+    WHERE c.id IN (
+      SELECT tc.club_id
+      FROM tournament_clubs tc
+      WHERE tc.tournament_id = $1
+
+      UNION
+
+      SELECT m.home_club_id
+      FROM matches m
+      WHERE m.tournament_id = $1
+
+      UNION
+
+      SELECT m.away_club_id
+      FROM matches m
+      WHERE m.tournament_id = $1
+    )
+  ),
+  completed_matches AS (
+    SELECT
+      m.home_club_id,
+      m.away_club_id,
+      COALESCE(m.home_score, 0) AS home_score,
+      COALESCE(m.away_score, 0) AS away_score
+    FROM matches m
+    WHERE m.tournament_id = $1
+      AND m.status = 'done'
+  ),
+  club_results AS (
+    SELECT
+      home_club_id AS club_id,
+      1 AS played,
+      CASE WHEN home_score > away_score THEN 1 ELSE 0 END AS won,
+      CASE WHEN home_score = away_score THEN 1 ELSE 0 END AS drawn,
+      CASE WHEN home_score < away_score THEN 1 ELSE 0 END AS lost,
+      home_score AS goals_for,
+      away_score AS goals_against,
+      CASE
+        WHEN home_score > away_score THEN 3
+        WHEN home_score = away_score THEN 1
+        ELSE 0
+      END AS points
+    FROM completed_matches
+
+    UNION ALL
+
+    SELECT
+      away_club_id AS club_id,
+      1 AS played,
+      CASE WHEN away_score > home_score THEN 1 ELSE 0 END AS won,
+      CASE WHEN away_score = home_score THEN 1 ELSE 0 END AS drawn,
+      CASE WHEN away_score < home_score THEN 1 ELSE 0 END AS lost,
+      away_score AS goals_for,
+      home_score AS goals_against,
+      CASE
+        WHEN away_score > home_score THEN 3
+        WHEN away_score = home_score THEN 1
+        ELSE 0
+      END AS points
+    FROM completed_matches
+  ),
+  aggregated AS (
+    SELECT
+      club_id,
+      SUM(played)::int AS played,
+      SUM(won)::int AS won,
+      SUM(drawn)::int AS drawn,
+      SUM(lost)::int AS lost,
+      SUM(goals_for)::int AS goals_for,
+      SUM(goals_against)::int AS goals_against,
+      SUM(points)::int AS points
+    FROM club_results
+    GROUP BY club_id
+  )
+  SELECT
+    'overall'::text AS group_name,
+    ROW_NUMBER() OVER (
+      ORDER BY
+        COALESCE(a.points, 0) DESC,
+        (COALESCE(a.goals_for, 0) - COALESCE(a.goals_against, 0)) DESC,
+        COALESCE(a.goals_for, 0) DESC,
+        p.name ASC
+    )::int AS position,
+    COALESCE(a.played, 0) AS played,
+    COALESCE(a.won, 0) AS won,
+    COALESCE(a.drawn, 0) AS drawn,
+    COALESCE(a.lost, 0) AS lost,
+    COALESCE(a.goals_for, 0) AS goals_for,
+    COALESCE(a.goals_against, 0) AS goals_against,
+    COALESCE(a.points, 0) AS points,
+    p.name AS team,
+    p.logo_path AS logo,
+    p.slug AS team_slug,
+    p.country,
+    p.city
+  FROM participants p
+  LEFT JOIN aggregated a ON a.club_id = p.id
+  ORDER BY position;
+`;
+
+function mapStandingsRow(row) {
+  return {
+    group: row.group_name,
+    position: row.position,
+    slug: row.team_slug,
+    team: row.team,
+    logo: row.logo,
+    country: row.country || '',
+    city: row.city || '',
+    played: row.played,
+    won: row.won,
+    drawn: row.drawn,
+    lost: row.lost,
+    goals: `${row.goals_for}-${row.goals_against}`,
+    points: row.points,
+  };
+}
+
+async function getTargetTournament(queryable, tournamentSlug = null) {
+  const { rows } = await queryable.query(
+    `
+      SELECT id, slug, is_featured
+      FROM tournaments
+      WHERE slug = COALESCE($1, (SELECT slug FROM tournaments WHERE is_featured = TRUE ORDER BY season_year DESC NULLS LAST, id DESC LIMIT 1))
+      LIMIT 1;
+    `,
+    [tournamentSlug]
+  );
+  return rows[0] || null;
+}
+
+async function getStandingsRows(queryable, tournamentSlug = null) {
+  const tournament = await getTargetTournament(queryable, tournamentSlug);
+  if (!tournament) return [];
+
+  if (tournament.is_featured !== true) {
+    const { rows } = await queryable.query(standingsQuery, [tournament.slug]);
+    return rows;
+  }
+
+  const { rows } = await queryable.query(computedStandingsQuery, [Number(tournament.id)]);
+  if (rows.length) return rows;
+
+  const storedResult = await queryable.query(standingsQuery, [tournament.slug]);
+  return storedResult.rows;
+}
+
 function buildMatchesQuery(includeMatchMedia, includeFeaturedMedia) {
   return `
     SELECT
@@ -1986,8 +2137,8 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       return res.status(404).json({ error: 'Tournament not found' });
     }
     const tournament = tournamentResult.rows[0];
-    const [standingsResult, matchesResult, newsResult, partnersResult] = await Promise.all([
-      pool.query(standingsQuery, [req.params.slug]),
+    const [standingsRows, matchesResult, newsResult, partnersResult] = await Promise.all([
+      getStandingsRows(pool, req.params.slug),
       queryMatches(pool, req.params.slug),
       pool.query(newsQuery, [req.params.slug]),
       pool.query(tournamentPartnersQuery, [req.params.slug]),
@@ -2029,21 +2180,7 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       status: tournament.status,
       is_featured: tournament.is_featured,
       countdown_enabled: tournament.countdown_enabled !== false,
-      standings: standingsResult.rows.map(row => ({
-        group: row.group_name,
-        position: row.position,
-        slug: row.team_slug,
-        team: row.team,
-        logo: row.logo,
-        country: row.country || '',
-        city: row.city || '',
-        played: row.played,
-        won: row.won,
-        drawn: row.drawn,
-        lost: row.lost,
-        goals: `${row.goals_for}-${row.goals_against}`,
-        points: row.points,
-      })),
+      standings: standingsRows.map(mapStandingsRow),
       matches: matchesResult.rows.map(formatMatchRow),
       news: newsResult.rows.map(row => ({
         id: Number(row.id),
@@ -2064,22 +2201,8 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
 
 app.get('/api/tournaments/:slug/standings', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(standingsQuery, [req.params.slug]);
-    res.json(rows.map(row => ({
-      group: row.group_name,
-      position: row.position,
-      slug: row.team_slug,
-      team: row.team,
-      logo: row.logo,
-      country: row.country || '',
-      city: row.city || '',
-      played: row.played,
-      won: row.won,
-      drawn: row.drawn,
-      lost: row.lost,
-      goals: `${row.goals_for}-${row.goals_against}`,
-      points: row.points,
-    })));
+    const rows = await getStandingsRows(pool, req.params.slug);
+    res.json(rows.map(mapStandingsRow));
   } catch (error) {
     next(error);
   }
@@ -2196,22 +2319,8 @@ app.get('/api/clubs/:slug/matches', async (req, res, next) => {
 
 app.get('/api/standings', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(standingsQuery, [null]);
-    res.json(rows.map(row => ({
-      group: row.group_name,
-      position: row.position,
-      slug: row.team_slug,
-      team: row.team,
-      logo: row.logo,
-      country: row.country || '',
-      city: row.city || '',
-      played: row.played,
-      won: row.won,
-      drawn: row.drawn,
-      lost: row.lost,
-      goals: `${row.goals_for}-${row.goals_against}`,
-      points: row.points,
-    })));
+    const rows = await getStandingsRows(pool, null);
+    res.json(rows.map(mapStandingsRow));
   } catch (error) {
     next(error);
   }
