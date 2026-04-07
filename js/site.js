@@ -1711,7 +1711,6 @@ function renderArchiveTournamentPage() {
   const statusNode = page.querySelector('[data-archive-status]');
   const statsNode = page.querySelector('[data-archive-stats]');
   const teamsNode = page.querySelector('[data-archive-teams]');
-  const partnersNode = page.querySelector('[data-archive-partners]');
   const matchesNode = page.querySelector('[data-archive-matches]');
 
   function renderArchiveClubCard(item) {
@@ -1725,17 +1724,6 @@ function renderArchiveTournamentPage() {
         <strong>${escapeHtml(item.name || 'Клуб')}</strong>
         <span>${escapeHtml(formatClubLocation(item))}</span>
       </${tag}>
-    `;
-  }
-
-  function renderArchivePartnerCard(item) {
-    const href = normalizePartnerHref(item.website_url || '');
-    const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
-    return `
-      <a class="archive-partner-card" href="${escapeHtml(href)}" ${externalAttrs}>
-        ${renderPartnerLogoMarkup(item.name, String(item.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO, item.logo_alt || item.name)}
-        <span>${escapeHtml(item.name || '')}</span>
-      </a>
     `;
   }
 
@@ -1790,14 +1778,6 @@ function renderArchiveTournamentPage() {
       teamsNode.innerHTML = clubs.length
         ? clubs.map(renderArchiveClubCard).join('')
         : '<div class="archive-empty-state">Состав участников появится позднее.</div>';
-    }
-
-    if (partnersNode) {
-      const groups = Array.isArray(resolvedDetail?.partners) ? resolvedDetail.partners : [];
-      const partners = groups.flatMap(group => Array.isArray(group.items) ? group.items : []);
-      partnersNode.innerHTML = partners.length
-        ? partners.map(renderArchivePartnerCard).join('')
-        : '<div class="archive-empty-state">Список партнёров добавим позднее.</div>';
     }
 
     if (matchesNode) {
