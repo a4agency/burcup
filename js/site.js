@@ -1510,6 +1510,12 @@ function pickFeaturedMediaMatch(matches = []) {
 
 function renderMediaActionButton(link, options = {}) {
   const label = escapeHtml(link.label || '');
+  const matchId = String(options.matchId || '').trim();
+  if (matchId) {
+    const href = `match.html?id=${encodeURIComponent(matchId)}&media=${encodeURIComponent(link.key || 'stream')}`;
+    return `<a class="media-action-button${options.primary ? ' is-primary' : ''}" href="${escapeHtml(href)}">${label}</a>`;
+  }
+
   if (!link.url) {
     return `<span class="media-action-button is-disabled">${label}</span>`;
   }
@@ -1660,7 +1666,7 @@ function renderMediaMatchCard(item) {
       </a>
       <div class="media-match-actions">
         <a class="media-action-button is-primary" href="match.html?id=${encodeURIComponent(item.id)}">Страница матча</a>
-        ${links.map(link => renderMediaActionButton(link)).join('')}
+        ${links.map(link => renderMediaActionButton(link, { matchId: item.id })).join('')}
       </div>
     </article>
   `;
@@ -1668,10 +1674,9 @@ function renderMediaMatchCard(item) {
 
 async function renderMultimediaPage() {
   const featuredTarget = document.querySelector('#media-featured');
-  const overviewTarget = document.querySelector('#media-overview');
   const libraryTarget = document.querySelector('#media-library');
   const storiesTarget = document.querySelector('#media-stories');
-  if (!featuredTarget || !overviewTarget || !libraryTarget || !storiesTarget) return;
+  if (!featuredTarget || !libraryTarget || !storiesTarget) return;
 
   try {
     const matchesRaw = await fetchJson('data/matches.json');
@@ -1683,8 +1688,6 @@ async function renderMultimediaPage() {
       ? renderMediaFeatureCard(featuredMatch)
       : '<div class="card media-empty-card">Медиаматериалы появятся здесь после публикации первых трансляций.</div>';
 
-    overviewTarget.innerHTML = renderMediaOverviewCards(matches, MEDIA_ALBUM_PLACEHOLDERS.length);
-
     libraryTarget.innerHTML = matches.length
       ? matches.map(renderMediaMatchCard).join('')
       : '<div class="card media-empty-card">Материалы матчей появятся после публикации первых эфиров.</div>';
@@ -1695,7 +1698,6 @@ async function renderMultimediaPage() {
     runAutoFit();
   } catch (error) {
     featuredTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить главный эфир.</div>';
-    overviewTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить медиараздел.</div>';
     libraryTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить материалы матчей.</div>';
     storiesTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить фоторепортажи.</div>';
   }
@@ -1811,7 +1813,9 @@ async function renderMatchPageFromJson() {
   if (!target) return;
   try {
     const items = await fetchJson('data/matches.json');
-    const id = Number(new URLSearchParams(window.location.search).get('id') || '1');
+    const params = new URLSearchParams(window.location.search);
+    const id = Number(params.get('id') || '1');
+    const requestedMediaTab = String(params.get('media') || '').trim().toLowerCase();
     const item = items.find(x => x.id === id) || items[0];
     const headToHeadMatches = getHeadToHeadMatches(items, item);
     const parts = String(item.score || '0:0').split(':');
@@ -1882,7 +1886,7 @@ async function renderMatchPageFromJson() {
             </div>
           </div>
         </section>
-        <div class="match-page-media" data-match-media>
+        <div class="match-page-media" data-match-media data-match-media-default-tab="${escapeHtml(requestedMediaTab)}">
           <div class="match-page-actions" role="tablist" aria-label="Материалы матча">
             <button class="match-page-action is-active" type="button" role="tab" aria-selected="true" data-match-media-tab="stream">Трансляция</button>
             <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="review">Обзор</button>
@@ -1941,6 +1945,7 @@ function initMatchMediaTabs(scope = document) {
     const buttons = Array.from(block.querySelectorAll('[data-match-media-tab]'));
     const panels = Array.from(block.querySelectorAll('[data-match-media-panel]'));
     if (!buttons.length || !panels.length) return;
+    const requestedTab = String(block.dataset.matchMediaDefaultTab || '').trim();
 
     function activate(tabKey) {
       buttons.forEach(button => {
@@ -1959,6 +1964,12 @@ function initMatchMediaTabs(scope = document) {
     buttons.forEach(button => {
       button.addEventListener('click', () => activate(button.dataset.matchMediaTab));
     });
+
+    const fallbackTab = buttons[0]?.dataset.matchMediaTab || 'stream';
+    const initialTab = buttons.some(button => button.dataset.matchMediaTab === requestedTab)
+      ? requestedTab
+      : fallbackTab;
+    activate(initialTab);
   });
 }
 

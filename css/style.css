@@ -117,10 +117,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .media-hero-grid{
-  display:grid;
-  grid-template-columns:minmax(0, 1.35fr) minmax(320px, .65fr);
-  gap:18px;
-  align-items:start;
+  display:block;
 }
 
 .media-loading-card,
