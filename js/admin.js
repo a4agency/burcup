@@ -537,6 +537,33 @@ function setStatus(text) {
   document.getElementById('admin-status').textContent = text;
 }
 
+let adminToastTimer = null;
+
+function showAdminToast(message, type = 'success') {
+  const toast = document.getElementById('admin-toast');
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.hidden = false;
+  toast.classList.remove('is-success', 'is-error', 'is-visible');
+  toast.classList.add(type === 'error' ? 'is-error' : 'is-success');
+
+  requestAnimationFrame(() => {
+    toast.classList.add('is-visible');
+  });
+
+  if (adminToastTimer) {
+    window.clearTimeout(adminToastTimer);
+  }
+
+  adminToastTimer = window.setTimeout(() => {
+    toast.classList.remove('is-visible');
+    window.setTimeout(() => {
+      toast.hidden = true;
+    }, 220);
+  }, 2600);
+}
+
 function getAdminMatchClubKey(item, side) {
   const slugValue = side === 'home' ? item?.home_team_slug : item?.away_team_slug;
   const slug = String(slugValue || '').trim().toLowerCase();
@@ -964,8 +991,10 @@ async function adminSave() {
     if (textarea) textarea.value = JSON.stringify(synced, null, 2);
     renderForm(currentSource, synced);
     setStatus(`Изменения сохранены. Записей: ${result.count ?? synced.length}.`);
+    showAdminToast('Изменения успешно сохранены.', 'success');
   } catch (error) {
     setStatus('Ошибка сохранения: ' + error.message);
+    showAdminToast('Не удалось сохранить изменения.', 'error');
   }
 }
 

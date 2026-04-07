@@ -1541,6 +1541,7 @@ object-fit:contain;
   gap:10px;
   flex-wrap:wrap;
   margin:14px 0 18px;
+  align-items:center;
 }
 
 .admin-actions button{
@@ -1551,8 +1552,12 @@ object-fit:contain;
   cursor:pointer;
 }
 
+.admin-actions-spacer{
+  flex:1 1 auto;
+}
+
 .admin-actions-bottom{
-  justify-content:flex-end;
+  justify-content:flex-start;
   margin-top:20px;
   padding-top:18px;
   border-top:1px solid rgba(13,43,99,.08);
@@ -1566,6 +1571,39 @@ object-fit:contain;
 .admin-save{background:var(--navy);color:#fff}
 .admin-reset{background:#eef3fb;color:var(--navy)}
 .admin-export{background:#e8f7ee;color:#146a3a}
+
+.admin-toast{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  z-index:1200;
+  min-width:280px;
+  max-width:min(420px, calc(100vw - 32px));
+  padding:14px 16px;
+  border-radius:16px;
+  color:#fff;
+  font-size:14px;
+  line-height:1.5;
+  font-weight:700;
+  box-shadow:0 18px 36px rgba(13,43,99,.18);
+  background:linear-gradient(135deg, var(--navy), #24488f);
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+.admin-toast.is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.admin-toast.is-success{
+  background:linear-gradient(135deg, #146a3a, #2d8d56);
+}
+
+.admin-toast.is-error{
+  background:linear-gradient(135deg, #a53a34, #d05249);
+}
 
 .admin-textarea{
   width:100%;
@@ -1601,12 +1639,24 @@ object-fit:contain;
     width:100%;
   }
 
+  .admin-actions-spacer{
+    display:none;
+  }
+
   .admin-actions-bottom{
     justify-content:stretch;
   }
 
   .admin-save-wide{
     width:100%;
+    min-width:0;
+  }
+
+  .admin-toast{
+    right:16px;
+    left:16px;
+    bottom:16px;
+    max-width:none;
     min-width:0;
   }
 }
