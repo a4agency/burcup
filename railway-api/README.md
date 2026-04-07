@@ -34,6 +34,7 @@ Files:
 - `GET /api/matches`
 - `GET /api/news`
 - `GET /api/results`
+- `POST /api/translate`
 - `GET /api/admin/:resource`
 - `PUT /api/admin/:resource`
 - `POST /api/admin/uploads/image`
@@ -55,6 +56,8 @@ The API keeps compatibility with the current `data/*.json` shape, and also expos
    `CLOUDINARY_CLOUD_NAME=your-cloud-name`
    `CLOUDINARY_API_KEY=your-api-key`
    `CLOUDINARY_API_SECRET=your-api-secret`
+   `TRANSLATION_ENABLED=true`
+   `TRANSLATION_PROVIDER=google-gtx`
 7. Deploy the service.
 
 Railway documents:
@@ -82,6 +85,8 @@ docker run --rm -p 3000:3000 \
   -e CLOUDINARY_CLOUD_NAME=your-cloud-name \
   -e CLOUDINARY_API_KEY=your-api-key \
   -e CLOUDINARY_API_SECRET=your-api-secret \
+  -e TRANSLATION_ENABLED=true \
+  -e TRANSLATION_PROVIDER=google-gtx \
   burcup-api
 ```
 
@@ -101,12 +106,34 @@ and adjust:
 - `CORS_ORIGIN`
 - `ADMIN_TOKEN`
 - Cloudinary variables
+- translation variables
 
 Then start:
 
 ```bash
 docker compose up -d --build
 ```
+
+## Automatic English Translation
+
+The site still keeps its manual Russian-to-English dictionary for UI labels and important fixed wording.
+
+For new Russian content coming from the database, the frontend can now request automatic English translations from:
+
+- `POST /api/translate`
+
+The API caches translated strings in PostgreSQL, so repeated texts do not need to be translated again on every page load.
+
+Current default provider:
+
+- `google-gtx`
+
+Environment variables:
+
+- `TRANSLATION_ENABLED=true`
+- `TRANSLATION_PROVIDER=google-gtx`
+
+If translation is unavailable, the site keeps the original Russian content and does not break.
 
 ## Run SQL
 

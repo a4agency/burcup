@@ -188,6 +188,18 @@ CREATE TABLE IF NOT EXISTS tournament_partners (
   UNIQUE (tournament_id, partner_id, category_id)
 );
 
+CREATE TABLE IF NOT EXISTS content_translations (
+  id BIGSERIAL PRIMARY KEY,
+  source_lang TEXT NOT NULL,
+  target_lang TEXT NOT NULL,
+  source_text TEXT NOT NULL,
+  translated_text TEXT NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'google-gtx',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (source_lang, target_lang, source_text)
+);
+
 CREATE INDEX IF NOT EXISTS idx_tournaments_year ON tournaments(season_year);
 CREATE INDEX IF NOT EXISTS idx_tournaments_status ON tournaments(status);
 CREATE INDEX IF NOT EXISTS idx_clubs_name ON clubs(name);
@@ -245,7 +257,8 @@ VALUES
   ('0003', 'create_partner_entities'),
   ('0004', 'add_partner_logo_asset_metadata'),
   ('0005', 'add_tournament_countdown_flag'),
-  ('0006', 'add_match_media_links')
+  ('0006', 'add_match_media_links'),
+  ('0007', 'create_content_translations')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;

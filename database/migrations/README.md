@@ -10,6 +10,7 @@
 - `0004_add_partner_logo_asset_metadata.sql`
 - `0005_add_tournament_countdown_flag.sql`
 - `0006_add_match_media_links.sql`
+- `0007_create_content_translations.sql`
 - `apply-all.psql.sql`
 
 ## Как применять на пустую базу
@@ -32,7 +33,7 @@ ORDER BY version;
 ## Как добавлять новую миграцию
 
 1. Создай новый файл по порядку, например:
-   `0006_add_something.sql`
+   `0007_add_something.sql`
 2. Помести в него только новое изменение схемы
 3. В конце добавь запись в `schema_migrations`
 4. Добавь файл в `apply-all.psql.sql`

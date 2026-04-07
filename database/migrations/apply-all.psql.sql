@@ -6,3 +6,4 @@
 \ir 0004_add_partner_logo_asset_metadata.sql
 \ir 0005_add_tournament_countdown_flag.sql
 \ir 0006_add_match_media_links.sql
+\ir 0007_create_content_translations.sql

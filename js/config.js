@@ -9,6 +9,7 @@
       : 'https://burcup-production.up.railway.app',
     cloudinaryCloudName: cloudinaryOverride || 'dcqvo4aoj',
     cloudinaryFetchEnabled: false,
+    autoTranslateEnabled: true,
     cloudinaryAssetMap: {}
   }, window.BCUP_CONFIG || {});
 })();

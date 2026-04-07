@@ -2,6 +2,10 @@
 (function() {
   const STORAGE_KEY = 'bc_lang';
   const DEFAULT_LANG = 'ru';
+  const AUTO_TRANSLATION_CACHE_KEY = 'bc_lang_auto_cache_v1';
+  const AUTO_TRANSLATION_BATCH_SIZE = 25;
+  const AUTO_TRANSLATION_MAX_CHARS = 6000;
+  const AUTO_TRANSLATION_RETRY_DELAY = 60000;
   const exactMap = {
   "Главная": "Home",
   "Новости": "News",
@@ -9,6 +13,7 @@
   "Расписание": "Schedule",
   "Результаты": "Results",
   "Трансляции": "Broadcasts",
+  "Медиа": "Media",
   "О турнире": "About the Tournament",
   "О Льве Бурчалкине": "About Lev Burchalkin",
   "Контакты": "Contacts",
@@ -27,6 +32,9 @@
   "Исторические участники турнира": "Historical Tournament Participants",
   "Исторический участник турнира прошлых лет.": "Historic participant of previous editions of the tournament.",
   "Команды Кубка Бурчалкина 2026": "Burchalkin Cup 2026 Teams",
+  "Кубок Бурчалкина 2026": "Burchalkin Cup 2026",
+  "Открыть турнир": "Open tournament",
+  "Открыть архив": "Open archive",
   "Матчи": "Matches",
   "Последние результаты": "Latest Results",
   "Прошлые розыгрыши": "Previous Editions",
@@ -239,6 +247,12 @@
 };
 
   const partialEntries = Object.entries(partialMap).sort((a, b) => b[0].length - a[0].length);
+  const autoTranslationCache = loadAutoTranslationCache();
+  const pendingAutoTranslations = new Set();
+  let autoTranslationTimer = null;
+  let autoTranslationInFlight = false;
+  let autoTranslationBlockedUntil = 0;
+  let observer = null;
 
   function getLang() {
     return localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG;
@@ -257,14 +271,151 @@
     return out;
   }
 
+  function normalizeTranslationText(text) {
+    return String(text || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function containsCyrillic(text) {
+    return /[А-Яа-яЁё]/.test(String(text || ''));
+  }
+
+  function getApiBaseUrl() {
+    return String(window.BCUP_CONFIG?.apiBaseUrl || '').trim();
+  }
+
+  function canUseAutoTranslation() {
+    return getLang() === 'en'
+      && window.BCUP_CONFIG?.autoTranslateEnabled !== false
+      && Boolean(getApiBaseUrl());
+  }
+
+  function loadAutoTranslationCache() {
+    try {
+      const raw = localStorage.getItem(AUTO_TRANSLATION_CACHE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  function persistAutoTranslationCache() {
+    try {
+      localStorage.setItem(AUTO_TRANSLATION_CACHE_KEY, JSON.stringify(autoTranslationCache));
+    } catch (error) {
+      // Ignore quota/storage issues and keep translation working in-memory.
+    }
+  }
+
+  function applyOuterWhitespace(original, translated) {
+    const leading = original.match(/^\s*/)?.[0] || '';
+    const trailing = original.match(/\s*$/)?.[0] || '';
+    return `${leading}${translated}${trailing}`;
+  }
+
+  function getCachedAutoTranslation(text) {
+    const normalized = normalizeTranslationText(text);
+    const translated = autoTranslationCache[normalized];
+    return translated ? applyOuterWhitespace(text, translated) : '';
+  }
+
+  function queueAutoTranslation(text) {
+    if (!canUseAutoTranslation()) return;
+    if (Date.now() < autoTranslationBlockedUntil) return;
+
+    const normalized = normalizeTranslationText(text);
+    if (!normalized || autoTranslationCache[normalized] || pendingAutoTranslations.has(normalized)) return;
+    if (!containsCyrillic(normalized)) return;
+
+    pendingAutoTranslations.add(normalized);
+    scheduleAutoTranslationFlush();
+  }
+
+  function scheduleAutoTranslationFlush() {
+    if (autoTranslationTimer || autoTranslationInFlight || !pendingAutoTranslations.size) return;
+    autoTranslationTimer = window.setTimeout(() => {
+      autoTranslationTimer = null;
+      flushAutoTranslations();
+    }, 150);
+  }
+
+  function rerunTranslationPass() {
+    if (observer) observer.disconnect();
+    translateTextTree(document.body);
+    startObserver();
+  }
+
+  async function flushAutoTranslations() {
+    if (autoTranslationInFlight || !canUseAutoTranslation()) return;
+    if (Date.now() < autoTranslationBlockedUntil || !pendingAutoTranslations.size) return;
+
+    const batch = [];
+    let totalChars = 0;
+
+    for (const text of pendingAutoTranslations) {
+      const nextChars = totalChars + text.length;
+      if (batch.length >= AUTO_TRANSLATION_BATCH_SIZE || nextChars > AUTO_TRANSLATION_MAX_CHARS) break;
+      batch.push(text);
+      totalChars = nextChars;
+    }
+
+    if (!batch.length) return;
+
+    batch.forEach(text => pendingAutoTranslations.delete(text));
+    autoTranslationInFlight = true;
+
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/translate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          source_lang: 'ru',
+          target_lang: 'en',
+          texts: batch
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Translation request failed with status ${response.status}`);
+      }
+
+      const payload = await response.json().catch(() => ({}));
+      const translations = payload?.translations && typeof payload.translations === 'object'
+        ? payload.translations
+        : {};
+
+      let hasNewTranslations = false;
+      Object.entries(translations).forEach(([source, translated]) => {
+        const normalizedSource = normalizeTranslationText(source);
+        const normalizedTranslation = normalizeTranslationText(translated);
+        if (!normalizedSource || !normalizedTranslation) return;
+        if (autoTranslationCache[normalizedSource] === normalizedTranslation) return;
+        autoTranslationCache[normalizedSource] = normalizedTranslation;
+        hasNewTranslations = true;
+      });
+
+      if (hasNewTranslations) {
+        persistAutoTranslationCache();
+        rerunTranslationPass();
+      }
+    } catch (error) {
+      autoTranslationBlockedUntil = Date.now() + AUTO_TRANSLATION_RETRY_DELAY;
+      batch.forEach(text => pendingAutoTranslations.add(text));
+      console.warn('Automatic translation is temporarily unavailable.', error);
+    } finally {
+      autoTranslationInFlight = false;
+      if (pendingAutoTranslations.size) scheduleAutoTranslationFlush();
+    }
+  }
+
   function translateString(text) {
     if (!text || getLang() !== 'en') return text;
     const trimmed = text.trim();
 
     if (Object.prototype.hasOwnProperty.call(exactMap, trimmed)) {
-      const leading = text.match(/^\s*/)?.[0] || '';
-      const trailing = text.match(/\s*$/)?.[0] || '';
-      return leading + exactMap[trimmed] + trailing;
+      return applyOuterWhitespace(text, exactMap[trimmed]);
     }
 
     let out = text;
@@ -272,6 +423,13 @@
       if (out.includes(ru)) out = out.split(ru).join(en);
     }
     out = replaceMonths(out);
+
+    if (!containsCyrillic(out)) return out;
+
+    const cachedTranslation = getCachedAutoTranslation(text);
+    if (cachedTranslation) return cachedTranslation;
+
+    queueAutoTranslation(text);
     return out;
   }
 
@@ -279,9 +437,13 @@
     root.querySelectorAll('[title],[aria-label],[alt],[placeholder]').forEach(el => {
       ['title','aria-label','alt','placeholder'].forEach(attr => {
         if (!el.hasAttribute(attr)) return;
-        const value = el.getAttribute(attr);
-        const tr = translateString(value);
-        if (tr !== value) el.setAttribute(attr, tr);
+        const originalAttrName = `data-bc-original-${attr.replace(/[^a-z0-9]+/gi, '-')}`;
+        if (!el.hasAttribute(originalAttrName)) {
+          el.setAttribute(originalAttrName, el.getAttribute(attr) || '');
+        }
+        const sourceValue = el.getAttribute(originalAttrName) || '';
+        const tr = translateString(sourceValue);
+        if (tr !== el.getAttribute(attr)) el.setAttribute(attr, tr);
       });
     });
   }
@@ -302,12 +464,17 @@
     while (walker.nextNode()) nodes.push(walker.currentNode);
 
     nodes.forEach(node => {
-      const tr = translateString(node.nodeValue);
+      const sourceValue = node.__bcOriginalText || node.nodeValue;
+      if (!node.__bcOriginalText) node.__bcOriginalText = sourceValue;
+      const tr = translateString(sourceValue);
       if (tr !== node.nodeValue) node.nodeValue = tr;
     });
 
     translateAttributes(root);
-    document.title = translateString(document.title);
+    if (!document.documentElement.dataset.bcOriginalTitle) {
+      document.documentElement.dataset.bcOriginalTitle = document.title;
+    }
+    document.title = translateString(document.documentElement.dataset.bcOriginalTitle);
     document.documentElement.lang = 'en';
   }
 
@@ -317,9 +484,9 @@
     });
   }
 
-  let observer = null;
   function startObserver() {
     if (getLang() !== 'en') return;
+    if (observer) observer.disconnect();
     observer = new MutationObserver(() => {
       if (!observer) return;
       observer.disconnect();

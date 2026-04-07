@@ -13,6 +13,8 @@ const adminPassword = (process.env.ADMIN_PASSWORD || 'agency').trim();
 const cloudinaryCloudName = (process.env.CLOUDINARY_CLOUD_NAME || '').trim();
 const cloudinaryApiKey = (process.env.CLOUDINARY_API_KEY || '').trim();
 const cloudinaryApiSecret = (process.env.CLOUDINARY_API_SECRET || '').trim();
+const translationEnabled = process.env.TRANSLATION_ENABLED !== 'false';
+const translationProvider = (process.env.TRANSLATION_PROVIDER || 'google-gtx').trim().toLowerCase();
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is required');
@@ -35,6 +37,8 @@ const CATEGORY_NAMES = {
   title: 'Титульные партнёры',
   official: 'Официальные партнёры',
 };
+
+let translationTableEnsured = false;
 
 app.use(cors({
   origin(origin, callback) {
@@ -95,6 +99,16 @@ function slugify(value) {
     .replace(/[^a-z0-9а-яё]+/gi, '-')
     .replace(/^-+|-+$/g, '')
     .replace(/-+/g, '-');
+}
+
+function normalizeTranslationText(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function containsCyrillic(value) {
+  return /[А-Яа-яЁё]/.test(String(value || ''));
 }
 
 function ensureArray(value) {
@@ -168,6 +182,147 @@ async function uploadImageToCloudinary({ file, folder, publicId }) {
   };
 }
 
+async function ensureTranslationCacheTable(queryable = pool) {
+  if (translationTableEnsured) return;
+
+  await queryable.query(`
+    CREATE TABLE IF NOT EXISTS content_translations (
+      id BIGSERIAL PRIMARY KEY,
+      source_lang TEXT NOT NULL,
+      target_lang TEXT NOT NULL,
+      source_text TEXT NOT NULL,
+      translated_text TEXT NOT NULL,
+      provider TEXT NOT NULL DEFAULT 'google-gtx',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (source_lang, target_lang, source_text)
+    );
+  `);
+
+  translationTableEnsured = true;
+}
+
+async function translateTextWithGoogleGtx(text, sourceLang, targetLang) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const url = new URL('https://translate.googleapis.com/translate_a/single');
+    url.searchParams.set('client', 'gtx');
+    url.searchParams.set('sl', sourceLang);
+    url.searchParams.set('tl', targetLang);
+    url.searchParams.set('dt', 't');
+    url.searchParams.set('q', text);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'BurchalkinCupTranslate/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Translation request failed with status ${response.status}`);
+    }
+
+    const payload = await response.json().catch(() => null);
+    const translatedText = Array.isArray(payload?.[0])
+      ? payload[0].map(item => Array.isArray(item) ? item[0] : '').join('').trim()
+      : '';
+
+    return translatedText || text;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function translateText(text, sourceLang, targetLang) {
+  if (sourceLang === targetLang || !containsCyrillic(text)) return text;
+
+  switch (translationProvider) {
+    case 'google-gtx':
+      return translateTextWithGoogleGtx(text, sourceLang, targetLang);
+    default:
+      throw new Error(`Unsupported translation provider: ${translationProvider}`);
+  }
+}
+
+async function getCachedTranslations(queryable, sourceLang, targetLang, texts) {
+  if (!texts.length) return {};
+
+  await ensureTranslationCacheTable(queryable);
+  const { rows } = await queryable.query(`
+    SELECT source_text, translated_text
+    FROM content_translations
+    WHERE source_lang = $1
+      AND target_lang = $2
+      AND source_text = ANY($3::text[]);
+  `, [sourceLang, targetLang, texts]);
+
+  return rows.reduce((acc, row) => {
+    acc[row.source_text] = row.translated_text;
+    return acc;
+  }, {});
+}
+
+async function saveTranslations(queryable, sourceLang, targetLang, translations) {
+  const entries = Object.entries(translations).filter(([, value]) => normalizeString(value));
+  if (!entries.length) return;
+
+  await ensureTranslationCacheTable(queryable);
+
+  for (const [sourceText, translatedText] of entries) {
+    await queryable.query(`
+      INSERT INTO content_translations (
+        source_lang,
+        target_lang,
+        source_text,
+        translated_text,
+        provider
+      )
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (source_lang, target_lang, source_text)
+      DO UPDATE SET
+        translated_text = EXCLUDED.translated_text,
+        provider = EXCLUDED.provider,
+        updated_at = NOW();
+    `, [sourceLang, targetLang, sourceText, translatedText, translationProvider]);
+  }
+}
+
+async function translateTexts(texts, sourceLang = 'ru', targetLang = 'en') {
+  if (!translationEnabled || sourceLang === targetLang) {
+    return texts.reduce((acc, text) => {
+      acc[text] = text;
+      return acc;
+    }, {});
+  }
+
+  const normalizedTexts = Array.from(new Set(
+    ensureArray(texts)
+      .map(normalizeTranslationText)
+      .filter(text => text && containsCyrillic(text))
+  ));
+
+  if (!normalizedTexts.length) return {};
+
+  const cached = await getCachedTranslations(pool, sourceLang, targetLang, normalizedTexts);
+  const missing = normalizedTexts.filter(text => !cached[text]);
+
+  if (!missing.length) return cached;
+
+  const translated = {};
+  for (const text of missing) {
+    translated[text] = await translateText(text, sourceLang, targetLang);
+  }
+
+  await saveTranslations(pool, sourceLang, targetLang, translated);
+  return {
+    ...cached,
+    ...translated,
+  };
+}
+
 function formatMatchRow(row) {
   return {
     id: Number(row.id),
@@ -236,6 +391,42 @@ app.post('/api/admin/session', (req, res) => {
   }
 
   return res.json({ token: adminToken });
+});
+
+app.post('/api/translate', async (req, res, next) => {
+  try {
+    const sourceLang = normalizeString(req.body?.source_lang) || 'ru';
+    const targetLang = normalizeString(req.body?.target_lang) || 'en';
+    const texts = Array.from(new Set(
+      ensureArray(req.body?.texts)
+        .map(normalizeTranslationText)
+        .filter(Boolean)
+    ));
+
+    if (!texts.length) {
+      return res.json({
+        ok: true,
+        source_lang: sourceLang,
+        target_lang: targetLang,
+        translations: {}
+      });
+    }
+
+    const totalCharacters = texts.reduce((sum, text) => sum + text.length, 0);
+    if (texts.length > 100 || totalCharacters > 12000) {
+      return res.status(400).json({ error: 'Translation payload is too large' });
+    }
+
+    const translations = await translateTexts(texts, sourceLang, targetLang);
+    return res.json({
+      ok: true,
+      source_lang: sourceLang,
+      target_lang: targetLang,
+      translations
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 async function hasTournamentCountdownColumn(queryable = pool) {
@@ -1552,6 +1743,7 @@ app.get('/', (req, res) => {
       '/api/matches',
       '/api/news',
       '/api/results',
+      '/api/translate',
       '/api/admin/session',
       '/api/admin/:resource',
       '/api/admin/standings',
