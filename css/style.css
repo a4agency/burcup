@@ -1251,6 +1251,26 @@ object-fit:contain;
   overflow:hidden;
 }
 
+.standings-scroll{
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding-bottom:14px;
+  scrollbar-gutter:stable;
+}
+
+.standings-scroll::-webkit-scrollbar{
+  height:10px;
+}
+
+.standings-scroll::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.standings-scroll::-webkit-scrollbar-thumb{
+  background:rgba(13,43,99,.22);
+  border-radius:999px;
+}
+
 .standings-table{
   width:100%;
   border-collapse:collapse;
@@ -3678,7 +3698,13 @@ button,
 
 /* Standings table: unified columns */
 .standings-card{
-  overflow:auto;
+  overflow:hidden;
+}
+
+.standings-scroll{
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding-bottom:16px;
 }
 
 .standings-table{

@@ -794,6 +794,26 @@ function normalizeTournamentAdminItem(item) {
   };
 }
 
+function getAdminMatchStatusLabel(status, fallback = '') {
+  const normalized = String(status || '').trim().toLowerCase();
+  const labels = {
+    soon: 'Скоро',
+    live: 'В эфире',
+    done: 'Завершен',
+    postponed: 'Перенесен',
+    cancelled: 'Отменен',
+  };
+
+  return labels[normalized] || String(fallback || '').trim();
+}
+
+function normalizeMatchAdminItem(item) {
+  return {
+    ...item,
+    status_label: getAdminMatchStatusLabel(item?.status, item?.status_label),
+  };
+}
+
 function normalizeSourceData(sourceName, data) {
   const sourceMeta = getAdminSourceMeta(sourceName);
   const items = Array.isArray(data) ? data : [];
@@ -805,13 +825,14 @@ function normalizeSourceData(sourceName, data) {
     return normalizedItems.filter(item => item?.is_featured || Number(item?.season_year || 0) >= 2026);
   }
   if (sourceName === 'matches' || sourceName === 'archive_matches') {
+    const normalizedItems = items.map(normalizeMatchAdminItem);
     if (sourceMeta?.filterArchiveMatches) {
-      return items.filter(item => {
+      return normalizedItems.filter(item => {
         const tournamentSlug = String(item?.tournament_slug || '').trim();
         return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
       });
     }
-    return items.filter(item => {
+    return normalizedItems.filter(item => {
       const tournamentSlug = String(item?.tournament_slug || '').trim();
       return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
     });
@@ -1170,9 +1191,9 @@ function makeMatchHeadToHeadPreview(item, itemIndex, allItems) {
   `;
 }
 
-function refreshAdminMatchPreviews(wrap) {
+function refreshAdminMatchPreviews(wrap, sourceName = 'matches') {
   if (!wrap) return;
-  const items = readFormData('matches');
+  const items = readFormData(sourceName);
   wrap.querySelectorAll('[data-admin-match-preview-body]').forEach(node => {
     const index = Number(node.dataset.adminMatchPreviewBody);
     node.innerHTML = buildAdminHeadToHeadPreview(items[index] || {}, index, items);
@@ -1895,6 +1916,27 @@ function renderForm(sourceName, data) {
     });
   });
 
+  if (sourceName === 'matches' || sourceName === 'archive_matches') {
+    wrap.querySelectorAll('[data-key="status"]').forEach(select => {
+      select.addEventListener('change', () => {
+        const index = Number(select.dataset.index);
+        const statusLabelInput = wrap.querySelector(`[data-key="status_label"][data-index="${index}"]`);
+        const nextLabel = getAdminMatchStatusLabel(select.value);
+        if (statusLabelInput) {
+          statusLabelInput.value = nextLabel;
+        }
+
+        const next = normalizeSourceData(sourceName, readFormData(sourceName));
+        setSourceData(sourceName, next);
+        if (sourceName === currentSource) {
+          setRenderedData(sourceName, next);
+        }
+
+        setStatus(`Статус матча обновлён на «${nextLabel || 'без подписи'}». Нажми «Сохранить», чтобы отправить изменения в API.`);
+      });
+    });
+  }
+
   if (sourceName === 'media') {
     wrap.querySelectorAll('[data-key="featured_match_id"]').forEach(select => {
       select.addEventListener('change', () => {
@@ -1907,10 +1949,10 @@ function renderForm(sourceName, data) {
   }
 
   if (sourceName === 'matches' || sourceName === 'archive_matches') {
-    refreshAdminMatchPreviews(wrap);
+    refreshAdminMatchPreviews(wrap, sourceName);
     if (wrap.dataset.matchPreviewBound !== 'true') {
       const syncPreviews = () => {
-        if (currentSource === 'matches' || currentSource === 'archive_matches') refreshAdminMatchPreviews(wrap);
+        if (currentSource === 'matches' || currentSource === 'archive_matches') refreshAdminMatchPreviews(wrap, currentSource);
       };
       wrap.addEventListener('input', syncPreviews);
       wrap.addEventListener('change', syncPreviews);

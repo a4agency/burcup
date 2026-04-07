@@ -228,31 +228,33 @@ function renderStandingsTable(data = []) {
 
   return `
     <div class="standings-card">
-      <table class="standings-table">
-        <colgroup>
-          <col class="col-rank">
-          <col class="col-team">
-          <col class="col-games">
-          <col class="col-wins">
-          <col class="col-draws">
-          <col class="col-losses">
-          <col class="col-goals">
-          <col class="col-points">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>№</th>
-            <th>Команда</th>
-            <th>Игр</th>
-            <th>Побед</th>
-            <th>Ничьих</th>
-            <th>Поражений</th>
-            <th>Мячей забито - пропущено</th>
-            <th>Очки</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
+      <div class="standings-scroll">
+        <table class="standings-table">
+          <colgroup>
+            <col class="col-rank">
+            <col class="col-team">
+            <col class="col-games">
+            <col class="col-wins">
+            <col class="col-draws">
+            <col class="col-losses">
+            <col class="col-goals">
+            <col class="col-points">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>Команда</th>
+              <th>Игр</th>
+              <th>Побед</th>
+              <th>Ничьих</th>
+              <th>Поражений</th>
+              <th>Мячей забито - пропущено</th>
+              <th>Очки</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
     </div>
   `;
 }
