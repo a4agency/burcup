@@ -303,6 +303,7 @@ const ADMIN_SOURCES = {
         video: '',
         review_video: '',
         interview_video: '',
+        is_featured_media: false,
         summary: '',
       }
     ],
@@ -327,6 +328,7 @@ const ADMIN_SOURCES = {
       video: '',
       review_video: '',
       interview_video: '',
+      is_featured_media: false,
       summary: '',
     }),
     fields: [
@@ -351,6 +353,23 @@ const ADMIN_SOURCES = {
       ['review_video', 'Ссылка на обзор', 'url'],
       ['interview_video', 'Ссылка на интервью', 'url'],
       ['summary', 'Описание', 'textarea'],
+    ],
+  },
+  media: {
+    key: 'bcup_admin_media',
+    exportName: 'media.json',
+    title: 'Медиа',
+    help: 'Выбор матча для главного блока на странице «Медиа».',
+    defaultData: [
+      {
+        featured_match_id: ''
+      }
+    ],
+    empty: () => ({
+      featured_match_id: ''
+    }),
+    fields: [
+      ['featured_match_id', 'Главный матч', 'text'],
     ],
   },
   archive_matches: {
@@ -380,6 +399,7 @@ const ADMIN_SOURCES = {
         video: '',
         review_video: '',
         interview_video: '',
+        is_featured_media: false,
         summary: '',
       }
     ],
@@ -404,6 +424,7 @@ const ADMIN_SOURCES = {
       video: '',
       review_video: '',
       interview_video: '',
+      is_featured_media: false,
       summary: '',
     }),
     fields: [
@@ -762,6 +783,7 @@ function getAdminApiSourceName(sourceName) {
   if (sourceName === 'archive_tournaments') return 'tournaments';
   if (sourceName === 'archive_matches') return 'matches';
   if (sourceName === 'archive_standings') return 'standings';
+  if (sourceName === 'media') return 'matches';
   return sourceName;
 }
 
@@ -793,6 +815,22 @@ function normalizeSourceData(sourceName, data) {
       const tournamentSlug = String(item?.tournament_slug || '').trim();
       return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
     });
+  }
+  if (sourceName === 'media') {
+    const looksLikeMatchPayload = items.some(item => Object.prototype.hasOwnProperty.call(item || {}, 'home_team') || Object.prototype.hasOwnProperty.call(item || {}, 'video'));
+    if (looksLikeMatchPayload) {
+      const currentMatches = normalizeSourceData('matches', items);
+      const featuredMatch = currentMatches.find(item => item?.is_featured_media === true)
+        || currentMatches.find(item => String(item?.video || '').trim())
+        || currentMatches[0]
+        || null;
+      return [{
+        featured_match_id: featuredMatch ? String(featuredMatch.id || '') : ''
+      }];
+    }
+    return [{
+      featured_match_id: String(items[0]?.featured_match_id || '').trim()
+    }];
   }
   if (sourceName === 'archive_standings') {
     return items.filter(item => {
@@ -881,6 +919,13 @@ async function pushAdminSource(sourceName, data) {
       }),
       ...normalizeSourceData(sourceName, data),
     ];
+  } else if (sourceName === 'media') {
+    const allMatches = await fetchAdminCollection(apiSourceName);
+    const selectedId = String(normalizeSourceData(sourceName, data)[0]?.featured_match_id || '').trim();
+    payload = allMatches.map(item => ({
+      ...item,
+      is_featured_media: selectedId ? String(item?.id || '') === selectedId : false,
+    }));
   }
 
   const response = await fetch(`${apiBaseUrl}/api/admin/${apiSourceName}`, {
@@ -1329,6 +1374,78 @@ function renderMatchAdminCard(item, index, allItems) {
   `;
 }
 
+function getCurrentAdminMatchesCatalog() {
+  const localMatches = renderedDataCache.matches || getSourceData('matches');
+  const base = localMatches || defaultsCache.matches || ADMIN_SOURCES.matches.defaultData || [];
+  return normalizeSourceData('matches', structuredClone(base))
+    .sort((left, right) => {
+      const leftDateTime = `${String(left?.date || '')} ${String(left?.time || '')}`.trim();
+      const rightDateTime = `${String(right?.date || '')} ${String(right?.time || '')}`.trim();
+      return leftDateTime.localeCompare(rightDateTime);
+    });
+}
+
+function formatAdminFeaturedMatchLabel(item) {
+  return joinNonEmpty([
+    item?.date,
+    item?.time,
+    joinNonEmpty([item?.home_team, item?.away_team], ' — ')
+  ], ' • ');
+}
+
+function renderMediaAdminCard(item) {
+  const selectedId = String(item?.featured_match_id || '').trim();
+  const matches = getCurrentAdminMatchesCatalog();
+  const selectedMatch = matches.find(match => String(match?.id || '') === selectedId) || null;
+
+  return `
+    <div class="admin-item-card admin-record-card admin-media-card" data-item-index="0">
+      <div class="admin-item-head">
+        <strong>Главный эфир</strong>
+      </div>
+
+      <div class="admin-record-layout">
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Выбор матча</div>
+          <div class="admin-form-grid admin-record-grid-1">
+            <div class="admin-record-note">Выбери матч текущего турнира. После сохранения именно он станет главным блоком страницы «Медиа».</div>
+            <div class="admin-field" style="grid-column:1/-1">
+              <label>Главный матч</label>
+              <select data-key="featured_match_id" data-index="0">
+                <option value="">Не выбран</option>
+                ${matches.map(match => `
+                  <option value="${escapeHtml(String(match.id || ''))}" ${String(match.id || '') === selectedId ? 'selected' : ''}>
+                    ${escapeHtml(formatAdminFeaturedMatchLabel(match))}
+                  </option>
+                `).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Превью блока</div>
+          <div class="admin-form-grid admin-record-grid-1">
+            ${selectedMatch ? `
+              <div class="admin-media-preview">
+                <div class="admin-media-preview-top">
+                  <span class="archive-stat-chip">Главный эфир</span>
+                  <span class="upcoming-status ${escapeHtml(String(selectedMatch.status || 'soon'))}">${escapeHtml(selectedMatch.status_label || 'Скоро')}</span>
+                </div>
+                <div class="admin-media-preview-title">${escapeHtml(joinNonEmpty([selectedMatch.home_team, selectedMatch.away_team], ' — '))}</div>
+                <div class="admin-media-preview-meta">${escapeHtml(joinNonEmpty([selectedMatch.date, selectedMatch.time, selectedMatch.group], ' • '))}</div>
+                ${selectedMatch.summary ? `<div class="admin-media-preview-summary">${escapeHtml(selectedMatch.summary)}</div>` : ''}
+              </div>
+            ` : `
+              <div class="admin-match-preview-empty">Выбери матч, и здесь появится превью главного блока страницы «Медиа».</div>
+            `}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderTournamentAdminCard(item, index) {
   const seasonYear = Number(item?.season_year || 0);
   const isFeatured = item?.is_featured === true;
@@ -1471,6 +1588,7 @@ function renderPartnerSourceCards(sourceName, data) {
 }
 
 function renderAdminCardBySource(sourceName, item, index, allItems) {
+  if (sourceName === 'media') return renderMediaAdminCard(item);
   if (sourceName === 'matches' || sourceName === 'archive_matches') return renderMatchAdminCard(item, index, allItems);
   if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') return renderTournamentAdminCard(item, index);
   if (sourceName === 'archive_standings') return renderStandingAdminCard(item, index);
@@ -1576,11 +1694,13 @@ function renderForm(sourceName, data) {
   const wrap = document.getElementById('admin-form-wrap');
   setRenderedData(sourceName, data);
   wrap.innerHTML = `
-    ${sourceName === 'partners' || sourceName === 'partners_media'
+    ${sourceName === 'media'
+      ? `<div class="admin-form-list">${renderMediaAdminCard(data[0] || source.empty())}</div>`
+      : sourceName === 'partners' || sourceName === 'partners_media'
       ? renderPartnerSourceCards(sourceName, data)
       : `<div class="admin-form-list">${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}</div>`
     }
-    <div class="admin-toolbar">
+    <div class="admin-toolbar"${sourceName === 'media' ? ' hidden' : ''}>
       ${(sourceName === 'partners' || sourceName === 'partners_media')
         ? (
           sourceName === 'partners'
@@ -1775,6 +1895,17 @@ function renderForm(sourceName, data) {
     });
   });
 
+  if (sourceName === 'media') {
+    wrap.querySelectorAll('[data-key="featured_match_id"]').forEach(select => {
+      select.addEventListener('change', () => {
+        const next = normalizeSourceData(sourceName, readFormData(sourceName));
+        setSourceData(sourceName, next);
+        renderForm(sourceName, next);
+        setStatus('Главный эфир обновлён в черновике. Нажми «Сохранить», чтобы отправить изменения в API.');
+      });
+    });
+  }
+
   if (sourceName === 'matches' || sourceName === 'archive_matches') {
     refreshAdminMatchPreviews(wrap);
     if (wrap.dataset.matchPreviewBound !== 'true') {
@@ -1823,12 +1954,21 @@ async function adminShowSource(sourceName, options = {}) {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
 
-  if ((sourceName === 'matches' || sourceName === 'archive_matches' || sourceName === 'archive_standings') && !defaultsCache.clubs) {
+  if ((sourceName === 'matches' || sourceName === 'archive_matches' || sourceName === 'archive_standings' || sourceName === 'media') && !defaultsCache.clubs) {
     try {
       const clubs = await loadSourceData('clubs');
       defaultsCache.clubs = structuredClone(clubs);
     } catch (error) {
       defaultsCache.clubs = cloneDefaultData('clubs');
+    }
+  }
+
+  if (sourceName === 'media' && !defaultsCache.matches) {
+    try {
+      const matches = await loadSourceData('matches');
+      defaultsCache.matches = structuredClone(matches);
+    } catch (error) {
+      defaultsCache.matches = cloneDefaultData('matches');
     }
   }
 

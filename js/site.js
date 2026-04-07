@@ -1504,6 +1504,8 @@ function sortMediaMatches(matches = []) {
 }
 
 function pickFeaturedMediaMatch(matches = []) {
+  const explicitFeatured = matches.find(item => item?.is_featured_media === true);
+  if (explicitFeatured) return explicitFeatured;
   const withStream = matches.find(item => String(item.video || '').trim());
   return withStream || matches[0] || null;
 }

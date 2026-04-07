@@ -347,6 +347,7 @@ function formatMatchRow(row) {
     video: row.video_url || '',
     review_video: row.review_video_url || '',
     interview_video: row.interview_video_url || '',
+    is_featured_media: row.is_featured_media === true,
     summary: row.summary || '',
     events: row.events || [],
   };
@@ -453,6 +454,20 @@ async function hasMatchMediaColumns(queryable = pool) {
   `);
 
   return Number(rows[0]?.count || 0) === 2;
+}
+
+async function hasMatchFeaturedMediaColumn(queryable = pool) {
+  const { rows } = await queryable.query(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'matches'
+        AND column_name = 'is_featured_media'
+    ) AS exists;
+  `);
+
+  return rows[0]?.exists === true;
 }
 
 function buildTournamentsQuery(includeCountdown) {
@@ -594,7 +609,7 @@ const standingsQuery = `
   ORDER BY ts.group_name, ts.position;
 `;
 
-function buildMatchesQuery(includeMatchMedia) {
+function buildMatchesQuery(includeMatchMedia, includeFeaturedMedia) {
   return `
     SELECT
       m.id,
@@ -620,6 +635,7 @@ function buildMatchesQuery(includeMatchMedia) {
       m.video_url,
       ${includeMatchMedia ? 'm.review_video_url,' : 'NULL::text AS review_video_url,'}
       ${includeMatchMedia ? 'm.interview_video_url,' : 'NULL::text AS interview_video_url,'}
+      ${includeFeaturedMedia ? 'm.is_featured_media,' : 'FALSE::boolean AS is_featured_media,'}
       m.summary,
       COALESCE(
         JSON_AGG(
@@ -663,6 +679,7 @@ function buildMatchesQuery(includeMatchMedia) {
       m.video_url,
       ${includeMatchMedia ? 'm.review_video_url,' : ''}
       ${includeMatchMedia ? 'm.interview_video_url,' : ''}
+      ${includeFeaturedMedia ? 'm.is_featured_media,' : ''}
       m.summary
     ORDER BY t.season_year DESC NULLS LAST, m.match_date NULLS FIRST, m.match_time NULLS FIRST, m.sort_order, m.id;
   `;
@@ -744,7 +761,8 @@ function buildClubMatchesQuery(includeMatchMedia) {
 
 async function queryMatches(queryable, tournamentSlug = null) {
   const includeMatchMedia = await hasMatchMediaColumns(queryable);
-  return queryable.query(buildMatchesQuery(includeMatchMedia), [tournamentSlug]);
+  const includeFeaturedMedia = await hasMatchFeaturedMediaColumn(queryable);
+  return queryable.query(buildMatchesQuery(includeMatchMedia, includeFeaturedMedia), [tournamentSlug]);
 }
 
 async function queryClubMatches(queryable, clubSlug) {
@@ -972,6 +990,7 @@ async function getAdminMatches(client) {
     video: row.video_url || '',
     review_video: row.review_video_url || '',
     interview_video: row.interview_video_url || '',
+    is_featured_media: row.is_featured_media === true,
     summary: row.summary || '',
   }));
 }
@@ -1222,6 +1241,7 @@ async function replaceMatches(client, payload) {
   const items = ensureArray(payload);
   const ids = [];
   const includeMatchMedia = await hasMatchMediaColumns(client);
+  const includeFeaturedMedia = await hasMatchFeaturedMediaColumn(client);
   const tournaments = await client.query('SELECT id, slug FROM tournaments');
   const clubs = await client.query('SELECT id, slug FROM clubs');
   const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
@@ -1229,6 +1249,10 @@ async function replaceMatches(client, payload) {
 
   if (!includeMatchMedia && items.some(item => normalizeString(item.review_video) || normalizeString(item.interview_video))) {
     throw new Error('Сначала примените миграцию 0006_add_match_media_links.sql, чтобы сохранять ссылки на обзор и интервью.');
+  }
+
+  if (!includeFeaturedMedia && items.some(item => parseBoolean(item.is_featured_media, false))) {
+    throw new Error('Сначала примените миграцию 0008_add_match_featured_media_flag.sql, чтобы выбирать главный эфир на странице «Медиа».');
   }
 
   for (const item of items) {
@@ -1356,6 +1380,103 @@ async function replaceMatches(client, payload) {
           summary = EXCLUDED.summary,
           sort_order = EXCLUDED.sort_order
       `;
+    }
+
+    if (includeFeaturedMedia) {
+      const featuredValue = parseBoolean(item.is_featured_media, false);
+      if (includeMatchMedia) {
+        params.splice(17, 0, featuredValue);
+        query = `
+          INSERT INTO matches (
+            id,
+            tournament_id,
+            stage_name,
+            round_name,
+            matchday_label,
+            match_date,
+            match_time,
+            status,
+            status_label,
+            home_club_id,
+            away_club_id,
+            home_score,
+            away_score,
+            venue,
+            video_url,
+            review_video_url,
+            interview_video_url,
+            is_featured_media,
+            summary,
+            sort_order
+          )
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+          ON CONFLICT (id) DO UPDATE
+          SET
+            tournament_id = EXCLUDED.tournament_id,
+            stage_name = EXCLUDED.stage_name,
+            round_name = EXCLUDED.round_name,
+            matchday_label = EXCLUDED.matchday_label,
+            match_date = EXCLUDED.match_date,
+            match_time = EXCLUDED.match_time,
+            status = EXCLUDED.status,
+            status_label = EXCLUDED.status_label,
+            home_club_id = EXCLUDED.home_club_id,
+            away_club_id = EXCLUDED.away_club_id,
+            home_score = EXCLUDED.home_score,
+            away_score = EXCLUDED.away_score,
+            venue = EXCLUDED.venue,
+            video_url = EXCLUDED.video_url,
+            review_video_url = EXCLUDED.review_video_url,
+            interview_video_url = EXCLUDED.interview_video_url,
+            is_featured_media = EXCLUDED.is_featured_media,
+            summary = EXCLUDED.summary,
+            sort_order = EXCLUDED.sort_order
+        `;
+      } else {
+        params.splice(15, 0, featuredValue);
+        query = `
+          INSERT INTO matches (
+            id,
+            tournament_id,
+            stage_name,
+            round_name,
+            matchday_label,
+            match_date,
+            match_time,
+            status,
+            status_label,
+            home_club_id,
+            away_club_id,
+            home_score,
+            away_score,
+            venue,
+            video_url,
+            is_featured_media,
+            summary,
+            sort_order
+          )
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+          ON CONFLICT (id) DO UPDATE
+          SET
+            tournament_id = EXCLUDED.tournament_id,
+            stage_name = EXCLUDED.stage_name,
+            round_name = EXCLUDED.round_name,
+            matchday_label = EXCLUDED.matchday_label,
+            match_date = EXCLUDED.match_date,
+            match_time = EXCLUDED.match_time,
+            status = EXCLUDED.status,
+            status_label = EXCLUDED.status_label,
+            home_club_id = EXCLUDED.home_club_id,
+            away_club_id = EXCLUDED.away_club_id,
+            home_score = EXCLUDED.home_score,
+            away_score = EXCLUDED.away_score,
+            venue = EXCLUDED.venue,
+            video_url = EXCLUDED.video_url,
+            is_featured_media = EXCLUDED.is_featured_media,
+            summary = EXCLUDED.summary,
+            sort_order = EXCLUDED.sort_order
+        `;
+      }
     }
 
     await client.query(query, params);

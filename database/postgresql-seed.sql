@@ -181,6 +181,7 @@ INSERT INTO matches (
   video_url,
   review_video_url,
   interview_video_url,
+  is_featured_media,
   summary,
   sort_order
 )
@@ -202,18 +203,19 @@ SELECT
   data.video_url,
   data.review_video_url,
   data.interview_video_url,
+  data.is_featured_media,
   data.summary,
   data.sort_order
 FROM (
   VALUES
-    (1::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '10:00'::TIME, 'done', 'Завершен', 'almaz-antey', 'crvena-zvezda', 10, 3, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239434&hash=a4ca6ca1e82ce6c4&hd=4', NULL::TEXT, NULL::TEXT, 'Открывающий матч игрового дня. На этой странице можно показывать прямой эфир или запись игры.', 1),
-    (2::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '12:00'::TIME, 'live', 'В эфире', 'zenit', 'kairat', 4, 1, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239431&hash=90e82e3d00ac220b&hd=4', NULL::TEXT, NULL::TEXT, 'Матч идёт в прямом эфире', 2),
-    (3::BIGINT, 'burchalkin-cup-2026', 'Группа B', '1 тур', 'День 1', DATE '2026-05-15', '14:00'::TIME, 'soon', 'Скоро', 'san-lorenzo', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239505&hash=eabac0fc9cb32fa5&hd=4', NULL::TEXT, NULL::TEXT, 'Матч группового этапа. Перед началом можно показывать анонс, а после — запись встречи.', 3),
-    (1773883313332::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'dinamo-minsk', 'palmeiras', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, '', 4),
-    (1773883426669::BIGINT, 'burchalkin-cup-2026', 'Группа A', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'almaz-antey', 'zenit', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, '', 5),
-    (1773883471638::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'kairat', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, '', 6),
-    (2025051601::BIGINT, 'burchalkin-cup-2025', 'Группа B', '1 тур', 'Архив', DATE '2025-05-16', '12:00'::TIME, 'done', 'Завершен', 'zenit', 'kairat', 2, 0, 'Стадион "Алмаз-Антей"', 'https://www.youtube.com/embed/5qap5aO4i9A', NULL::TEXT, NULL::TEXT, 'Архивный матч для проверки сквозной истории клуба.', 1)
-) AS data(id, tournament_slug, stage_name, round_name, matchday_label, match_date, match_time, status, status_label, home_club_slug, away_club_slug, home_score, away_score, venue, video_url, review_video_url, interview_video_url, summary, sort_order)
+    (1::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '10:00'::TIME, 'done', 'Завершен', 'almaz-antey', 'crvena-zvezda', 10, 3, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239434&hash=a4ca6ca1e82ce6c4&hd=4', NULL::TEXT, NULL::TEXT, FALSE, 'Открывающий матч игрового дня. На этой странице можно показывать прямой эфир или запись игры.', 1),
+    (2::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '12:00'::TIME, 'live', 'В эфире', 'zenit', 'kairat', 4, 1, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239431&hash=90e82e3d00ac220b&hd=4', NULL::TEXT, NULL::TEXT, TRUE, 'Матч идёт в прямом эфире', 2),
+    (3::BIGINT, 'burchalkin-cup-2026', 'Группа B', '1 тур', 'День 1', DATE '2026-05-15', '14:00'::TIME, 'soon', 'Скоро', 'san-lorenzo', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239505&hash=eabac0fc9cb32fa5&hd=4', NULL::TEXT, NULL::TEXT, FALSE, 'Матч группового этапа. Перед началом можно показывать анонс, а после — запись встречи.', 3),
+    (1773883313332::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'dinamo-minsk', 'palmeiras', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 4),
+    (1773883426669::BIGINT, 'burchalkin-cup-2026', 'Группа A', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'almaz-antey', 'zenit', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 5),
+    (1773883471638::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'kairat', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 6),
+    (2025051601::BIGINT, 'burchalkin-cup-2025', 'Группа B', '1 тур', 'Архив', DATE '2025-05-16', '12:00'::TIME, 'done', 'Завершен', 'zenit', 'kairat', 2, 0, 'Стадион "Алмаз-Антей"', 'https://www.youtube.com/embed/5qap5aO4i9A', NULL::TEXT, NULL::TEXT, FALSE, 'Архивный матч для проверки сквозной истории клуба.', 1)
+) AS data(id, tournament_slug, stage_name, round_name, matchday_label, match_date, match_time, status, status_label, home_club_slug, away_club_slug, home_score, away_score, venue, video_url, review_video_url, interview_video_url, is_featured_media, summary, sort_order)
 JOIN tournaments tournament ON tournament.slug = data.tournament_slug
 JOIN clubs home_club ON home_club.slug = data.home_club_slug
 JOIN clubs away_club ON away_club.slug = data.away_club_slug
@@ -235,6 +237,7 @@ SET
   video_url = EXCLUDED.video_url,
   review_video_url = EXCLUDED.review_video_url,
   interview_video_url = EXCLUDED.interview_video_url,
+  is_featured_media = EXCLUDED.is_featured_media,
   summary = EXCLUDED.summary,
   sort_order = EXCLUDED.sort_order;
 

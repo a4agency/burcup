@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS matches (
   video_url TEXT,
   review_video_url TEXT,
   interview_video_url TEXT,
+  is_featured_media BOOLEAN NOT NULL DEFAULT FALSE,
   summary TEXT NOT NULL DEFAULT '',
   attendance INTEGER,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -258,7 +259,8 @@ VALUES
   ('0004', 'add_partner_logo_asset_metadata'),
   ('0005', 'add_tournament_countdown_flag'),
   ('0006', 'add_match_media_links'),
-  ('0007', 'create_content_translations')
+  ('0007', 'create_content_translations'),
+  ('0008', 'add_match_featured_media_flag')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;
