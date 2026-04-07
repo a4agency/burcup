@@ -1153,6 +1153,97 @@ object-fit:contain;
   transform:translateY(-1px);
 }
 
+.match-headtohead{
+  display:grid;
+  gap:18px;
+}
+
+.match-headtohead-list{
+  display:grid;
+  gap:0;
+  background:#fff;
+  border:1px solid rgba(13,43,99,.10);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 18px 34px rgba(13,43,99,.08);
+}
+
+.match-headtohead-row{
+  display:grid;
+  grid-template-columns:minmax(140px, 200px) minmax(0, 1fr);
+  align-items:center;
+  gap:24px;
+  padding:22px 24px;
+  text-decoration:none;
+  color:inherit;
+  background:#fff;
+  transition:background-color .22s ease;
+}
+
+.match-headtohead-row + .match-headtohead-row{
+  border-top:1px solid rgba(13,43,99,.10);
+}
+
+.match-headtohead-row:hover,
+.match-headtohead-row:focus-visible{
+  background:#f7faff;
+}
+
+.match-headtohead-date{
+  font-size:clamp(18px, 1.8vw, 22px);
+  line-height:1.1;
+  font-weight:700;
+  color:var(--navy);
+}
+
+.match-headtohead-main{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items:center;
+  gap:22px;
+}
+
+.match-headtohead-team{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+}
+
+.match-headtohead-team-home{
+  justify-content:flex-end;
+  text-align:right;
+}
+
+.match-headtohead-team-away{
+  justify-content:flex-start;
+  text-align:left;
+}
+
+.match-headtohead-logo{
+  width:48px;
+  height:48px;
+  object-fit:contain;
+  flex:0 0 48px;
+}
+
+.match-headtohead-name{
+  min-width:0;
+  font-size:clamp(22px, 2vw, 34px);
+  line-height:1.1;
+  font-weight:700;
+  color:var(--navy);
+  overflow-wrap:anywhere;
+}
+
+.match-headtohead-score{
+  font-size:clamp(24px, 2.1vw, 36px);
+  line-height:1;
+  font-weight:800;
+  color:var(--navy);
+  white-space:nowrap;
+}
+
 @media (max-width: 900px){
   .match-page-topline,
   .match-page-head{
@@ -1177,6 +1268,27 @@ object-fit:contain;
 
   .match-page-team-away .match-page-team-brand{
     flex-direction:row;
+  }
+
+  .match-headtohead-row{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .match-headtohead-main{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .match-headtohead-team,
+  .match-headtohead-team-away{
+    justify-content:flex-start;
+    text-align:left;
+  }
+
+  .match-headtohead-team-home{
+    justify-content:flex-start;
+    text-align:left;
   }
 }
 
@@ -1216,6 +1328,26 @@ object-fit:contain;
   .match-page-action{
     min-width:0;
     flex:1 1 180px;
+  }
+
+  .match-headtohead-row{
+    padding:18px;
+  }
+
+  .match-headtohead-date{
+    font-size:16px;
+  }
+
+  .match-headtohead-main{
+    gap:14px;
+  }
+
+  .match-headtohead-name{
+    font-size:20px;
+  }
+
+  .match-headtohead-score{
+    font-size:24px;
   }
 }
 

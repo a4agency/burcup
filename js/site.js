@@ -466,6 +466,71 @@ function formatClubLocation(item = {}) {
   return joinNonEmpty([city, country], ', ');
 }
 
+function getMatchClubKey(item, side) {
+  const slugKey = side === 'home'
+    ? String(item?.home_team_slug || '').trim().toLowerCase()
+    : String(item?.away_team_slug || '').trim().toLowerCase();
+  if (slugKey) return slugKey;
+
+  const nameKey = side === 'home'
+    ? String(item?.home_team || '').trim().toLowerCase()
+    : String(item?.away_team || '').trim().toLowerCase();
+  return nameKey;
+}
+
+function getMatchSortValue(item) {
+  const date = String(item?.date || '').trim();
+  const time = String(item?.time || '').trim();
+  if (date) {
+    const parsed = Date.parse(`${date}T${time || '00:00'}:00`);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+
+  const numericId = Number(item?.id);
+  return Number.isFinite(numericId) ? numericId : 0;
+}
+
+function formatHeadToHeadDateLabel(item) {
+  const date = String(item?.date || '').trim();
+  const time = String(item?.time || '').trim();
+  let dateLabel = '';
+
+  if (date) {
+    const parsed = new Date(`${date}T${time || '00:00'}:00`);
+    if (!Number.isNaN(parsed.getTime())) {
+      dateLabel = new Intl.DateTimeFormat('ru-RU', {
+        day: 'numeric',
+        month: 'short'
+      }).format(parsed).replace(/\./g, '');
+    } else {
+      dateLabel = date;
+    }
+  }
+
+  return joinNonEmpty([dateLabel, time], ', ') || 'Архив матча';
+}
+
+function getHeadToHeadMatches(allMatches, currentMatch) {
+  const homeKey = getMatchClubKey(currentMatch, 'home');
+  const awayKey = getMatchClubKey(currentMatch, 'away');
+  if (!homeKey || !awayKey) return [];
+
+  return (Array.isArray(allMatches) ? allMatches : [])
+    .filter(match => {
+      if (!match || Number(match.id) === Number(currentMatch.id)) return false;
+      if (String(match.status || '').trim().toLowerCase() !== 'done') return false;
+
+      const matchHomeKey = getMatchClubKey(match, 'home');
+      const matchAwayKey = getMatchClubKey(match, 'away');
+
+      return (
+        (matchHomeKey === homeKey && matchAwayKey === awayKey) ||
+        (matchHomeKey === awayKey && matchAwayKey === homeKey)
+      );
+    })
+    .sort((left, right) => getMatchSortValue(right) - getMatchSortValue(left));
+}
+
 function getCloudinaryCloudName() {
   return (window.BCUP_CONFIG?.cloudinaryCloudName || '').trim();
 }
@@ -1201,6 +1266,7 @@ async function renderMatchPageFromJson() {
     const items = await fetchJson('data/matches.json');
     const id = Number(new URLSearchParams(window.location.search).get('id') || '1');
     const item = items.find(x => x.id === id) || items[0];
+    const headToHeadMatches = getHeadToHeadMatches(items, item);
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
@@ -1208,6 +1274,27 @@ async function renderMatchPageFromJson() {
     const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || 'Матч';
     const matchdayLabel = item.matchday || item.round || '';
+    const headToHeadMarkup = headToHeadMatches.length
+      ? headToHeadMatches.map(match => {
+          const scoreParts = String(match.score || '0:0').split(':');
+          return `
+            <a class="match-headtohead-row" href="match.html?id=${encodeURIComponent(match.id)}">
+              <div class="match-headtohead-date">${escapeHtml(formatHeadToHeadDateLabel(match))}</div>
+              <div class="match-headtohead-main">
+                <div class="match-headtohead-team match-headtohead-team-home">
+                  <span class="match-headtohead-name">${escapeHtml(match.home_team)}</span>
+                  ${renderImageMarkup({ src: match.home_logo, alt: match.home_team, className: 'match-headtohead-logo', width: 96 })}
+                </div>
+                <div class="match-headtohead-score">${escapeHtml(scoreParts[0] || '0')} - ${escapeHtml(scoreParts[1] || '0')}</div>
+                <div class="match-headtohead-team match-headtohead-team-away">
+                  ${renderImageMarkup({ src: match.away_logo, alt: match.away_team, className: 'match-headtohead-logo', width: 96 })}
+                  <span class="match-headtohead-name">${escapeHtml(match.away_team)}</span>
+                </div>
+              </div>
+            </a>
+          `;
+        }).join('')
+      : '<div class="card">Команды не встречались ранее.</div>';
     target.innerHTML = `
       <div class="container match-page-shell">
         <section class="match-page-hero">
@@ -1264,6 +1351,14 @@ async function renderMatchPageFromJson() {
             })}
           </div>
         </div>
+        <section class="match-headtohead">
+          <div class="home-block-head">
+            <div>
+              <h2 class="section-title home-block-title">Личные встречи</h2>
+            </div>
+          </div>
+          <div class="match-headtohead-list">${headToHeadMarkup}</div>
+        </section>
       </div>
     `;
     initMatchMediaTabs(target);
