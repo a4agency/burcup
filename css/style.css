@@ -6073,8 +6073,9 @@ button,
 }
 
 .archive-edition-card strong{
-  font-size:32px;
-  line-height:1;
+  font-size:28px;
+  line-height:1.05;
+  font-weight:700;
   color:var(--blue);
 }
 
@@ -6088,7 +6089,7 @@ button,
 
 .archive-edition-card span:last-child{
   color:var(--muted);
-  font-size:18px;
+  font-size:17px;
   line-height:1.5;
 }
 
@@ -6139,15 +6140,17 @@ button,
 
 .archive-placeholder-title{
   margin:0 0 14px;
-  font-size:clamp(42px, 5vw, 64px);
-  line-height:.95;
+  font-size:clamp(36px, 4.6vw, 56px);
+  line-height:1;
+  font-weight:700;
+  letter-spacing:-.02em;
   color:var(--blue);
 }
 
 .archive-placeholder-season{
   margin-bottom:16px;
   color:var(--muted);
-  font-size:24px;
+  font-size:20px;
   font-weight:700;
 }
 
@@ -6155,7 +6158,7 @@ button,
   max-width:920px;
   margin:0 0 28px;
   color:var(--text);
-  font-size:22px;
+  font-size:18px;
   line-height:1.5;
 }
 
@@ -6195,7 +6198,7 @@ button,
 .archive-placeholder-panel-title{
   margin-bottom:14px;
   color:var(--blue);
-  font-size:20px;
+  font-size:18px;
   font-weight:700;
 }
 
@@ -6203,14 +6206,14 @@ button,
   margin:0;
   padding-left:20px;
   color:var(--muted);
-  font-size:18px;
+  font-size:17px;
   line-height:1.6;
 }
 
 .archive-placeholder-panel p{
   margin:0;
   color:var(--muted);
-  font-size:18px;
+  font-size:17px;
   line-height:1.6;
 }
 
@@ -6238,8 +6241,9 @@ button,
 .archive-content-head h2{
   margin:0;
   color:var(--blue);
-  font-size:clamp(28px, 4vw, 42px);
-  line-height:1;
+  font-size:clamp(26px, 3.5vw, 38px);
+  line-height:1.05;
+  font-weight:700;
 }
 
 .archive-team-grid{
@@ -6289,13 +6293,13 @@ button,
 
 .archive-team-card strong{
   color:var(--blue);
-  font-size:28px;
+  font-size:24px;
   line-height:1.05;
 }
 
 .archive-team-card span{
   color:var(--muted);
-  font-size:18px;
+  font-size:17px;
 }
 
 .archive-partner-list{
@@ -6325,7 +6329,7 @@ button,
 
 .archive-partner-card span{
   color:var(--blue);
-  font-size:20px;
+  font-size:18px;
   font-weight:700;
   line-height:1.2;
 }
@@ -6357,7 +6361,7 @@ button,
   gap:14px;
   margin-bottom:16px;
   color:var(--muted);
-  font-size:16px;
+  font-size:15px;
   font-weight:700;
 }
 
@@ -6393,7 +6397,7 @@ button,
 
 .archive-match-card-team span{
   color:var(--blue);
-  font-size:24px;
+  font-size:22px;
   font-weight:700;
   line-height:1.05;
 }
@@ -6402,7 +6406,7 @@ button,
   min-width:110px;
   text-align:center;
   color:var(--blue);
-  font-size:38px;
+  font-size:32px;
   font-weight:800;
   line-height:1;
 }
@@ -6412,7 +6416,7 @@ button,
   border:1px dashed rgba(191,205,233,.95);
   border-radius:24px;
   color:var(--muted);
-  font-size:18px;
+  font-size:17px;
   line-height:1.5;
 }
 
@@ -6463,7 +6467,7 @@ button,
   }
 
   .archive-edition-card strong{
-    font-size:26px;
+    font-size:24px;
   }
 
   .archive-edition-card span:last-child,
@@ -6474,7 +6478,7 @@ button,
   }
 
   .archive-placeholder-season{
-    font-size:20px;
+    font-size:18px;
   }
 
   .archive-content-card{
@@ -6491,7 +6495,7 @@ button,
   }
 
   .archive-partner-card span{
-    font-size:18px;
+    font-size:17px;
   }
 
   .archive-match-card{
@@ -6518,11 +6522,11 @@ button,
   .archive-match-card-score{
     min-width:auto;
     text-align:left;
-    font-size:34px;
+    font-size:30px;
   }
 
   .archive-team-card strong,
   .archive-match-card-team span{
-    font-size:24px;
+    font-size:21px;
   }
 }

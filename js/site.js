@@ -357,7 +357,64 @@ const ARCHIVE_TOURNAMENTS = {
     title: 'Кубок Бурчалкина 2025',
     season: 'Архивный розыгрыш 15 - 17 мая 2025',
     description: 'Позже здесь появятся команды турнира, результаты матчей, сетка, фотографии и архивные материалы розыгрыша 2025 года.',
-    status: 'Страница уже готова как архивная точка входа. Материалы можно будет постепенно добавить позже.'
+    status: 'Страница уже готова как архивная точка входа. Материалы можно будет постепенно добавить позже.',
+    detail: {
+      clubs_count: 6,
+      matches_count: 3,
+      matches: [
+        {
+          id: 'archive-2025-1',
+          date: '2025-05-15',
+          time: '10:00',
+          status_label: 'Завершён',
+          score: '2:1',
+          group: 'Группа A',
+          home_team: 'Алмаз-Антей',
+          home_team_slug: 'almaz-antey',
+          home_logo: 'images/team-almaz-antey.png',
+          away_team: 'Динамо-Минск',
+          away_team_slug: 'dinamo-minsk',
+          away_logo: 'images/team-dinamo-minsk.png'
+        },
+        {
+          id: 'archive-2025-2',
+          date: '2025-05-15',
+          time: '12:00',
+          status_label: 'Завершён',
+          score: '3:1',
+          group: 'Группа A',
+          home_team: 'Зенит',
+          home_team_slug: 'zenit',
+          home_logo: 'images/team-zenit.png',
+          away_team: 'Кайрат',
+          away_team_slug: 'kairat',
+          away_logo: 'images/team-kairat.png'
+        },
+        {
+          id: 'archive-2025-3',
+          date: '2025-05-15',
+          time: '14:00',
+          status_label: 'Завершён',
+          score: '1:1',
+          group: 'Группа B',
+          home_team: 'Палмейрас',
+          home_team_slug: 'palmeiras',
+          home_logo: 'images/team-palmeiras.png',
+          away_team: 'Сан-Лоренсо',
+          away_team_slug: 'san-lorenzo',
+          away_logo: 'images/team-san-lorenzo.png'
+        }
+      ],
+      partners: [
+        {
+          slug: 'general',
+          items: [
+            { name: 'Система спортивной аналитики B-SIGHT', logo_url: 'images/logo-burchalkin.png', website_url: '' },
+            { name: 'Банк ВТБ', logo_url: 'images/logo-burchalkin.png', website_url: '' }
+          ]
+        }
+      ]
+    }
   },
   '2024': {
     title: 'Кубок Бурчалкина 2024',
@@ -1598,6 +1655,7 @@ function renderArchiveTournamentPage() {
   }
 
   function applyArchiveData(archive, detail = null) {
+    const resolvedDetail = detail || archiveFallback.detail || null;
     if (titleNode) titleNode.textContent = archive.title;
     if (seasonNode) seasonNode.textContent = archive.season;
     if (descriptionNode) descriptionNode.textContent = archive.description;
@@ -1606,8 +1664,8 @@ function renderArchiveTournamentPage() {
 
     if (statsNode) {
       const stats = [];
-      const clubsCount = Number(detail?.clubs_count || getArchiveTournamentClubs(detail || {}).length || 0);
-      const matchesCount = Number(detail?.matches_count || (Array.isArray(detail?.matches) ? detail.matches.length : 0) || 0);
+      const clubsCount = Number(resolvedDetail?.clubs_count || getArchiveTournamentClubs(resolvedDetail || {}).length || 0);
+      const matchesCount = Number(resolvedDetail?.matches_count || (Array.isArray(resolvedDetail?.matches) ? resolvedDetail.matches.length : 0) || 0);
       if (clubsCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(formatCountLabel(clubsCount, ['клуб', 'клуба', 'клубов']))}</div>`);
       if (matchesCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей']))}</div>`);
       stats.push(`<div class="archive-stat-chip">${escapeHtml(archive.season)}</div>`);
@@ -1615,14 +1673,14 @@ function renderArchiveTournamentPage() {
     }
 
     if (teamsNode) {
-      const clubs = getArchiveTournamentClubs(detail || {});
+      const clubs = getArchiveTournamentClubs(resolvedDetail || {});
       teamsNode.innerHTML = clubs.length
         ? clubs.map(renderArchiveClubCard).join('')
         : '<div class="archive-empty-state">Состав участников появится позднее.</div>';
     }
 
     if (partnersNode) {
-      const groups = Array.isArray(detail?.partners) ? detail.partners : [];
+      const groups = Array.isArray(resolvedDetail?.partners) ? resolvedDetail.partners : [];
       const partners = groups.flatMap(group => Array.isArray(group.items) ? group.items : []);
       partnersNode.innerHTML = partners.length
         ? partners.map(renderArchivePartnerCard).join('')
@@ -1630,7 +1688,7 @@ function renderArchiveTournamentPage() {
     }
 
     if (matchesNode) {
-      const matches = Array.isArray(detail?.matches) ? detail.matches : [];
+      const matches = Array.isArray(resolvedDetail?.matches) ? resolvedDetail.matches : [];
       matchesNode.innerHTML = matches.length
         ? matches.map(renderArchiveMatchCard).join('')
         : '<div class="archive-empty-state">Архивные матчи будут опубликованы позднее.</div>';
