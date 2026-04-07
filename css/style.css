@@ -6363,7 +6363,7 @@ button,
   gap:20px;
   align-items:end;
   margin-bottom:20px;
-  max-width:860px;
+  max-width:980px;
   margin-left:auto;
   margin-right:auto;
 }
@@ -6371,7 +6371,7 @@ button,
 .archive-team-grid-rest{
   grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:18px;
-  max-width:860px;
+  max-width:980px;
   margin:0 auto;
 }
 
@@ -6387,7 +6387,7 @@ button,
   text-decoration:none;
   color:var(--text);
   transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-  min-height:240px;
+  min-height:260px;
 }
 
 .archive-team-card-podium{
@@ -6479,15 +6479,15 @@ button,
 .archive-team-card-podium .archive-team-body{
   position:relative;
   z-index:1;
-  min-height:172px;
-  padding:20px 18px 20px;
+  min-height:178px;
+  padding:22px 22px 22px;
   justify-content:flex-start;
 }
 
 .archive-team-card strong{
   color:var(--navy);
-  font-size:18px;
-  line-height:1.15;
+  font-size:17px;
+  line-height:1.2;
   max-width:100%;
   white-space:normal;
   text-wrap:balance;
@@ -6495,7 +6495,7 @@ button,
 
 .archive-team-card span{
   color:var(--muted);
-  font-size:15px;
+  font-size:14px;
   line-height:1.35;
   max-width:100%;
   white-space:normal;
@@ -6503,9 +6503,10 @@ button,
 }
 
 .archive-team-place{
-  margin-top:4px;
+  margin-top:auto;
+  padding-top:10px;
   color:var(--navy);
-  font-size:16px;
+  font-size:15px;
   font-weight:700;
   line-height:1.2;
 }
@@ -6520,17 +6521,29 @@ button,
 }
 
 .archive-team-grid-rest .archive-team-card{
-  min-height:220px;
-  padding:20px 18px 18px;
+  min-height:236px;
+  padding:22px 20px 20px;
 }
 
 .archive-team-grid-rest .archive-team-logo-wrap{
-  min-height:94px;
+  min-height:108px;
 }
 
 .archive-team-grid-rest .archive-team-logo{
-  width:min(100px, 62%);
-  max-height:84px;
+  width:min(122px, 72%);
+  max-height:96px;
+}
+
+.archive-team-grid-rest .archive-team-body{
+  min-height:108px;
+}
+
+.archive-team-grid-rest .archive-team-card strong{
+  font-size:16px;
+}
+
+.archive-team-grid-rest .archive-team-card span{
+  font-size:14px;
 }
 
 .archive-standings-card .standings-table{
