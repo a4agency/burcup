@@ -9,6 +9,42 @@ const TEAM_LOGOS = [
   { name: 'Алмаз-Антей', path: 'images/team-almaz-antey.png' },
 ];
 
+const DEFAULT_PARTNERS = [
+  ['b-sight', 'Система спортивной аналитики B-SIGHT', 'general', 1],
+  ['rossiyskaya-promyshlennaya-kollegiya', 'АО «Российская промышленная коллегия»', 'general', 2],
+  ['baz', 'БАЗ', 'general', 3],
+  ['medialiga', 'Медиалига', 'general', 4],
+  ['vtb-strana', 'БФ «ВТБ Страна»', 'general', 5],
+  ['bank-vtb', 'Банк ВТБ', 'general', 6],
+  ['izhora-stal-invest', 'Ижора Сталь Инвест', 'general', 7],
+  ['spring-center', 'ООО Фирма «Спринг-Центр»', 'general', 8],
+  ['novye-tekhnologii-materialy', 'ООО «Новые технологии и материалы»', 'general', 9],
+  ['saturn', 'ПАО Сатурн', 'general', 10],
+  ['bank-psb', 'Банк ПСБ', 'general', 11],
+  ['tekhprom', 'ТехПром', 'general', 12],
+  ['tass', 'ТАСС', 'media', 1],
+  ['sport-express', 'Спорт-Экспресс', 'media', 2],
+  ['rfs', 'РФС', 'media', 3],
+  ['fontanka', 'Фонтанка.ру', 'media', 4],
+  ['sport-den-za-dnem', 'Спорт День за Днем', 'media', 5],
+  ['komsomolskaya-pravda', 'Комсомольская правда', 'media', 6],
+  ['radio-zenit', 'Радио «Зенит»', 'media', 7],
+  ['football-peterburga', 'Футбол Петербурга', 'media', 8],
+  ['spb-vedomosti', 'Санкт-Петербургские ведомости', 'media', 9],
+  ['tv-spb', 'Телеканал «Санкт-Петербург»', 'media', 10],
+].map(([slug, name, category, sortOrder]) => ({
+  slug,
+  name,
+  category,
+  tournament_slug: 'burchalkin-cup-2026',
+  website_url: '',
+  logo_url: '',
+  alt_text: name,
+  sort_order: sortOrder,
+  is_visible: true,
+  note: '',
+}));
+
 const ADMIN_TOKEN_KEY = 'bcup_admin_session_token';
 
 function escapeHtml(value) {
@@ -252,20 +288,7 @@ const ADMIN_SOURCES = {
     exportName: 'partners.json',
     title: 'Партнёры',
     help: 'Каталог партнёров, категорий, логотипов и ссылок. Если ссылка не указана, карточка партнёра ведёт на главную страницу сайта.',
-    defaultData: [
-      {
-        slug: 'b-sight',
-        name: 'Система спортивной аналитики B-SIGHT',
-        category: 'general',
-        tournament_slug: 'burchalkin-cup-2026',
-        website_url: '',
-        logo_url: '',
-        alt_text: 'B-SIGHT',
-        sort_order: 1,
-        is_visible: true,
-        note: '',
-      }
-    ],
+    defaultData: DEFAULT_PARTNERS,
     empty: () => ({
       slug: '',
       name: '',
@@ -763,7 +786,7 @@ function makeFieldsByKeys(sourceName, keys, item, itemIndex) {
 
 function renderSectionedAdminCard(title, index, sections) {
   return `
-    <div class="admin-item-card admin-record-card">
+    <div class="admin-item-card admin-record-card" data-item-index="${index}">
       <div class="admin-item-head">
         <strong>${title} #${index + 1}</strong>
         <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
@@ -785,7 +808,7 @@ function renderSectionedAdminCard(title, index, sections) {
 
 function renderMatchAdminCard(item, index, allItems) {
   return `
-    <div class="admin-item-card admin-match-card">
+    <div class="admin-item-card admin-match-card" data-item-index="${index}">
       <div class="admin-item-head">
         <strong>Матч #${index + 1}</strong>
         <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
@@ -913,6 +936,37 @@ function renderPartnerAdminCard(item, index) {
   ]);
 }
 
+function getPartnerCategoryTitle(category) {
+  if (category === 'media') return 'Информационные партнёры';
+  if (category === 'title') return 'Титульные партнёры';
+  if (category === 'official') return 'Официальные партнёры';
+  return 'Партнёры';
+}
+
+function renderPartnerSourceCards(data) {
+  const groups = ['general', 'media', 'title', 'official'];
+  const chunks = [];
+
+  groups.forEach(category => {
+    const items = data
+      .map((item, index) => ({ item, index }))
+      .filter(entry => String(entry.item.category || 'general') === category);
+
+    if (!items.length) return;
+
+    chunks.push(`
+      <div class="admin-source-group">
+        <div class="admin-source-group-title">${getPartnerCategoryTitle(category)}</div>
+        <div class="admin-form-list">
+          ${items.map(({ item, index }) => renderPartnerAdminCard(item, index)).join('')}
+        </div>
+      </div>
+    `);
+  });
+
+  return chunks.join('');
+}
+
 function renderAdminCardBySource(sourceName, item, index, allItems) {
   if (sourceName === 'matches') return renderMatchAdminCard(item, index, allItems);
   if (sourceName === 'tournaments') return renderTournamentAdminCard(item, index);
@@ -991,25 +1045,26 @@ function readFormData(sourceName) {
   const baseItems = renderedDataCache[sourceName] || [];
   const items = [];
   const cards = document.querySelectorAll('.admin-item-card');
-  cards.forEach((card, index) => {
-    const item = structuredClone(baseItems[index] || {});
+  cards.forEach((card, visualIndex) => {
+    const sourceIndex = Number(card.dataset.itemIndex ?? visualIndex);
+    const item = structuredClone(baseItems[sourceIndex] || {});
     source.fields.forEach(([key, , type]) => {
       if (type === 'score') {
-        const leftEl = card.querySelector(`[data-key="${key}"][data-score-part="left"][data-index="${index}"]`);
-        const rightEl = card.querySelector(`[data-key="${key}"][data-score-part="right"][data-index="${index}"]`);
+        const leftEl = card.querySelector(`[data-key="${key}"][data-score-part="left"][data-index="${sourceIndex}"]`);
+        const rightEl = card.querySelector(`[data-key="${key}"][data-score-part="right"][data-index="${sourceIndex}"]`);
         item[key] = `${leftEl ? leftEl.value || '0' : '0'}:${rightEl ? rightEl.value || '0' : '0'}`;
         return;
       }
-      const el = card.querySelector(`[data-key="${key}"][data-index="${index}"]`);
+      const el = card.querySelector(`[data-key="${key}"][data-index="${sourceIndex}"]`);
       if (!el) return;
       let value = el.value;
       if (type === 'number') value = value === '' ? '' : Number(value);
       if (type === 'checkbox') value = value === 'true';
       item[key] = value;
     });
-    items.push(item);
+    items[sourceIndex] = item;
   });
-  return items;
+  return items.filter(Boolean);
 }
 
 function renderForm(sourceName, data) {
@@ -1017,9 +1072,10 @@ function renderForm(sourceName, data) {
   const wrap = document.getElementById('admin-form-wrap');
   setRenderedData(sourceName, data);
   wrap.innerHTML = `
-    <div class="admin-form-list">
-      ${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}
-    </div>
+    ${sourceName === 'partners'
+      ? renderPartnerSourceCards(data)
+      : `<div class="admin-form-list">${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}</div>`
+    }
     <div class="admin-toolbar">
       <button type="button" class="admin-add" id="admin-add-item">+ Добавить запись</button>
     </div>

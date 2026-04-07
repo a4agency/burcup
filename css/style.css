@@ -1688,6 +1688,21 @@ object-fit:contain;
   gap:14px;
 }
 
+.admin-source-group{
+  display:grid;
+  gap:14px;
+}
+
+.admin-source-group + .admin-source-group{
+  margin-top:22px;
+}
+
+.admin-source-group-title{
+  font-size:18px;
+  font-weight:900;
+  color:var(--navy);
+}
+
 .admin-item-card{
   border:1px solid var(--line);
   border-radius:16px;
