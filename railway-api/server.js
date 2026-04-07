@@ -222,62 +222,83 @@ function requireAdminAuth(req, res, next) {
   return next();
 }
 
-const tournamentsQuery = `
-  SELECT
-    t.id,
-    t.slug,
-    t.name,
-    t.season_year,
-    t.short_label,
-    t.logo_path,
-    t.hero_image_url,
-    t.description,
-    TO_CHAR(t.start_date, 'YYYY-MM-DD') AS start_date,
-    TO_CHAR(t.end_date, 'YYYY-MM-DD') AS end_date,
-    t.location,
-    t.status,
-    t.is_featured,
-    COUNT(DISTINCT tc.club_id) AS clubs_count,
-    COUNT(DISTINCT m.id) AS matches_count
-  FROM tournaments t
-  LEFT JOIN tournament_clubs tc ON tc.tournament_id = t.id
-  LEFT JOIN matches m ON m.tournament_id = t.id
-  GROUP BY
-    t.id,
-    t.slug,
-    t.name,
-    t.season_year,
-    t.short_label,
-    t.logo_path,
-    t.hero_image_url,
-    t.description,
-    t.start_date,
-    t.end_date,
-    t.location,
-    t.status,
-    t.is_featured
-  ORDER BY t.season_year DESC NULLS LAST, t.start_date DESC NULLS LAST, t.id DESC;
-`;
+async function hasTournamentCountdownColumn(queryable = pool) {
+  const { rows } = await queryable.query(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'tournaments'
+        AND column_name = 'countdown_enabled'
+    ) AS exists;
+  `);
 
-const tournamentDetailsQuery = `
-  SELECT
-    t.id,
-    t.slug,
-    t.name,
-    t.season_year,
-    t.short_label,
-    t.logo_path,
-    t.hero_image_url,
-    t.description,
-    TO_CHAR(t.start_date, 'YYYY-MM-DD') AS start_date,
-    TO_CHAR(t.end_date, 'YYYY-MM-DD') AS end_date,
-    t.location,
-    t.status,
-    t.is_featured
-  FROM tournaments t
-  WHERE t.slug = $1
-  LIMIT 1;
-`;
+  return rows[0]?.exists === true;
+}
+
+function buildTournamentsQuery(includeCountdown) {
+  return `
+    SELECT
+      t.id,
+      t.slug,
+      t.name,
+      t.season_year,
+      t.short_label,
+      t.logo_path,
+      t.hero_image_url,
+      t.description,
+      TO_CHAR(t.start_date, 'YYYY-MM-DD') AS start_date,
+      TO_CHAR(t.end_date, 'YYYY-MM-DD') AS end_date,
+      t.location,
+      t.status,
+      t.is_featured,
+      ${includeCountdown ? 't.countdown_enabled' : 'TRUE::boolean AS countdown_enabled'},
+      COUNT(DISTINCT tc.club_id) AS clubs_count,
+      COUNT(DISTINCT m.id) AS matches_count
+    FROM tournaments t
+    LEFT JOIN tournament_clubs tc ON tc.tournament_id = t.id
+    LEFT JOIN matches m ON m.tournament_id = t.id
+    GROUP BY
+      t.id,
+      t.slug,
+      t.name,
+      t.season_year,
+      t.short_label,
+      t.logo_path,
+      t.hero_image_url,
+      t.description,
+      t.start_date,
+      t.end_date,
+      t.location,
+      t.status,
+      t.is_featured
+      ${includeCountdown ? ', t.countdown_enabled' : ''}
+    ORDER BY t.season_year DESC NULLS LAST, t.start_date DESC NULLS LAST, t.id DESC;
+  `;
+}
+
+function buildTournamentDetailsQuery(includeCountdown) {
+  return `
+    SELECT
+      t.id,
+      t.slug,
+      t.name,
+      t.season_year,
+      t.short_label,
+      t.logo_path,
+      t.hero_image_url,
+      t.description,
+      TO_CHAR(t.start_date, 'YYYY-MM-DD') AS start_date,
+      TO_CHAR(t.end_date, 'YYYY-MM-DD') AS end_date,
+      t.location,
+      t.status,
+      t.is_featured,
+      ${includeCountdown ? 't.countdown_enabled' : 'TRUE::boolean AS countdown_enabled'}
+    FROM tournaments t
+    WHERE t.slug = $1
+    LIMIT 1;
+  `;
+}
 
 const clubsQuery = `
   SELECT
@@ -592,6 +613,7 @@ const adminPartnersQuery = `
 `;
 
 async function getAdminTournaments(client) {
+  const includeCountdown = await hasTournamentCountdownColumn(client);
   const { rows } = await client.query(`
     SELECT
       slug,
@@ -605,7 +627,8 @@ async function getAdminTournaments(client) {
       logo_path,
       hero_image_url,
       description,
-      is_featured
+      is_featured,
+      ${includeCountdown ? 'countdown_enabled' : 'TRUE::boolean AS countdown_enabled'}
     FROM tournaments
     ORDER BY season_year DESC NULLS LAST, start_date DESC NULLS LAST, id DESC;
   `);
@@ -623,6 +646,7 @@ async function getAdminTournaments(client) {
     hero_image: row.hero_image_url || '',
     description: row.description || '',
     is_featured: row.is_featured,
+    countdown_enabled: row.countdown_enabled !== false,
   }));
 }
 
@@ -727,6 +751,11 @@ async function getAdminPartners(client) {
 async function replaceTournaments(client, payload) {
   const items = ensureArray(payload);
   const slugs = [];
+  const includeCountdown = await hasTournamentCountdownColumn(client);
+
+  if (!includeCountdown && items.some(item => parseBoolean(item.countdown_enabled, true) === false)) {
+    throw new Error('Сначала примените миграцию 0005_add_tournament_countdown_flag.sql, чтобы скрывать таймер турнира.');
+  }
 
   await client.query('UPDATE tournaments SET is_featured = FALSE');
 
@@ -737,6 +766,56 @@ async function replaceTournaments(client, payload) {
       throw new Error('Each tournament must have slug and name');
     }
     slugs.push(slug);
+    if (includeCountdown) {
+      await client.query(`
+        INSERT INTO tournaments (
+          slug,
+          name,
+          season_year,
+          short_label,
+          logo_path,
+          hero_image_url,
+          description,
+          start_date,
+          end_date,
+          location,
+          status,
+          is_featured,
+          countdown_enabled
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+        ON CONFLICT (slug) DO UPDATE
+        SET
+          name = EXCLUDED.name,
+          season_year = EXCLUDED.season_year,
+          short_label = EXCLUDED.short_label,
+          logo_path = EXCLUDED.logo_path,
+          hero_image_url = EXCLUDED.hero_image_url,
+          description = EXCLUDED.description,
+          start_date = EXCLUDED.start_date,
+          end_date = EXCLUDED.end_date,
+          location = EXCLUDED.location,
+          status = EXCLUDED.status,
+          is_featured = EXCLUDED.is_featured,
+          countdown_enabled = EXCLUDED.countdown_enabled
+      `, [
+        slug,
+        name,
+        item.season_year ? parseInteger(item.season_year, null) : null,
+        nullIfEmpty(item.short_label),
+        nullIfEmpty(item.logo),
+        nullIfEmpty(item.hero_image),
+        normalizeString(item.description),
+        nullIfEmpty(item.start_date),
+        nullIfEmpty(item.end_date),
+        nullIfEmpty(item.location),
+        normalizeString(item.status) || 'draft',
+        parseBoolean(item.is_featured, false),
+        parseBoolean(item.countdown_enabled, true),
+      ]);
+      continue;
+    }
+
     await client.query(`
       INSERT INTO tournaments (
         slug,
@@ -1340,7 +1419,8 @@ app.put('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
 
 app.get('/api/tournaments', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(tournamentsQuery);
+    const includeCountdown = await hasTournamentCountdownColumn(pool);
+    const { rows } = await pool.query(buildTournamentsQuery(includeCountdown));
     res.json(rows.map(row => ({
       id: Number(row.id),
       slug: row.slug,
@@ -1355,6 +1435,7 @@ app.get('/api/tournaments', async (req, res, next) => {
       location: row.location || '',
       status: row.status,
       is_featured: row.is_featured,
+      countdown_enabled: row.countdown_enabled !== false,
       clubs_count: Number(row.clubs_count || 0),
       matches_count: Number(row.matches_count || 0),
     })));
@@ -1365,7 +1446,8 @@ app.get('/api/tournaments', async (req, res, next) => {
 
 app.get('/api/tournaments/:slug', async (req, res, next) => {
   try {
-    const tournamentResult = await pool.query(tournamentDetailsQuery, [req.params.slug]);
+    const includeCountdown = await hasTournamentCountdownColumn(pool);
+    const tournamentResult = await pool.query(buildTournamentDetailsQuery(includeCountdown), [req.params.slug]);
     if (!tournamentResult.rows.length) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
@@ -1412,6 +1494,7 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       location: tournament.location || '',
       status: tournament.status,
       is_featured: tournament.is_featured,
+      countdown_enabled: tournament.countdown_enabled !== false,
       standings: standingsResult.rows.map(row => ({
         group: row.group_name,
         position: row.position,

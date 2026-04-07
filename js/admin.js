@@ -31,6 +31,7 @@ const ADMIN_SOURCES = {
         hero_image: '',
         description: 'Основной турнир сезона 2026 года.',
         is_featured: true,
+        countdown_enabled: true,
       }
     ],
     empty: () => ({
@@ -46,6 +47,7 @@ const ADMIN_SOURCES = {
       hero_image: '',
       description: '',
       is_featured: false,
+      countdown_enabled: true,
     }),
     fields: [
       ['slug', 'Slug', 'text'],
@@ -59,6 +61,7 @@ const ADMIN_SOURCES = {
       ['logo', 'Логотип', 'image'],
       ['hero_image', 'Hero image', 'image'],
       ['is_featured', 'Текущий турнир', 'checkbox'],
+      ['countdown_enabled', 'Показывать таймер на главной', 'checkbox'],
       ['description', 'Описание', 'textarea'],
     ],
   },
@@ -295,7 +298,22 @@ function setAdminToken(token) {
 }
 
 function cloneDefaultData(sourceName) {
-  return structuredClone(ADMIN_SOURCES[sourceName].defaultData || []);
+  return normalizeSourceData(sourceName, structuredClone(ADMIN_SOURCES[sourceName].defaultData || []));
+}
+
+function normalizeTournamentAdminItem(item) {
+  return {
+    ...item,
+    countdown_enabled: item?.countdown_enabled !== false,
+  };
+}
+
+function normalizeSourceData(sourceName, data) {
+  const items = Array.isArray(data) ? data : [];
+  if (sourceName === 'tournaments') {
+    return items.map(normalizeTournamentAdminItem);
+  }
+  return items;
 }
 
 async function fetchAdminSource(sourceName) {
@@ -320,7 +338,8 @@ async function fetchAdminSource(sourceName) {
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
 
-  return response.json();
+  const data = await response.json();
+  return normalizeSourceData(sourceName, data);
 }
 
 async function pushAdminSource(sourceName, data) {
@@ -410,18 +429,18 @@ function getSourceData(sourceName) {
   const local = localStorage.getItem(source.key);
   if (local) {
     try {
-      return JSON.parse(local);
+      return normalizeSourceData(sourceName, JSON.parse(local));
     } catch (e) {}
   }
   return null;
 }
 
 function setSourceData(sourceName, data) {
-  localStorage.setItem(ADMIN_SOURCES[sourceName].key, JSON.stringify(data));
+  localStorage.setItem(ADMIN_SOURCES[sourceName].key, JSON.stringify(normalizeSourceData(sourceName, data)));
 }
 
 function setRenderedData(sourceName, data) {
-  renderedDataCache[sourceName] = structuredClone(data);
+  renderedDataCache[sourceName] = normalizeSourceData(sourceName, structuredClone(data));
 }
 
 function syncTextareaWithRenderedData(sourceName) {
@@ -727,7 +746,7 @@ async function adminShowSource(sourceName, options = {}) {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
 
-  const data = await loadSourceData(sourceName, options);
+  const data = normalizeSourceData(sourceName, await loadSourceData(sourceName, options));
 
   document.getElementById('admin-title').textContent = source.title;
   document.getElementById('admin-help').textContent = source.help;
@@ -751,10 +770,10 @@ async function adminSave() {
   try {
     let parsed;
     if (currentMode === 'form') {
-      parsed = readFormData(currentSource);
+      parsed = normalizeSourceData(currentSource, readFormData(currentSource));
       document.getElementById('admin-textarea').value = JSON.stringify(parsed, null, 2);
     } else {
-      parsed = JSON.parse(document.getElementById('admin-textarea').value);
+      parsed = normalizeSourceData(currentSource, JSON.parse(document.getElementById('admin-textarea').value));
       renderForm(currentSource, parsed);
     }
 

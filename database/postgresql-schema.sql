@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS tournaments (
   location TEXT,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'upcoming', 'active', 'completed', 'archived')),
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  countdown_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -240,7 +241,8 @@ VALUES
   ('0001', 'create_core_entities'),
   ('0002', 'create_matches_and_news'),
   ('0003', 'create_partner_entities'),
-  ('0004', 'add_partner_logo_asset_metadata')
+  ('0004', 'add_partner_logo_asset_metadata'),
+  ('0005', 'add_tournament_countdown_flag')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;

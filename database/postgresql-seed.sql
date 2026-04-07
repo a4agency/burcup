@@ -11,7 +11,8 @@ INSERT INTO tournaments (
   end_date,
   location,
   status,
-  is_featured
+  is_featured,
+  countdown_enabled
 )
 VALUES
   (
@@ -25,6 +26,7 @@ VALUES
     DATE '2026-03-20',
     'Санкт-Петербург',
     'active',
+    TRUE,
     TRUE
   ),
   (
@@ -38,6 +40,7 @@ VALUES
     DATE '2025-05-20',
     'Санкт-Петербург',
     'completed',
+    FALSE,
     FALSE
   )
 ON CONFLICT (slug) DO UPDATE
@@ -51,7 +54,8 @@ SET
   end_date = EXCLUDED.end_date,
   location = EXCLUDED.location,
   status = EXCLUDED.status,
-  is_featured = EXCLUDED.is_featured;
+  is_featured = EXCLUDED.is_featured,
+  countdown_enabled = EXCLUDED.countdown_enabled;
 
 INSERT INTO clubs (
   slug,

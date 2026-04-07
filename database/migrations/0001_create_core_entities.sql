@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS tournaments (
   location TEXT,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'upcoming', 'active', 'completed', 'archived')),
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  countdown_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

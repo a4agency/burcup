@@ -95,9 +95,21 @@ function initActiveHeaderLink() {
   });
 }
 
-function initTournamentCountdown() {
+async function initTournamentCountdown() {
   const root = document.querySelector('[data-countdown-target]');
   if (!root) return;
+  const section = root.closest('.countdown-section');
+  const tournaments = await fetchApi('/api/tournaments');
+  const featuredTournament = Array.isArray(tournaments)
+    ? tournaments.find(item => item && item.is_featured) || null
+    : null;
+
+  if (featuredTournament && featuredTournament.countdown_enabled === false) {
+    if (section) section.hidden = true;
+    return;
+  }
+
+  if (section) section.hidden = false;
 
   const targetTimestamp = Date.parse(root.getAttribute('data-countdown-target') || '');
   if (!Number.isFinite(targetTimestamp)) return;
