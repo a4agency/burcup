@@ -1463,12 +1463,14 @@ async function renderNewsArticlePage() {
     root.innerHTML = `
       <article class="news-article-card">
         <a class="news-article-back" href="news.html">← Все новости</a>
-        <div class="news-article-date">${escapeHtml(item.date || '')}</div>
         <h1 class="news-article-title">${escapeHtml(item.title || '')}</h1>
         ${renderNewsCoverImage(imageSrc, item.title, 'news-article-cover')}
         <div class="news-article-body">
           ${item.excerpt ? `<p class="news-article-lead">${escapeHtml(item.excerpt)}</p>` : ''}
           ${content.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+        </div>
+        <div class="news-article-footer">
+          <div class="news-article-date">Добавлено: ${escapeHtml(item.date || '')}</div>
         </div>
       </article>
     `;
