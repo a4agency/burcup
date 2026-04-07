@@ -24,7 +24,7 @@
   "Все матчи →": "All matches →",
   "Все новости →": "All news →",
   "Все результаты →": "All results →",
-  "История участников": "Participants History",
+  "Исторические участники турнира": "Historical Tournament Participants",
   "Исторический участник турнира прошлых лет.": "Historic participant of previous editions of the tournament.",
   "Команды Кубка Бурчалкина 2025": "Burchalkin Cup 2025 Teams",
   "Матчи": "Matches",
