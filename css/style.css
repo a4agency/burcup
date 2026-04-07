@@ -3963,6 +3963,44 @@ button,
   display: block !important;
 }
 
+.teams-current-section{
+  padding-bottom: 18px;
+}
+
+.teams-history-section{
+  position: relative;
+  padding-top: 42px !important;
+}
+
+.teams-history-section::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(1180px, calc(100% - 32px));
+  height:1px;
+  background:linear-gradient(90deg, rgba(13,43,99,0), rgba(13,43,99,.14) 18%, rgba(13,43,99,.14) 82%, rgba(13,43,99,0));
+}
+
+.teams-history-section::after{
+  content:"";
+  position:absolute;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(1180px, calc(100% - 32px));
+  height:140px;
+  border-radius:30px;
+  background:linear-gradient(180deg, rgba(244,247,251,.92), rgba(255,255,255,0));
+  pointer-events:none;
+}
+
+.teams-history-section .container{
+  position:relative;
+  z-index:1;
+}
+
 
 /* About tournament page */
 .about-intro-section{
