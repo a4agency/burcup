@@ -909,6 +909,9 @@ function renderImageMarkup({
   if (className) attrs.push(`class="${escapeHtml(className)}"`);
   if (rawSrc && !rawSrc.startsWith('data:image/') && !isCloudinaryUrl(rawSrc)) {
     attrs.push(`data-original-src="${escapeHtml(rawSrc)}"`);
+    if (/^images\/(?:logo-burchalkin|team-[a-z0-9-]+|history-[a-z0-9-]+)\.webp$/i.test(rawSrc)) {
+      attrs.push(`data-png-fallback-src="${escapeHtml(rawSrc.replace(/\.webp$/i, '.png'))}"`);
+    }
   }
   if (keepEmptyAlt || alt) attrs.push(`alt="${escapeHtml(alt || '')}"`);
   if (loading) attrs.push(`loading="${escapeHtml(loading)}"`);
@@ -1013,18 +1016,30 @@ function upgradeStaticImagesForCloudinary() {
 function handleCloudinaryImageFallback(event) {
   const image = event.target;
   if (!(image instanceof HTMLImageElement)) return;
-  if (image.dataset.cloudinaryFallbackApplied === 'true') return;
-
   const currentSrc = image.currentSrc || image.getAttribute('src') || '';
   const originalSrc = image.dataset.originalSrc || '';
-  if (!originalSrc || !isCloudinaryUrl(currentSrc)) return;
 
-  image.dataset.cloudinaryFallbackApplied = 'true';
+  if (originalSrc && isCloudinaryUrl(currentSrc) && image.dataset.cloudinaryFallbackApplied !== 'true') {
+    image.dataset.cloudinaryFallbackApplied = 'true';
+    image.removeAttribute('srcset');
+    image.removeAttribute('sizes');
+    if (image.dataset.originalSrcset) image.setAttribute('srcset', image.dataset.originalSrcset);
+    if (image.dataset.originalSizes) image.setAttribute('sizes', image.dataset.originalSizes);
+    image.setAttribute('src', originalSrc);
+    return;
+  }
+
+  const pngFallbackSrc = image.dataset.pngFallbackSrc
+    || (/(?:^|\/)images\/(?:logo-burchalkin|team-[a-z0-9-]+|history-[a-z0-9-]+)\.webp(?:$|\?)/i.test(currentSrc)
+      ? currentSrc.replace(/\.webp(\?|$)/i, '.png$1')
+      : '');
+
+  if (!pngFallbackSrc || image.dataset.pngFallbackApplied === 'true') return;
+
+  image.dataset.pngFallbackApplied = 'true';
   image.removeAttribute('srcset');
   image.removeAttribute('sizes');
-  if (image.dataset.originalSrcset) image.setAttribute('srcset', image.dataset.originalSrcset);
-  if (image.dataset.originalSizes) image.setAttribute('sizes', image.dataset.originalSizes);
-  image.setAttribute('src', originalSrc);
+  image.setAttribute('src', pngFallbackSrc);
 }
 
 async function fetchApi(path) {
