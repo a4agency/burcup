@@ -1139,11 +1139,22 @@ function renderMatchAdminCard(item, index, allItems) {
 }
 
 function renderTournamentAdminCard(item, index) {
+  const seasonYear = Number(item?.season_year || 0);
+  const isFeatured = item?.is_featured === true;
+  const panelNote = isFeatured
+    ? 'Эта запись управляет карточкой текущего турнира на главной странице.'
+    : seasonYear && seasonYear < 2026
+      ? 'Эта запись управляет архивной карточкой турнира.'
+      : 'Эта запись управляет карточкой турнира на сайте.';
+
   return renderSectionedAdminCard('Турнир', index, [
     {
       title: 'Основная информация',
       gridClass: 'admin-record-grid-3',
-      content: makeFieldsByKeys('tournaments', ['slug', 'name', 'season_year', 'short_label', 'status', 'location', 'start_date', 'end_date'], item, index)
+      content: `
+        <div class="admin-record-note">${escapeHtml(panelNote)}</div>
+        ${makeFieldsByKeys('tournaments', ['slug', 'name', 'season_year', 'short_label', 'status', 'location', 'start_date', 'end_date'], item, index)}
+      `
     },
     {
       title: 'Визуал и настройки',
