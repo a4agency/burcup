@@ -308,6 +308,16 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   max-width:760px;
 }
 
+.home-block-subtitle,
+.page-head p{
+  display:none;
+}
+
+.home-block-title,
+.page-head h1{
+  margin-bottom:0;
+}
+
 .home-block-link{
   color:var(--navy);
   font-weight:700;
