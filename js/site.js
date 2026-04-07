@@ -1254,10 +1254,16 @@ async function renderMatchPageFromJson() {
             <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="review">Обзор</button>
             <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="interview">Интервью</button>
           </div>
-            <div class="match-page-media-stage">
+          <div class="match-page-media-stage">
             ${renderMatchMediaPanel('stream', 'Трансляция', item.video)}
-            ${renderMatchMediaPanel('review', 'Обзор', item.review_video)}
-            ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video)}
+            ${renderMatchMediaPanel('review', 'Обзор', item.review_video, {
+              title: 'Обзор появится после матча',
+              description: 'После игры сюда добавят ссылку на обзор лучших моментов.'
+            })}
+            ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video, {
+              title: 'Интервью появится после матча',
+              description: 'После игры сюда добавят ссылку на интервью игроков и тренеров.'
+            })}
           </div>
         </div>
       </div>
@@ -1269,7 +1275,7 @@ async function renderMatchPageFromJson() {
   }
 }
 
-function renderMatchMediaPanel(key, label, url) {
+function renderMatchMediaPanel(key, label, url, emptyState = null) {
   const safeLabel = escapeHtml(label);
   const normalizedUrl = String(url || '').trim();
 
@@ -1277,7 +1283,12 @@ function renderMatchMediaPanel(key, label, url) {
     <section class="match-page-media-panel${key === 'stream' ? ' is-active' : ''}" data-match-media-panel="${escapeHtml(key)}" role="tabpanel" aria-label="${safeLabel}" ${key === 'stream' ? '' : 'hidden'}>
       ${normalizedUrl
         ? `<iframe class="match-page-video" src="${escapeHtml(normalizedUrl)}" allowfullscreen></iframe>`
-        : `<div class="match-page-media-empty" aria-hidden="true"></div>`}
+        : emptyState
+          ? `<div class="match-page-media-placeholder">
+              <div class="match-page-media-placeholder-title">${escapeHtml(emptyState.title || '')}</div>
+              <p>${escapeHtml(emptyState.description || '')}</p>
+            </div>`
+          : `<div class="match-page-media-empty" aria-hidden="true"></div>`}
     </section>
   `;
 }
