@@ -6394,10 +6394,11 @@ button,
 
 .archive-podium{
   display:grid;
-  grid-template-columns:repeat(3, minmax(0, 1fr));
+  grid-template-columns:repeat(3, minmax(240px, 280px));
   gap:18px;
   align-items:end;
-  max-width:980px;
+  justify-content:center;
+  max-width:880px;
   margin:0 auto;
 }
 
@@ -6412,56 +6413,49 @@ button,
 
 .archive-podium-logo-wrap{
   width:100%;
-  height:116px;
+  height:92px;
   display:flex;
   align-items:flex-end;
   justify-content:center;
-  margin-bottom:-18px;
+  margin-bottom:-16px;
   position:relative;
   z-index:1;
 }
 
 .archive-podium-logo-img{
   width:auto;
-  max-width:170px;
-  max-height:112px;
+  max-width:150px;
+  max-height:92px;
   object-fit:contain;
 }
 
 .archive-podium-card{
   width:100%;
-  padding-top:34px !important;
+  padding-top:28px !important;
 }
 
 .archive-podium-card.archive-podium-item-silver{
-  min-height:258px;
+  min-height:280px;
   background:linear-gradient(180deg, #f7faff 0%, #eef4fb 100%) !important;
 }
 
 .archive-podium-card.archive-podium-item-gold{
-  min-height:292px;
+  min-height:304px;
   background:linear-gradient(180deg, #fff9de 0%, #fff0b7 100%) !important;
   border-color:rgba(230, 194, 82, .42) !important;
 }
 
 .archive-podium-card.archive-podium-item-bronze{
-  min-height:274px;
+  min-height:292px;
   background:linear-gradient(180deg, #fae7dc 0%, #f3d3c2 100%) !important;
   border-color:rgba(204, 136, 91, .34) !important;
 }
 
-.archive-podium-card h3{
-  min-height:auto !important;
-}
-
-.archive-podium-card .team-country{
-  white-space:normal !important;
-  overflow:visible !important;
-  text-overflow:unset !important;
-}
-
 .archive-team-grid-rest{
-  margin-top:2px;
+  grid-template-columns:repeat(3, minmax(240px, 280px)) !important;
+  justify-content:center;
+  max-width:880px;
+  margin:2px auto 0;
 }
 
 .archive-standings-card .standings-table{
@@ -6675,6 +6669,11 @@ button,
 
   .archive-podium-logo-wrap{
     height:98px;
+  }
+
+  .archive-team-grid-rest{
+    grid-template-columns:1fr !important;
+    max-width:none;
   }
 
   .archive-podium-card.archive-podium-item-silver,
