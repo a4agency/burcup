@@ -287,12 +287,45 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_partners',
     exportName: 'partners.json',
     title: 'Партнёры',
+    filterCategory: 'general',
     help: 'Каталог партнёров, категорий, логотипов и ссылок. Если ссылка не указана, карточка партнёра ведёт на главную страницу сайта.',
     defaultData: DEFAULT_PARTNERS,
     empty: () => ({
       slug: '',
       name: '',
       category: 'general',
+      tournament_slug: 'burchalkin-cup-2026',
+      website_url: '',
+      logo_url: '',
+      alt_text: '',
+      sort_order: 1,
+      is_visible: true,
+      note: '',
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['name', 'Название', 'text'],
+      ['category', 'Категория', 'select', ['general', 'media', 'title', 'official']],
+      ['tournament_slug', 'Турнир', 'text'],
+      ['website_url', 'Ссылка партнёра', 'url'],
+      ['logo_url', 'Логотип', 'image'],
+      ['alt_text', 'Alt', 'text'],
+      ['sort_order', 'Порядок', 'number'],
+      ['is_visible', 'Показывать', 'checkbox'],
+      ['note', 'Примечание', 'textarea'],
+    ],
+  },
+  partners_media: {
+    key: 'bcup_admin_partners_media',
+    exportName: 'partners-media.json',
+    title: 'Информационные партнёры',
+    filterCategory: 'media',
+    help: 'Информационные партнёры турнира. Сохраняются в тот же общий каталог партнёров.',
+    defaultData: DEFAULT_PARTNERS,
+    empty: () => ({
+      slug: '',
+      name: '',
+      category: 'media',
       tournament_slug: 'burchalkin-cup-2026',
       website_url: '',
       logo_url: '',
@@ -386,6 +419,14 @@ function cloneDefaultData(sourceName) {
   return normalizeSourceData(sourceName, structuredClone(ADMIN_SOURCES[sourceName].defaultData || []));
 }
 
+function getAdminSourceMeta(sourceName) {
+  return ADMIN_SOURCES[sourceName] || null;
+}
+
+function getAdminApiSourceName(sourceName) {
+  return sourceName === 'partners_media' ? 'partners' : sourceName;
+}
+
 function normalizeTournamentAdminItem(item) {
   return {
     ...item,
@@ -394,14 +435,18 @@ function normalizeTournamentAdminItem(item) {
 }
 
 function normalizeSourceData(sourceName, data) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
   const items = Array.isArray(data) ? data : [];
   if (sourceName === 'tournaments') {
     return items.map(normalizeTournamentAdminItem);
   }
+  if (sourceMeta?.filterCategory) {
+    return items.filter(item => String(item?.category || 'general') === sourceMeta.filterCategory);
+  }
   return items;
 }
 
-async function fetchAdminSource(sourceName) {
+async function fetchAdminCollection(apiSourceName) {
   const apiBaseUrl = getApiBaseUrl();
   const token = getAdminToken();
 
@@ -412,7 +457,7 @@ async function fetchAdminSource(sourceName) {
     throw new Error('Сначала войди в админ-панель.');
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
+  const response = await fetch(`${apiBaseUrl}/api/admin/${apiSourceName}`, {
     headers: {
       'x-admin-token': token
     }
@@ -427,11 +472,17 @@ async function fetchAdminSource(sourceName) {
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
 
-  const data = await response.json();
+  return response.json();
+}
+
+async function fetchAdminSource(sourceName) {
+  const data = await fetchAdminCollection(getAdminApiSourceName(sourceName));
   return normalizeSourceData(sourceName, data);
 }
 
 async function pushAdminSource(sourceName, data) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
+  const apiSourceName = getAdminApiSourceName(sourceName);
   const apiBaseUrl = getApiBaseUrl();
   const token = getAdminToken();
 
@@ -442,13 +493,22 @@ async function pushAdminSource(sourceName, data) {
     throw new Error('Сначала войди в админ-панель.');
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
+  let payload = data;
+  if (sourceMeta?.filterCategory) {
+    const allPartners = await fetchAdminCollection(apiSourceName);
+    payload = [
+      ...allPartners.filter(item => String(item?.category || 'general') !== sourceMeta.filterCategory),
+      ...normalizeSourceData(sourceName, data),
+    ];
+  }
+
+  const response = await fetch(`${apiBaseUrl}/api/admin/${apiSourceName}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'x-admin-token': token
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(payload)
   });
 
   if (!response.ok) {
@@ -943,8 +1003,9 @@ function getPartnerCategoryTitle(category) {
   return 'Партнёры';
 }
 
-function renderPartnerSourceCards(data) {
-  const groups = ['general', 'media', 'title', 'official'];
+function renderPartnerSourceCards(sourceName, data) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
+  const groups = sourceMeta?.filterCategory ? [sourceMeta.filterCategory] : ['general', 'media', 'title', 'official'];
   const chunks = [];
 
   groups.forEach(category => {
@@ -1072,16 +1133,17 @@ function renderForm(sourceName, data) {
   const wrap = document.getElementById('admin-form-wrap');
   setRenderedData(sourceName, data);
   wrap.innerHTML = `
-    ${sourceName === 'partners'
-      ? renderPartnerSourceCards(data)
+    ${sourceName === 'partners' || sourceName === 'partners_media'
+      ? renderPartnerSourceCards(sourceName, data)
       : `<div class="admin-form-list">${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}</div>`
     }
     <div class="admin-toolbar">
-      ${sourceName === 'partners'
-        ? `
-          <button type="button" class="admin-add" id="admin-add-general-partner">+ Добавить партнёра</button>
-          <button type="button" class="admin-add" id="admin-add-media-partner">+ Добавить информационного партнёра</button>
-        `
+      ${(sourceName === 'partners' || sourceName === 'partners_media')
+        ? (
+          sourceName === 'partners'
+            ? `<button type="button" class="admin-add" id="admin-add-general-partner">+ Добавить партнёра</button>`
+            : `<button type="button" class="admin-add" id="admin-add-media-partner">+ Добавить информационного партнёра</button>`
+        )
         : `<button type="button" class="admin-add" id="admin-add-item">+ Добавить запись</button>`
       }
     </div>
@@ -1324,7 +1386,7 @@ async function adminSave() {
     setStatus('Сохраняю изменения...');
 
     const result = await pushAdminSource(currentSource, parsed);
-    const synced = result.data || parsed;
+    const synced = normalizeSourceData(currentSource, result.data || parsed);
     defaultsCache[currentSource] = structuredClone(synced);
     setSourceData(currentSource, synced);
     if (textarea) textarea.value = JSON.stringify(synced, null, 2);
