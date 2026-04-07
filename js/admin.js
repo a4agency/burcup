@@ -1077,7 +1077,13 @@ function renderForm(sourceName, data) {
       : `<div class="admin-form-list">${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}</div>`
     }
     <div class="admin-toolbar">
-      <button type="button" class="admin-add" id="admin-add-item">+ Добавить запись</button>
+      ${sourceName === 'partners'
+        ? `
+          <button type="button" class="admin-add" id="admin-add-general-partner">+ Добавить партнёра</button>
+          <button type="button" class="admin-add" id="admin-add-media-partner">+ Добавить информационного партнёра</button>
+        `
+        : `<button type="button" class="admin-add" id="admin-add-item">+ Добавить запись</button>`
+      }
     </div>
   `;
 
@@ -1092,14 +1098,41 @@ function renderForm(sourceName, data) {
     });
   });
 
+  const addDraftItem = (overrides = {}, message = 'Новая запись добавлена в черновик. Нажми «Сохранить», чтобы отправить в API.') => {
+    const next = readFormData(sourceName);
+    next.push({
+      ...source.empty(),
+      ...overrides
+    });
+    setSourceData(sourceName, next);
+    adminShowSource(sourceName, { preferLocal: true });
+    setStatus(message);
+  };
+
   const addBtn = document.getElementById('admin-add-item');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
-      const next = readFormData(sourceName);
-      next.push(source.empty());
-      setSourceData(sourceName, next);
-      adminShowSource(sourceName, { preferLocal: true });
-      setStatus('Новая запись добавлена в черновик. Нажми «Сохранить», чтобы отправить в API.');
+      addDraftItem();
+    });
+  }
+
+  const addGeneralPartnerBtn = document.getElementById('admin-add-general-partner');
+  if (addGeneralPartnerBtn) {
+    addGeneralPartnerBtn.addEventListener('click', () => {
+      addDraftItem(
+        { category: 'general', sort_order: readFormData(sourceName).filter(item => String(item.category || 'general') === 'general').length + 1 },
+        'Новый партнёр добавлен в блок «Партнёры». Нажми «Сохранить», чтобы отправить в API.'
+      );
+    });
+  }
+
+  const addMediaPartnerBtn = document.getElementById('admin-add-media-partner');
+  if (addMediaPartnerBtn) {
+    addMediaPartnerBtn.addEventListener('click', () => {
+      addDraftItem(
+        { category: 'media', sort_order: readFormData(sourceName).filter(item => String(item.category || 'general') === 'media').length + 1 },
+        'Новый партнёр добавлен в блок «Информационные партнёры». Нажми «Сохранить», чтобы отправить в API.'
+      );
     });
   }
 
