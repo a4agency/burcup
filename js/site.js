@@ -384,6 +384,13 @@ const ARCHIVE_TOURNAMENTS = {
     status: 'Архив 2018 года пока находится в подготовке.'
   }
 };
+const ARCHIVE_TOURNAMENT_SLUG_BY_YEAR = {
+  '2025': 'burchalkin-cup-2025',
+  '2024': 'burchalkin-cup-2024',
+  '2023': 'burchalkin-cup-2023',
+  '2019': 'burchalkin-cup-2019',
+  '2018': 'burchalkin-cup-2018'
+};
 
 function pluralizeRu(count, forms) {
   const value = Math.abs(Number(count) || 0);
@@ -525,6 +532,47 @@ function getArchiveTournamentData(year) {
     description: 'На этой странице позже появятся команды, результаты, фотографии и материалы архивного розыгрыша.',
     status: 'Страница-заглушка уже создана и готова для будущего наполнения.'
   };
+}
+
+function getArchiveTournamentSlug(year) {
+  return ARCHIVE_TOURNAMENT_SLUG_BY_YEAR[String(year || '').trim()] || '';
+}
+
+function getArchiveTournamentClubs(detail = {}) {
+  const standings = Array.isArray(detail.standings) ? detail.standings : [];
+  if (standings.length) {
+    return standings
+      .map(item => ({
+        slug: item.slug || item.team_slug || '',
+        name: item.team || item.name || '',
+        logo: item.logo || '',
+        city: item.city || '',
+        country: item.country || ''
+      }))
+      .filter(item => item.name);
+  }
+
+  const matches = Array.isArray(detail.matches) ? detail.matches : [];
+  const seen = new Map();
+  matches.forEach(match => {
+    [
+      {
+        slug: match.home_team_slug || '',
+        name: match.home_team || '',
+        logo: match.home_logo || ''
+      },
+      {
+        slug: match.away_team_slug || '',
+        name: match.away_team || '',
+        logo: match.away_logo || ''
+      }
+    ].forEach(club => {
+      const key = String(club.slug || club.name || '').trim().toLowerCase();
+      if (!key || seen.has(key)) return;
+      seen.set(key, club);
+    });
+  });
+  return Array.from(seen.values());
 }
 
 function getMatchClubKey(item, side) {
@@ -1485,19 +1533,130 @@ function renderArchiveTournamentPage() {
 
   const params = new URLSearchParams(window.location.search);
   const year = params.get('year') || '2025';
-  const archive = getArchiveTournamentData(year);
-
+  const archiveFallback = getArchiveTournamentData(year);
+  const slug = params.get('slug') || getArchiveTournamentSlug(year);
   const titleNode = page.querySelector('[data-archive-title]');
   const seasonNode = page.querySelector('[data-archive-season]');
   const descriptionNode = page.querySelector('[data-archive-description]');
   const statusNode = page.querySelector('[data-archive-status]');
+  const statsNode = page.querySelector('[data-archive-stats]');
+  const teamsNode = page.querySelector('[data-archive-teams]');
+  const partnersNode = page.querySelector('[data-archive-partners]');
+  const matchesNode = page.querySelector('[data-archive-matches]');
 
-  if (titleNode) titleNode.textContent = archive.title;
-  if (seasonNode) seasonNode.textContent = archive.season;
-  if (descriptionNode) descriptionNode.textContent = archive.description;
-  if (statusNode) statusNode.textContent = archive.status;
+  function renderArchiveClubCard(item) {
+    const href = item.slug ? `club.html?slug=${encodeURIComponent(item.slug)}` : '';
+    const tag = href ? 'a' : 'div';
+    return `
+      <${tag} class="archive-team-card" ${href ? `href="${escapeHtml(href)}"` : ''}>
+        <div class="archive-team-logo-wrap">
+          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'archive-team-logo', width: 220 })}
+        </div>
+        <strong>${escapeHtml(item.name || 'Клуб')}</strong>
+        <span>${escapeHtml(formatClubLocation(item))}</span>
+      </${tag}>
+    `;
+  }
 
-  document.title = `${archive.title} - Burchalkin Cup`;
+  function renderArchivePartnerCard(item) {
+    const href = normalizePartnerHref(item.website_url || '');
+    const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
+    return `
+      <a class="archive-partner-card" href="${escapeHtml(href)}" ${externalAttrs}>
+        ${renderPartnerLogoMarkup(item.name, String(item.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO, item.logo_alt || item.name)}
+        <span>${escapeHtml(item.name || '')}</span>
+      </a>
+    `;
+  }
+
+  function renderArchiveMatchCard(item) {
+    const href = item.id ? `match.html?id=${encodeURIComponent(item.id)}` : '#';
+    const meta = joinNonEmpty([
+      formatMatchDisplayDate(item.date),
+      String(item.time || '').trim(),
+      String(item.group || item.round || '').trim()
+    ], ' • ');
+    return `
+      <a class="archive-match-card" href="${escapeHtml(href)}">
+        <div class="archive-match-card-top">
+          <span>${escapeHtml(meta || 'Архив матча')}</span>
+          <span class="archive-match-card-status">${escapeHtml(item.status_label || '')}</span>
+        </div>
+        <div class="archive-match-card-main">
+          <div class="archive-match-card-team">
+            ${renderImageMarkup({ src: item.home_logo || 'images/logo-burchalkin.png', alt: item.home_team || '', className: 'archive-match-card-logo', width: 112 })}
+            <span>${escapeHtml(item.home_team || '')}</span>
+          </div>
+          <div class="archive-match-card-score">${escapeHtml(item.score || '0:0')}</div>
+          <div class="archive-match-card-team archive-match-card-team-away">
+            ${renderImageMarkup({ src: item.away_logo || 'images/logo-burchalkin.png', alt: item.away_team || '', className: 'archive-match-card-logo', width: 112 })}
+            <span>${escapeHtml(item.away_team || '')}</span>
+          </div>
+        </div>
+      </a>
+    `;
+  }
+
+  function applyArchiveData(archive, detail = null) {
+    if (titleNode) titleNode.textContent = archive.title;
+    if (seasonNode) seasonNode.textContent = archive.season;
+    if (descriptionNode) descriptionNode.textContent = archive.description;
+    if (statusNode) statusNode.textContent = archive.status;
+    document.title = `${archive.title} - Burchalkin Cup`;
+
+    if (statsNode) {
+      const stats = [];
+      const clubsCount = Number(detail?.clubs_count || getArchiveTournamentClubs(detail || {}).length || 0);
+      const matchesCount = Number(detail?.matches_count || (Array.isArray(detail?.matches) ? detail.matches.length : 0) || 0);
+      if (clubsCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(formatCountLabel(clubsCount, ['клуб', 'клуба', 'клубов']))}</div>`);
+      if (matchesCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей']))}</div>`);
+      stats.push(`<div class="archive-stat-chip">${escapeHtml(archive.season)}</div>`);
+      statsNode.innerHTML = stats.join('');
+    }
+
+    if (teamsNode) {
+      const clubs = getArchiveTournamentClubs(detail || {});
+      teamsNode.innerHTML = clubs.length
+        ? clubs.map(renderArchiveClubCard).join('')
+        : '<div class="archive-empty-state">Состав участников появится позднее.</div>';
+    }
+
+    if (partnersNode) {
+      const groups = Array.isArray(detail?.partners) ? detail.partners : [];
+      const partners = groups.flatMap(group => Array.isArray(group.items) ? group.items : []);
+      partnersNode.innerHTML = partners.length
+        ? partners.map(renderArchivePartnerCard).join('')
+        : '<div class="archive-empty-state">Список партнёров добавим позднее.</div>';
+    }
+
+    if (matchesNode) {
+      const matches = Array.isArray(detail?.matches) ? detail.matches : [];
+      matchesNode.innerHTML = matches.length
+        ? matches.map(renderArchiveMatchCard).join('')
+        : '<div class="archive-empty-state">Архивные матчи будут опубликованы позднее.</div>';
+    }
+  }
+
+  applyArchiveData(archiveFallback, null);
+  if (!slug) return;
+
+  fetchApi(`/api/tournaments/${encodeURIComponent(slug)}`)
+    .then(detail => {
+      if (!detail) return;
+      const archive = {
+        title: detail.name || archiveFallback.title,
+        season: joinNonEmpty([
+          formatMatchDisplayDate(detail.start_date),
+          detail.end_date ? formatMatchDisplayDate(detail.end_date) : ''
+        ], ' - ') || archiveFallback.season,
+        description: detail.description || archiveFallback.description,
+        status: 'Страница архива подключена к данным турнира и готова к наполнению.'
+      };
+      applyArchiveData(archive, detail);
+    })
+    .catch(() => {
+      applyArchiveData(archiveFallback, null);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
