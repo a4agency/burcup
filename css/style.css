@@ -1287,6 +1287,7 @@ object-fit:contain;
   background:#eff4fd;
   color:var(--navy);
   font-size:14px;
+  white-space:nowrap;
 }
 
 .standings-table tr:last-child td{
@@ -3732,6 +3733,10 @@ button,
 .standings-table td{
   text-align:center !important;
   vertical-align:middle !important;
+}
+
+.standings-table th{
+  white-space:nowrap;
 }
 
 .standings-table th:nth-child(2),
