@@ -6357,18 +6357,66 @@ button,
   gap:14px;
 }
 
+.archive-team-podium{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:20px;
+  align-items:end;
+  margin-bottom:20px;
+}
+
+.archive-team-grid-rest{
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:18px;
+}
+
 .archive-team-card{
   display:flex;
   flex-direction:column;
-  align-items:flex-start;
-  gap:8px;
-  padding:16px;
+  align-items:center;
+  gap:10px;
+  padding:18px 18px 16px;
   border:1px solid rgba(204,217,242,.88);
   border-radius:22px;
   background:#fff;
   text-decoration:none;
   color:var(--text);
   transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.archive-team-card-podium{
+  position:relative;
+  align-items:center;
+  padding:0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+}
+
+.archive-team-card-podium::before{
+  content:"";
+  position:absolute;
+  inset:72px 0 0;
+  border-radius:26px;
+  border:1px solid rgba(218,224,238,.95);
+  background:#fff;
+  box-shadow:0 12px 24px rgba(13,43,99,.05);
+  z-index:0;
+}
+
+.archive-team-card-podium.archive-team-card-rank-1::before{
+  background:linear-gradient(180deg, rgba(255,244,196,.95) 0%, rgba(255,251,236,.98) 100%);
+  border-color:rgba(227,201,112,.9);
+}
+
+.archive-team-card-podium.archive-team-card-rank-2::before{
+  background:linear-gradient(180deg, rgba(237,241,247,.96) 0%, rgba(255,255,255,.98) 100%);
+  border-color:rgba(190,201,221,.95);
+}
+
+.archive-team-card-podium.archive-team-card-rank-3::before{
+  background:linear-gradient(180deg, rgba(239,210,192,.96) 0%, rgba(255,248,243,.98) 100%);
+  border-color:rgba(205,155,126,.9);
 }
 
 .archive-team-card:hover,
@@ -6390,10 +6438,41 @@ button,
   justify-content:center;
 }
 
+.archive-team-card-podium .archive-team-logo-wrap{
+  position:relative;
+  z-index:1;
+  width:100%;
+  min-height:118px;
+  aspect-ratio:auto;
+  margin-bottom:-6px;
+}
+
 .archive-team-logo{
   width:min(110px, 66%);
   max-height:90px;
   object-fit:contain;
+}
+
+.archive-team-card-podium .archive-team-logo{
+  width:min(150px, 78%);
+  max-height:126px;
+}
+
+.archive-team-body{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  text-align:center;
+}
+
+.archive-team-card-podium .archive-team-body{
+  position:relative;
+  z-index:1;
+  min-height:168px;
+  padding:20px 18px 18px;
+  justify-content:flex-start;
 }
 
 .archive-team-card strong{
@@ -6405,6 +6484,13 @@ button,
 .archive-team-card span{
   color:var(--muted);
   font-size:15px;
+}
+
+.archive-team-place{
+  margin-top:4px;
+  color:var(--navy);
+  font-size:16px;
+  font-weight:700;
 }
 
 .archive-standings-card .standings-table{
@@ -6607,8 +6693,18 @@ button,
     border-radius:26px;
   }
 
+  .archive-team-podium,
+  .archive-team-grid-rest{
+    grid-template-columns:1fr;
+  }
+
   .archive-team-grid{
     grid-template-columns:1fr;
+  }
+
+  .archive-team-card-podium{
+    max-width:360px;
+    margin:0 auto;
   }
 
   .archive-partner-card{
