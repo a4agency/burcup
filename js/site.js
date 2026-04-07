@@ -111,10 +111,36 @@ function initTournamentCountdown() {
     useGrouping: false
   });
   let timerId = null;
+  const segmentMap = {
+    '0': ['a', 'b', 'c', 'd', 'e', 'f'],
+    '1': ['b', 'c'],
+    '2': ['a', 'b', 'd', 'e', 'g'],
+    '3': ['a', 'b', 'c', 'd', 'g'],
+    '4': ['b', 'c', 'f', 'g'],
+    '5': ['a', 'c', 'd', 'f', 'g'],
+    '6': ['a', 'c', 'd', 'e', 'f', 'g'],
+    '7': ['a', 'b', 'c'],
+    '8': ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+    '9': ['a', 'b', 'c', 'd', 'f', 'g']
+  };
+  const segments = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+
+  function renderSegmentDigit(char) {
+    const activeSegments = new Set(segmentMap[char] || []);
+    return `
+      <span class="segment-digit" aria-hidden="true">
+        ${segments.map(segment => `
+          <span class="segment segment-${segment}${activeSegments.has(segment) ? ' is-on' : ''}"></span>
+        `).join('')}
+      </span>
+    `;
+  }
 
   function setValue(node, value) {
     if (!node) return;
-    node.textContent = value > 99 ? String(value) : formatter.format(value);
+    const displayValue = value > 99 ? String(value) : formatter.format(value);
+    node.setAttribute('aria-label', displayValue);
+    node.innerHTML = displayValue.split('').map(renderSegmentDigit).join('');
   }
 
   function renderCountdown() {
