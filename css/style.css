@@ -893,10 +893,10 @@ object-fit:contain;
 }
 
 .match-page-topline{
-  display:flex;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
   align-items:flex-start;
-  justify-content:space-between;
-  gap:18px;
+  gap:12px 18px;
   margin-bottom:16px;
 }
 
@@ -905,6 +905,7 @@ object-fit:contain;
   flex-wrap:wrap;
   gap:10px;
   margin-bottom:0;
+  min-width:0;
 }
 
 .match-page-tag{
@@ -955,6 +956,7 @@ object-fit:contain;
   flex:0 0 auto;
   margin-top:0;
   align-self:flex-start;
+  justify-self:end;
 }
 
 .match-page-scorecard{
@@ -1245,7 +1247,6 @@ object-fit:contain;
 }
 
 @media (max-width: 900px){
-  .match-page-topline,
   .match-page-head{
     flex-direction:column;
     align-items:flex-start;
@@ -1257,7 +1258,7 @@ object-fit:contain;
 
   .match-page-scorebox{
     min-width:0;
-    order:-1;
+    order:0;
   }
 
   .match-page-team,
@@ -1299,26 +1300,76 @@ object-fit:contain;
   }
 
   .match-page-topline{
-    gap:14px;
+    grid-template-columns:minmax(0, 1fr) auto;
+    gap:10px 12px;
+    align-items:start;
+  }
+
+  .match-page-status{
+    margin-top:2px;
+    white-space:nowrap;
+    justify-self:end;
+    align-self:start;
+  }
+
+  .match-page-scorecard{
+    grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+    gap:10px;
+    align-items:stretch;
   }
 
   .match-page-team{
-    padding:16px;
+    padding:14px 10px;
+    border-radius:18px;
+    gap:10px;
+    justify-content:center;
+    text-align:center;
   }
 
   .match-page-team-brand{
-    gap:12px;
+    flex-direction:column;
+    justify-content:center;
+    gap:8px;
   }
 
   .match-page-team-logo{
-    width:52px;
-    height:52px;
-    flex-basis:52px;
+    width:48px;
+    height:48px;
+    flex-basis:48px;
+  }
+
+  .match-page-team-away .match-page-team-brand{
+    flex-direction:column;
+  }
+
+  .match-page-team-name{
+    font-size:clamp(15px, 4.8vw, 21px);
+    text-align:center;
+  }
+
+  .match-page-team-badge{
+    font-size:10px;
+    letter-spacing:.1em;
+    text-align:center;
   }
 
   .match-page-scorebox{
-    padding:14px 16px;
-    border-radius:20px;
+    min-width:88px;
+    padding:16px 12px;
+    border-radius:18px;
+    align-self:stretch;
+  }
+
+  .match-page-scoreline{
+    gap:6px;
+  }
+
+  .match-page-score-digit{
+    font-size:clamp(30px, 8vw, 38px);
+  }
+
+  .match-page-score-separator{
+    font-size:clamp(22px, 6vw, 28px);
   }
 
   .match-page-actions{
@@ -3251,6 +3302,13 @@ button,
   font-weight:700;
   color:#5f7395;
   margin-top:8px;
+}
+.upcoming-venue{
+  font-size:13px;
+  line-height:1.35;
+  font-weight:600;
+  color:#7a88a3;
+  margin-top:4px;
 }
 .upcoming-status{
   background:#f5d7d4;
@@ -5540,6 +5598,11 @@ button,
   .upcoming-time{
     font-size:14px !important;
     margin-top:8px !important;
+  }
+
+  .upcoming-venue{
+    font-size:12px !important;
+    margin-top:4px !important;
   }
 
   .upcoming-status{
