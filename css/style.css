@@ -2944,6 +2944,7 @@ button,
 
 .footer .container{
   width: min(1180px, calc(100% - 32px));
+  text-align:center;
 }
 
 .footer-brand{
