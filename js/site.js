@@ -1246,18 +1246,81 @@ async function renderMatchPageFromJson() {
             </div>
           </div>
         </section>
-        <iframe class="match-page-video" src="${escapeHtml(item.video)}" allowfullscreen></iframe>
-        <div class="match-page-actions" role="group" aria-label="Материалы матча">
-          <button class="match-page-action is-active" type="button" aria-pressed="true">Трансляция</button>
-          <button class="match-page-action" type="button" disabled>Обзор</button>
-          <button class="match-page-action" type="button" disabled>Интервью</button>
+        <div class="match-page-media" data-match-media>
+          <div class="match-page-media-stage">
+            ${renderMatchMediaPanel('stream', 'Трансляция', item.video, {
+              title: 'Трансляция появится позже',
+              description: 'Ссылка на трансляцию для этого матча пока не добавлена.'
+            })}
+            ${renderMatchMediaPanel('review', 'Обзор', item.review_video, {
+              title: 'Обзор появится после матча',
+              description: 'Сюда можно добавить обзор лучших моментов игры.'
+            })}
+            ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video, {
+              title: 'Интервью скоро будет доступно',
+              description: 'Сюда можно добавить интервью игроков, тренеров или организаторов.'
+            })}
+          </div>
+          <div class="match-page-actions" role="tablist" aria-label="Материалы матча">
+            <button class="match-page-action is-active" type="button" role="tab" aria-selected="true" data-match-media-tab="stream">Трансляция</button>
+            <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="review">Обзор</button>
+            <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="interview">Интервью</button>
+          </div>
         </div>
       </div>
     `;
+    initMatchMediaTabs(target);
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="container"><div class="card">Не удалось загрузить матч.</div></div>';
   }
+}
+
+function renderMatchMediaPanel(key, label, url, emptyState = {}) {
+  const safeLabel = escapeHtml(label);
+  const normalizedUrl = String(url || '').trim();
+  const title = escapeHtml(emptyState.title || `${label} скоро появится`);
+  const description = escapeHtml(emptyState.description || 'Материал для этого раздела пока не добавлен.');
+
+  return `
+    <section class="match-page-media-panel${key === 'stream' ? ' is-active' : ''}" data-match-media-panel="${escapeHtml(key)}" role="tabpanel" aria-label="${safeLabel}" ${key === 'stream' ? '' : 'hidden'}>
+      ${normalizedUrl
+        ? `<iframe class="match-page-video" src="${escapeHtml(normalizedUrl)}" allowfullscreen></iframe>`
+        : `<div class="match-page-media-placeholder">
+            <div class="match-page-media-placeholder-title">${title}</div>
+            <p>${description}</p>
+          </div>`}
+    </section>
+  `;
+}
+
+function initMatchMediaTabs(scope = document) {
+  scope.querySelectorAll('[data-match-media]').forEach(block => {
+    if (block.dataset.mediaTabsBound === 'true') return;
+    block.dataset.mediaTabsBound = 'true';
+
+    const buttons = Array.from(block.querySelectorAll('[data-match-media-tab]'));
+    const panels = Array.from(block.querySelectorAll('[data-match-media-panel]'));
+    if (!buttons.length || !panels.length) return;
+
+    function activate(tabKey) {
+      buttons.forEach(button => {
+        const isActive = button.dataset.matchMediaTab === tabKey;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+
+      panels.forEach(panel => {
+        const isActive = panel.dataset.matchMediaPanel === tabKey;
+        panel.classList.toggle('is-active', isActive);
+        panel.hidden = !isActive;
+      });
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => activate(button.dataset.matchMediaTab));
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
