@@ -1464,6 +1464,235 @@ async function renderNewsPage() {
   }
 }
 
+function getMatchStatusClass(status) {
+  return status === 'live' ? 'live' : (status === 'done' ? 'done' : 'soon');
+}
+
+function getMatchTimestamp(item = {}) {
+  const date = String(item.date || '').trim();
+  const time = String(item.time || '').trim() || '00:00';
+  const parsed = Date.parse(`${date}T${time}`);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getMatchMediaLinks(item = {}) {
+  return [
+    { key: 'stream', label: 'Трансляция', url: String(item.video || '').trim() },
+    { key: 'review', label: 'Обзор', url: String(item.review_video || '').trim() },
+    { key: 'interview', label: 'Интервью', url: String(item.interview_video || '').trim() }
+  ];
+}
+
+function hasAnyMatchMedia(item = {}) {
+  return getMatchMediaLinks(item).some(link => Boolean(link.url));
+}
+
+function sortMediaMatches(matches = []) {
+  const priorityMap = { live: 0, soon: 1, done: 2 };
+  return [...matches].sort((left, right) => {
+    const leftPriority = priorityMap[left.status] ?? 9;
+    const rightPriority = priorityMap[right.status] ?? 9;
+    if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+
+    const leftTime = getMatchTimestamp(left);
+    const rightTime = getMatchTimestamp(right);
+    if (left.status === 'done' && right.status === 'done') {
+      return rightTime - leftTime;
+    }
+    return leftTime - rightTime;
+  });
+}
+
+function pickFeaturedMediaMatch(matches = []) {
+  const withStream = matches.find(item => String(item.video || '').trim());
+  return withStream || matches[0] || null;
+}
+
+function renderMediaActionButton(link, options = {}) {
+  const label = escapeHtml(link.label || '');
+  if (!link.url) {
+    return `<span class="media-action-button is-disabled">${label}</span>`;
+  }
+
+  const target = options.external === false ? '' : ' target="_blank" rel="noreferrer"';
+  return `<a class="media-action-button${options.primary ? ' is-primary' : ''}" href="${escapeHtml(link.url)}"${target}>${label}</a>`;
+}
+
+function renderMediaFeatureCard(item) {
+  const statusClass = getMatchStatusClass(item.status);
+  const meta = joinNonEmpty([
+    formatMatchCardDateTime(item),
+    String(item.group || item.stage || '').trim()
+  ], ' • ');
+  const summary = String(item.summary || '').trim() || 'На странице матча можно смотреть трансляцию, а позже переключаться между обзором и интервью.';
+  const title = `${item.home_team} — ${item.away_team}`;
+  const links = getMatchMediaLinks(item);
+
+  return `
+    <section class="card media-feature-card">
+      <div class="media-feature-shell">
+        <div class="media-feature-copy">
+          <div class="media-feature-topline">
+            <span class="archive-stat-chip">Главный эфир</span>
+            <span class="upcoming-status media-feature-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</span>
+          </div>
+          <h2 class="media-feature-title">${escapeHtml(title)}</h2>
+          ${meta ? `<div class="media-feature-meta">${escapeHtml(meta)}</div>` : ''}
+          <p class="media-feature-summary">${escapeHtml(summary)}</p>
+          <div class="media-feature-links">
+            <a class="tournament-card-button" href="match.html?id=${encodeURIComponent(item.id)}">Страница матча</a>
+          </div>
+        </div>
+        <div class="match-page-media media-feature-player" data-match-media>
+          <div class="match-page-actions" role="tablist" aria-label="Материалы матча">
+            ${links.map((link, index) => `
+              <button class="match-page-action${index === 0 ? ' is-active' : ''}" type="button" role="tab" aria-selected="${index === 0 ? 'true' : 'false'}" data-match-media-tab="${escapeHtml(link.key)}">${escapeHtml(link.label)}</button>
+            `).join('')}
+          </div>
+          <div class="match-page-media-stage">
+            ${renderMatchMediaPanel('stream', 'Трансляция', item.video, {
+              title: 'Трансляция появится позднее'
+            })}
+            ${renderMatchMediaPanel('review', 'Обзор', item.review_video, {
+              title: 'Обзор появится позднее'
+            })}
+            ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video, {
+              title: 'Интервью появится позднее'
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderMediaOverviewCards(matches = [], news = [], featuredMatch = null) {
+  const streamsCount = matches.filter(item => String(item.video || '').trim()).length;
+  const reviewsCount = matches.filter(item => String(item.review_video || '').trim()).length;
+  const interviewsCount = matches.filter(item => String(item.interview_video || '').trim()).length;
+  const storiesCount = news.length;
+
+  return `
+    <section class="card media-overview-card">
+      <h3>В медиаразделе</h3>
+      <div class="media-kpi-grid">
+        <div class="media-kpi">
+          <strong>${streamsCount}</strong>
+          <span>трансляций</span>
+        </div>
+        <div class="media-kpi">
+          <strong>${reviewsCount}</strong>
+          <span>обзоров</span>
+        </div>
+        <div class="media-kpi">
+          <strong>${interviewsCount}</strong>
+          <span>интервью</span>
+        </div>
+        <div class="media-kpi">
+          <strong>${storiesCount}</strong>
+          <span>фоторепортажей</span>
+        </div>
+      </div>
+    </section>
+    <section class="card media-overview-card">
+      <h3>Быстрый переход</h3>
+      <div class="media-quick-list">
+        ${featuredMatch ? `
+          <a class="media-quick-link" href="match.html?id=${encodeURIComponent(featuredMatch.id)}">
+            <strong>${escapeHtml(`${featuredMatch.home_team} — ${featuredMatch.away_team}`)}</strong>
+            <span>${escapeHtml(joinNonEmpty([formatMatchCardDateTime(featuredMatch), featuredMatch.status_label], ' • '))}</span>
+          </a>
+        ` : ''}
+        <a class="media-quick-link" href="matches.html">
+          <strong>Страницы матчей</strong>
+          <span>все трансляции, обзоры и интервью турнира</span>
+        </a>
+        <a class="media-quick-link" href="news.html">
+          <strong>Новости и фото</strong>
+          <span>оперативные публикации и фотоматериалы турнира</span>
+        </a>
+      </div>
+    </section>
+  `;
+}
+
+function renderMediaMatchCard(item) {
+  const statusClass = getMatchStatusClass(item.status);
+  const links = getMatchMediaLinks(item);
+  const scoreParts = String(item.score || '0:0').split(':');
+  const score = item.status === 'soon'
+    ? '—'
+    : `${escapeHtml(scoreParts[0] || '0')}:${escapeHtml(scoreParts[1] || '0')}`;
+
+  return `
+    <article class="card media-match-card">
+      <div class="media-match-top">
+        <div>
+          <div class="media-match-stage">${escapeHtml(item.group || item.stage || 'Матч')}</div>
+          <div class="media-match-date">${escapeHtml(formatMatchCardDateTime(item))}</div>
+        </div>
+        <div class="upcoming-status media-match-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
+      </div>
+      <a class="media-match-main" href="match.html?id=${encodeURIComponent(item.id)}">
+        <div class="media-match-team">
+          ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'media-match-logo', width: 120 })}
+          <span>${escapeHtml(item.home_team)}</span>
+        </div>
+        <div class="media-match-score">${score}</div>
+        <div class="media-match-team media-match-team-away">
+          ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'media-match-logo', width: 120 })}
+          <span>${escapeHtml(item.away_team)}</span>
+        </div>
+      </a>
+      <div class="media-match-actions">
+        <a class="media-action-button is-primary" href="match.html?id=${encodeURIComponent(item.id)}">Страница матча</a>
+        ${links.map(link => renderMediaActionButton(link)).join('')}
+      </div>
+    </article>
+  `;
+}
+
+async function renderMultimediaPage() {
+  const featuredTarget = document.querySelector('#media-featured');
+  const overviewTarget = document.querySelector('#media-overview');
+  const libraryTarget = document.querySelector('#media-library');
+  const storiesTarget = document.querySelector('#media-stories');
+  if (!featuredTarget || !overviewTarget || !libraryTarget || !storiesTarget) return;
+
+  try {
+    const [matchesRaw, newsRaw] = await Promise.all([
+      fetchJson('data/matches.json'),
+      fetchJson('data/news.json')
+    ]);
+
+    const matches = sortMediaMatches((Array.isArray(matchesRaw) ? matchesRaw : []).filter(hasAnyMatchMedia));
+    const news = Array.isArray(newsRaw) ? newsRaw : [];
+    const featuredMatch = pickFeaturedMediaMatch(matches);
+
+    featuredTarget.innerHTML = featuredMatch
+      ? renderMediaFeatureCard(featuredMatch)
+      : '<div class="card media-empty-card">Медиаматериалы появятся здесь после публикации первых трансляций.</div>';
+
+    overviewTarget.innerHTML = renderMediaOverviewCards(matches, news, featuredMatch);
+
+    libraryTarget.innerHTML = matches.length
+      ? matches.map(renderMediaMatchCard).join('')
+      : '<div class="card media-empty-card">Материалы матчей появятся после публикации первых эфиров.</div>';
+
+    storiesTarget.innerHTML = news.length
+      ? news.map(renderNewsPreviewCard).join('')
+      : '<div class="card media-empty-card">Фоторепортажи появятся позднее.</div>';
+
+    if (featuredMatch) initMatchMediaTabs(featuredTarget);
+    runAutoFit();
+  } catch (error) {
+    featuredTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить главный эфир.</div>';
+    overviewTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить медиараздел.</div>';
+    libraryTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить материалы матчей.</div>';
+    storiesTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить фоторепортажи.</div>';
+  }
+}
+
 async function renderNewsArticlePage() {
   const root = document.querySelector('#news-article-page');
   if (!root) return;
@@ -1909,6 +2138,7 @@ function renderArchiveTournamentPage() {
 document.addEventListener('DOMContentLoaded', () => {
   renderUpcomingMatches();
   renderHomeNews();
+  renderMultimediaPage();
   renderMatchesPage();
   renderNewsPage();
   renderNewsArticlePage();

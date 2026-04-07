@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Burchalkin Cup — Трансляции</title>
+  <title>Burchalkin Cup — Медиа</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -50,29 +50,54 @@
 </header>
 
   
-<main class="site-main">
-<section class="page-head"><div class="container"><h1>Трансляции</h1><p>Фотографии, видеозаписи и лучшие моменты турнира.</p></div></section>
-<section class="section">
-  <div class="container grid-2">
-    <div class="card">
-      <h3>Видео дня</h3>
-      <iframe class="video" src="https://www.youtube.com/embed/jfKfPfyJRdk" allowfullscreen></iframe>
+<main class="site-main" id="multimedia-page">
+  <section class="page-head media-page-head">
+    <div class="container">
+      <h1>Медиа</h1>
     </div>
-    <div class="card">
-      <h3>Галерея</h3>
-      <div class="mini">Фото с матчей и церемоний</div>
-      <div class="mini">Лучшие моменты игрового дня</div>
-      <div class="mini">Команды и болельщики</div>
+  </section>
+
+  <section class="section media-page-section">
+    <div class="container media-hero-grid">
+      <div id="media-featured">
+        <div class="card media-loading-card">Загружаем главный эфир...</div>
+      </div>
+      <div id="media-overview" class="media-overview-stack">
+        <div class="card media-loading-card">Собираем медиаматериалы...</div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <section class="section media-page-section">
+    <div class="container">
+      <div class="home-block-head">
+        <h2 class="section-title home-block-title">Материалы матчей</h2>
+        <a class="home-block-link" href="matches.html">Все матчи →</a>
+      </div>
+      <div id="media-library" class="media-library-grid">
+        <div class="card media-loading-card">Подготавливаем видеотеку...</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section media-page-section">
+    <div class="container">
+      <div class="home-block-head">
+        <h2 class="section-title home-block-title">Фоторепортажи</h2>
+        <a class="home-block-link" href="news.html">Все новости →</a>
+      </div>
+      <div id="media-stories" class="home-news-grid">
+        <div class="card media-loading-card">Загружаем фотоматериалы...</div>
+      </div>
+    </div>
+  </section>
 </main>
 
   
 <section class="sponsors">
   <div class="container">
     <h2>Партнёры</h2>
-    <div class="sponsor-grid">
+    <div id="partners-general" class="sponsor-grid">
       <div class="sponsor-item">Система спортивной аналитики B-SIGHT</div>
       <div class="sponsor-item">АО «Российская промышленная коллегия»</div>
       <div class="sponsor-item">БАЗ</div>
@@ -87,7 +112,7 @@
       <div class="sponsor-item">ТехПром</div>
     </div>
     <h2 style="margin-top:24px">Информационные партнёры</h2>
-    <div class="sponsor-grid">
+    <div id="partners-media" class="sponsor-grid">
       <div class="sponsor-item">ТАСС</div>
       <div class="sponsor-item">Спорт-Экспресс</div>
       <div class="sponsor-item">РФС</div>
