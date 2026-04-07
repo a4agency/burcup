@@ -11,6 +11,20 @@ const TEAM_LOGOS = [
 
 const ADMIN_TOKEN_KEY = 'bcup_admin_token';
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
+}
+
+function joinNonEmpty(parts, separator = ' • ') {
+  return parts.map(item => String(item || '').trim()).filter(Boolean).join(separator);
+}
+
 const ADMIN_SOURCES = {
   tournaments: {
     key: 'bcup_admin_tournaments',
@@ -469,6 +483,112 @@ function setStatus(text) {
   document.getElementById('admin-status').textContent = text;
 }
 
+function getAdminMatchClubKey(item, side) {
+  const slugValue = side === 'home' ? item?.home_team_slug : item?.away_team_slug;
+  const slug = String(slugValue || '').trim().toLowerCase();
+  if (slug) return slug;
+
+  const nameValue = side === 'home' ? item?.home_team : item?.away_team;
+  return String(nameValue || '').trim().toLowerCase();
+}
+
+function getAdminMatchSortValue(item) {
+  const date = String(item?.date || '').trim();
+  const time = String(item?.time || '').trim();
+  if (date) {
+    const parsed = Date.parse(`${date}T${time || '00:00'}:00`);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+
+  const numericId = Number(item?.id);
+  return Number.isFinite(numericId) ? numericId : 0;
+}
+
+function getAdminHeadToHeadMatches(items, currentIndex) {
+  const current = items[currentIndex] || null;
+  if (!current) return [];
+
+  const homeKey = getAdminMatchClubKey(current, 'home');
+  const awayKey = getAdminMatchClubKey(current, 'away');
+  if (!homeKey || !awayKey) return [];
+
+  return items
+    .filter((item, index) => {
+      if (!item || index === currentIndex) return false;
+      if (String(item.status || '').trim().toLowerCase() !== 'done') return false;
+
+      const itemHomeKey = getAdminMatchClubKey(item, 'home');
+      const itemAwayKey = getAdminMatchClubKey(item, 'away');
+
+      return (
+        (itemHomeKey === homeKey && itemAwayKey === awayKey) ||
+        (itemHomeKey === awayKey && itemAwayKey === homeKey)
+      );
+    })
+    .sort((left, right) => getAdminMatchSortValue(right) - getAdminMatchSortValue(left));
+}
+
+function buildAdminHeadToHeadPreview(item, itemIndex, items) {
+  const homeKey = getAdminMatchClubKey(item, 'home');
+  const awayKey = getAdminMatchClubKey(item, 'away');
+
+  if (!homeKey || !awayKey) {
+    return '<div class="admin-match-preview-empty">Укажи хозяев и гостей, чтобы увидеть личные встречи этой пары.</div>';
+  }
+
+  const headToHeadMatches = getAdminHeadToHeadMatches(items, itemIndex);
+  if (!headToHeadMatches.length) {
+    return '<div class="admin-match-preview-empty">Команды не встречались ранее.</div>';
+  }
+
+  return `
+    <div class="admin-match-preview-list">
+      ${headToHeadMatches.map(match => {
+        const score = String(match.score || '0:0');
+        const dateTime = joinNonEmpty([String(match.date || '').trim(), String(match.time || '').trim()], ' ');
+        const meta = joinNonEmpty([
+          String(match.group || '').trim(),
+          String(match.round || '').trim(),
+          String(match.status_label || '').trim()
+        ], ' • ');
+
+        return `
+          <a class="admin-match-preview-row" href="match.html?id=${encodeURIComponent(match.id)}" target="_blank" rel="noreferrer">
+            <div class="admin-match-preview-main">
+              <strong>${escapeHtml(String(match.home_team || '').trim())} — ${escapeHtml(String(match.away_team || '').trim())}</strong>
+              <span>${escapeHtml(joinNonEmpty([dateTime, meta], ' • '))}</span>
+            </div>
+            <div class="admin-match-preview-score">${escapeHtml(score)}</div>
+          </a>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function makeMatchHeadToHeadPreview(item, itemIndex, allItems) {
+  return `
+    <div class="admin-match-preview" data-admin-match-preview="${itemIndex}">
+      <div class="admin-match-preview-head">
+        <strong>Личные встречи</strong>
+        <span>Завершённые очные матчи автоматически появятся на странице матча.</span>
+      </div>
+      <div class="admin-match-preview-body" data-admin-match-preview-body="${itemIndex}">
+        ${buildAdminHeadToHeadPreview(item, itemIndex, allItems)}
+      </div>
+    </div>
+  `;
+}
+
+function refreshAdminMatchPreviews(wrap) {
+  if (!wrap) return;
+  const items = readFormData('matches');
+  wrap.querySelectorAll('[data-admin-match-preview-body]').forEach(node => {
+    const index = Number(node.dataset.adminMatchPreviewBody);
+    node.innerHTML = buildAdminHeadToHeadPreview(items[index] || {}, index, items);
+  });
+}
+
 function makeLogoPicker(value, key, index) {
   return `
     <div class="admin-field">
@@ -598,6 +718,7 @@ function renderForm(sourceName, data) {
           <div class="admin-form-grid">
             ${source.fields.map(field => makeField(field, item[field[0]], index)).join('')}
           </div>
+          ${sourceName === 'matches' ? makeMatchHeadToHeadPreview(item, index, data) : ''}
         </div>
       `).join('')}
     </div>
@@ -715,6 +836,18 @@ function renderForm(sourceName, data) {
       preview.innerHTML = value ? `<img src="${value}" alt="preview">` : '<div>Превью появится здесь</div>';
     });
   });
+
+  if (sourceName === 'matches') {
+    refreshAdminMatchPreviews(wrap);
+    if (wrap.dataset.matchPreviewBound !== 'true') {
+      const syncPreviews = () => {
+        if (currentSource === 'matches') refreshAdminMatchPreviews(wrap);
+      };
+      wrap.addEventListener('input', syncPreviews);
+      wrap.addEventListener('change', syncPreviews);
+      wrap.dataset.matchPreviewBound = 'true';
+    }
+  }
 }
 
 async function loadSourceData(sourceName, options = {}) {
