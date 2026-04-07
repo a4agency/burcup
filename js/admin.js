@@ -761,6 +761,28 @@ function makeFieldsByKeys(sourceName, keys, item, itemIndex) {
   return keys.map(key => makeFieldByKey(sourceName, key, item, itemIndex)).join('');
 }
 
+function renderSectionedAdminCard(title, index, sections) {
+  return `
+    <div class="admin-item-card admin-record-card">
+      <div class="admin-item-head">
+        <strong>${title} #${index + 1}</strong>
+        <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+      </div>
+
+      <div class="admin-record-layout">
+        ${sections.map(section => `
+          <div class="admin-record-section">
+            <div class="admin-record-section-head">${section.title}</div>
+            <div class="admin-form-grid ${section.gridClass || ''}">
+              ${section.content}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderMatchAdminCard(item, index, allItems) {
   return `
     <div class="admin-item-card admin-match-card">
@@ -806,6 +828,107 @@ function renderMatchAdminCard(item, index, allItems) {
         </div>
 
         ${makeMatchHeadToHeadPreview(item, index, allItems)}
+      </div>
+    </div>
+  `;
+}
+
+function renderTournamentAdminCard(item, index) {
+  return renderSectionedAdminCard('Турнир', index, [
+    {
+      title: 'Основная информация',
+      gridClass: 'admin-record-grid-3',
+      content: makeFieldsByKeys('tournaments', ['slug', 'name', 'season_year', 'short_label', 'status', 'location', 'start_date', 'end_date'], item, index)
+    },
+    {
+      title: 'Визуал и настройки',
+      gridClass: 'admin-record-grid-2',
+      content: makeFieldsByKeys('tournaments', ['logo', 'hero_image', 'is_featured', 'countdown_enabled'], item, index)
+    },
+    {
+      title: 'Описание',
+      gridClass: 'admin-record-grid-1',
+      content: makeFieldsByKeys('tournaments', ['description'], item, index)
+    }
+  ]);
+}
+
+function renderClubAdminCard(item, index) {
+  return renderSectionedAdminCard('Клуб', index, [
+    {
+      title: 'Основная информация',
+      gridClass: 'admin-record-grid-3',
+      content: makeFieldsByKeys('clubs', ['slug', 'name', 'short_name', 'country', 'city', 'founded_year', 'is_active'], item, index)
+    },
+    {
+      title: 'Визуал и ссылки',
+      gridClass: 'admin-record-grid-2',
+      content: makeFieldsByKeys('clubs', ['logo', 'hero_image', 'website_url'], item, index)
+    },
+    {
+      title: 'Описание',
+      gridClass: 'admin-record-grid-1',
+      content: makeFieldsByKeys('clubs', ['description'], item, index)
+    }
+  ]);
+}
+
+function renderNewsAdminCard(item, index) {
+  return renderSectionedAdminCard('Новость', index, [
+    {
+      title: 'Публикация',
+      gridClass: 'admin-record-grid-3',
+      content: makeFieldsByKeys('news', ['id', 'tournament_slug', 'slug', 'date', 'link', 'is_published'], item, index)
+    },
+    {
+      title: 'Контент',
+      gridClass: 'admin-record-grid-1',
+      content: makeFieldsByKeys('news', ['title', 'excerpt', 'body'], item, index)
+    },
+    {
+      title: 'Обложка',
+      gridClass: 'admin-record-grid-1',
+      content: makeFieldsByKeys('news', ['image'], item, index)
+    }
+  ]);
+}
+
+function renderPartnerAdminCard(item, index) {
+  return renderSectionedAdminCard('Партнёр', index, [
+    {
+      title: 'Основная информация',
+      gridClass: 'admin-record-grid-3',
+      content: makeFieldsByKeys('partners', ['slug', 'name', 'category', 'tournament_slug', 'sort_order', 'is_visible'], item, index)
+    },
+    {
+      title: 'Логотип и ссылка',
+      gridClass: 'admin-record-grid-2',
+      content: makeFieldsByKeys('partners', ['logo_url', 'website_url', 'alt_text'], item, index)
+    },
+    {
+      title: 'Примечание',
+      gridClass: 'admin-record-grid-1',
+      content: makeFieldsByKeys('partners', ['note'], item, index)
+    }
+  ]);
+}
+
+function renderAdminCardBySource(sourceName, item, index, allItems) {
+  if (sourceName === 'matches') return renderMatchAdminCard(item, index, allItems);
+  if (sourceName === 'tournaments') return renderTournamentAdminCard(item, index);
+  if (sourceName === 'clubs') return renderClubAdminCard(item, index);
+  if (sourceName === 'news') return renderNewsAdminCard(item, index);
+  if (sourceName === 'partners') return renderPartnerAdminCard(item, index);
+
+  const source = ADMIN_SOURCES[sourceName];
+  return `
+    <div class="admin-item-card">
+      <div class="admin-item-head">
+        <strong>${source.title} #${index + 1}</strong>
+        <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+      </div>
+      <div class="admin-form-grid">
+        ${source.fields.map(field => makeField(field, item[field[0]], index)).join('')}
       </div>
     </div>
   `;
@@ -895,20 +1018,7 @@ function renderForm(sourceName, data) {
   setRenderedData(sourceName, data);
   wrap.innerHTML = `
     <div class="admin-form-list">
-      ${data.map((item, index) => sourceName === 'matches'
-        ? renderMatchAdminCard(item, index, data)
-        : `
-          <div class="admin-item-card">
-            <div class="admin-item-head">
-              <strong>${source.title} #${index + 1}</strong>
-              <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
-            </div>
-            <div class="admin-form-grid">
-              ${source.fields.map(field => makeField(field, item[field[0]], index)).join('')}
-            </div>
-          </div>
-        `
-      ).join('')}
+      ${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}
     </div>
     <div class="admin-toolbar">
       <button type="button" class="admin-add" id="admin-add-item">+ Добавить запись</button>
