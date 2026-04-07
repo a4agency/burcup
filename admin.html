@@ -3,111 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Burchalkin Cup — Админка</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/style.css">
+  <title>Burchalkin Cup</title>
+  <meta http-equiv="refresh" content="0; url=index.html">
+  <script>
+    window.location.replace('index.html');
+  </script>
 </head>
-<body>
-<header class="header">
-  <div class="container header-inner">
-    <a class="header-brand" href="index.html">
-      <span class="header-brand-mark"><img src="images/logo-burchalkin.png" alt="Burchalkin Cup"></span>
-      <span class="header-brand-title">Burchalkin Cup</span>
-    </a>
-
-    <button class="header-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Открыть меню">
-      <span class="header-toggle-lines" aria-hidden="true">
-        <span></span>
-        <span></span>
-        <span></span>
-      </span>
-    </button>
-
-    <nav class="header-menu" id="site-menu">
-      <a href="index.html">Главная</a>
-      <a href="news.html">Новости</a>
-      <a href="teams.html">Команды</a>
-      <a href="matches.html">Расписание</a>
-      <a href="results.html">Результаты</a>
-      <a href="multimedia.html">Медиа</a>
-      <a href="about-tournament.html">О турнире</a>
-      <a href="about-lev-burchalkin.html">О Льве Бурчалкине</a>
-      <a href="contacts.html">Контакты</a>
-      <div class="lang-switcher" aria-label="Language switcher">
-        <button type="button" class="lang-btn" data-lang="ru" title="Русский">
-          <span class="lang-code">RU</span>
-          <img src="images/lang-ru.png" alt="Русский" class="lang-flag-img" loading="lazy">
-        </button>
-        <button type="button" class="lang-btn" data-lang="en" title="English">
-          <span class="lang-code">EN</span>
-          <img src="images/lang-en.png" alt="English" class="lang-flag-img" loading="lazy">
-        </button>
-      </div>
-    </nav>
-  </div>
-</header>
-
-<main class="site-main">
-  <section class="page-head">
-    <div class="container">
-      <h1>Админка</h1>
-      <p>Войди по паролю, внеси изменения и нажми «Сохранить».</p>
-    </div>
-  </section>
-
-  <section class="section" id="admin-auth-section">
-    <div class="container">
-      <div class="admin-auth-card">
-        <h2>Вход в админку</h2>
-        <p>Для доступа к редактированию турниров, матчей, новостей и партнёров нужен пароль.</p>
-        <form id="admin-login-form" class="admin-auth-form">
-          <input id="admin-password" class="admin-auth-input" type="password" placeholder="Пароль" autocomplete="current-password">
-          <button class="admin-save" type="submit">Войти</button>
-        </form>
-        <div id="admin-login-status" class="admin-login-status">Введи пароль, чтобы открыть админку.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="admin-app" hidden>
-    <div class="container admin-layout">
-      <aside class="admin-sidebar">
-        <h3>Разделы</h3>
-        <div id="admin-nav" class="admin-nav"></div>
-      </aside>
-
-      <div class="admin-panel">
-        <h2 id="admin-title">Турниры</h2>
-        <div id="admin-help" class="admin-help"></div>
-
-        <div class="admin-mode-switch">
-          <button id="mode-form" class="active" type="button">Форма</button>
-          <button id="mode-json" type="button">JSON</button>
-        </div>
-        <div class="admin-actions">
-          <button id="admin-save" class="admin-save" type="button">Сохранить</button>
-          <button id="admin-reset" class="admin-reset" type="button">Сбросить</button>
-          <button id="admin-export" class="admin-export" type="button">Экспорт JSON</button>
-          <button id="admin-logout" class="admin-reset" type="button">Выйти</button>
-        </div>
-
-        <div id="admin-form-wrap" class="admin-form-wrap active"></div>
-        <div id="admin-json-wrap" class="admin-json-wrap">
-          <textarea id="admin-textarea" class="admin-textarea"></textarea>
-        </div>
-        <div id="admin-status" class="admin-status">Загрузка…</div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer class="footer">
-  <div class="container">© <span id="year"></span> Burchalkin Cup</div>
-</footer>
-
-<script src="js/config.js"></script>
-<script src="js/site.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/i18n.js"></script>
-</body>
+<body></body>
 </html>

@@ -176,7 +176,7 @@ Set these environment variables on Railway:
 - `ADMIN_TOKEN`
 - `ADMIN_PASSWORD`
 
-The admin page `admin.html` stores the current session token in the browser session and uses it to read and write data directly through Railway API. The old `admin-lkjuft.html` address now redirects to `admin.html`.
+The working admin page is `admin-almaz.html`. It stores the current session token in the browser session and uses it to read and write data directly through Railway API. The old `admin.html` and `admin-lkjuft.html` addresses now redirect to the public homepage.
 
 For partner logos and other image fields, the admin page can upload files through Railway API into Cloudinary. The server stores only the resulting public URL in PostgreSQL, which keeps the database cleaner than saving long base64 strings.
 

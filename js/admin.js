@@ -295,7 +295,6 @@ const ADMIN_SOURCES = {
 
 let currentSource = 'tournaments';
 let defaultsCache = {};
-let currentMode = 'form';
 let renderedDataCache = {};
 
 function getApiBaseUrl() {
@@ -329,7 +328,7 @@ function setAdminAuthenticated(isAuthenticated) {
   if (app) app.hidden = !isAuthenticated;
 }
 
-function resetAdminSession(message = 'Войди в админку, чтобы продолжить.') {
+function resetAdminSession(message = 'Войди в админ-панель, чтобы продолжить.') {
   setAdminToken('');
   setAdminAuthenticated(false);
   setLoginStatus(message, true);
@@ -387,7 +386,7 @@ async function fetchAdminSource(sourceName) {
     throw new Error('В js/config.js не указан apiBaseUrl');
   }
   if (!token) {
-    throw new Error('Сначала войди в админку.');
+    throw new Error('Сначала войди в админ-панель.');
   }
 
   const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
@@ -399,8 +398,8 @@ async function fetchAdminSource(sourceName) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
-      throw new Error('Сессия админки завершилась. Войди ещё раз.');
+      resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
+      throw new Error('Сессия админ-панели завершилась. Войди ещё раз.');
     }
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
@@ -417,7 +416,7 @@ async function pushAdminSource(sourceName, data) {
     throw new Error('В js/config.js не указан apiBaseUrl');
   }
   if (!token) {
-    throw new Error('Сначала войди в админку.');
+    throw new Error('Сначала войди в админ-панель.');
   }
 
   const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
@@ -432,8 +431,8 @@ async function pushAdminSource(sourceName, data) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
-      throw new Error('Сессия админки завершилась. Войди ещё раз.');
+      resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
+      throw new Error('Сессия админ-панели завершилась. Войди ещё раз.');
     }
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
@@ -449,7 +448,7 @@ async function uploadAdminImage({ file, sourceName, key }) {
     throw new Error('В js/config.js не указан apiBaseUrl');
   }
   if (!token) {
-    throw new Error('Сначала войди в админку.');
+    throw new Error('Сначала войди в админ-панель.');
   }
 
   const dataUrl = await new Promise((resolve, reject) => {
@@ -476,8 +475,8 @@ async function uploadAdminImage({ file, sourceName, key }) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
-      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
-      throw new Error('Сессия админки завершилась. Войди ещё раз.');
+      resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
+      throw new Error('Сессия админ-панели завершилась. Войди ещё раз.');
     }
     throw new Error(body.error || `Ошибка upload API (${response.status})`);
   }
@@ -943,33 +942,17 @@ async function adminShowSource(sourceName, options = {}) {
   const data = normalizeSourceData(sourceName, await loadSourceData(sourceName, options));
 
   document.getElementById('admin-title').textContent = source.title;
-  document.getElementById('admin-help').textContent = source.help;
-  document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
+  const textarea = document.getElementById('admin-textarea');
+  if (textarea) textarea.value = JSON.stringify(data, null, 2);
   renderForm(sourceName, data);
-  switchMode(currentMode);
   setStatus(options.forceRemote ? 'Данные обновлены.' : 'Раздел загружен.');
-}
-
-function switchMode(mode) {
-  currentMode = mode;
-  document.getElementById('mode-form').classList.toggle('active', mode === 'form');
-  document.getElementById('mode-json').classList.toggle('active', mode === 'json');
-  document.getElementById('admin-form-wrap').classList.toggle('active', mode === 'form');
-  document.getElementById('admin-json-wrap').classList.toggle('active', mode === 'json');
-  document.getElementById('admin-form-wrap').style.display = mode === 'form' ? 'block' : 'none';
-  document.getElementById('admin-json-wrap').style.display = mode === 'json' ? 'block' : 'none';
 }
 
 async function adminSave() {
   try {
-    let parsed;
-    if (currentMode === 'form') {
-      parsed = normalizeSourceData(currentSource, readFormData(currentSource));
-      document.getElementById('admin-textarea').value = JSON.stringify(parsed, null, 2);
-    } else {
-      parsed = normalizeSourceData(currentSource, JSON.parse(document.getElementById('admin-textarea').value));
-      renderForm(currentSource, parsed);
-    }
+    const parsed = normalizeSourceData(currentSource, readFormData(currentSource));
+    const textarea = document.getElementById('admin-textarea');
+    if (textarea) textarea.value = JSON.stringify(parsed, null, 2);
 
     setSourceData(currentSource, parsed);
     setStatus('Сохраняю изменения...');
@@ -978,9 +961,8 @@ async function adminSave() {
     const synced = result.data || parsed;
     defaultsCache[currentSource] = structuredClone(synced);
     setSourceData(currentSource, synced);
-    document.getElementById('admin-textarea').value = JSON.stringify(synced, null, 2);
+    if (textarea) textarea.value = JSON.stringify(synced, null, 2);
     renderForm(currentSource, synced);
-    switchMode(currentMode);
     setStatus(`Изменения сохранены. Записей: ${result.count ?? synced.length}.`);
   } catch (error) {
     setStatus('Ошибка сохранения: ' + error.message);
@@ -991,28 +973,24 @@ async function adminReset() {
   localStorage.removeItem(ADMIN_SOURCES[currentSource].key);
   try {
     const data = await loadSourceData(currentSource, { forceRemote: true });
-    document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
+    const textarea = document.getElementById('admin-textarea');
+    if (textarea) textarea.value = JSON.stringify(data, null, 2);
     renderForm(currentSource, data);
-    switchMode(currentMode);
     setStatus('Черновик очищен. Данные загружены заново.');
   } catch (error) {
     const fallback = cloneDefaultData(currentSource);
-    document.getElementById('admin-textarea').value = JSON.stringify(fallback, null, 2);
+    const textarea = document.getElementById('admin-textarea');
+    if (textarea) textarea.value = JSON.stringify(fallback, null, 2);
     renderForm(currentSource, fallback);
-    switchMode(currentMode);
     setStatus('Не получилось загрузить данные. Показаны стартовые значения: ' + error.message);
   }
 }
 
 function adminExport() {
   try {
-    let text = document.getElementById('admin-textarea').value;
-    if (currentMode === 'form') {
-      text = JSON.stringify(readFormData(currentSource), null, 2);
-      document.getElementById('admin-textarea').value = text;
-    } else {
-      JSON.parse(text);
-    }
+    const text = JSON.stringify(readFormData(currentSource), null, 2);
+    const textarea = document.getElementById('admin-textarea');
+    if (textarea) textarea.value = text;
     const source = ADMIN_SOURCES[currentSource];
     const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
     const a = document.createElement('a');
@@ -1087,29 +1065,33 @@ function handleAdminLogout() {
   setAdminToken('');
   setAdminAuthenticated(false);
   setLoginStatus('Сессия закрыта.');
-  setStatus('Вход в админку закрыт.');
+  setStatus('Вход в админ-панель закрыт.');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('admin-app');
   if (!app) return;
 
-  document.getElementById('admin-save').addEventListener('click', adminSave);
-  document.getElementById('admin-reset').addEventListener('click', adminReset);
-  document.getElementById('admin-export').addEventListener('click', adminExport);
+  document.querySelectorAll('[data-admin-save]').forEach(button => {
+    button.addEventListener('click', adminSave);
+  });
+  document.querySelectorAll('[data-admin-reset]').forEach(button => {
+    button.addEventListener('click', adminReset);
+  });
+  document.querySelectorAll('[data-admin-export]').forEach(button => {
+    button.addEventListener('click', adminExport);
+  });
   document.getElementById('admin-logout').addEventListener('click', handleAdminLogout);
   document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
-  document.getElementById('mode-form').addEventListener('click', () => switchMode('form'));
-  document.getElementById('mode-json').addEventListener('click', () => switchMode('json'));
 
   if (getAdminToken()) {
     openAdminWorkspace({ forceRemote: true }).catch((error) => {
-      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
+      resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
       setStatus('Ошибка загрузки данных: ' + error.message);
     });
   } else {
     setAdminAuthenticated(false);
-    setLoginStatus('Введи пароль, чтобы открыть админку.');
-    setStatus('Войди в админку, чтобы редактировать данные.');
+    setLoginStatus('Введи пароль, чтобы открыть панель.');
+    setStatus('Войди в админ-панель, чтобы редактировать данные.');
   }
 });

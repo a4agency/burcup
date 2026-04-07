@@ -1497,6 +1497,28 @@ object-fit:contain;
   background:#fff;
 }
 
+.admin-auth-submit{
+  min-height:48px;
+  border:none;
+  border-radius:14px;
+  padding:0 22px;
+  background:linear-gradient(135deg, var(--navy), #2d4f95);
+  color:#fff;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:.01em;
+  cursor:pointer;
+  box-shadow:0 12px 24px rgba(13,43,99,.16);
+  transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.admin-auth-submit:hover,
+.admin-auth-submit:focus-visible{
+  transform:translateY(-1px);
+  box-shadow:0 16px 28px rgba(13,43,99,.2);
+  filter:saturate(1.04);
+}
+
 .admin-login-status{
   margin-top:14px;
   font-size:14px;
@@ -1527,6 +1549,18 @@ object-fit:contain;
   padding:12px 16px;
   font-weight:800;
   cursor:pointer;
+}
+
+.admin-actions-bottom{
+  justify-content:flex-end;
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid rgba(13,43,99,.08);
+}
+
+.admin-save-wide{
+  min-width:220px;
+  justify-content:center;
 }
 
 .admin-save{background:var(--navy);color:#fff}
@@ -1561,6 +1595,19 @@ object-fit:contain;
 
   .admin-auth-card{
     padding:22px;
+  }
+
+  .admin-auth-submit{
+    width:100%;
+  }
+
+  .admin-actions-bottom{
+    justify-content:stretch;
+  }
+
+  .admin-save-wide{
+    width:100%;
+    min-width:0;
   }
 }
 
