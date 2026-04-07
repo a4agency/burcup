@@ -578,6 +578,26 @@ function formatMatchDisplayDate(value) {
   }).format(parsed);
 }
 
+function formatTournamentDisplayDate(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const parsed = new Date(`${raw}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return raw;
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(parsed);
+}
+
+function formatTournamentDateRange(startDate, endDate) {
+  const startLabel = formatTournamentDisplayDate(startDate);
+  const endLabel = formatTournamentDisplayDate(endDate);
+  return joinNonEmpty([startLabel, endLabel], ' - ');
+}
+
 function formatMatchCardDateTime(item = {}) {
   return joinNonEmpty([formatMatchDisplayDate(item.date), String(item.time || '').trim()], ' • ');
 }
@@ -599,18 +619,27 @@ function getArchiveTournamentSlug(year) {
 function buildArchiveTournamentEntries() {
   return Object.entries(ARCHIVE_TOURNAMENTS)
     .sort((left, right) => Number(right[0]) - Number(left[0]))
-    .map(([year, item]) => ({
-      slug: getArchiveTournamentSlug(year),
-      season_year: Number(year),
-      status: year === '2025' ? 'completed' : 'archived',
-      name: item.title,
-      description: item.description,
-      start_date: String(item.season || '').match(/\d{1,2}\s+[а-яё]+/i)?.[0] || '',
-      end_date: '',
-      clubs_count: Number(item.detail?.clubs_count || 0),
-      matches_count: Number(item.detail?.matches_count || 0),
-      is_archive: true
-    }));
+    .map(([year, item]) => {
+      const matchDates = (Array.isArray(item.detail?.matches) ? item.detail.matches : [])
+        .map(match => String(match?.date || '').trim())
+        .filter(Boolean)
+        .sort();
+      const derivedStartDate = matchDates[0] || '';
+      const derivedEndDate = matchDates[matchDates.length - 1] || '';
+
+      return {
+        slug: getArchiveTournamentSlug(year),
+        season_year: Number(year),
+        status: year === '2025' ? 'completed' : 'archived',
+        name: item.title,
+        description: item.description,
+        start_date: derivedStartDate,
+        end_date: derivedEndDate,
+        clubs_count: Number(item.detail?.clubs_count || 0),
+        matches_count: Number(item.detail?.matches_count || 0),
+        is_archive: true
+      };
+    });
 }
 
 function getArchiveTournamentClubs(detail = {}) {
@@ -1070,9 +1099,10 @@ async function renderTournamentsGrid() {
       ? `archive-tournament.html?year=${encodeURIComponent(String(item.season_year || ''))}${item.slug ? `&slug=${encodeURIComponent(item.slug)}` : ''}`
       : `results.html?tournament=${encodeURIComponent(item.slug || '')}`;
     const actionLabel = isArchive ? 'Открыть архив' : 'Открыть турнир';
-    const datesLabel = item.is_archive
-      ? String(item.start_date || '').trim()
-      : `${escapeHtml(item.start_date || '')}${item.end_date ? ` - ${escapeHtml(item.end_date)}` : ''}`;
+    const datesLabel = formatTournamentDateRange(item.start_date, item.end_date) || escapeHtml(String(item.start_date || '').trim());
+    const displayName = Number(item.season_year || 0) === 2026
+      ? 'Кубок Бурчалкина 2026'
+      : String(item.name || '').trim();
 
     return `
     <article class="tournament-card">
@@ -1080,7 +1110,7 @@ async function renderTournamentsGrid() {
         <div class="tournament-card-year">${escapeHtml(item.season_year || '')}</div>
         <div class="tournament-card-status ${escapeHtml(item.status)}">${escapeHtml(formatTournamentStatus(item.status))}</div>
       </div>
-      <h3>${escapeHtml(item.name)}</h3>
+      <h3>${escapeHtml(displayName)}</h3>
       <p>${escapeHtml(item.description || '')}</p>
       <div class="tournament-card-meta">
         <span>${escapeHtml(formatCountLabel(item.clubs_count, ['клуб', 'клуба', 'клубов']))}</span>

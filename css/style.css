@@ -593,6 +593,8 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .tournament-card{
+  display:flex;
+  flex-direction:column;
   background:linear-gradient(180deg,#ffffff 0%,#f3f8ff 100%);
   border:1px solid var(--line);
   border-radius:24px;
@@ -648,7 +650,8 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .tournament-card-actions{
-  margin-top:18px;
+  margin-top:auto;
+  padding-top:18px;
 }
 
 .tournament-card-button{
