@@ -352,6 +352,38 @@ const HISTORICAL_CLUB_FALLBACKS = {
     matches: []
   }
 };
+const ARCHIVE_TOURNAMENTS = {
+  '2025': {
+    title: 'Кубок Бурчалкина 2025',
+    season: 'Архивный розыгрыш 15 - 17 мая 2025',
+    description: 'Позже здесь появятся команды турнира, результаты матчей, сетка, фотографии и архивные материалы розыгрыша 2025 года.',
+    status: 'Страница уже готова как архивная точка входа. Материалы можно будет постепенно добавить позже.'
+  },
+  '2024': {
+    title: 'Кубок Бурчалкина 2024',
+    season: 'Архивный розыгрыш сезона 2024',
+    description: 'Это страница-заглушка под архив 2024 года. Позже здесь можно будет собрать участников, расписание, итоги и медиаматериалы.',
+    status: 'Архив ещё не заполнен, но страница уже подключена и доступна по ссылке.'
+  },
+  '2023': {
+    title: 'Кубок Бурчалкина 2023',
+    season: 'Архивный розыгрыш сезона 2023',
+    description: 'На этой странице позже появится информация о розыгрыше 2023 года: команды, результаты, фотографии и памятные материалы.',
+    status: 'Пока это заглушка для будущего наполнения через админ-панель.'
+  },
+  '2019': {
+    title: 'Кубок Бурчалкина 2019',
+    season: 'Архивный розыгрыш сезона 2019',
+    description: 'Страница подготовлена как архив для одного из ранних розыгрышей турнира. Здесь можно будет собрать историю турнира по годам.',
+    status: 'Страница архива уже работает, содержимое добавим позже.'
+  },
+  '2018': {
+    title: 'Кубок Бурчалкина 2018',
+    season: 'Архивный розыгрыш сезона 2018',
+    description: 'Заглушка для архивной страницы 2018 года. Позже здесь появятся команды, результаты и исторические материалы турнира.',
+    status: 'Архив 2018 года пока находится в подготовке.'
+  }
+};
 
 function pluralizeRu(count, forms) {
   const value = Math.abs(Number(count) || 0);
@@ -483,6 +515,16 @@ function formatMatchDisplayDate(value) {
 
 function formatMatchCardDateTime(item = {}) {
   return joinNonEmpty([formatMatchDisplayDate(item.date), String(item.time || '').trim()], ' • ');
+}
+
+function getArchiveTournamentData(year) {
+  const normalizedYear = String(year || '').trim();
+  return ARCHIVE_TOURNAMENTS[normalizedYear] || {
+    title: `Кубок Бурчалкина ${normalizedYear || 'Архив'}`,
+    season: normalizedYear ? `Архивный розыгрыш сезона ${normalizedYear}` : 'Архивный розыгрыш турнира',
+    description: 'На этой странице позже появятся команды, результаты, фотографии и материалы архивного розыгрыша.',
+    status: 'Страница-заглушка уже создана и готова для будущего наполнения.'
+  };
 }
 
 function getMatchClubKey(item, side) {
@@ -1437,6 +1479,27 @@ function initMatchMediaTabs(scope = document) {
   });
 }
 
+function renderArchiveTournamentPage() {
+  const page = document.querySelector('#archive-tournament-page');
+  if (!page) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const year = params.get('year') || '2025';
+  const archive = getArchiveTournamentData(year);
+
+  const titleNode = page.querySelector('[data-archive-title]');
+  const seasonNode = page.querySelector('[data-archive-season]');
+  const descriptionNode = page.querySelector('[data-archive-description]');
+  const statusNode = page.querySelector('[data-archive-status]');
+
+  if (titleNode) titleNode.textContent = archive.title;
+  if (seasonNode) seasonNode.textContent = archive.season;
+  if (descriptionNode) descriptionNode.textContent = archive.description;
+  if (statusNode) statusNode.textContent = archive.status;
+
+  document.title = `${archive.title} - Burchalkin Cup`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderUpcomingMatches();
   renderHomeNews();
@@ -1450,6 +1513,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderClubsGrid('#clubs-grid-page');
   renderPartnersForFeaturedTournament();
   renderClubPage();
+  renderArchiveTournamentPage();
   runAutoFit();
 });
 

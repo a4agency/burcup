@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Архив турнира - Burchalkin Cup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="container topbar">
+    <a class="logo" href="index.html"><img src="images/logo-burchalkin.png" alt="Burchalkin Cup logo"><span>Burchalkin Cup</span></a>
+    <button class="header-toggle" type="button" aria-expanded="false" aria-controls="header-menu" aria-label="Открыть меню">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header-menu" id="header-menu" aria-hidden="true">
+      <a href="index.html">Главная</a>
+      <a href="news.html">Новости</a>
+      <a href="teams.html">Команды</a>
+      <a href="matches.html">Расписание</a>
+      <a href="results.html">Результаты</a>
+      <a href="multimedia.html">Медиа</a>
+      <a href="about-tournament.html">О турнире</a>
+      <a href="about-burchalkin.html">О Льве Бурчалкине</a>
+      <a href="contacts.html">Контакты</a>
+      <div class="lang-switch">
+        <button class="lang-btn active">RU 🇷🇺</button>
+        <button class="lang-btn">EN 🇬🇧</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="archive-tournament-page" class="archive-placeholder-page">
+  <section class="section archive-placeholder-section">
+    <div class="container">
+      <div class="archive-placeholder-card">
+        <div class="archive-placeholder-topline">
+          <span class="archive-placeholder-chip">Архив турнира</span>
+          <a class="archive-placeholder-back" href="results.html">← Назад к результатам</a>
+        </div>
+        <h1 class="archive-placeholder-title" data-archive-title>Кубок Бурчалкина 2025</h1>
+        <div class="archive-placeholder-season" data-archive-season>Архивный розыгрыш турнира</div>
+        <p class="archive-placeholder-description" data-archive-description>
+          На этой странице позже появятся команды, результаты, сетка, фотографии и материалы архивного розыгрыша.
+        </p>
+        <div class="archive-placeholder-columns">
+          <div class="archive-placeholder-panel">
+            <div class="archive-placeholder-panel-title">Что появится позднее</div>
+            <ul class="archive-placeholder-list">
+              <li>Состав участников и группы</li>
+              <li>Результаты матчей и турнирная таблица</li>
+              <li>Фотографии и видео розыгрыша</li>
+            </ul>
+          </div>
+          <div class="archive-placeholder-panel">
+            <div class="archive-placeholder-panel-title">Статус страницы</div>
+            <p data-archive-status>Страница-заглушка уже готова. Наполнение добавим позже через админ-панель.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">©АО "Обуховский завод" 2015-2026</div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>
