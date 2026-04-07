@@ -1247,7 +1247,11 @@ async function renderMatchPageFromJson() {
           </div>
         </section>
         <iframe class="match-page-video" src="${escapeHtml(item.video)}" allowfullscreen></iframe>
-        ${item.summary ? `<p class="match-page-summary">${escapeHtml(item.summary)}</p>` : ''}
+        <div class="match-page-actions" role="group" aria-label="Материалы матча">
+          <button class="match-page-action is-active" type="button" aria-pressed="true">Трансляция</button>
+          <button class="match-page-action" type="button" disabled>Обзор</button>
+          <button class="match-page-action" type="button" disabled>Интервью</button>
+        </div>
       </div>
     `;
     runAutoFit();
