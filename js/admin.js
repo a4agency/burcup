@@ -115,6 +115,119 @@ const ADMIN_SOURCES = {
       ['description', 'Описание', 'textarea'],
     ],
   },
+  archive_tournaments: {
+    key: 'bcup_admin_archive_tournaments',
+    exportName: 'archive-tournaments.json',
+    title: 'Архив турниров',
+    filterArchived: true,
+    defaultData: [
+      {
+        slug: 'burchalkin-cup-2025',
+        name: 'Burchalkin Cup 2025',
+        season_year: 2025,
+        short_label: 'BCUP 2025',
+        status: 'completed',
+        location: 'Санкт-Петербург',
+        start_date: '2025-05-15',
+        end_date: '2025-05-17',
+        logo: 'images/logo-burchalkin.png',
+        hero_image: '',
+        description: 'Архивный розыгрыш турнира 2025 года.',
+        is_featured: false,
+        countdown_enabled: false,
+      },
+      {
+        slug: 'burchalkin-cup-2024',
+        name: 'Burchalkin Cup 2024',
+        season_year: 2024,
+        short_label: 'BCUP 2024',
+        status: 'archived',
+        location: 'Санкт-Петербург',
+        start_date: '2024-05-15',
+        end_date: '2024-05-17',
+        logo: 'images/logo-burchalkin.png',
+        hero_image: '',
+        description: 'Архивный розыгрыш турнира 2024 года.',
+        is_featured: false,
+        countdown_enabled: false,
+      },
+      {
+        slug: 'burchalkin-cup-2023',
+        name: 'Burchalkin Cup 2023',
+        season_year: 2023,
+        short_label: 'BCUP 2023',
+        status: 'archived',
+        location: 'Санкт-Петербург',
+        start_date: '2023-05-15',
+        end_date: '2023-05-17',
+        logo: 'images/logo-burchalkin.png',
+        hero_image: '',
+        description: 'Архивный розыгрыш турнира 2023 года.',
+        is_featured: false,
+        countdown_enabled: false,
+      },
+      {
+        slug: 'burchalkin-cup-2019',
+        name: 'Burchalkin Cup 2019',
+        season_year: 2019,
+        short_label: 'BCUP 2019',
+        status: 'archived',
+        location: 'Санкт-Петербург',
+        start_date: '2019-05-15',
+        end_date: '2019-05-17',
+        logo: 'images/logo-burchalkin.png',
+        hero_image: '',
+        description: 'Архивный розыгрыш турнира 2019 года.',
+        is_featured: false,
+        countdown_enabled: false,
+      },
+      {
+        slug: 'burchalkin-cup-2018',
+        name: 'Burchalkin Cup 2018',
+        season_year: 2018,
+        short_label: 'BCUP 2018',
+        status: 'archived',
+        location: 'Санкт-Петербург',
+        start_date: '2018-05-15',
+        end_date: '2018-05-17',
+        logo: 'images/logo-burchalkin.png',
+        hero_image: '',
+        description: 'Архивный розыгрыш турнира 2018 года.',
+        is_featured: false,
+        countdown_enabled: false,
+      }
+    ],
+    empty: () => ({
+      slug: '',
+      name: '',
+      season_year: '',
+      short_label: '',
+      status: 'archived',
+      location: '',
+      start_date: '',
+      end_date: '',
+      logo: 'images/logo-burchalkin.png',
+      hero_image: '',
+      description: '',
+      is_featured: false,
+      countdown_enabled: false,
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['name', 'Название', 'text'],
+      ['season_year', 'Год', 'number'],
+      ['short_label', 'Короткая подпись', 'text'],
+      ['status', 'Статус', 'select', ['draft', 'upcoming', 'active', 'completed', 'archived']],
+      ['location', 'Локация', 'text'],
+      ['start_date', 'Дата старта', 'date'],
+      ['end_date', 'Дата окончания', 'date'],
+      ['logo', 'Логотип', 'image'],
+      ['hero_image', 'Hero image', 'image'],
+      ['is_featured', 'Текущий турнир', 'checkbox'],
+      ['countdown_enabled', 'Показывать таймер на главной', 'checkbox'],
+      ['description', 'Описание', 'textarea'],
+    ],
+  },
   clubs: {
     key: 'bcup_admin_clubs',
     exportName: 'clubs.json',
@@ -199,6 +312,83 @@ const ADMIN_SOURCES = {
       time: '10:00',
       status: 'soon',
       status_label: 'Скоро',
+      home_team: '',
+      home_team_slug: '',
+      home_logo: '',
+      away_team: '',
+      away_team_slug: '',
+      away_logo: '',
+      score: '0:0',
+      group: '',
+      round: '',
+      matchday: '',
+      venue: 'Стадион "Алмаз-Антей"',
+      video: '',
+      review_video: '',
+      interview_video: '',
+      summary: '',
+    }),
+    fields: [
+      ['id', 'ID', 'number'],
+      ['tournament_slug', 'Турнир', 'text'],
+      ['date', 'Дата', 'date'],
+      ['time', 'Время', 'time'],
+      ['status', 'Статус', 'select', ['soon', 'live', 'done', 'postponed', 'cancelled']],
+      ['status_label', 'Подпись статуса', 'text'],
+      ['home_team', 'Хозяева', 'text'],
+      ['home_team_slug', 'Slug хозяев', 'text'],
+      ['home_logo', 'Логотип хозяев', 'logo'],
+      ['away_team', 'Гости', 'text'],
+      ['away_team_slug', 'Slug гостей', 'text'],
+      ['away_logo', 'Логотип гостей', 'logo'],
+      ['score', 'Счёт', 'score'],
+      ['group', 'Группа / стадия', 'text'],
+      ['round', 'Раунд', 'text'],
+      ['matchday', 'Игровой день', 'text'],
+      ['venue', 'Стадион', 'text'],
+      ['video', 'Ссылка на трансляцию', 'url'],
+      ['review_video', 'Ссылка на обзор', 'url'],
+      ['interview_video', 'Ссылка на интервью', 'url'],
+      ['summary', 'Описание', 'textarea'],
+    ],
+  },
+  archive_matches: {
+    key: 'bcup_archive_matches',
+    exportName: 'archive-matches.json',
+    title: 'Архивные матчи',
+    filterArchiveMatches: true,
+    defaultData: [
+      {
+        id: Date.now(),
+        tournament_slug: 'burchalkin-cup-2025',
+        date: '2025-05-15',
+        time: '10:00',
+        status: 'done',
+        status_label: 'Завершен',
+        home_team: '',
+        home_team_slug: '',
+        home_logo: '',
+        away_team: '',
+        away_team_slug: '',
+        away_logo: '',
+        score: '0:0',
+        group: '',
+        round: '',
+        matchday: '',
+        venue: 'Стадион "Алмаз-Антей"',
+        video: '',
+        review_video: '',
+        interview_video: '',
+        summary: '',
+      }
+    ],
+    empty: () => ({
+      id: Date.now(),
+      tournament_slug: 'burchalkin-cup-2025',
+      date: '2025-05-15',
+      time: '10:00',
+      status: 'done',
+      status_label: 'Завершен',
       home_team: '',
       home_team_slug: '',
       home_logo: '',
@@ -424,7 +614,10 @@ function getAdminSourceMeta(sourceName) {
 }
 
 function getAdminApiSourceName(sourceName) {
-  return sourceName === 'partners_media' ? 'partners' : sourceName;
+  if (sourceName === 'partners_media') return 'partners';
+  if (sourceName === 'archive_tournaments') return 'tournaments';
+  if (sourceName === 'archive_matches') return 'matches';
+  return sourceName;
 }
 
 function normalizeTournamentAdminItem(item) {
@@ -437,8 +630,24 @@ function normalizeTournamentAdminItem(item) {
 function normalizeSourceData(sourceName, data) {
   const sourceMeta = getAdminSourceMeta(sourceName);
   const items = Array.isArray(data) ? data : [];
-  if (sourceName === 'tournaments') {
-    return items.map(normalizeTournamentAdminItem);
+  if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') {
+    const normalizedItems = items.map(normalizeTournamentAdminItem);
+    if (sourceMeta?.filterArchived) {
+      return normalizedItems.filter(item => !item?.is_featured && Number(item?.season_year || 0) < 2026);
+    }
+    return normalizedItems.filter(item => item?.is_featured || Number(item?.season_year || 0) >= 2026);
+  }
+  if (sourceName === 'matches' || sourceName === 'archive_matches') {
+    if (sourceMeta?.filterArchiveMatches) {
+      return items.filter(item => {
+        const tournamentSlug = String(item?.tournament_slug || '').trim();
+        return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
+      });
+    }
+    return items.filter(item => {
+      const tournamentSlug = String(item?.tournament_slug || '').trim();
+      return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
+    });
   }
   if (sourceMeta?.filterCategory) {
     return items.filter(item => String(item?.category || 'general') === sourceMeta.filterCategory);
@@ -498,6 +707,18 @@ async function pushAdminSource(sourceName, data) {
     const allPartners = await fetchAdminCollection(apiSourceName);
     payload = [
       ...allPartners.filter(item => String(item?.category || 'general') !== sourceMeta.filterCategory),
+      ...normalizeSourceData(sourceName, data),
+    ];
+  } else if (sourceName === 'archive_tournaments') {
+    const allTournaments = await fetchAdminCollection(apiSourceName);
+    payload = [
+      ...normalizeSourceData('tournaments', allTournaments),
+      ...normalizeSourceData(sourceName, data),
+    ];
+  } else if (sourceName === 'archive_matches') {
+    const allMatches = await fetchAdminCollection(apiSourceName);
+    payload = [
+      ...normalizeSourceData('matches', allMatches),
       ...normalizeSourceData(sourceName, data),
     ];
   }
@@ -1029,11 +1250,11 @@ function renderPartnerSourceCards(sourceName, data) {
 }
 
 function renderAdminCardBySource(sourceName, item, index, allItems) {
-  if (sourceName === 'matches') return renderMatchAdminCard(item, index, allItems);
-  if (sourceName === 'tournaments') return renderTournamentAdminCard(item, index);
+  if (sourceName === 'matches' || sourceName === 'archive_matches') return renderMatchAdminCard(item, index, allItems);
+  if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') return renderTournamentAdminCard(item, index);
   if (sourceName === 'clubs') return renderClubAdminCard(item, index);
   if (sourceName === 'news') return renderNewsAdminCard(item, index);
-  if (sourceName === 'partners') return renderPartnerAdminCard(item, index);
+  if (sourceName === 'partners' || sourceName === 'partners_media') return renderPartnerAdminCard(item, index);
 
   const source = ADMIN_SOURCES[sourceName];
   return `
@@ -1310,11 +1531,11 @@ function renderForm(sourceName, data) {
     });
   });
 
-  if (sourceName === 'matches') {
+  if (sourceName === 'matches' || sourceName === 'archive_matches') {
     refreshAdminMatchPreviews(wrap);
     if (wrap.dataset.matchPreviewBound !== 'true') {
       const syncPreviews = () => {
-        if (currentSource === 'matches') refreshAdminMatchPreviews(wrap);
+        if (currentSource === 'matches' || currentSource === 'archive_matches') refreshAdminMatchPreviews(wrap);
       };
       wrap.addEventListener('input', syncPreviews);
       wrap.addEventListener('change', syncPreviews);
@@ -1358,7 +1579,7 @@ async function adminShowSource(sourceName, options = {}) {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
 
-  if (sourceName === 'matches' && !defaultsCache.clubs) {
+  if ((sourceName === 'matches' || sourceName === 'archive_matches') && !defaultsCache.clubs) {
     try {
       const clubs = await loadSourceData('clubs');
       defaultsCache.clubs = structuredClone(clubs);
