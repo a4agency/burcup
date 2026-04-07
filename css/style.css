@@ -1248,6 +1248,7 @@ object-fit:contain;
   line-height:1.1;
   font-weight:700;
   color:var(--navy);
+  white-space:nowrap;
 }
 
 .match-headtohead-main{
