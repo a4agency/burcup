@@ -1727,25 +1727,20 @@ function renderArchiveTournamentPage() {
   const standingsNode = page.querySelector('[data-archive-standings]');
   const matchesNode = page.querySelector('[data-archive-matches]');
 
-  function renderArchiveClubCard(item, rank, variant = 'default') {
+  function renderArchiveClubCard(item, rank) {
     const href = item.slug ? `club.html?slug=${encodeURIComponent(item.slug)}` : '';
     const tag = href ? 'a' : 'div';
     const placeLabel = rank ? `${rank} место` : '';
     const location = formatClubLocation(item);
-    const cardClass = variant === 'podium'
-      ? `archive-team-card archive-team-card-podium archive-team-card-rank-${rank || 0}`
-      : 'archive-team-card';
 
     return `
-      <${tag} class="${cardClass}" ${href ? `href="${escapeHtml(href)}"` : ''}>
+      <${tag} class="archive-team-card" ${href ? `href="${escapeHtml(href)}"` : ''}>
         <div class="archive-team-logo-wrap">
           ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'archive-team-logo', width: 220 })}
         </div>
-        <div class="archive-team-body">
-          <strong>${escapeHtml(item.name || 'Клуб')}</strong>
-          ${location ? `<span>${escapeHtml(location)}</span>` : ''}
-          ${placeLabel ? `<div class="archive-team-place">${escapeHtml(placeLabel)}</div>` : ''}
-        </div>
+        <strong>${escapeHtml(item.name || 'Клуб')}</strong>
+        ${location ? `<span>${escapeHtml(location)}</span>` : ''}
+        ${placeLabel ? `<div class="archive-team-place">${escapeHtml(placeLabel)}</div>` : ''}
       </${tag}>
     `;
   }
@@ -1805,25 +1800,7 @@ function renderArchiveTournamentPage() {
           ...club,
           rank: Number(club.position || index + 1)
         })).sort((left, right) => (left.rank || 999) - (right.rank || 999));
-
-        const podiumOrder = [2, 1, 3];
-        const podium = podiumOrder
-          .map(place => rankedClubs.find(club => club.rank === place))
-          .filter(Boolean);
-        const rest = rankedClubs.filter(club => ![1, 2, 3].includes(club.rank));
-
-        teamsNode.innerHTML = `
-          ${podium.length ? `
-            <div class="archive-team-podium">
-              ${podium.map(club => renderArchiveClubCard(club, club.rank, 'podium')).join('')}
-            </div>
-          ` : ''}
-          ${rest.length ? `
-            <div class="archive-team-grid archive-team-grid-rest">
-              ${rest.map(club => renderArchiveClubCard(club, club.rank)).join('')}
-            </div>
-          ` : ''}
-        `;
+        teamsNode.innerHTML = rankedClubs.map(club => renderArchiveClubCard(club, club.rank)).join('');
       }
     }
 
