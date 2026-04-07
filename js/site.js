@@ -1046,7 +1046,15 @@ async function fetchApi(path) {
   const apiBaseUrl = getApiBaseUrl();
   if (!apiBaseUrl) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}${path}`);
+    const url = new URL(`${apiBaseUrl}${path}`);
+    url.searchParams.set('_ts', String(Date.now()));
+    const response = await fetch(url.toString(), {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache'
+      }
+    });
     if (!response.ok) throw new Error(`Failed to load ${path}`);
     return response.json();
   } catch (error) {
@@ -1063,6 +1071,23 @@ async function fetchJson(path) {
     'data/results.json': 'bcup_results',
   };
   const storageKey = storageKeyMap[path];
+  const apiBaseUrl = getApiBaseUrl();
+  const endpoint = API_ENDPOINTS[path];
+  if (apiBaseUrl && endpoint) {
+    try {
+      const remoteData = await fetchApi(endpoint);
+      if (remoteData && (path !== 'data/standings.json' || hasExpandedStandingsFields(remoteData))) {
+        if (storageKey) {
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(remoteData));
+          } catch (e) {}
+        }
+        return remoteData;
+      }
+    } catch (error) {
+      console.warn(`Remote API ${endpoint} is unavailable, falling back to static file.`, error);
+    }
+  }
   if (storageKey) {
     const local = localStorage.getItem(storageKey);
     if (local) {
@@ -1072,18 +1097,6 @@ async function fetchJson(path) {
           return parsed;
         }
       } catch (e) {}
-    }
-  }
-  const apiBaseUrl = getApiBaseUrl();
-  const endpoint = API_ENDPOINTS[path];
-  if (apiBaseUrl && endpoint) {
-    try {
-      const remoteData = await fetchApi(endpoint);
-      if (remoteData && (path !== 'data/standings.json' || hasExpandedStandingsFields(remoteData))) {
-        return remoteData;
-      }
-    } catch (error) {
-      console.warn(`Remote API ${endpoint} is unavailable, falling back to static file.`, error);
     }
   }
   const response = await fetch(path);
@@ -1682,9 +1695,9 @@ async function renderMultimediaPage() {
 
   try {
     const matchesRaw = await fetchJson('data/matches.json');
-
-    const matches = sortMediaMatches((Array.isArray(matchesRaw) ? matchesRaw : []).filter(hasAnyMatchMedia));
-    const featuredMatch = pickFeaturedMediaMatch(matches);
+    const allMatches = sortMediaMatches(Array.isArray(matchesRaw) ? matchesRaw : []);
+    const featuredMatch = pickFeaturedMediaMatch(allMatches);
+    const matches = allMatches.filter(hasAnyMatchMedia);
 
     featuredTarget.innerHTML = featuredMatch
       ? renderMediaFeatureCard(featuredMatch)
