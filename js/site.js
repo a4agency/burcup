@@ -1254,19 +1254,10 @@ async function renderMatchPageFromJson() {
             <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="review">Обзор</button>
             <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="interview">Интервью</button>
           </div>
-          <div class="match-page-media-stage">
-            ${renderMatchMediaPanel('stream', 'Трансляция', item.video, {
-              title: 'Трансляция появится позже',
-              description: 'Ссылка на трансляцию для этого матча пока не добавлена.'
-            })}
-            ${renderMatchMediaPanel('review', 'Обзор', item.review_video, {
-              title: 'Обзор появится после матча',
-              description: 'Сюда можно добавить обзор лучших моментов игры.'
-            })}
-            ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video, {
-              title: 'Интервью скоро будет доступно',
-              description: 'Сюда можно добавить интервью игроков, тренеров или организаторов.'
-            })}
+            <div class="match-page-media-stage">
+            ${renderMatchMediaPanel('stream', 'Трансляция', item.video)}
+            ${renderMatchMediaPanel('review', 'Обзор', item.review_video)}
+            ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video)}
           </div>
         </div>
       </div>
@@ -1278,20 +1269,15 @@ async function renderMatchPageFromJson() {
   }
 }
 
-function renderMatchMediaPanel(key, label, url, emptyState = {}) {
+function renderMatchMediaPanel(key, label, url) {
   const safeLabel = escapeHtml(label);
   const normalizedUrl = String(url || '').trim();
-  const title = escapeHtml(emptyState.title || `${label} скоро появится`);
-  const description = escapeHtml(emptyState.description || 'Материал для этого раздела пока не добавлен.');
 
   return `
     <section class="match-page-media-panel${key === 'stream' ? ' is-active' : ''}" data-match-media-panel="${escapeHtml(key)}" role="tabpanel" aria-label="${safeLabel}" ${key === 'stream' ? '' : 'hidden'}>
       ${normalizedUrl
         ? `<iframe class="match-page-video" src="${escapeHtml(normalizedUrl)}" allowfullscreen></iframe>`
-        : `<div class="match-page-media-placeholder">
-            <div class="match-page-media-placeholder-title">${title}</div>
-            <p>${description}</p>
-          </div>`}
+        : `<div class="match-page-media-empty" aria-hidden="true"></div>`}
     </section>
   `;
 }

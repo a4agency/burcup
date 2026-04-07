@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS matches (
   away_score INTEGER NOT NULL DEFAULT 0 CHECK (away_score >= 0),
   venue TEXT,
   video_url TEXT,
+  review_video_url TEXT,
+  interview_video_url TEXT,
   summary TEXT NOT NULL DEFAULT '',
   attendance INTEGER,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -242,7 +244,8 @@ VALUES
   ('0002', 'create_matches_and_news'),
   ('0003', 'create_partner_entities'),
   ('0004', 'add_partner_logo_asset_metadata'),
-  ('0005', 'add_tournament_countdown_flag')
+  ('0005', 'add_tournament_countdown_flag'),
+  ('0006', 'add_match_media_links')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;

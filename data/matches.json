@@ -12,6 +12,8 @@
     "score": "10:3",
     "group": "Группа A",
     "video": "https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239434&hash=a4ca6ca1e82ce6c4&hd=4",
+    "review_video": "",
+    "interview_video": "",
     "summary": "Открывающий матч игрового дня. На этой странице можно показывать прямой эфир или запись игры."
   },
   {
@@ -27,6 +29,8 @@
     "score": "4:1",
     "group": "Группа А",
     "video": "https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239431&hash=90e82e3d00ac220b&hd=4",
+    "review_video": "",
+    "interview_video": "",
     "summary": "Матч идёт в прямом эфире"
   },
   {
@@ -42,6 +46,8 @@
     "score": "0:0",
     "group": "Группа B",
     "video": "https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239505&hash=eabac0fc9cb32fa5&hd=4",
+    "review_video": "",
+    "interview_video": "",
     "summary": "Матч группового этапа. Перед началом можно показывать анонс, а после — запись встречи."
   },
   {
@@ -57,6 +63,8 @@
     "score": "0:0",
     "group": "Группа B",
     "video": "https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4",
+    "review_video": "",
+    "interview_video": "",
     "summary": ""
   },
   {
@@ -72,6 +80,8 @@
     "score": "0:0",
     "group": "Группа А",
     "video": "https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4",
+    "review_video": "",
+    "interview_video": "",
     "summary": ""
   },
   {
@@ -87,6 +97,8 @@
     "score": "0:0",
     "group": "Группа B",
     "video": "https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4",
+    "review_video": "",
+    "interview_video": "",
     "summary": ""
   }
 ]

@@ -189,6 +189,8 @@ function formatMatchRow(row) {
     group: row.stage_name || '',
     venue: row.venue || '',
     video: row.video_url || '',
+    review_video: row.review_video_url || '',
+    interview_video: row.interview_video_url || '',
     summary: row.summary || '',
     events: row.events || [],
   };
@@ -234,6 +236,18 @@ async function hasTournamentCountdownColumn(queryable = pool) {
   `);
 
   return rows[0]?.exists === true;
+}
+
+async function hasMatchMediaColumns(queryable = pool) {
+  const { rows } = await queryable.query(`
+    SELECT COUNT(*)::int AS count
+    FROM information_schema.columns
+    WHERE table_schema = current_schema()
+      AND table_name = 'matches'
+      AND column_name = ANY(ARRAY['review_video_url', 'interview_video_url']);
+  `);
+
+  return Number(rows[0]?.count || 0) === 2;
 }
 
 function buildTournamentsQuery(includeCountdown) {
@@ -373,141 +387,163 @@ const standingsQuery = `
   ORDER BY ts.group_name, ts.position;
 `;
 
-const matchesQuery = `
-  SELECT
-    m.id,
-    t.slug AS tournament_slug,
-    t.name AS tournament_name,
-    t.season_year AS tournament_season_year,
-    m.stage_name,
-    m.round_name,
-    m.matchday_label,
-    TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date,
-    TO_CHAR(m.match_time, 'HH24:MI') AS match_time,
-    m.status,
-    m.status_label,
-    home_club.name AS home_team,
-    home_club.slug AS home_team_slug,
-    home_club.logo_path AS home_logo,
-    away_club.name AS away_team,
-    away_club.slug AS away_team_slug,
-    away_club.logo_path AS away_logo,
-    m.home_score,
-    m.away_score,
-    m.venue,
-    m.video_url,
-    m.summary,
-    COALESCE(
-      JSON_AGG(
-        JSON_BUILD_OBJECT(
-          'minute', me.minute_label,
-          'type', me.event_type,
-          'title', me.title,
-          'description', me.description
-        )
-        ORDER BY me.sort_order
-      ) FILTER (WHERE me.id IS NOT NULL),
-      '[]'::json
-    ) AS events
-  FROM matches m
-  JOIN tournaments t ON t.id = m.tournament_id
-  JOIN clubs home_club ON home_club.id = m.home_club_id
-  JOIN clubs away_club ON away_club.id = m.away_club_id
-  LEFT JOIN match_events me ON me.match_id = m.id
-  WHERE ($1::text IS NULL OR t.slug = $1)
-  GROUP BY
-    m.id,
-    t.slug,
-    t.name,
-    t.season_year,
-    m.stage_name,
-    m.round_name,
-    m.matchday_label,
-    m.match_date,
-    m.match_time,
-    m.status,
-    m.status_label,
-    home_club.name,
-    home_club.slug,
-    home_club.logo_path,
-    away_club.name,
-    away_club.slug,
-    away_club.logo_path,
-    m.home_score,
-    m.away_score,
-    m.venue,
-    m.video_url,
-    m.summary
-  ORDER BY t.season_year DESC NULLS LAST, m.match_date NULLS FIRST, m.match_time NULLS FIRST, m.sort_order, m.id;
-`;
+function buildMatchesQuery(includeMatchMedia) {
+  return `
+    SELECT
+      m.id,
+      t.slug AS tournament_slug,
+      t.name AS tournament_name,
+      t.season_year AS tournament_season_year,
+      m.stage_name,
+      m.round_name,
+      m.matchday_label,
+      TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date,
+      TO_CHAR(m.match_time, 'HH24:MI') AS match_time,
+      m.status,
+      m.status_label,
+      home_club.name AS home_team,
+      home_club.slug AS home_team_slug,
+      home_club.logo_path AS home_logo,
+      away_club.name AS away_team,
+      away_club.slug AS away_team_slug,
+      away_club.logo_path AS away_logo,
+      m.home_score,
+      m.away_score,
+      m.venue,
+      m.video_url,
+      ${includeMatchMedia ? 'm.review_video_url,' : 'NULL::text AS review_video_url,'}
+      ${includeMatchMedia ? 'm.interview_video_url,' : 'NULL::text AS interview_video_url,'}
+      m.summary,
+      COALESCE(
+        JSON_AGG(
+          JSON_BUILD_OBJECT(
+            'minute', me.minute_label,
+            'type', me.event_type,
+            'title', me.title,
+            'description', me.description
+          )
+          ORDER BY me.sort_order
+        ) FILTER (WHERE me.id IS NOT NULL),
+        '[]'::json
+      ) AS events
+    FROM matches m
+    JOIN tournaments t ON t.id = m.tournament_id
+    JOIN clubs home_club ON home_club.id = m.home_club_id
+    JOIN clubs away_club ON away_club.id = m.away_club_id
+    LEFT JOIN match_events me ON me.match_id = m.id
+    WHERE ($1::text IS NULL OR t.slug = $1)
+    GROUP BY
+      m.id,
+      t.slug,
+      t.name,
+      t.season_year,
+      m.stage_name,
+      m.round_name,
+      m.matchday_label,
+      m.match_date,
+      m.match_time,
+      m.status,
+      m.status_label,
+      home_club.name,
+      home_club.slug,
+      home_club.logo_path,
+      away_club.name,
+      away_club.slug,
+      away_club.logo_path,
+      m.home_score,
+      m.away_score,
+      m.venue,
+      m.video_url,
+      ${includeMatchMedia ? 'm.review_video_url,' : ''}
+      ${includeMatchMedia ? 'm.interview_video_url,' : ''}
+      m.summary
+    ORDER BY t.season_year DESC NULLS LAST, m.match_date NULLS FIRST, m.match_time NULLS FIRST, m.sort_order, m.id;
+  `;
+}
 
-const clubMatchesQuery = `
-  SELECT
-    m.id,
-    t.slug AS tournament_slug,
-    t.name AS tournament_name,
-    m.stage_name,
-    m.round_name,
-    m.matchday_label,
-    TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date,
-    TO_CHAR(m.match_time, 'HH24:MI') AS match_time,
-    m.status,
-    m.status_label,
-    home_club.name AS home_team,
-    home_club.slug AS home_team_slug,
-    home_club.logo_path AS home_logo,
-    away_club.name AS away_team,
-    away_club.slug AS away_team_slug,
-    away_club.logo_path AS away_logo,
-    m.home_score,
-    m.away_score,
-    m.venue,
-    m.video_url,
-    m.summary,
-    COALESCE(
-      JSON_AGG(
-        JSON_BUILD_OBJECT(
-          'minute', me.minute_label,
-          'type', me.event_type,
-          'title', me.title,
-          'description', me.description
-        )
-        ORDER BY me.sort_order
-      ) FILTER (WHERE me.id IS NOT NULL),
-      '[]'::json
-    ) AS events
-  FROM matches m
-  JOIN tournaments t ON t.id = m.tournament_id
-  JOIN clubs club ON club.slug = $1
-  JOIN clubs home_club ON home_club.id = m.home_club_id
-  JOIN clubs away_club ON away_club.id = m.away_club_id
-  LEFT JOIN match_events me ON me.match_id = m.id
-  WHERE club.id IN (m.home_club_id, m.away_club_id)
-  GROUP BY
-    m.id,
-    t.slug,
-    t.name,
-    m.stage_name,
-    m.round_name,
-    m.matchday_label,
-    m.match_date,
-    m.match_time,
-    m.status,
-    m.status_label,
-    home_club.name,
-    home_club.slug,
-    home_club.logo_path,
-    away_club.name,
-    away_club.slug,
-    away_club.logo_path,
-    m.home_score,
-    m.away_score,
-    m.venue,
-    m.video_url,
-    m.summary,
-    club.id
-  ORDER BY m.match_date DESC NULLS LAST, m.match_time DESC NULLS LAST, m.id DESC;
-`;
+function buildClubMatchesQuery(includeMatchMedia) {
+  return `
+    SELECT
+      m.id,
+      t.slug AS tournament_slug,
+      t.name AS tournament_name,
+      m.stage_name,
+      m.round_name,
+      m.matchday_label,
+      TO_CHAR(m.match_date, 'YYYY-MM-DD') AS match_date,
+      TO_CHAR(m.match_time, 'HH24:MI') AS match_time,
+      m.status,
+      m.status_label,
+      home_club.name AS home_team,
+      home_club.slug AS home_team_slug,
+      home_club.logo_path AS home_logo,
+      away_club.name AS away_team,
+      away_club.slug AS away_team_slug,
+      away_club.logo_path AS away_logo,
+      m.home_score,
+      m.away_score,
+      m.venue,
+      m.video_url,
+      ${includeMatchMedia ? 'm.review_video_url,' : 'NULL::text AS review_video_url,'}
+      ${includeMatchMedia ? 'm.interview_video_url,' : 'NULL::text AS interview_video_url,'}
+      m.summary,
+      COALESCE(
+        JSON_AGG(
+          JSON_BUILD_OBJECT(
+            'minute', me.minute_label,
+            'type', me.event_type,
+            'title', me.title,
+            'description', me.description
+          )
+          ORDER BY me.sort_order
+        ) FILTER (WHERE me.id IS NOT NULL),
+        '[]'::json
+      ) AS events
+    FROM matches m
+    JOIN tournaments t ON t.id = m.tournament_id
+    JOIN clubs club ON club.slug = $1
+    JOIN clubs home_club ON home_club.id = m.home_club_id
+    JOIN clubs away_club ON away_club.id = m.away_club_id
+    LEFT JOIN match_events me ON me.match_id = m.id
+    WHERE club.id IN (m.home_club_id, m.away_club_id)
+    GROUP BY
+      m.id,
+      t.slug,
+      t.name,
+      m.stage_name,
+      m.round_name,
+      m.matchday_label,
+      m.match_date,
+      m.match_time,
+      m.status,
+      m.status_label,
+      home_club.name,
+      home_club.slug,
+      home_club.logo_path,
+      away_club.name,
+      away_club.slug,
+      away_club.logo_path,
+      m.home_score,
+      m.away_score,
+      m.venue,
+      m.video_url,
+      ${includeMatchMedia ? 'm.review_video_url,' : ''}
+      ${includeMatchMedia ? 'm.interview_video_url,' : ''}
+      m.summary,
+      club.id
+    ORDER BY m.match_date DESC NULLS LAST, m.match_time DESC NULLS LAST, m.id DESC;
+  `;
+}
+
+async function queryMatches(queryable, tournamentSlug = null) {
+  const includeMatchMedia = await hasMatchMediaColumns(queryable);
+  return queryable.query(buildMatchesQuery(includeMatchMedia), [tournamentSlug]);
+}
+
+async function queryClubMatches(queryable, clubSlug) {
+  const includeMatchMedia = await hasMatchMediaColumns(queryable);
+  return queryable.query(buildClubMatchesQuery(includeMatchMedia), [clubSlug]);
+}
 
 const newsQuery = `
   SELECT
@@ -684,7 +720,7 @@ async function getAdminClubs(client) {
 }
 
 async function getAdminMatches(client) {
-  const { rows } = await client.query(matchesQuery, [null]);
+  const { rows } = await queryMatches(client, null);
   return rows.map(row => ({
     id: Number(row.id),
     tournament_slug: row.tournament_slug,
@@ -704,6 +740,8 @@ async function getAdminMatches(client) {
     matchday: row.matchday_label || '',
     venue: row.venue || '',
     video: row.video_url || '',
+    review_video: row.review_video_url || '',
+    interview_video: row.interview_video_url || '',
     summary: row.summary || '',
   }));
 }
@@ -932,10 +970,15 @@ async function replaceClubs(client, payload) {
 async function replaceMatches(client, payload) {
   const items = ensureArray(payload);
   const ids = [];
+  const includeMatchMedia = await hasMatchMediaColumns(client);
   const tournaments = await client.query('SELECT id, slug FROM tournaments');
   const clubs = await client.query('SELECT id, slug FROM clubs');
   const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
   const clubMap = new Map(clubs.rows.map(row => [row.slug, Number(row.id)]));
+
+  if (!includeMatchMedia && items.some(item => normalizeString(item.review_video) || normalizeString(item.interview_video))) {
+    throw new Error('Сначала примените миграцию 0006_add_match_media_links.sql, чтобы сохранять ссылки на обзор и интервью.');
+  }
 
   for (const item of items) {
     const id = parseInteger(item.id, 0);
@@ -955,7 +998,27 @@ async function replaceMatches(client, payload) {
     ids.push(id);
     const score = parseScore(item.score);
 
-    await client.query(`
+    const params = [
+      id,
+      tournamentId,
+      nullIfEmpty(item.group),
+      nullIfEmpty(item.round),
+      nullIfEmpty(item.matchday),
+      nullIfEmpty(item.date),
+      nullIfEmpty(item.time),
+      normalizeString(item.status) || 'soon',
+      normalizeString(item.status_label) || 'Скоро',
+      homeClubId,
+      awayClubId,
+      score.home,
+      score.away,
+      nullIfEmpty(item.venue),
+      nullIfEmpty(item.video),
+      normalizeString(item.summary),
+      parseInteger(item.sort_order, ids.length),
+    ];
+
+    let query = `
       INSERT INTO matches (
         id,
         tournament_id,
@@ -994,25 +1057,57 @@ async function replaceMatches(client, payload) {
         video_url = EXCLUDED.video_url,
         summary = EXCLUDED.summary,
         sort_order = EXCLUDED.sort_order
-    `, [
-      id,
-      tournamentId,
-      nullIfEmpty(item.group),
-      nullIfEmpty(item.round),
-      nullIfEmpty(item.matchday),
-      nullIfEmpty(item.date),
-      nullIfEmpty(item.time),
-      normalizeString(item.status) || 'soon',
-      normalizeString(item.status_label) || 'Скоро',
-      homeClubId,
-      awayClubId,
-      score.home,
-      score.away,
-      nullIfEmpty(item.venue),
-      nullIfEmpty(item.video),
-      normalizeString(item.summary),
-      parseInteger(item.sort_order, ids.length),
-    ]);
+    `;
+
+    if (includeMatchMedia) {
+      params.splice(15, 0, nullIfEmpty(item.review_video), nullIfEmpty(item.interview_video));
+      query = `
+        INSERT INTO matches (
+          id,
+          tournament_id,
+          stage_name,
+          round_name,
+          matchday_label,
+          match_date,
+          match_time,
+          status,
+          status_label,
+          home_club_id,
+          away_club_id,
+          home_score,
+          away_score,
+          venue,
+          video_url,
+          review_video_url,
+          interview_video_url,
+          summary,
+          sort_order
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+        ON CONFLICT (id) DO UPDATE
+        SET
+          tournament_id = EXCLUDED.tournament_id,
+          stage_name = EXCLUDED.stage_name,
+          round_name = EXCLUDED.round_name,
+          matchday_label = EXCLUDED.matchday_label,
+          match_date = EXCLUDED.match_date,
+          match_time = EXCLUDED.match_time,
+          status = EXCLUDED.status,
+          status_label = EXCLUDED.status_label,
+          home_club_id = EXCLUDED.home_club_id,
+          away_club_id = EXCLUDED.away_club_id,
+          home_score = EXCLUDED.home_score,
+          away_score = EXCLUDED.away_score,
+          venue = EXCLUDED.venue,
+          video_url = EXCLUDED.video_url,
+          review_video_url = EXCLUDED.review_video_url,
+          interview_video_url = EXCLUDED.interview_video_url,
+          summary = EXCLUDED.summary,
+          sort_order = EXCLUDED.sort_order
+      `;
+    }
+
+    await client.query(query, params);
   }
 
   if (ids.length) {
@@ -1454,7 +1549,7 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
     const tournament = tournamentResult.rows[0];
     const [standingsResult, matchesResult, newsResult, partnersResult] = await Promise.all([
       pool.query(standingsQuery, [req.params.slug]),
-      pool.query(matchesQuery, [req.params.slug]),
+      queryMatches(pool, req.params.slug),
       pool.query(newsQuery, [req.params.slug]),
       pool.query(tournamentPartnersQuery, [req.params.slug]),
     ]);
@@ -1549,7 +1644,7 @@ app.get('/api/tournaments/:slug/standings', async (req, res, next) => {
 
 app.get('/api/tournaments/:slug/matches', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(matchesQuery, [req.params.slug]);
+    const { rows } = await queryMatches(pool, req.params.slug);
     res.json(rows.map(formatMatchRow));
   } catch (error) {
     next(error);
@@ -1625,7 +1720,7 @@ app.get('/api/clubs/:slug', async (req, res, next) => {
       return res.status(404).json({ error: 'Club not found' });
     }
     const club = clubResult.rows[0];
-    const matchesResult = await pool.query(clubMatchesQuery, [req.params.slug]);
+    const matchesResult = await queryClubMatches(pool, req.params.slug);
 
     res.json({
       id: Number(club.id),
@@ -1649,7 +1744,7 @@ app.get('/api/clubs/:slug', async (req, res, next) => {
 
 app.get('/api/clubs/:slug/matches', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(clubMatchesQuery, [req.params.slug]);
+    const { rows } = await queryClubMatches(pool, req.params.slug);
     res.json(rows.map(formatMatchRow));
   } catch (error) {
     next(error);
@@ -1679,7 +1774,7 @@ app.get('/api/standings', async (req, res, next) => {
 
 app.get('/api/matches', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(matchesQuery, [null]);
+    const { rows } = await queryMatches(pool, null);
     res.json(rows.map(formatMatchRow));
   } catch (error) {
     next(error);

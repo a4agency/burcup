@@ -137,6 +137,8 @@ const ADMIN_SOURCES = {
         matchday: '',
         venue: '',
         video: '',
+        review_video: '',
+        interview_video: '',
         summary: '',
       }
     ],
@@ -159,6 +161,8 @@ const ADMIN_SOURCES = {
       matchday: '',
       venue: '',
       video: '',
+      review_video: '',
+      interview_video: '',
       summary: '',
     }),
     fields: [
@@ -179,7 +183,9 @@ const ADMIN_SOURCES = {
       ['round', 'Раунд', 'text'],
       ['matchday', 'Игровой день', 'text'],
       ['venue', 'Стадион', 'text'],
-      ['video', 'Видео', 'text'],
+      ['video', 'Ссылка на трансляцию', 'url'],
+      ['review_video', 'Ссылка на обзор', 'url'],
+      ['interview_video', 'Ссылка на интервью', 'url'],
       ['summary', 'Описание', 'textarea'],
     ],
   },
