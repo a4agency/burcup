@@ -595,7 +595,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 .tournament-card{
   display:flex;
   flex-direction:column;
-  background:linear-gradient(180deg,#ffffff 0%,#f3f8ff 100%);
+  background:#fff;
   border:1px solid var(--line);
   border-radius:24px;
   box-shadow:none;
