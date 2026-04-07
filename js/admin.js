@@ -430,6 +430,149 @@ const ADMIN_SOURCES = {
       ['summary', 'Описание', 'textarea'],
     ],
   },
+  archive_standings: {
+    key: 'bcup_archive_standings',
+    exportName: 'archive-standings.json',
+    title: 'Архивные таблицы',
+    help: 'Турнирные таблицы прошлых розыгрышей. Эти данные попадают на архивные страницы сезонов.',
+    filterArchiveStandings: true,
+    defaultData: [
+      {
+        tournament_slug: 'burchalkin-cup-2025',
+        tournament_name: 'Кубок Бурчалкина 2025',
+        season_year: 2025,
+        group_name: '',
+        position: 1,
+        played: 3,
+        won: 2,
+        drawn: 1,
+        lost: 0,
+        goals_for: 7,
+        goals_against: 4,
+        points: 7,
+        team_slug: 'almaz-antey',
+        team: 'Алмаз-Антей',
+        logo: 'images/team-almaz-antey.png',
+      },
+      {
+        tournament_slug: 'burchalkin-cup-2025',
+        tournament_name: 'Кубок Бурчалкина 2025',
+        season_year: 2025,
+        group_name: '',
+        position: 2,
+        played: 3,
+        won: 2,
+        drawn: 0,
+        lost: 1,
+        goals_for: 5,
+        goals_against: 3,
+        points: 6,
+        team_slug: 'dinamo-minsk',
+        team: 'Динамо-Минск',
+        logo: 'images/team-dinamo-minsk.png',
+      },
+      {
+        tournament_slug: 'burchalkin-cup-2025',
+        tournament_name: 'Кубок Бурчалкина 2025',
+        season_year: 2025,
+        group_name: '',
+        position: 3,
+        played: 3,
+        won: 1,
+        drawn: 1,
+        lost: 1,
+        goals_for: 4,
+        goals_against: 4,
+        points: 4,
+        team_slug: 'zenit',
+        team: 'Зенит',
+        logo: 'images/team-zenit.png',
+      },
+      {
+        tournament_slug: 'burchalkin-cup-2025',
+        tournament_name: 'Кубок Бурчалкина 2025',
+        season_year: 2025,
+        group_name: '',
+        position: 4,
+        played: 3,
+        won: 1,
+        drawn: 0,
+        lost: 2,
+        goals_for: 4,
+        goals_against: 6,
+        points: 3,
+        team_slug: 'kairat',
+        team: 'Кайрат',
+        logo: 'images/team-kairat.png',
+      },
+      {
+        tournament_slug: 'burchalkin-cup-2025',
+        tournament_name: 'Кубок Бурчалкина 2025',
+        season_year: 2025,
+        group_name: '',
+        position: 5,
+        played: 3,
+        won: 0,
+        drawn: 2,
+        lost: 1,
+        goals_for: 3,
+        goals_against: 5,
+        points: 2,
+        team_slug: 'palmeiras',
+        team: 'Палмейрас',
+        logo: 'images/team-palmeiras.png',
+      },
+      {
+        tournament_slug: 'burchalkin-cup-2025',
+        tournament_name: 'Кубок Бурчалкина 2025',
+        season_year: 2025,
+        group_name: '',
+        position: 6,
+        played: 3,
+        won: 0,
+        drawn: 1,
+        lost: 2,
+        goals_for: 2,
+        goals_against: 7,
+        points: 1,
+        team_slug: 'san-lorenzo',
+        team: 'Сан-Лоренцо',
+        logo: 'images/team-san-lorenzo.png',
+      }
+    ],
+    empty: () => ({
+      tournament_slug: 'burchalkin-cup-2025',
+      tournament_name: '',
+      season_year: 2025,
+      group_name: '',
+      position: 1,
+      played: 0,
+      won: 0,
+      drawn: 0,
+      lost: 0,
+      goals_for: 0,
+      goals_against: 0,
+      points: 0,
+      team_slug: '',
+      team: '',
+      logo: '',
+    }),
+    fields: [
+      ['tournament_slug', 'Турнир', 'text'],
+      ['group_name', 'Группа', 'text'],
+      ['position', 'Место', 'number'],
+      ['team', 'Команда', 'text'],
+      ['team_slug', 'Slug команды', 'text'],
+      ['logo', 'Логотип', 'logo'],
+      ['played', 'Игр', 'number'],
+      ['won', 'Побед', 'number'],
+      ['drawn', 'Ничьих', 'number'],
+      ['lost', 'Поражений', 'number'],
+      ['goals_for', 'Забито', 'number'],
+      ['goals_against', 'Пропущено', 'number'],
+      ['points', 'Очки', 'number'],
+    ],
+  },
   news: {
     key: 'bcup_news',
     exportName: 'news.json',
@@ -618,6 +761,7 @@ function getAdminApiSourceName(sourceName) {
   if (sourceName === 'partners_media') return 'partners';
   if (sourceName === 'archive_tournaments') return 'tournaments';
   if (sourceName === 'archive_matches') return 'matches';
+  if (sourceName === 'archive_standings') return 'standings';
   return sourceName;
 }
 
@@ -648,6 +792,12 @@ function normalizeSourceData(sourceName, data) {
     return items.filter(item => {
       const tournamentSlug = String(item?.tournament_slug || '').trim();
       return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
+    });
+  }
+  if (sourceName === 'archive_standings') {
+    return items.filter(item => {
+      const tournamentSlug = String(item?.tournament_slug || '').trim();
+      return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
     });
   }
   if (sourceMeta?.filterCategory) {
@@ -720,6 +870,15 @@ async function pushAdminSource(sourceName, data) {
     const allMatches = await fetchAdminCollection(apiSourceName);
     payload = [
       ...normalizeSourceData('matches', allMatches),
+      ...normalizeSourceData(sourceName, data),
+    ];
+  } else if (sourceName === 'archive_standings') {
+    const allStandings = await fetchAdminCollection(apiSourceName);
+    payload = [
+      ...allStandings.filter(item => {
+        const tournamentSlug = String(item?.tournament_slug || '').trim();
+        return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
+      }),
       ...normalizeSourceData(sourceName, data),
     ];
   }
@@ -1052,6 +1211,38 @@ function makeMatchClubSelect(item, side, itemIndex) {
   `;
 }
 
+function findAdminClubByStanding(item) {
+  const clubs = getAdminClubsCatalog();
+  const slug = String(item?.team_slug || '').trim().toLowerCase();
+  const name = String(item?.team || '').trim().toLowerCase();
+
+  return clubs.find(club => {
+    const clubSlug = String(club.slug || '').trim().toLowerCase();
+    const clubName = String(club.name || '').trim().toLowerCase();
+    return (slug && clubSlug === slug) || (name && clubName === name);
+  }) || null;
+}
+
+function makeStandingClubSelect(item, itemIndex) {
+  const selectedClub = findAdminClubByStanding(item);
+  const clubs = getAdminClubsCatalog();
+  const selectedSlug = String(selectedClub?.slug || '').trim();
+
+  return `
+    <div class="admin-field admin-match-club-select">
+      <label>Команда: выбрать клуб</label>
+      <select data-standing-club-select="team" data-index="${itemIndex}">
+        <option value="">Выбери команду</option>
+        ${clubs.map(club => `
+          <option value="${escapeHtml(String(club.slug || ''))}" ${selectedSlug === String(club.slug || '') ? 'selected' : ''}>
+            ${escapeHtml(String(club.name || ''))}
+          </option>
+        `).join('')}
+      </select>
+    </div>
+  `;
+}
+
 function getAdminSourceField(sourceName, key) {
   return (ADMIN_SOURCES[sourceName]?.fields || []).find(field => field[0] === key) || null;
 }
@@ -1169,6 +1360,24 @@ function renderTournamentAdminCard(item, index) {
   ]);
 }
 
+function renderStandingAdminCard(item, index) {
+  return renderSectionedAdminCard('Турнирная строка', index, [
+    {
+      title: 'Привязка',
+      gridClass: 'admin-record-grid-3',
+      content: `
+        ${makeStandingClubSelect(item, index)}
+        ${makeFieldsByKeys('archive_standings', ['tournament_slug', 'group_name', 'position', 'team', 'team_slug', 'logo'], item, index)}
+      `
+    },
+    {
+      title: 'Статистика',
+      gridClass: 'admin-record-grid-3',
+      content: makeFieldsByKeys('archive_standings', ['played', 'won', 'drawn', 'lost', 'goals_for', 'goals_against', 'points'], item, index)
+    }
+  ]);
+}
+
 function renderClubAdminCard(item, index) {
   return renderSectionedAdminCard('Клуб', index, [
     {
@@ -1264,6 +1473,7 @@ function renderPartnerSourceCards(sourceName, data) {
 function renderAdminCardBySource(sourceName, item, index, allItems) {
   if (sourceName === 'matches' || sourceName === 'archive_matches') return renderMatchAdminCard(item, index, allItems);
   if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') return renderTournamentAdminCard(item, index);
+  if (sourceName === 'archive_standings') return renderStandingAdminCard(item, index);
   if (sourceName === 'clubs') return renderClubAdminCard(item, index);
   if (sourceName === 'news') return renderNewsAdminCard(item, index);
   if (sourceName === 'partners' || sourceName === 'partners_media') return renderPartnerAdminCard(item, index);
@@ -1543,6 +1753,28 @@ function renderForm(sourceName, data) {
     });
   });
 
+  wrap.querySelectorAll('[data-standing-club-select]').forEach(select => {
+    select.addEventListener('change', () => {
+      const index = Number(select.dataset.index);
+      const selectedSlug = String(select.value || '').trim();
+      const club = getAdminClubsCatalog().find(item => String(item.slug || '') === selectedSlug) || null;
+      const next = readFormData(sourceName);
+      const target = next[index];
+      if (!target) return;
+
+      target.team = club?.name || '';
+      target.team_slug = club?.slug || '';
+      target.logo = club?.logo || '';
+
+      setSourceData(sourceName, next);
+      renderForm(sourceName, next);
+      setStatus(club
+        ? `Команда «${club.name}» подставлена в турнирную таблицу. Нажми «Сохранить», чтобы записать изменения в API.`
+        : 'Выбор команды очищен. Нажми «Сохранить», чтобы записать изменения в API.'
+      );
+    });
+  });
+
   if (sourceName === 'matches' || sourceName === 'archive_matches') {
     refreshAdminMatchPreviews(wrap);
     if (wrap.dataset.matchPreviewBound !== 'true') {
@@ -1591,7 +1823,7 @@ async function adminShowSource(sourceName, options = {}) {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
 
-  if ((sourceName === 'matches' || sourceName === 'archive_matches') && !defaultsCache.clubs) {
+  if ((sourceName === 'matches' || sourceName === 'archive_matches' || sourceName === 'archive_standings') && !defaultsCache.clubs) {
     try {
       const clubs = await loadSourceData('clubs');
       defaultsCache.clubs = structuredClone(clubs);

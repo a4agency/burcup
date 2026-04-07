@@ -662,6 +662,29 @@ const adminPartnersQuery = `
   ORDER BY COALESCE(pc.slug, 'general'), tp.sort_order, p.name;
 `;
 
+const adminStandingsQuery = `
+  SELECT
+    t.slug AS tournament_slug,
+    t.name AS tournament_name,
+    t.season_year,
+    ts.group_name,
+    ts.position,
+    ts.played,
+    ts.won,
+    ts.drawn,
+    ts.lost,
+    ts.goals_for,
+    ts.goals_against,
+    ts.points,
+    c.slug AS team_slug,
+    c.name AS team_name,
+    c.logo_path AS team_logo
+  FROM tournament_standings ts
+  JOIN tournaments t ON t.id = ts.tournament_id
+  JOIN clubs c ON c.id = ts.club_id
+  ORDER BY t.season_year DESC NULLS LAST, t.slug, ts.group_name, ts.position, c.name;
+`;
+
 async function getAdminTournaments(client) {
   const includeCountdown = await hasTournamentCountdownColumn(client);
   const { rows } = await client.query(`
@@ -797,6 +820,27 @@ async function getAdminPartners(client) {
     sort_order: parseInteger(row.sort_order, 0),
     is_visible: row.is_visible,
     note: row.description || '',
+  }));
+}
+
+async function getAdminStandings(client) {
+  const { rows } = await client.query(adminStandingsQuery);
+  return rows.map(row => ({
+    tournament_slug: row.tournament_slug,
+    tournament_name: row.tournament_name,
+    season_year: row.season_year,
+    group_name: row.group_name || '',
+    position: parseInteger(row.position, 0),
+    played: parseInteger(row.played, 0),
+    won: parseInteger(row.won, 0),
+    drawn: parseInteger(row.drawn, 0),
+    lost: parseInteger(row.lost, 0),
+    goals_for: parseInteger(row.goals_for, 0),
+    goals_against: parseInteger(row.goals_against, 0),
+    points: parseInteger(row.points, 0),
+    team_slug: row.team_slug || '',
+    team: row.team_name || '',
+    logo: row.team_logo || '',
   }));
 }
 
@@ -1389,6 +1433,66 @@ async function replacePartners(client, payload) {
   }
 }
 
+async function replaceStandings(client, payload) {
+  const items = ensureArray(payload);
+  const tournaments = await client.query('SELECT id, slug FROM tournaments');
+  const clubs = await client.query('SELECT id, slug, name, logo_path FROM clubs');
+  const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
+  const clubMap = new Map(clubs.rows.map(row => [row.slug, {
+    id: Number(row.id),
+    name: row.name,
+    logo: row.logo_path || '',
+  }]));
+
+  await client.query('DELETE FROM tournament_standings');
+
+  for (const item of items) {
+    const tournamentSlug = normalizeString(item.tournament_slug);
+    const teamSlug = normalizeString(item.team_slug);
+    if (!tournamentSlug || !teamSlug) {
+      throw new Error('Each standings row must have tournament_slug and team_slug');
+    }
+
+    const tournamentId = tournamentMap.get(tournamentSlug);
+    const club = clubMap.get(teamSlug);
+    if (!tournamentId) {
+      throw new Error(`Tournament not found for standings row: ${tournamentSlug}`);
+    }
+    if (!club) {
+      throw new Error(`Club not found for standings row: ${teamSlug}`);
+    }
+
+    await client.query(`
+      INSERT INTO tournament_standings (
+        tournament_id,
+        club_id,
+        group_name,
+        position,
+        played,
+        won,
+        drawn,
+        lost,
+        goals_for,
+        goals_against,
+        points
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+    `, [
+      tournamentId,
+      club.id,
+      nullIfEmpty(item.group_name),
+      parseInteger(item.position, 0),
+      parseInteger(item.played, 0),
+      parseInteger(item.won, 0),
+      parseInteger(item.drawn, 0),
+      parseInteger(item.lost, 0),
+      parseInteger(item.goals_for, 0),
+      parseInteger(item.goals_against, 0),
+      parseInteger(item.points, 0),
+    ]);
+  }
+}
+
 async function loadAdminResource(client, resource) {
   switch (resource) {
     case 'tournaments':
@@ -1401,6 +1505,8 @@ async function loadAdminResource(client, resource) {
       return getAdminNews(client);
     case 'partners':
       return getAdminPartners(client);
+    case 'standings':
+      return getAdminStandings(client);
     default:
       throw new Error('Unknown admin resource');
   }
@@ -1418,6 +1524,8 @@ async function saveAdminResource(client, resource, payload) {
       return replaceNews(client, payload);
     case 'partners':
       return replacePartners(client, payload);
+    case 'standings':
+      return replaceStandings(client, payload);
     default:
       throw new Error('Unknown admin resource');
   }
@@ -1444,6 +1552,7 @@ app.get('/', (req, res) => {
       '/api/results',
       '/api/admin/session',
       '/api/admin/:resource',
+      '/api/admin/standings',
       '/api/admin/uploads/image'
     ]
   });
