@@ -2553,7 +2553,7 @@ h1,h2,h3,h4,p,span,a,div{
   width:min(100%, 620px);
   aspect-ratio:16 / 9;
   object-fit:cover;
-  border-radius:14px;
+  border-radius:20px;
   margin:0 auto 20px;
 }
 
