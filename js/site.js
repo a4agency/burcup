@@ -1727,20 +1727,47 @@ function renderArchiveTournamentPage() {
   const standingsNode = page.querySelector('[data-archive-standings]');
   const matchesNode = page.querySelector('[data-archive-matches]');
 
-  function renderArchiveClubCard(item, rank) {
-    const href = item.slug ? `club.html?slug=${encodeURIComponent(item.slug)}` : '';
-    const tag = href ? 'a' : 'div';
+  function renderArchiveClubCardContent(item, rank, options = {}) {
+    const showLogo = options.showLogo !== false;
     const placeLabel = rank ? `${rank} место` : '';
     const location = formatClubLocation(item);
 
     return `
-      <${tag} class="team-logo-card archive-team-card" ${href ? `href="${escapeHtml(href)}"` : ''}>
+      ${showLogo ? `
         <div class="team-logo-wrap archive-team-logo-wrap">
           ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'team-logo-img archive-team-logo', width: 240 })}
         </div>
-        <h3>${escapeHtml(item.name || 'Клуб')}</h3>
-        ${location ? `<div class="muted team-country">${escapeHtml(location)}</div>` : ''}
-        ${placeLabel ? `<div class="archive-team-place">${escapeHtml(placeLabel)}</div>` : ''}
+      ` : ''}
+      <h3>${escapeHtml(item.name || 'Клуб')}</h3>
+      ${location ? `<div class="muted team-country">${escapeHtml(location)}</div>` : ''}
+      ${placeLabel ? `<div class="archive-team-place">${escapeHtml(placeLabel)}</div>` : ''}
+    `;
+  }
+
+  function renderArchiveClubCard(item, rank) {
+    const href = item.slug ? `club.html?slug=${encodeURIComponent(item.slug)}` : '';
+    const tag = href ? 'a' : 'div';
+
+    return `
+      <${tag} class="team-logo-card archive-team-card" ${href ? `href="${escapeHtml(href)}"` : ''}>
+        ${renderArchiveClubCardContent(item, rank)}
+      </${tag}>
+    `;
+  }
+
+  function renderArchivePodiumCard(item, rank) {
+    const href = item.slug ? `club.html?slug=${encodeURIComponent(item.slug)}` : '';
+    const tag = href ? 'a' : 'div';
+    const toneClass = rank === 1 ? 'archive-podium-item-gold' : rank === 2 ? 'archive-podium-item-silver' : 'archive-podium-item-bronze';
+
+    return `
+      <${tag} class="archive-podium-item ${toneClass}" ${href ? `href="${escapeHtml(href)}"` : ''}>
+        <div class="archive-podium-logo-wrap">
+          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'archive-podium-logo-img', width: 240 })}
+        </div>
+        <div class="team-logo-card archive-team-card archive-podium-card ${toneClass}">
+          ${renderArchiveClubCardContent(item, rank, { showLogo: false })}
+        </div>
       </${tag}>
     `;
   }
@@ -1800,7 +1827,30 @@ function renderArchiveTournamentPage() {
           ...club,
           rank: Number(club.position || index + 1)
         })).sort((left, right) => (left.rank || 999) - (right.rank || 999));
-        teamsNode.innerHTML = rankedClubs.map(club => renderArchiveClubCard(club, club.rank)).join('');
+        const podiumCandidates = rankedClubs.filter(club => club.rank >= 1 && club.rank <= 3);
+        const podiumOrder = [2, 1, 3]
+          .map(rank => podiumCandidates.find(club => club.rank === rank))
+          .filter(Boolean);
+        const otherClubs = rankedClubs.filter(club => club.rank > 3);
+
+        if (podiumOrder.length === 3) {
+          teamsNode.innerHTML = `
+            <div class="archive-podium">
+              ${podiumOrder.map(club => renderArchivePodiumCard(club, club.rank)).join('')}
+            </div>
+            ${otherClubs.length ? `
+              <div class="archive-team-grid team-logo-grid archive-team-grid-rest">
+                ${otherClubs.map(club => renderArchiveClubCard(club, club.rank)).join('')}
+              </div>
+            ` : ''}
+          `;
+        } else {
+          teamsNode.innerHTML = `
+            <div class="archive-team-grid team-logo-grid archive-team-grid-rest">
+              ${rankedClubs.map(club => renderArchiveClubCard(club, club.rank)).join('')}
+            </div>
+          `;
+        }
       }
     }
 
