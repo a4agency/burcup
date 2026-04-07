@@ -1734,12 +1734,12 @@ function renderArchiveTournamentPage() {
     const location = formatClubLocation(item);
 
     return `
-      <${tag} class="archive-team-card archive-team-card-classic" ${href ? `href="${escapeHtml(href)}"` : ''}>
-        <div class="archive-team-logo-wrap">
-          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'archive-team-logo', width: 220 })}
+      <${tag} class="team-logo-card archive-team-card" ${href ? `href="${escapeHtml(href)}"` : ''}>
+        <div class="team-logo-wrap archive-team-logo-wrap">
+          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'team-logo-img archive-team-logo', width: 240 })}
         </div>
-        <strong>${escapeHtml(item.name || 'Клуб')}</strong>
-        ${location ? `<span>${escapeHtml(location)}</span>` : ''}
+        <h3>${escapeHtml(item.name || 'Клуб')}</h3>
+        ${location ? `<div class="muted team-country">${escapeHtml(location)}</div>` : ''}
         ${placeLabel ? `<div class="archive-team-place">${escapeHtml(placeLabel)}</div>` : ''}
       </${tag}>
     `;
