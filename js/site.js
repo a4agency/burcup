@@ -367,12 +367,12 @@ const ARCHIVE_TOURNAMENTS = {
       clubs_count: 6,
       matches_count: 3,
       standings: [
-        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.png', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
-        { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.png', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
-        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.png', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
-        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.png', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
-        { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.png', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
-        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.png', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
+        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.png', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
+        { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.png', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
+        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.png', city: 'Сан-Паулу', country: 'Бразилия', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.png', city: 'Буэнос-Айрес', country: 'Аргентина', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.png', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
+        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.png', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
       ],
       matches: [
         {

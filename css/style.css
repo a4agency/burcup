@@ -6374,13 +6374,17 @@ button,
 }
 
 .archive-team-place{
-  margin-top:4px;
+  margin-top:10px;
   color:var(--navy);
   font-size:16px;
   font-weight:700;
   line-height:1.2;
   text-align:center;
   width:100%;
+}
+
+.archive-team-card .team-country{
+  margin-bottom:2px;
 }
 
 .archive-standings-card .standings-table{

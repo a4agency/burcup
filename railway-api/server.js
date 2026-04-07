@@ -393,7 +393,9 @@ const standingsQuery = `
     ts.points,
     c.name AS team,
     c.logo_path AS logo,
-    c.slug AS team_slug
+    c.slug AS team_slug,
+    c.country,
+    c.city
   FROM tournament_standings ts
   JOIN clubs c ON c.id = ts.club_id
   JOIN tournaments t ON t.id = ts.tournament_id
@@ -1720,6 +1722,8 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
         slug: row.team_slug,
         team: row.team,
         logo: row.logo,
+        country: row.country || '',
+        city: row.city || '',
         played: row.played,
         won: row.won,
         drawn: row.drawn,
@@ -1754,6 +1758,8 @@ app.get('/api/tournaments/:slug/standings', async (req, res, next) => {
       slug: row.team_slug,
       team: row.team,
       logo: row.logo,
+      country: row.country || '',
+      city: row.city || '',
       played: row.played,
       won: row.won,
       drawn: row.drawn,
@@ -1884,6 +1890,8 @@ app.get('/api/standings', async (req, res, next) => {
       slug: row.team_slug,
       team: row.team,
       logo: row.logo,
+      country: row.country || '',
+      city: row.city || '',
       played: row.played,
       won: row.won,
       drawn: row.drawn,
