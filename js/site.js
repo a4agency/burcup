@@ -1516,6 +1516,10 @@ function sortMediaMatches(matches = []) {
   });
 }
 
+function sortMatchesChronologically(matches = []) {
+  return [...matches].sort((left, right) => getMatchTimestamp(left) - getMatchTimestamp(right));
+}
+
 function pickFeaturedMediaMatch(matches = []) {
   const explicitFeatured = matches.find(item => item?.is_featured_media === true);
   if (explicitFeatured) return explicitFeatured;
@@ -1697,7 +1701,7 @@ async function renderMultimediaPage() {
     const matchesRaw = await fetchJson('data/matches.json');
     const allMatches = sortMediaMatches(Array.isArray(matchesRaw) ? matchesRaw : []);
     const featuredMatch = pickFeaturedMediaMatch(allMatches);
-    const matches = allMatches.filter(hasAnyMatchMedia);
+    const matches = sortMatchesChronologically(allMatches.filter(hasAnyMatchMedia));
 
     featuredTarget.innerHTML = featuredMatch
       ? renderMediaFeatureCard(featuredMatch)
@@ -1710,6 +1714,7 @@ async function renderMultimediaPage() {
     storiesTarget.innerHTML = MEDIA_ALBUM_PLACEHOLDERS.map(renderMediaAlbumPlaceholderCard).join('');
 
     if (featuredMatch) initMatchMediaTabs(featuredTarget);
+    initMediaLibrarySlider();
     runAutoFit();
   } catch (error) {
     featuredTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить главный эфир.</div>';
@@ -2443,6 +2448,43 @@ function initHomeTournamentsSlider() {
   nextBtn.addEventListener('click', () => {
     track.scrollBy({ left: getStep(), behavior: 'smooth' });
   });
+
+  track.addEventListener('scroll', updateButtons, { passive: true });
+  window.addEventListener('resize', updateButtons);
+
+  const observer = new MutationObserver(updateButtons);
+  observer.observe(track, { childList: true, subtree: true });
+
+  setTimeout(updateButtons, 80);
+}
+
+function initMediaLibrarySlider() {
+  const track = document.getElementById('media-library');
+  const prevBtn = document.getElementById('media-library-prev');
+  const nextBtn = document.getElementById('media-library-next');
+  if (!track || !prevBtn || !nextBtn) return;
+
+  function getStep() {
+    const firstCard = track.querySelector('.media-match-card');
+    if (!firstCard) return Math.max(track.clientWidth * 0.9, 360);
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
+    return firstCard.getBoundingClientRect().width + gap;
+  }
+
+  function updateButtons() {
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
+    prevBtn.disabled = track.scrollLeft <= 2;
+    nextBtn.disabled = track.scrollLeft >= maxScroll;
+  }
+
+  prevBtn.onclick = () => {
+    track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+  };
+
+  nextBtn.onclick = () => {
+    track.scrollBy({ left: getStep(), behavior: 'smooth' });
+  };
 
   track.addEventListener('scroll', updateButtons, { passive: true });
   window.addEventListener('resize', updateButtons);
