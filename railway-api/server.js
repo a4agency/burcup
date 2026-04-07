@@ -9,6 +9,7 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const databaseUrl = process.env.DATABASE_URL;
 const adminToken = (process.env.ADMIN_TOKEN || '').trim();
+const adminPassword = (process.env.ADMIN_PASSWORD || 'agency').trim();
 const cloudinaryCloudName = (process.env.CLOUDINARY_CLOUD_NAME || '').trim();
 const cloudinaryApiKey = (process.env.CLOUDINARY_API_KEY || '').trim();
 const cloudinaryApiSecret = (process.env.CLOUDINARY_API_SECRET || '').trim();
@@ -223,6 +224,19 @@ function requireAdminAuth(req, res, next) {
 
   return next();
 }
+
+app.post('/api/admin/session', (req, res) => {
+  if (!adminToken) {
+    return res.status(503).json({ error: 'ADMIN_TOKEN is not configured on the server' });
+  }
+
+  const password = normalizeString(req.body?.password);
+  if (!password || password !== adminPassword) {
+    return res.status(401).json({ error: 'Invalid admin password' });
+  }
+
+  return res.json({ token: adminToken });
+});
 
 async function hasTournamentCountdownColumn(queryable = pool) {
   const { rows } = await queryable.query(`
@@ -1428,6 +1442,7 @@ app.get('/', (req, res) => {
       '/api/matches',
       '/api/news',
       '/api/results',
+      '/api/admin/session',
       '/api/admin/:resource',
       '/api/admin/uploads/image'
     ]

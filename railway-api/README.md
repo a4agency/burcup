@@ -141,6 +141,7 @@ Then redeploy or push the frontend changes to GitHub Pages.
 
 Protected admin routes are intended for the custom admin page:
 
+- `POST /api/admin/session`
 - `GET /api/admin/tournaments`
 - `GET /api/admin/clubs`
 - `GET /api/admin/matches`
@@ -153,13 +154,29 @@ Protected admin routes are intended for the custom admin page:
 - `PUT /api/admin/partners`
 - `POST /api/admin/uploads/image`
 
-Send the Railway secret in the request header:
+The admin page first logs in with a password and receives the current admin token from the API:
+
+```http
+POST /api/admin/session
+Content-Type: application/json
+
+{
+  "password": "agency"
+}
+```
+
+After that it sends the Railway secret in the request header:
 
 ```http
 x-admin-token: your-strong-secret
 ```
 
-The admin page `admin-lkjuft.html` now stores this token locally in the browser and uses it to read and write data directly through Railway API.
+Set these environment variables on Railway:
+
+- `ADMIN_TOKEN`
+- `ADMIN_PASSWORD`
+
+The admin page `admin.html` stores the current session token in the browser session and uses it to read and write data directly through Railway API. The old `admin-lkjuft.html` address now redirects to `admin.html`.
 
 For partner logos and other image fields, the admin page can upload files through Railway API into Cloudinary. The server stores only the resulting public URL in PostgreSQL, which keeps the database cleaner than saving long base64 strings.
 

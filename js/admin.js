@@ -9,7 +9,7 @@ const TEAM_LOGOS = [
   { name: 'Алмаз-Антей', path: 'images/team-almaz-antey.png' },
 ];
 
-const ADMIN_TOKEN_KEY = 'bcup_admin_token';
+const ADMIN_TOKEN_KEY = 'bcup_admin_session_token';
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -303,18 +303,61 @@ function getApiBaseUrl() {
 }
 
 function getAdminToken() {
-  return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+  return sessionStorage.getItem(ADMIN_TOKEN_KEY) || '';
 }
 
 function setAdminToken(token) {
   const value = String(token || '').trim();
   if (value) {
-    localStorage.setItem(ADMIN_TOKEN_KEY, value);
+    sessionStorage.setItem(ADMIN_TOKEN_KEY, value);
   } else {
-    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    sessionStorage.removeItem(ADMIN_TOKEN_KEY);
   }
-  const input = document.getElementById('admin-token');
-  if (input) input.value = value;
+}
+
+function setLoginStatus(text, isError = false) {
+  const node = document.getElementById('admin-login-status');
+  if (!node) return;
+  node.textContent = text;
+  node.dataset.state = isError ? 'error' : 'default';
+}
+
+function setAdminAuthenticated(isAuthenticated) {
+  const authSection = document.getElementById('admin-auth-section');
+  const app = document.getElementById('admin-app');
+  if (authSection) authSection.hidden = isAuthenticated;
+  if (app) app.hidden = !isAuthenticated;
+}
+
+function resetAdminSession(message = 'Войди в админку, чтобы продолжить.') {
+  setAdminToken('');
+  setAdminAuthenticated(false);
+  setLoginStatus(message, true);
+  setStatus(message);
+}
+
+async function createAdminSession(password) {
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl) {
+    throw new Error('В js/config.js не указан apiBaseUrl');
+  }
+
+  const response = await fetch(`${apiBaseUrl}/api/admin/session`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      password: String(password || '').trim()
+    })
+  });
+
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body.error || `Ошибка входа (${response.status})`);
+  }
+
+  return body;
 }
 
 function cloneDefaultData(sourceName) {
@@ -344,7 +387,7 @@ async function fetchAdminSource(sourceName) {
     throw new Error('В js/config.js не указан apiBaseUrl');
   }
   if (!token) {
-    throw new Error('Сначала вставь ADMIN_TOKEN из Railway');
+    throw new Error('Сначала войди в админку.');
   }
 
   const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
@@ -355,6 +398,10 @@ async function fetchAdminSource(sourceName) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
+      throw new Error('Сессия админки завершилась. Войди ещё раз.');
+    }
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
 
@@ -370,7 +417,7 @@ async function pushAdminSource(sourceName, data) {
     throw new Error('В js/config.js не указан apiBaseUrl');
   }
   if (!token) {
-    throw new Error('Сначала вставь ADMIN_TOKEN из Railway');
+    throw new Error('Сначала войди в админку.');
   }
 
   const response = await fetch(`${apiBaseUrl}/api/admin/${sourceName}`, {
@@ -384,6 +431,10 @@ async function pushAdminSource(sourceName, data) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
+      throw new Error('Сессия админки завершилась. Войди ещё раз.');
+    }
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
 
@@ -398,7 +449,7 @@ async function uploadAdminImage({ file, sourceName, key }) {
     throw new Error('В js/config.js не указан apiBaseUrl');
   }
   if (!token) {
-    throw new Error('Сначала вставь ADMIN_TOKEN из Railway');
+    throw new Error('Сначала войди в админку.');
   }
 
   const dataUrl = await new Promise((resolve, reject) => {
@@ -424,6 +475,10 @@ async function uploadAdminImage({ file, sourceName, key }) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
+      throw new Error('Сессия админки завершилась. Войди ещё раз.');
+    }
     throw new Error(body.error || `Ошибка upload API (${response.status})`);
   }
 
@@ -892,7 +947,7 @@ async function adminShowSource(sourceName, options = {}) {
   document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
   renderForm(sourceName, data);
   switchMode(currentMode);
-  setStatus(options.forceRemote ? 'Данные обновлены с Railway API.' : 'Раздел загружен.');
+  setStatus(options.forceRemote ? 'Данные обновлены.' : 'Раздел загружен.');
 }
 
 function switchMode(mode) {
@@ -917,7 +972,7 @@ async function adminSave() {
     }
 
     setSourceData(currentSource, parsed);
-    setStatus('Отправляю изменения в Railway API...');
+    setStatus('Сохраняю изменения...');
 
     const result = await pushAdminSource(currentSource, parsed);
     const synced = result.data || parsed;
@@ -926,7 +981,7 @@ async function adminSave() {
     document.getElementById('admin-textarea').value = JSON.stringify(synced, null, 2);
     renderForm(currentSource, synced);
     switchMode(currentMode);
-    setStatus(`Сохранено в Railway API и PostgreSQL. Записей: ${result.count ?? synced.length}.`);
+    setStatus(`Изменения сохранены. Записей: ${result.count ?? synced.length}.`);
   } catch (error) {
     setStatus('Ошибка сохранения: ' + error.message);
   }
@@ -939,13 +994,13 @@ async function adminReset() {
     document.getElementById('admin-textarea').value = JSON.stringify(data, null, 2);
     renderForm(currentSource, data);
     switchMode(currentMode);
-    setStatus('Черновик очищен. Данные перечитаны из Railway API.');
+    setStatus('Черновик очищен. Данные загружены заново.');
   } catch (error) {
     const fallback = cloneDefaultData(currentSource);
     document.getElementById('admin-textarea').value = JSON.stringify(fallback, null, 2);
     renderForm(currentSource, fallback);
     switchMode(currentMode);
-    setStatus('Не получилось перечитать API. Показаны стартовые данные: ' + error.message);
+    setStatus('Не получилось загрузить данные. Показаны стартовые значения: ' + error.message);
   }
 }
 
@@ -974,24 +1029,18 @@ function adminExport() {
 
 async function adminReloadFromApi() {
   try {
-    setStatus('Обновляю данные с Railway API...');
+    setStatus('Обновляю данные...');
     await adminShowSource(currentSource, { forceRemote: true });
   } catch (error) {
     setStatus('Ошибка загрузки из API: ' + error.message);
   }
 }
 
-function connectAdminApi() {
-  const input = document.getElementById('admin-token');
-  setAdminToken(input?.value || '');
-  setStatus(getAdminToken()
-    ? 'Токен сохранён локально в браузере. Теперь можно загружать и сохранять через API.'
-    : 'Токен очищен.');
-}
+let adminNavInitialized = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initAdminNav() {
   const nav = document.getElementById('admin-nav');
-  if (!nav) return;
+  if (!nav || adminNavInitialized) return;
 
   Object.entries(ADMIN_SOURCES).forEach(([name, meta]) => {
     const btn = document.createElement('button');
@@ -1002,15 +1051,65 @@ document.addEventListener('DOMContentLoaded', () => {
     nav.appendChild(btn);
   });
 
-  setAdminToken(getAdminToken());
+  adminNavInitialized = true;
+}
+
+async function openAdminWorkspace(options = {}) {
+  initAdminNav();
+  setAdminAuthenticated(true);
+  await adminShowSource(currentSource || 'tournaments', options);
+}
+
+async function handleAdminLogin(event) {
+  event.preventDefault();
+  const input = document.getElementById('admin-password');
+  const password = String(input?.value || '').trim();
+
+  if (!password) {
+    setLoginStatus('Введи пароль.', true);
+    return;
+  }
+
+  try {
+    setLoginStatus('Проверяю пароль...');
+    const session = await createAdminSession(password);
+    setAdminToken(session.token || '');
+    setLoginStatus('');
+    if (input) input.value = '';
+    await openAdminWorkspace({ forceRemote: true });
+  } catch (error) {
+    setLoginStatus('Неверный пароль или сервер недоступен.', true);
+    setStatus('Ошибка входа: ' + error.message);
+  }
+}
+
+function handleAdminLogout() {
+  setAdminToken('');
+  setAdminAuthenticated(false);
+  setLoginStatus('Сессия закрыта.');
+  setStatus('Вход в админку закрыт.');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const app = document.getElementById('admin-app');
+  if (!app) return;
 
   document.getElementById('admin-save').addEventListener('click', adminSave);
   document.getElementById('admin-reset').addEventListener('click', adminReset);
   document.getElementById('admin-export').addEventListener('click', adminExport);
-  document.getElementById('admin-connect').addEventListener('click', connectAdminApi);
-  document.getElementById('admin-reload').addEventListener('click', adminReloadFromApi);
+  document.getElementById('admin-logout').addEventListener('click', handleAdminLogout);
+  document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
   document.getElementById('mode-form').addEventListener('click', () => switchMode('form'));
   document.getElementById('mode-json').addEventListener('click', () => switchMode('json'));
 
-  adminShowSource('tournaments');
+  if (getAdminToken()) {
+    openAdminWorkspace({ forceRemote: true }).catch((error) => {
+      resetAdminSession('Сессия админки завершилась. Войди ещё раз.');
+      setStatus('Ошибка загрузки данных: ' + error.message);
+    });
+  } else {
+    setAdminAuthenticated(false);
+    setLoginStatus('Введи пароль, чтобы открыть админку.');
+    setStatus('Войди в админку, чтобы редактировать данные.');
+  }
 });
