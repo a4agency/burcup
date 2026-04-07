@@ -1566,11 +1566,44 @@ function renderMediaFeatureCard(item) {
   `;
 }
 
-function renderMediaOverviewCards(matches = [], news = [], featuredMatch = null) {
+const MEDIA_ALBUM_PLACEHOLDERS = [
+  {
+    title: 'Фотоальбом открытия',
+    excerpt: 'Фотографии церемонии открытия и первых эмоций турнира.',
+    badge: 'Скоро'
+  },
+  {
+    title: 'Лучшие кадры игрового дня',
+    excerpt: 'Подборка игровых моментов, болельщиков и атмосферы матчей.',
+    badge: 'Скоро'
+  },
+  {
+    title: 'Награждение и закрытие',
+    excerpt: 'Отдельный альбом с награждением, кубком и финальными кадрами.',
+    badge: 'Скоро'
+  }
+];
+
+function renderMediaAlbumPlaceholderCard(item) {
+  return `
+    <article class="news-preview-card media-album-card">
+      <div class="news-preview-cover media-album-cover">
+        <span class="archive-stat-chip media-album-badge">${escapeHtml(item.badge || 'Скоро')}</span>
+        <div class="media-album-icon">Фотоальбом</div>
+      </div>
+      <div class="news-preview-content media-album-content">
+        <div class="news-preview-date">Будущий материал</div>
+        <h3>${escapeHtml(item.title || '')}</h3>
+        <p>${escapeHtml(item.excerpt || '')}</p>
+      </div>
+    </article>
+  `;
+}
+
+function renderMediaOverviewCards(matches = [], storiesCount = 0) {
   const streamsCount = matches.filter(item => String(item.video || '').trim()).length;
   const reviewsCount = matches.filter(item => String(item.review_video || '').trim()).length;
   const interviewsCount = matches.filter(item => String(item.interview_video || '').trim()).length;
-  const storiesCount = news.length;
 
   return `
     <section class="card media-overview-card">
@@ -1592,25 +1625,6 @@ function renderMediaOverviewCards(matches = [], news = [], featuredMatch = null)
           <strong>${storiesCount}</strong>
           <span>фоторепортажей</span>
         </div>
-      </div>
-    </section>
-    <section class="card media-overview-card">
-      <h3>Быстрый переход</h3>
-      <div class="media-quick-list">
-        ${featuredMatch ? `
-          <a class="media-quick-link" href="match.html?id=${encodeURIComponent(featuredMatch.id)}">
-            <strong>${escapeHtml(`${featuredMatch.home_team} — ${featuredMatch.away_team}`)}</strong>
-            <span>${escapeHtml(joinNonEmpty([formatMatchCardDateTime(featuredMatch), featuredMatch.status_label], ' • '))}</span>
-          </a>
-        ` : ''}
-        <a class="media-quick-link" href="matches.html">
-          <strong>Страницы матчей</strong>
-          <span>все трансляции, обзоры и интервью турнира</span>
-        </a>
-        <a class="media-quick-link" href="news.html">
-          <strong>Новости и фото</strong>
-          <span>оперативные публикации и фотоматериалы турнира</span>
-        </a>
       </div>
     </section>
   `;
@@ -1660,28 +1674,22 @@ async function renderMultimediaPage() {
   if (!featuredTarget || !overviewTarget || !libraryTarget || !storiesTarget) return;
 
   try {
-    const [matchesRaw, newsRaw] = await Promise.all([
-      fetchJson('data/matches.json'),
-      fetchJson('data/news.json')
-    ]);
+    const matchesRaw = await fetchJson('data/matches.json');
 
     const matches = sortMediaMatches((Array.isArray(matchesRaw) ? matchesRaw : []).filter(hasAnyMatchMedia));
-    const news = Array.isArray(newsRaw) ? newsRaw : [];
     const featuredMatch = pickFeaturedMediaMatch(matches);
 
     featuredTarget.innerHTML = featuredMatch
       ? renderMediaFeatureCard(featuredMatch)
       : '<div class="card media-empty-card">Медиаматериалы появятся здесь после публикации первых трансляций.</div>';
 
-    overviewTarget.innerHTML = renderMediaOverviewCards(matches, news, featuredMatch);
+    overviewTarget.innerHTML = renderMediaOverviewCards(matches, MEDIA_ALBUM_PLACEHOLDERS.length);
 
     libraryTarget.innerHTML = matches.length
       ? matches.map(renderMediaMatchCard).join('')
       : '<div class="card media-empty-card">Материалы матчей появятся после публикации первых эфиров.</div>';
 
-    storiesTarget.innerHTML = news.length
-      ? news.map(renderNewsPreviewCard).join('')
-      : '<div class="card media-empty-card">Фоторепортажи появятся позднее.</div>';
+    storiesTarget.innerHTML = MEDIA_ALBUM_PLACEHOLDERS.map(renderMediaAlbumPlaceholderCard).join('');
 
     if (featuredMatch) initMatchMediaTabs(featuredTarget);
     runAutoFit();

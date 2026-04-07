@@ -194,10 +194,18 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 
 .media-feature-player .match-page-actions{
   margin-bottom:2px;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  scrollbar-width:none;
 }
 
 .media-feature-player .match-page-action{
-  min-width:132px;
+  min-width:0;
+  flex:1 1 0;
+}
+
+.media-feature-player .match-page-actions::-webkit-scrollbar{
+  display:none;
 }
 
 .media-overview-stack{
@@ -245,46 +253,49 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   font-weight:700;
 }
 
-.media-quick-list{
-  display:grid;
-  gap:12px;
-}
-
-.media-quick-link{
-  display:block;
-  padding:16px 18px;
-  border:1px solid var(--line);
-  border-radius:20px;
-  background:#fff;
-  transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
-}
-
-.media-quick-link strong{
-  display:block;
-  color:var(--navy);
-  font-size:18px;
-  line-height:1.2;
-  margin-bottom:6px;
-}
-
-.media-quick-link span{
-  display:block;
-  color:var(--muted);
-  font-size:15px;
-  line-height:1.55;
-}
-
-.media-quick-link:hover,
-.media-quick-link:focus-visible{
-  transform:translateY(-2px);
-  border-color:rgba(13,43,99,.18);
-  box-shadow:0 14px 26px rgba(13,43,99,.08);
-}
-
 .media-library-grid{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:18px;
+}
+
+.media-album-card{
+  cursor:default;
+}
+
+.media-album-card:hover,
+.media-album-card:focus-visible{
+  transform:none;
+  box-shadow:var(--shadow);
+}
+
+.media-album-cover{
+  align-items:flex-start;
+  justify-content:flex-end;
+  padding:18px;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,.16), transparent 36%),
+    linear-gradient(135deg, #15346e 0%, #214f97 48%, #5f7ea8 100%);
+}
+
+.media-album-badge{
+  background:rgba(255,255,255,.18);
+  color:#fff;
+  border:none;
+  box-shadow:none;
+}
+
+.media-album-icon{
+  margin-top:auto;
+  align-self:flex-start;
+  color:rgba(255,255,255,.92);
+  font-size:28px;
+  line-height:1;
+  font-weight:800;
+}
+
+.media-album-content .news-preview-date{
+  margin-bottom:12px;
 }
 
 .media-match-card{
