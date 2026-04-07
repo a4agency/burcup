@@ -1204,7 +1204,7 @@ async function renderMatchPageFromJson() {
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
-    const matchMeta = joinNonEmpty([item.date, item.time, item.venue], ' • ');
+    const matchMeta = joinNonEmpty([item.date, item.venue, item.time], ' • ');
     const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || 'Матч';
     const matchdayLabel = item.matchday || item.round || '';
@@ -1218,7 +1218,6 @@ async function renderMatchPageFromJson() {
           </div>
           <div class="match-page-head">
             <div class="match-page-copy">
-              <h1 class="article-title match-page-title">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</h1>
               ${matchMeta ? `<div class="match-page-meta">${escapeHtml(matchMeta)}</div>` : ''}
             </div>
             <div class="upcoming-status match-page-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>

@@ -919,13 +919,14 @@ object-fit:contain;
 .match-page-head{
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
+  align-items:center;
   gap:18px;
-  margin-bottom:24px;
+  margin-bottom:20px;
 }
 
 .match-page-copy{
   min-width:0;
+  flex:1 1 auto;
 }
 
 .match-page-title{
@@ -936,16 +937,15 @@ object-fit:contain;
 }
 
 .match-page-meta{
-  margin-top:14px;
-  font-size:clamp(15px, 1.5vw, 18px);
+  font-size:clamp(15px, 1.45vw, 17px);
   line-height:1.45;
   color:#617594;
-  font-weight:600;
+  font-weight:700;
 }
 
 .match-page-status{
   flex:0 0 auto;
-  margin-top:4px;
+  margin-top:0;
 }
 
 .match-page-scorecard{
@@ -1012,11 +1012,11 @@ object-fit:contain;
 }
 
 .match-page-scorebox{
-  min-width:170px;
-  padding:18px 22px;
+  min-width:150px;
+  padding:16px 20px;
   border-radius:24px;
-  background:linear-gradient(180deg, rgba(13,43,99,.95), rgba(23,53,106,.88));
-  box-shadow:0 20px 34px rgba(13,43,99,.20);
+  background:linear-gradient(180deg, rgba(13,43,99,.92), rgba(23,53,106,.82));
+  box-shadow:0 16px 28px rgba(13,43,99,.16);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -1030,17 +1030,17 @@ object-fit:contain;
 }
 
 .match-page-score-digit{
-  font-size:clamp(42px, 5.4vw, 64px);
-  font-weight:900;
+  font-size:clamp(34px, 4.4vw, 52px);
+  font-weight:800;
   line-height:1;
-  letter-spacing:-.04em;
+  letter-spacing:-.03em;
 }
 
 .match-page-score-separator{
-  font-size:clamp(28px, 3vw, 40px);
-  font-weight:800;
+  font-size:clamp(24px, 2.4vw, 34px);
+  font-weight:700;
   line-height:1;
-  opacity:.72;
+  opacity:.58;
 }
 
 .match-page-summary{
@@ -1102,7 +1102,7 @@ object-fit:contain;
   }
 
   .match-page-scorebox{
-    padding:16px 18px;
+    padding:14px 16px;
     border-radius:20px;
   }
 
