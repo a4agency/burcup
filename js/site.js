@@ -1257,12 +1257,10 @@ async function renderMatchPageFromJson() {
           <div class="match-page-media-stage">
             ${renderMatchMediaPanel('stream', 'Трансляция', item.video)}
             ${renderMatchMediaPanel('review', 'Обзор', item.review_video, {
-              title: 'Обзор появится после матча',
-              description: 'После игры сюда добавят ссылку на обзор лучших моментов.'
+              title: 'Обзор появится позднее'
             })}
             ${renderMatchMediaPanel('interview', 'Интервью', item.interview_video, {
-              title: 'Интервью появится после матча',
-              description: 'После игры сюда добавят ссылку на интервью игроков и тренеров.'
+              title: 'Интервью появится позднее'
             })}
           </div>
         </div>
@@ -1286,7 +1284,7 @@ function renderMatchMediaPanel(key, label, url, emptyState = null) {
         : emptyState
           ? `<div class="match-page-media-placeholder">
               <div class="match-page-media-placeholder-title">${escapeHtml(emptyState.title || '')}</div>
-              <p>${escapeHtml(emptyState.description || '')}</p>
+              ${emptyState.description ? `<p>${escapeHtml(emptyState.description || '')}</p>` : ''}
             </div>`
           : `<div class="match-page-media-empty" aria-hidden="true"></div>`}
     </section>
