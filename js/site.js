@@ -1211,16 +1211,18 @@ async function renderMatchPageFromJson() {
     target.innerHTML = `
       <div class="container match-page-shell">
         <section class="match-page-hero">
-          <div class="match-page-tags">
-            <span class="match-page-tag">${escapeHtml(stageLabel)}</span>
-            <span class="match-page-tag match-page-tag-soft">Кубок Бурчалкина</span>
-            ${matchdayLabel ? `<span class="match-page-tag match-page-tag-soft">${escapeHtml(matchdayLabel)}</span>` : ''}
+          <div class="match-page-topline">
+            <div class="match-page-tags">
+              <span class="match-page-tag">${escapeHtml(stageLabel)}</span>
+              <span class="match-page-tag match-page-tag-soft">Кубок Бурчалкина</span>
+              ${matchdayLabel ? `<span class="match-page-tag match-page-tag-soft">${escapeHtml(matchdayLabel)}</span>` : ''}
+            </div>
+            <div class="upcoming-status match-page-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
           </div>
           <div class="match-page-head">
             <div class="match-page-copy">
               ${matchMeta ? `<div class="match-page-meta">${escapeHtml(matchMeta)}</div>` : ''}
             </div>
-            <div class="upcoming-status match-page-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
           </div>
           <div class="match-page-scorecard">
             <div class="match-page-team match-page-team-home">
@@ -1247,6 +1249,11 @@ async function renderMatchPageFromJson() {
           </div>
         </section>
         <div class="match-page-media" data-match-media>
+          <div class="match-page-actions" role="tablist" aria-label="Материалы матча">
+            <button class="match-page-action is-active" type="button" role="tab" aria-selected="true" data-match-media-tab="stream">Трансляция</button>
+            <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="review">Обзор</button>
+            <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="interview">Интервью</button>
+          </div>
           <div class="match-page-media-stage">
             ${renderMatchMediaPanel('stream', 'Трансляция', item.video, {
               title: 'Трансляция появится позже',
@@ -1260,11 +1267,6 @@ async function renderMatchPageFromJson() {
               title: 'Интервью скоро будет доступно',
               description: 'Сюда можно добавить интервью игроков, тренеров или организаторов.'
             })}
-          </div>
-          <div class="match-page-actions" role="tablist" aria-label="Материалы матча">
-            <button class="match-page-action is-active" type="button" role="tab" aria-selected="true" data-match-media-tab="stream">Трансляция</button>
-            <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="review">Обзор</button>
-            <button class="match-page-action" type="button" role="tab" aria-selected="false" data-match-media-tab="interview">Интервью</button>
           </div>
         </div>
       </div>
