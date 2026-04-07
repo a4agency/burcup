@@ -1078,9 +1078,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-admin-reset]').forEach(button => {
     button.addEventListener('click', adminReset);
   });
-  document.querySelectorAll('[data-admin-export]').forEach(button => {
-    button.addEventListener('click', adminExport);
-  });
   document.getElementById('admin-logout').addEventListener('click', handleAdminLogout);
   document.getElementById('admin-login-form').addEventListener('submit', handleAdminLogin);
 
