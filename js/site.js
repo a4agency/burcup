@@ -470,8 +470,21 @@ function formatMatchVenue(item = {}) {
   return 'Стадион "Алмаз-Антей"';
 }
 
+function formatMatchDisplayDate(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const parsed = new Date(`${raw}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return raw;
+
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long'
+  }).format(parsed);
+}
+
 function formatMatchCardDateTime(item = {}) {
-  return joinNonEmpty([String(item.date || '').trim(), String(item.time || '').trim()], ' • ');
+  return joinNonEmpty([formatMatchDisplayDate(item.date), String(item.time || '').trim()], ' • ');
 }
 
 function getMatchClubKey(item, side) {
@@ -1278,7 +1291,7 @@ async function renderMatchPageFromJson() {
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
-    const matchMeta = joinNonEmpty([String(item.date || '').trim(), String(item.time || '').trim(), formatMatchVenue(item)], ' • ');
+    const matchMeta = joinNonEmpty([formatMatchDisplayDate(item.date), String(item.time || '').trim(), formatMatchVenue(item)], ' • ');
     const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || 'Матч';
     const matchdayLabel = item.matchday || item.round || '';

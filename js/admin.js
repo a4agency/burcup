@@ -171,7 +171,7 @@ const ADMIN_SOURCES = {
       {
         id: Date.now(),
         tournament_slug: 'burchalkin-cup-2026',
-        date: '',
+        date: '2026-05-15',
         time: '10:00',
         status: 'soon',
         status_label: 'Скоро',
@@ -195,7 +195,7 @@ const ADMIN_SOURCES = {
     empty: () => ({
       id: Date.now(),
       tournament_slug: 'burchalkin-cup-2026',
-      date: '',
+      date: '2026-05-15',
       time: '10:00',
       status: 'soon',
       status_label: 'Скоро',
