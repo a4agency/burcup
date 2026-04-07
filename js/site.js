@@ -193,64 +193,68 @@ async function renderStandings(selector) {
   if (!target) return;
   try {
     const data = await fetchJson('data/standings.json');
-    const rows = data.map((item, index) => {
-      const clubUrl = getClubPageUrl(item);
-      const teamMarkup = clubUrl
-        ? `<a class="standings-team standings-team-link" href="${escapeHtml(clubUrl)}">
-            ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
-            <span>${item.team}</span>
-          </a>`
-        : `<div class="standings-team">
-            ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
-            <span>${item.team}</span>
-          </div>`;
-
-      return `
-        <tr>
-          <td class="num">${item.position || index + 1}</td>
-          <td>${teamMarkup}</td>
-          <td class="num">${item.played}</td>
-          <td class="num">${formatStandingStat(item.won)}</td>
-          <td class="num">${formatStandingStat(item.drawn)}</td>
-          <td class="num">${formatStandingStat(item.lost)}</td>
-          <td class="num">${escapeHtml(formatStandingGoals(item))}</td>
-          <td class="points">${item.points}</td>
-        </tr>
-      `;
-    }).join('');
-
-    target.innerHTML = `
-      <div class="standings-card">
-        <table class="standings-table">
-          <colgroup>
-            <col class="col-rank">
-            <col class="col-team">
-            <col class="col-games">
-            <col class="col-wins">
-            <col class="col-draws">
-            <col class="col-losses">
-            <col class="col-goals">
-            <col class="col-points">
-          </colgroup>
-          <thead>
-            <tr>
-              <th>№</th>
-              <th>Команда</th>
-              <th>Игр</th>
-              <th>Побед</th>
-              <th>Ничьих</th>
-              <th>Поражений</th>
-              <th>Мячей забито - пропущено</th>
-              <th>Очки</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    `;
+    target.innerHTML = renderStandingsTable(data);
   } catch (error) {
     target.innerHTML = '<div class="standings-card"><div style="padding:18px">Не удалось загрузить таблицу.</div></div>';
   }
+}
+
+function renderStandingsTable(data = []) {
+  const rows = (Array.isArray(data) ? data : []).map((item, index) => {
+    const clubUrl = getClubPageUrl(item);
+    const teamMarkup = clubUrl
+      ? `<a class="standings-team standings-team-link" href="${escapeHtml(clubUrl)}">
+          ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
+          <span>${item.team}</span>
+        </a>`
+      : `<div class="standings-team">
+          ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
+          <span>${item.team}</span>
+        </div>`;
+
+    return `
+      <tr>
+        <td class="num">${item.position || index + 1}</td>
+        <td>${teamMarkup}</td>
+        <td class="num">${item.played}</td>
+        <td class="num">${formatStandingStat(item.won)}</td>
+        <td class="num">${formatStandingStat(item.drawn)}</td>
+        <td class="num">${formatStandingStat(item.lost)}</td>
+        <td class="num">${escapeHtml(formatStandingGoals(item))}</td>
+        <td class="points">${item.points}</td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <div class="standings-card">
+      <table class="standings-table">
+        <colgroup>
+          <col class="col-rank">
+          <col class="col-team">
+          <col class="col-games">
+          <col class="col-wins">
+          <col class="col-draws">
+          <col class="col-losses">
+          <col class="col-goals">
+          <col class="col-points">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Команда</th>
+            <th>Игр</th>
+            <th>Побед</th>
+            <th>Ничьих</th>
+            <th>Поражений</th>
+            <th>Мячей забито - пропущено</th>
+            <th>Очки</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -362,6 +366,14 @@ const ARCHIVE_TOURNAMENTS = {
     detail: {
       clubs_count: 6,
       matches_count: 3,
+      standings: [
+        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.png', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
+        { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.png', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
+        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.png', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.png', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.png', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
+        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.png', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
+      ],
       matches: [
         {
           id: 'archive-2025-1',
@@ -1711,6 +1723,7 @@ function renderArchiveTournamentPage() {
   const statusNode = page.querySelector('[data-archive-status]');
   const statsNode = page.querySelector('[data-archive-stats]');
   const teamsNode = page.querySelector('[data-archive-teams]');
+  const standingsNode = page.querySelector('[data-archive-standings]');
   const matchesNode = page.querySelector('[data-archive-matches]');
 
   function renderArchiveClubCard(item) {
@@ -1778,6 +1791,13 @@ function renderArchiveTournamentPage() {
       teamsNode.innerHTML = clubs.length
         ? clubs.map(renderArchiveClubCard).join('')
         : '<div class="archive-empty-state">Состав участников появится позднее.</div>';
+    }
+
+    if (standingsNode) {
+      const standings = Array.isArray(resolvedDetail?.standings) ? resolvedDetail.standings : [];
+      standingsNode.innerHTML = standings.length
+        ? renderStandingsTable(standings)
+        : '<div class="archive-empty-state">Турнирная таблица появится позднее.</div>';
     }
 
     if (matchesNode) {
