@@ -470,6 +470,10 @@ function formatMatchVenue(item = {}) {
   return 'Стадион "Алмаз-Антей"';
 }
 
+function formatMatchCardDateTime(item = {}) {
+  return joinNonEmpty([String(item.date || '').trim(), String(item.time || '').trim()], ' • ');
+}
+
 function getMatchClubKey(item, side) {
   const slugKey = side === 'home'
     ? String(item?.home_team_slug || '').trim().toLowerCase()
@@ -1093,8 +1097,7 @@ async function renderUpcomingMatches() {
         <div class="upcoming-header">
           <div>
             <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
-            <div class="upcoming-time">${escapeHtml(item.time || '')}</div>
-            <div class="upcoming-venue">${escapeHtml(formatMatchVenue(item))}</div>
+            <div class="upcoming-time">${escapeHtml(formatMatchCardDateTime(item))}</div>
           </div>
           <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
         </div>
@@ -1163,8 +1166,7 @@ async function renderMatchesPage() {
         <div class="upcoming-header">
           <div>
             <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
-            <div class="upcoming-time">${escapeHtml(item.time || '')}</div>
-            <div class="upcoming-venue">${escapeHtml(formatMatchVenue(item))}</div>
+            <div class="upcoming-time">${escapeHtml(formatMatchCardDateTime(item))}</div>
           </div>
           <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
         </div>
@@ -1237,8 +1239,7 @@ async function renderResultsMatches() {
         <div class="upcoming-header">
           <div>
             <div class="upcoming-tour">${escapeHtml(item.stage || item.group || '1 тур')}</div>
-            <div class="upcoming-time">${escapeHtml(item.time || '')}</div>
-            <div class="upcoming-venue">${escapeHtml(formatMatchVenue(item))}</div>
+            <div class="upcoming-time">${escapeHtml(formatMatchCardDateTime(item))}</div>
           </div>
           <div class="upcoming-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
         </div>
@@ -1277,7 +1278,7 @@ async function renderMatchPageFromJson() {
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
-    const matchMeta = joinNonEmpty([item.date, formatMatchVenue(item), item.time], ' • ');
+    const matchMeta = joinNonEmpty([String(item.date || '').trim(), String(item.time || '').trim(), formatMatchVenue(item)], ' • ');
     const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || 'Матч';
     const matchdayLabel = item.matchday || item.round || '';
