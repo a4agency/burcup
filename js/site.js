@@ -273,9 +273,9 @@ function escapeHtml(str) {
 
 const TRANSPARENT_IMAGE_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 const NEWS_IMAGE_FALLBACKS = [
-  { id: 1, slug: 'applications-open', src: 'images/news-1.jpg' },
-  { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.jpg' },
-  { id: 3, slug: 'playoff-bracket-coming-soon', src: 'images/news-3.jpg' }
+  { id: 1, slug: 'applications-open', src: 'images/news-1.webp' },
+  { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.webp' },
+  { id: 3, slug: 'playoff-bracket-coming-soon', src: 'images/news-3.webp' }
 ];
 const CLUB_LOCATION_OVERRIDES = {
   palmeiras: {

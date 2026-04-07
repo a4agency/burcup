@@ -137,7 +137,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   inset:-18px;
   background:
     linear-gradient(135deg, rgba(8,24,58,.46), rgba(17,53,121,.22)),
-    url("../images/hero-carousel-1-1600.jpg") center 38% / cover no-repeat;
+    url("../images/hero-carousel-1-1600.webp") center 38% / cover no-repeat;
   filter:blur(12px) saturate(1.1);
   transform:scale(1.06);
 }
