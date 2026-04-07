@@ -595,6 +595,23 @@ function getArchiveTournamentSlug(year) {
   return ARCHIVE_TOURNAMENT_SLUG_BY_YEAR[String(year || '').trim()] || '';
 }
 
+function buildArchiveTournamentEntries() {
+  return Object.entries(ARCHIVE_TOURNAMENTS)
+    .sort((left, right) => Number(right[0]) - Number(left[0]))
+    .map(([year, item]) => ({
+      slug: getArchiveTournamentSlug(year),
+      season_year: Number(year),
+      status: year === '2025' ? 'completed' : 'archived',
+      name: item.title,
+      description: item.description,
+      start_date: String(item.season || '').match(/\d{1,2}\s+[а-яё]+/i)?.[0] || '',
+      end_date: '',
+      clubs_count: Number(item.detail?.clubs_count || 0),
+      matches_count: Number(item.detail?.matches_count || 0),
+      is_archive: true
+    }));
+}
+
 function getArchiveTournamentClubs(detail = {}) {
   const standings = Array.isArray(detail.standings) ? detail.standings : [];
   if (standings.length) {
@@ -1039,8 +1056,24 @@ async function renderTournamentsGrid() {
   const target = document.querySelector('#home-tournaments');
   if (!target) return;
   const tournaments = await fetchApi('/api/tournaments');
-  if (!tournaments) return;
-  target.innerHTML = tournaments.map(item => `
+  const liveTournaments = Array.isArray(tournaments) ? tournaments : [];
+  const archiveEntries = buildArchiveTournamentEntries().filter(archiveItem => {
+    return !liveTournaments.some(item => Number(item?.season_year || 0) === Number(archiveItem.season_year || 0));
+  });
+  const allTournaments = [...liveTournaments, ...archiveEntries];
+  if (!allTournaments.length) return;
+
+  target.innerHTML = allTournaments.map(item => {
+    const isArchive = Boolean(item.is_archive) || ['completed', 'archived'].includes(String(item.status || '').trim().toLowerCase()) && Number(item.season_year || 0) < 2026;
+    const actionHref = isArchive
+      ? `archive-tournament.html?year=${encodeURIComponent(String(item.season_year || ''))}${item.slug ? `&slug=${encodeURIComponent(item.slug)}` : ''}`
+      : `results.html?tournament=${encodeURIComponent(item.slug || '')}`;
+    const actionLabel = isArchive ? 'Открыть архив' : 'Открыть турнир';
+    const datesLabel = item.is_archive
+      ? String(item.start_date || '').trim()
+      : `${escapeHtml(item.start_date || '')}${item.end_date ? ` - ${escapeHtml(item.end_date)}` : ''}`;
+
+    return `
     <article class="tournament-card">
       <div class="tournament-card-top">
         <div class="tournament-card-year">${escapeHtml(item.season_year || '')}</div>
@@ -1052,12 +1085,13 @@ async function renderTournamentsGrid() {
         <span>${escapeHtml(formatCountLabel(item.clubs_count, ['клуб', 'клуба', 'клубов']))}</span>
         <span>${escapeHtml(formatCountLabel(item.matches_count, ['матч', 'матча', 'матчей']))}</span>
       </div>
-      <div class="tournament-card-dates">${escapeHtml(item.start_date || '')}${item.end_date ? ` - ${escapeHtml(item.end_date)}` : ''}</div>
+      <div class="tournament-card-dates">${datesLabel}</div>
       <div class="tournament-card-actions">
-        <a class="tournament-card-button" href="results.html?tournament=${encodeURIComponent(item.slug || '')}">Открыть турнир</a>
+        <a class="tournament-card-button" href="${escapeHtml(actionHref)}">${actionLabel}</a>
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
 }
 
 const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.png';
