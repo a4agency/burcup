@@ -1734,7 +1734,7 @@ function renderArchiveTournamentPage() {
     const location = formatClubLocation(item);
 
     return `
-      <${tag} class="archive-team-card" ${href ? `href="${escapeHtml(href)}"` : ''}>
+      <${tag} class="archive-team-card archive-team-card-classic" ${href ? `href="${escapeHtml(href)}"` : ''}>
         <div class="archive-team-logo-wrap">
           ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'archive-team-logo', width: 220 })}
         </div>

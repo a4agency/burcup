@@ -6415,6 +6415,66 @@ button,
   line-height:1.2;
 }
 
+.archive-team-grid-classic{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+}
+
+.archive-team-grid-classic .archive-team-card-classic{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+  padding:16px;
+  min-height:auto;
+  height:auto;
+  border:1px solid rgba(204,217,242,.88);
+  border-radius:22px;
+  background:#fff;
+  text-decoration:none;
+  color:var(--text);
+}
+
+.archive-team-grid-classic .archive-team-logo-wrap{
+  width:100%;
+  aspect-ratio:1.35 / 1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.archive-team-grid-classic .archive-team-logo{
+  width:min(110px, 66%);
+  max-height:90px;
+  object-fit:contain;
+}
+
+.archive-team-grid-classic .archive-team-card-classic strong{
+  color:var(--navy);
+  font-size:18px;
+  line-height:1.1;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+  hyphens:none;
+}
+
+.archive-team-grid-classic .archive-team-card-classic span{
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.35;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+  hyphens:none;
+}
+
+.archive-team-grid-classic .archive-team-place{
+  margin-top:4px;
+  font-size:16px;
+}
+
 .archive-standings-card .standings-table{
   min-width:760px;
 }
@@ -6619,6 +6679,10 @@ button,
     grid-template-columns:1fr;
   }
 
+  .archive-team-grid-classic{
+    grid-template-columns:1fr;
+  }
+
   .archive-partner-card{
     gap:14px;
   }
@@ -6656,6 +6720,10 @@ button,
 
   .archive-team-card strong,
   .archive-match-card-team span{
+    font-size:21px;
+  }
+
+  .archive-team-grid-classic .archive-team-card-classic strong{
     font-size:21px;
   }
 }
