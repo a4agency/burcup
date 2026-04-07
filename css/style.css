@@ -6363,11 +6363,16 @@ button,
   gap:20px;
   align-items:end;
   margin-bottom:20px;
+  max-width:860px;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 .archive-team-grid-rest{
   grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:18px;
+  max-width:860px;
+  margin:0 auto;
 }
 
 .archive-team-card{
@@ -6382,6 +6387,7 @@ button,
   text-decoration:none;
   color:var(--text);
   transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  min-height:240px;
 }
 
 .archive-team-card-podium{
@@ -6396,8 +6402,8 @@ button,
 .archive-team-card-podium::before{
   content:"";
   position:absolute;
-  inset:72px 0 0;
-  border-radius:26px;
+  inset:74px 0 0;
+  border-radius:28px;
   border:1px solid rgba(218,224,238,.95);
   background:#fff;
   box-shadow:0 12px 24px rgba(13,43,99,.05);
@@ -6442,9 +6448,9 @@ button,
   position:relative;
   z-index:1;
   width:100%;
-  min-height:118px;
+  min-height:122px;
   aspect-ratio:auto;
-  margin-bottom:-6px;
+  margin-bottom:-10px;
 }
 
 .archive-team-logo{
@@ -6465,25 +6471,35 @@ button,
   align-items:center;
   gap:6px;
   text-align:center;
+  word-break:normal;
+  overflow-wrap:normal;
+  hyphens:none;
 }
 
 .archive-team-card-podium .archive-team-body{
   position:relative;
   z-index:1;
-  min-height:168px;
-  padding:20px 18px 18px;
+  min-height:172px;
+  padding:20px 18px 20px;
   justify-content:flex-start;
 }
 
 .archive-team-card strong{
   color:var(--navy);
   font-size:18px;
-  line-height:1.1;
+  line-height:1.15;
+  max-width:100%;
+  white-space:normal;
+  text-wrap:balance;
 }
 
 .archive-team-card span{
   color:var(--muted);
   font-size:15px;
+  line-height:1.35;
+  max-width:100%;
+  white-space:normal;
+  text-wrap:balance;
 }
 
 .archive-team-place{
@@ -6491,6 +6507,30 @@ button,
   color:var(--navy);
   font-size:16px;
   font-weight:700;
+  line-height:1.2;
+}
+
+.archive-team-card-podium.archive-team-card-rank-1{
+  transform:translateY(-20px);
+}
+
+.archive-team-card-podium.archive-team-card-rank-1:hover,
+.archive-team-card-podium.archive-team-card-rank-1:focus-visible{
+  transform:translateY(-23px);
+}
+
+.archive-team-grid-rest .archive-team-card{
+  min-height:220px;
+  padding:20px 18px 18px;
+}
+
+.archive-team-grid-rest .archive-team-logo-wrap{
+  min-height:94px;
+}
+
+.archive-team-grid-rest .archive-team-logo{
+  width:min(100px, 62%);
+  max-height:84px;
 }
 
 .archive-standings-card .standings-table{
@@ -6696,6 +6736,7 @@ button,
   .archive-team-podium,
   .archive-team-grid-rest{
     grid-template-columns:1fr;
+    max-width:none;
   }
 
   .archive-team-grid{
@@ -6705,6 +6746,12 @@ button,
   .archive-team-card-podium{
     max-width:360px;
     margin:0 auto;
+    transform:none;
+  }
+
+  .archive-team-card-podium.archive-team-card-rank-1:hover,
+  .archive-team-card-podium.archive-team-card-rank-1:focus-visible{
+    transform:translateY(-3px);
   }
 
   .archive-partner-card{
