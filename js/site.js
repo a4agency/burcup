@@ -908,6 +908,9 @@ async function renderTournamentsGrid() {
         <span>${escapeHtml(formatCountLabel(item.matches_count, ['матч', 'матча', 'матчей']))}</span>
       </div>
       <div class="tournament-card-dates">${escapeHtml(item.start_date || '')}${item.end_date ? ` - ${escapeHtml(item.end_date)}` : ''}</div>
+      <div class="tournament-card-actions">
+        <a class="tournament-card-button" href="results.html?tournament=${encodeURIComponent(item.slug || '')}">Открыть турнир</a>
+      </div>
     </article>
   `).join('');
 }
