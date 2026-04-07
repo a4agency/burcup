@@ -1057,23 +1057,25 @@ async function renderHomeNews() {
   if (!target) return;
   try {
     const items = await fetchJson('data/news.json');
-    target.innerHTML = items.map(item => {
-      const imageSrc = resolveNewsImage(item);
-      return `
-        <a class="news-preview-card" href="${escapeHtml(item.link)}">
-          ${renderNewsCoverImage(imageSrc, item.title)}
-          <div class="news-preview-content">
-            <div class="news-preview-date">${escapeHtml(item.date)}</div>
-            <h3>${escapeHtml(item.title)}</h3>
-            <p>${escapeHtml(item.excerpt)}</p>
-          </div>
-        </a>
-      `;
-    }).join('');
+    target.innerHTML = items.map(renderNewsPreviewCard).join('');
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
   }
+}
+
+function renderNewsPreviewCard(item) {
+  const imageSrc = resolveNewsImage(item);
+  return `
+    <a class="news-preview-card" href="${escapeHtml(item.link)}">
+      ${renderNewsCoverImage(imageSrc, item.title)}
+      <div class="news-preview-content">
+        <div class="news-preview-date">${escapeHtml(item.date)}</div>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p>${escapeHtml(item.excerpt)}</p>
+      </div>
+    </a>
+  `;
 }
 
 async function renderMatchesPage() {
@@ -1124,17 +1126,7 @@ async function renderNewsPage() {
   if (!target) return;
   try {
     const items = await fetchJson('data/news.json');
-    target.innerHTML = items.map(item => {
-      const imageSrc = resolveNewsImage(item);
-      return `
-        <a class="news-card" href="${escapeHtml(item.link)}">
-          <div class="thumb">${imageSrc ? renderImageMarkup({ src: imageSrc, alt: item.title, width: 720, className: 'news-list-thumb-img' }) : `<div class="news-preview-cover" style="height:100%"></div>`}</div>
-          <div class="meta-top"><span>${escapeHtml(item.date)}</span></div>
-          <h3>${escapeHtml(item.title)}</h3>
-          <p>${escapeHtml(item.excerpt)}</p>
-        </a>
-      `;
-    }).join('');
+    target.innerHTML = items.map(renderNewsPreviewCard).join('');
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
