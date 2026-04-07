@@ -287,7 +287,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   villarreal: {
     slug: 'villarreal',
     name: 'Вильярреал',
-    logo: 'images/history-villarreal.png',
+    logo: 'images/history-villarreal.webp',
     country: 'Испания',
     city: 'Вильярреал',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -296,7 +296,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   mtk: {
     slug: 'mtk',
     name: 'МТК',
-    logo: 'images/history-mtk.png',
+    logo: 'images/history-mtk.webp',
     country: 'Венгрия',
     city: 'Будапешт',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -305,7 +305,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   'cruz-azul': {
     slug: 'cruz-azul',
     name: 'Крус Асуль',
-    logo: 'images/history-cruz-azul.png',
+    logo: 'images/history-cruz-azul.webp',
     country: 'Мексика',
     city: 'Мехико',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -314,7 +314,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   victoria: {
     slug: 'victoria',
     name: 'Виктория',
-    logo: 'images/history-victoria.png',
+    logo: 'images/history-victoria.webp',
     country: 'Португалия',
     city: 'Гимарайнш',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -323,7 +323,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   santos: {
     slug: 'santos',
     name: 'Сантос',
-    logo: 'images/history-santos.png',
+    logo: 'images/history-santos.webp',
     country: 'Бразилия',
     city: 'Сантус',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -332,7 +332,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   atalanta: {
     slug: 'atalanta',
     name: 'Аталанта',
-    logo: 'images/history-atalanta.png',
+    logo: 'images/history-atalanta.webp',
     country: 'Италия',
     city: 'Бергамо',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -341,7 +341,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   roma: {
     slug: 'roma',
     name: 'Рома',
-    logo: 'images/history-roma.png',
+    logo: 'images/history-roma.webp',
     country: 'Италия',
     city: 'Рим',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -350,7 +350,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   sepahan: {
     slug: 'sepahan',
     name: 'Сепахан',
-    logo: 'images/history-sepahan.png',
+    logo: 'images/history-sepahan.webp',
     country: 'Иран',
     city: 'Исфахан',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
@@ -367,12 +367,12 @@ const ARCHIVE_TOURNAMENTS = {
       clubs_count: 6,
       matches_count: 3,
       standings: [
-        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.png', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
-        { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.png', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
-        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.png', city: 'Сан-Паулу', country: 'Бразилия', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
-        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.png', city: 'Буэнос-Айрес', country: 'Аргентина', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
-        { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.png', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
-        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.png', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
+        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
+        { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
+        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
+        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
       ],
       matches: [
         {
@@ -384,10 +384,10 @@ const ARCHIVE_TOURNAMENTS = {
           group: 'Группа A',
           home_team: 'Алмаз-Антей',
           home_team_slug: 'almaz-antey',
-          home_logo: 'images/team-almaz-antey.png',
+          home_logo: 'images/team-almaz-antey.webp',
           away_team: 'Динамо-Минск',
           away_team_slug: 'dinamo-minsk',
-          away_logo: 'images/team-dinamo-minsk.png'
+          away_logo: 'images/team-dinamo-minsk.webp'
         },
         {
           id: 'archive-2025-2',
@@ -398,10 +398,10 @@ const ARCHIVE_TOURNAMENTS = {
           group: 'Группа A',
           home_team: 'Зенит',
           home_team_slug: 'zenit',
-          home_logo: 'images/team-zenit.png',
+          home_logo: 'images/team-zenit.webp',
           away_team: 'Кайрат',
           away_team_slug: 'kairat',
-          away_logo: 'images/team-kairat.png'
+          away_logo: 'images/team-kairat.webp'
         },
         {
           id: 'archive-2025-3',
@@ -412,18 +412,18 @@ const ARCHIVE_TOURNAMENTS = {
           group: 'Группа B',
           home_team: 'Палмейрас',
           home_team_slug: 'palmeiras',
-          home_logo: 'images/team-palmeiras.png',
+          home_logo: 'images/team-palmeiras.webp',
           away_team: 'Сан-Лоренсо',
           away_team_slug: 'san-lorenzo',
-          away_logo: 'images/team-san-lorenzo.png'
+          away_logo: 'images/team-san-lorenzo.webp'
         }
       ],
       partners: [
         {
           slug: 'general',
           items: [
-            { name: 'Система спортивной аналитики B-SIGHT', logo_url: 'images/logo-burchalkin.png', website_url: '' },
-            { name: 'Банк ВТБ', logo_url: 'images/logo-burchalkin.png', website_url: '' }
+            { name: 'Система спортивной аналитики B-SIGHT', logo_url: 'images/logo-burchalkin.webp', website_url: '' },
+            { name: 'Банк ВТБ', logo_url: 'images/logo-burchalkin.webp', website_url: '' }
           ]
         }
       ]
@@ -1139,7 +1139,7 @@ async function renderTournamentsGrid() {
   }).join('');
 }
 
-const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.png';
+const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.webp';
 const PARTNER_FALLBACK_HREF = 'index.html';
 
 function normalizePartnerLookupKey(value) {
@@ -1735,7 +1735,7 @@ function renderArchiveTournamentPage() {
     return `
       ${showLogo ? `
         <div class="team-logo-wrap archive-team-logo-wrap">
-          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'team-logo-img archive-team-logo', width: 240 })}
+          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.webp', alt: item.name || 'Клуб', className: 'team-logo-img archive-team-logo', width: 240 })}
         </div>
       ` : ''}
       <h3>${escapeHtml(item.name || 'Клуб')}</h3>
@@ -1763,7 +1763,7 @@ function renderArchiveTournamentPage() {
     return `
       <${tag} class="archive-podium-item ${toneClass}" ${href ? `href="${escapeHtml(href)}"` : ''}>
         <div class="archive-podium-logo-wrap">
-          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.png', alt: item.name || 'Клуб', className: 'archive-podium-logo-img', width: 240 })}
+          ${renderImageMarkup({ src: item.logo || 'images/logo-burchalkin.webp', alt: item.name || 'Клуб', className: 'archive-podium-logo-img', width: 240 })}
         </div>
         <div class="team-logo-card archive-team-card archive-podium-card ${toneClass}">
           ${renderArchiveClubCardContent(item, rank, { showLogo: false })}
@@ -1787,12 +1787,12 @@ function renderArchiveTournamentPage() {
         </div>
         <div class="archive-match-card-main">
           <div class="archive-match-card-team">
-            ${renderImageMarkup({ src: item.home_logo || 'images/logo-burchalkin.png', alt: item.home_team || '', className: 'archive-match-card-logo', width: 112 })}
+            ${renderImageMarkup({ src: item.home_logo || 'images/logo-burchalkin.webp', alt: item.home_team || '', className: 'archive-match-card-logo', width: 112 })}
             <span>${escapeHtml(item.home_team || '')}</span>
           </div>
           <div class="archive-match-card-score">${escapeHtml(item.score || '0:0')}</div>
           <div class="archive-match-card-team archive-match-card-team-away">
-            ${renderImageMarkup({ src: item.away_logo || 'images/logo-burchalkin.png', alt: item.away_team || '', className: 'archive-match-card-logo', width: 112 })}
+            ${renderImageMarkup({ src: item.away_logo || 'images/logo-burchalkin.webp', alt: item.away_team || '', className: 'archive-match-card-logo', width: 112 })}
             <span>${escapeHtml(item.away_team || '')}</span>
           </div>
         </div>
