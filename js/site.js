@@ -713,14 +713,15 @@ function formatHeadToHeadDateLabel(item) {
     if (!Number.isNaN(parsed.getTime())) {
       dateLabel = new Intl.DateTimeFormat('ru-RU', {
         day: 'numeric',
-        month: 'short'
-      }).format(parsed).replace(/\./g, '');
+        month: 'long',
+        year: 'numeric'
+      }).format(parsed).replace(' г.', ' г.');
     } else {
       dateLabel = date;
     }
   }
 
-  return joinNonEmpty([dateLabel, time], ', ') || 'Архив матча';
+  return joinNonEmpty([dateLabel, time], ' • ') || 'Архив матча';
 }
 
 function getHeadToHeadMatches(allMatches, currentMatch) {
