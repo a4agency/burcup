@@ -1695,6 +1695,10 @@ object-fit:contain;
   background:#fafcff;
 }
 
+.admin-match-card{
+  background:#fbfdff;
+}
+
 .admin-item-head{
   display:flex;
   justify-content:space-between;
@@ -1725,6 +1729,71 @@ object-fit:contain;
 
 .admin-form-grid.full{
   grid-template-columns:1fr;
+}
+
+.admin-match-layout{
+  display:grid;
+  gap:16px;
+}
+
+.admin-match-section{
+  display:grid;
+  gap:12px;
+}
+
+.admin-match-section-head{
+  font-size:13px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+
+.admin-match-top-grid{
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+}
+
+.admin-match-teams-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:14px;
+}
+
+.admin-match-team-card{
+  border:1px solid rgba(26, 61, 131, 0.08);
+  border-radius:16px;
+  padding:14px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(26, 61, 131, 0.04);
+}
+
+.admin-match-team-title{
+  margin-bottom:12px;
+  font-size:13px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--navy);
+}
+
+.admin-match-team-grid{
+  grid-template-columns:1fr;
+}
+
+.admin-match-team-grid .admin-field{
+  min-width:0;
+}
+
+.admin-match-club-select{
+  margin-bottom:2px;
+}
+
+.admin-match-extra-grid{
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+}
+
+.admin-match-extra-grid .admin-field:last-child{
+  grid-column:1/-1;
 }
 
 .admin-field{
@@ -1784,6 +1853,12 @@ object-fit:contain;
 
 @media (max-width: 960px){
   .admin-form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .admin-match-top-grid,
+  .admin-match-extra-grid,
+  .admin-match-teams-grid{
     grid-template-columns:1fr;
   }
 }
@@ -3093,13 +3168,28 @@ button,
   gap:12px;
 }
 
+#admin-form-wrap .admin-match-top-grid{
+  grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+}
+
+#admin-form-wrap .admin-match-team-grid{
+  grid-template-columns:1fr !important;
+}
+
+#admin-form-wrap .admin-match-extra-grid{
+  grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+}
+
 #admin-form-wrap .admin-field[style*="grid-column"],
 #admin-form-wrap .admin-field textarea{
   width:100%;
 }
 
 @media (max-width: 760px){
-  #admin-form-wrap .admin-form-grid{
+  #admin-form-wrap .admin-form-grid,
+  #admin-form-wrap .admin-match-top-grid,
+  #admin-form-wrap .admin-match-extra-grid,
+  #admin-form-wrap .admin-match-teams-grid{
     grid-template-columns:1fr !important;
   }
 }

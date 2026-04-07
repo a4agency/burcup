@@ -706,6 +706,111 @@ function makeImageField(value, key, index) {
   `;
 }
 
+function getAdminClubsCatalog() {
+  const localClubs = getSourceData('clubs');
+  const base = localClubs || defaultsCache.clubs || ADMIN_SOURCES.clubs.defaultData || [];
+  return normalizeSourceData('clubs', structuredClone(base))
+    .filter(club => club && String(club.name || '').trim())
+    .sort((left, right) => String(left.name || '').localeCompare(String(right.name || ''), 'ru'));
+}
+
+function findAdminClubByMatchSide(item, side) {
+  const clubs = getAdminClubsCatalog();
+  const slug = String(side === 'home' ? item?.home_team_slug : item?.away_team_slug || '').trim().toLowerCase();
+  const name = String(side === 'home' ? item?.home_team : item?.away_team || '').trim().toLowerCase();
+
+  return clubs.find(club => {
+    const clubSlug = String(club.slug || '').trim().toLowerCase();
+    const clubName = String(club.name || '').trim().toLowerCase();
+    return (slug && clubSlug === slug) || (name && clubName === name);
+  }) || null;
+}
+
+function makeMatchClubSelect(item, side, itemIndex) {
+  const selectedClub = findAdminClubByMatchSide(item, side);
+  const clubs = getAdminClubsCatalog();
+  const sideLabel = side === 'home' ? 'Хозяева' : 'Гости';
+  const selectedSlug = String(selectedClub?.slug || '').trim();
+
+  return `
+    <div class="admin-field admin-match-club-select">
+      <label>${sideLabel}: выбрать клуб</label>
+      <select data-club-select="${side}" data-index="${itemIndex}">
+        <option value="">Выбери команду</option>
+        ${clubs.map(club => `
+          <option value="${escapeHtml(String(club.slug || ''))}" ${selectedSlug === String(club.slug || '') ? 'selected' : ''}>
+            ${escapeHtml(String(club.name || ''))}
+          </option>
+        `).join('')}
+      </select>
+    </div>
+  `;
+}
+
+function getAdminSourceField(sourceName, key) {
+  return (ADMIN_SOURCES[sourceName]?.fields || []).find(field => field[0] === key) || null;
+}
+
+function makeFieldByKey(sourceName, key, item, itemIndex) {
+  const field = getAdminSourceField(sourceName, key);
+  if (!field) return '';
+  return makeField(field, item[key], itemIndex);
+}
+
+function makeFieldsByKeys(sourceName, keys, item, itemIndex) {
+  return keys.map(key => makeFieldByKey(sourceName, key, item, itemIndex)).join('');
+}
+
+function renderMatchAdminCard(item, index, allItems) {
+  return `
+    <div class="admin-item-card admin-match-card">
+      <div class="admin-item-head">
+        <strong>Матч #${index + 1}</strong>
+        <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+      </div>
+
+      <div class="admin-match-layout">
+        <div class="admin-match-section">
+          <div class="admin-match-section-head">Основная информация</div>
+          <div class="admin-form-grid admin-match-top-grid">
+            ${makeFieldsByKeys('matches', ['id', 'tournament_slug', 'date', 'time', 'status', 'status_label', 'score', 'group', 'round', 'matchday', 'venue'], item, index)}
+          </div>
+        </div>
+
+        <div class="admin-match-section">
+          <div class="admin-match-section-head">Команды</div>
+          <div class="admin-match-teams-grid">
+            <div class="admin-match-team-card">
+              <div class="admin-match-team-title">Хозяева</div>
+              <div class="admin-form-grid admin-match-team-grid">
+                ${makeMatchClubSelect(item, 'home', index)}
+                ${makeFieldsByKeys('matches', ['home_team', 'home_team_slug', 'home_logo'], item, index)}
+              </div>
+            </div>
+
+            <div class="admin-match-team-card">
+              <div class="admin-match-team-title">Гости</div>
+              <div class="admin-form-grid admin-match-team-grid">
+                ${makeMatchClubSelect(item, 'away', index)}
+                ${makeFieldsByKeys('matches', ['away_team', 'away_team_slug', 'away_logo'], item, index)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-match-section">
+          <div class="admin-match-section-head">Медиа и описание</div>
+          <div class="admin-form-grid admin-match-extra-grid">
+            ${makeFieldsByKeys('matches', ['video', 'review_video', 'interview_video', 'summary'], item, index)}
+          </div>
+        </div>
+
+        ${makeMatchHeadToHeadPreview(item, index, allItems)}
+      </div>
+    </div>
+  `;
+}
+
 function makeField(field, value, itemIndex) {
   const [key, label, type, options] = field;
   if (type === 'textarea') {
@@ -790,18 +895,20 @@ function renderForm(sourceName, data) {
   setRenderedData(sourceName, data);
   wrap.innerHTML = `
     <div class="admin-form-list">
-      ${data.map((item, index) => `
-        <div class="admin-item-card">
-          <div class="admin-item-head">
-            <strong>${source.title} #${index + 1}</strong>
-            <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+      ${data.map((item, index) => sourceName === 'matches'
+        ? renderMatchAdminCard(item, index, data)
+        : `
+          <div class="admin-item-card">
+            <div class="admin-item-head">
+              <strong>${source.title} #${index + 1}</strong>
+              <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+            </div>
+            <div class="admin-form-grid">
+              ${source.fields.map(field => makeField(field, item[field[0]], index)).join('')}
+            </div>
           </div>
-          <div class="admin-form-grid">
-            ${source.fields.map(field => makeField(field, item[field[0]], index)).join('')}
-          </div>
-          ${sourceName === 'matches' ? makeMatchHeadToHeadPreview(item, index, data) : ''}
-        </div>
-      `).join('')}
+        `
+      ).join('')}
     </div>
     <div class="admin-toolbar">
       <button type="button" class="admin-add" id="admin-add-item">+ Добавить запись</button>
@@ -918,6 +1025,30 @@ function renderForm(sourceName, data) {
     });
   });
 
+  wrap.querySelectorAll('[data-club-select]').forEach(select => {
+    select.addEventListener('change', () => {
+      const side = String(select.dataset.clubSelect || '').trim();
+      const index = Number(select.dataset.index);
+      const selectedSlug = String(select.value || '').trim();
+      const club = getAdminClubsCatalog().find(item => String(item.slug || '') === selectedSlug) || null;
+      const next = readFormData(sourceName);
+      const target = next[index];
+      if (!target || !side) return;
+
+      const prefix = side === 'home' ? 'home' : 'away';
+      target[`${prefix}_team`] = club?.name || '';
+      target[`${prefix}_team_slug`] = club?.slug || '';
+      target[`${prefix}_logo`] = club?.logo || '';
+
+      setSourceData(sourceName, next);
+      renderForm(sourceName, next);
+      setStatus(club
+        ? `Команда «${club.name}» подставлена. Нажми «Сохранить», чтобы записать изменения в API.`
+        : 'Выбор команды очищен. Нажми «Сохранить», чтобы записать изменения в API.'
+      );
+    });
+  });
+
   if (sourceName === 'matches') {
     refreshAdminMatchPreviews(wrap);
     if (wrap.dataset.matchPreviewBound !== 'true') {
@@ -965,6 +1096,15 @@ async function adminShowSource(sourceName, options = {}) {
   document.querySelectorAll('.admin-nav button').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
+
+  if (sourceName === 'matches' && !defaultsCache.clubs) {
+    try {
+      const clubs = await loadSourceData('clubs');
+      defaultsCache.clubs = structuredClone(clubs);
+    } catch (error) {
+      defaultsCache.clubs = cloneDefaultData('clubs');
+    }
+  }
 
   const data = normalizeSourceData(sourceName, await loadSourceData(sourceName, options));
 
