@@ -663,7 +663,8 @@ function getArchiveTournamentClubs(detail = {}) {
         name: item.team || item.name || '',
         logo: item.logo || '',
         city: item.city || '',
-        country: item.country || ''
+        country: item.country || '',
+        position: Number(item.position || 0) || ''
       }))
       .filter(item => item.name);
   }
