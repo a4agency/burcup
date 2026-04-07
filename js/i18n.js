@@ -26,7 +26,7 @@
   "Все результаты →": "All results →",
   "Исторические участники турнира": "Historical Tournament Participants",
   "Исторический участник турнира прошлых лет.": "Historic participant of previous editions of the tournament.",
-  "Команды Кубка Бурчалкина 2025": "Burchalkin Cup 2025 Teams",
+  "Команды Кубка Бурчалкина 2026": "Burchalkin Cup 2026 Teams",
   "Матчи": "Matches",
   "Последние результаты": "Latest Results",
   "Прошлые розыгрыши": "Previous Editions",
