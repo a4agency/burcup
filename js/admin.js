@@ -2029,7 +2029,9 @@ function renderAlbumAdminCard(item, index) {
 function renderTournamentAdminCard(item, index, sourceName = 'tournaments') {
   const seasonYear = Number(item?.season_year || 0);
   const isFeatured = item?.is_featured === true;
-  const isCurrentTournamentCard = sourceName === 'tournaments' && isFeatured;
+  const tournamentSlug = String(item?.slug || '').trim();
+  const isCurrentTournamentCard = sourceName === 'tournaments'
+    && (isFeatured || tournamentSlug === 'burchalkin-cup-2026' || seasonYear >= 2026);
   const panelNote = isFeatured
     ? 'Эта запись управляет карточкой текущего турнира на главной странице.'
     : seasonYear && seasonYear < 2026
@@ -2056,7 +2058,8 @@ function renderTournamentAdminCard(item, index, sourceName = 'tournaments') {
       content: `
         <div class="admin-record-note">` +
           'Режим <strong>auto</strong> считает данные по матчам автоматически. ' +
-          'Режим <strong>manual</strong> берёт ручные данные из разделов «Турнирная таблица» и «Сетка плей-офф».'
+          'Режим <strong>manual</strong> берёт ручные данные из разделов «Турнирная таблица» и «Сетка плей-офф». '
+          + 'Для сайта используется режим текущего турнира.'
         + `</div>
         ${makeFieldsByKeys(sourceName, ['standings_mode', 'playoff_mode'], item, index)}
       `
