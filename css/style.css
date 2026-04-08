@@ -4417,6 +4417,7 @@ button,
   position:relative;
   display:flex;
   width:min(100%, 314px);
+  align-self:stretch;
   overflow:visible;
 }
 
@@ -4535,7 +4536,8 @@ button,
   display:grid;
   gap:0;
   position:relative;
-  min-height:auto;
+  min-height:176px;
+  height:100%;
   padding:18px 20px;
   width:100%;
   background:#fff;
@@ -4601,11 +4603,30 @@ button,
   display:none;
 }
 
-.playoff-seed-row.is-placeholder .playoff-team-name{
+.playoff-seed-row.is-placeholder.no-logo{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) 36px;
+  align-items:center;
+  gap:12px;
+}
+
+.playoff-seed-row.is-placeholder.no-logo .team-left{
+  display:block;
+  min-width:0;
+}
+
+.playoff-seed-row.is-placeholder.no-logo .playoff-team-name{
   white-space:normal;
   overflow:visible;
   text-overflow:clip;
   line-height:1.2;
+  font-size:17px;
+}
+
+.playoff-seed-row.is-placeholder.no-logo .playoff-team-score{
+  min-width:36px;
+  flex:0 0 36px;
+  align-self:center;
 }
 
 .playoff-match-score{

@@ -595,6 +595,13 @@ function buildPlayoffGenericSeed(index) {
 
 function renderPlayoffSeed(seed = {}, score = '0') {
   const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
+  const seedClasses = [
+    'upcoming-team-row',
+    'playoff-seed-row',
+    clubUrl && seed.type === 'team' ? 'playoff-seed-row-link' : '',
+    seed.type === 'placeholder' ? 'is-placeholder' : '',
+    seed.logo ? 'has-logo' : 'no-logo'
+  ].filter(Boolean).join(' ');
   const body = `
     <div class="team-left">
       ${seed.logo
@@ -606,10 +613,10 @@ function renderPlayoffSeed(seed = {}, score = '0') {
   `;
 
   if (clubUrl && seed.type === 'team') {
-    return `<a class="upcoming-team-row playoff-seed-row playoff-seed-row-link" href="${escapeHtml(clubUrl)}">${body}</a>`;
+    return `<a class="${seedClasses}" href="${escapeHtml(clubUrl)}">${body}</a>`;
   }
 
-  return `<div class="upcoming-team-row playoff-seed-row${seed.type === 'placeholder' ? ' is-placeholder' : ''}">${body}</div>`;
+  return `<div class="${seedClasses}">${body}</div>`;
 }
 
 function renderPlayoffMatch(match = {}) {
