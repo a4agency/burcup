@@ -1121,6 +1121,15 @@ async function uploadAdminImage({ file, sourceName, key }) {
   return response.json();
 }
 
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
+    reader.readAsDataURL(file);
+  });
+}
+
 async function adminLoadDefault(sourceName) {
   if (defaultsCache[sourceName]) return structuredClone(defaultsCache[sourceName]);
 
@@ -1675,11 +1684,17 @@ function renderAlbumAdminCard(item, index) {
           <div class="admin-record-section-head">Фотографии альбома</div>
           <div class="admin-record-note">Загружай фотографии через кнопку «Загрузить файл». Файлы уйдут во внешний storage, а на сайт и в базу сохранится только их URL и подписи.</div>
           <div class="admin-album-photos">
+            <div class="admin-inline-actions admin-album-bulk-actions">
+              <label class="admin-small-btn">
+                Загрузить много фото
+                <input type="file" accept="image/*" multiple data-upload-album-batch="${index}" style="display:none">
+              </label>
+              <button type="button" class="admin-add admin-album-photo-add" data-add-album-photo="${index}">+ Добавить фото</button>
+            </div>
             ${photos.length
               ? photos.map((photo, photoIndex) => renderAlbumPhotoEditor(photo, index, photoIndex)).join('')
               : '<div class="admin-match-preview-empty">Пока в альбоме нет фотографий. Добавь фото ниже.</div>'
             }
-            <button type="button" class="admin-add admin-album-photo-add" data-add-album-photo="${index}">+ Добавить фото</button>
           </div>
         </div>
       </div>
@@ -2052,6 +2067,66 @@ function renderForm(sourceName, data) {
     });
   });
 
+  wrap.querySelectorAll('[data-upload-album-batch]').forEach(input => {
+    input.addEventListener('change', async event => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      const index = Number(event.target.dataset.uploadAlbumBatch);
+      const next = readFormData(sourceName);
+      const album = next[index];
+      if (!album) {
+        event.target.value = '';
+        return;
+      }
+
+      const currentPhotos = Array.isArray(album.photos) ? album.photos : [];
+      const appendedPhotos = [];
+
+      setStatus(`Загружаю ${files.length} фото в альбом...`);
+
+      for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+        const file = files[fileIndex];
+        let url = '';
+
+        try {
+          const result = await uploadAdminImage({ file, sourceName, key: 'album-photo' });
+          url = String(result?.url || '').trim();
+        } catch (error) {
+          try {
+            url = await readFileAsDataUrl(file);
+            setStatus(`Storage недоступен для части файлов. Использую fallback base64 (${fileIndex + 1}/${files.length})...`);
+          } catch (readError) {
+            continue;
+          }
+        }
+
+        if (!url) continue;
+
+        appendedPhotos.push({
+          image_url: url,
+          alt_text: String(file.name || '').replace(/\.[^.]+$/, '').trim(),
+          caption: '',
+          sort_order: currentPhotos.length + appendedPhotos.length + 1
+        });
+      }
+
+      if (!appendedPhotos.length) {
+        setStatus('Не удалось добавить фотографии в альбом.');
+        showAdminToast('Не удалось загрузить фотографии.', 'error');
+        event.target.value = '';
+        return;
+      }
+
+      album.photos = [...currentPhotos, ...appendedPhotos];
+      setSourceData(sourceName, next);
+      renderForm(sourceName, next);
+      setStatus(`Добавлено фото: ${appendedPhotos.length}. Нажми «Сохранить», чтобы отправить изменения в API.`);
+      showAdminToast(`В альбом добавлено ${appendedPhotos.length} фото.`, 'success');
+      event.target.value = '';
+    });
+  });
+
   wrap.querySelectorAll('[data-remove-album-photo]').forEach(btn => {
     btn.addEventListener('click', () => {
       const index = Number(btn.dataset.index);
@@ -2133,17 +2208,17 @@ function renderForm(sourceName, data) {
           setStatus('Изображение загружено в storage. Нажми «Сохранить», чтобы записать URL в базу.');
         })
         .catch(async error => {
-          const reader = new FileReader();
-          reader.onload = () => {
+          readFileAsDataUrl(file)
+            .then(result => {
             if (textInput) {
-              textInput.value = reader.result;
+              textInput.value = result;
             }
             if (previewBox) {
-              previewBox.innerHTML = `<img src="${reader.result}" alt="preview">`;
+              previewBox.innerHTML = `<img src="${result}" alt="preview">`;
             }
             if (sourceName === 'partners' && key === 'logo_url') {
               updateRenderedItem(sourceName, Number(index), item => {
-                item.logo_url = String(reader.result || '');
+                item.logo_url = String(result || '');
                 item.logo_storage_provider = 'inline';
                 item.logo_public_id = '';
                 item.logo_file_name = file.name || '';
@@ -2159,14 +2234,17 @@ function renderForm(sourceName, data) {
               const album = next[Number(index)];
               const photo = album?.photos?.[Number(photoIndex)];
               if (photo) {
-                photo.image_url = String(reader.result || '');
+                photo.image_url = String(result || '');
                 if (!photo.alt_text) photo.alt_text = file.name || album.title || '';
               }
               setSourceData(sourceName, next);
             }
             setStatus(`Storage недоступен: ${error.message}. В форму подставлен base64 как временный fallback.`);
-          };
-          reader.readAsDataURL(file);
+          })
+            .catch(() => {
+              setStatus(`Не удалось загрузить изображение: ${error.message}`);
+              showAdminToast('Не удалось прочитать изображение.', 'error');
+            });
         })
         .finally(() => {
           e.target.value = '';

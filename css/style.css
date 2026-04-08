@@ -7247,6 +7247,13 @@ button,
   gap:16px;
 }
 
+.admin-album-bulk-actions{
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
 .admin-album-photo-row{
   border:1px solid rgba(13,43,99,.08);
   border-radius:18px;
