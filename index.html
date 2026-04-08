@@ -164,7 +164,15 @@
     </div>
 
     <div id="home-media-stories" class="home-news-grid">
-      <div class="card media-loading-card">Загружаем фотоматериалы...</div>
+      <div class="card media-loading-card site-loading-state-card" aria-hidden="true">
+        <div class="site-loading-copy">
+          <div class="site-loading-label">Загружаем фотоматериалы...</div>
+          <div class="site-loading-stack">
+            <div class="loading-skeleton-block loading-skeleton-line" style="width:72%"></div>
+            <div class="loading-skeleton-block loading-skeleton-line" style="width:54%"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

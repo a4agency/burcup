@@ -232,6 +232,8 @@ document.addEventListener('error', handleCloudinaryImageFallback, true);
 async function renderStandings(selector) {
   const target = document.querySelector(selector);
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = renderStandingsLoadingCard();
   const [standingsResult, matchesResult, playoffResult] = await Promise.allSettled([
     fetchJson('data/standings.json'),
     fetchJson('data/matches.json'),
@@ -259,9 +261,11 @@ async function renderStandings(selector) {
     if (typeof runAutoFit === 'function') {
       runAutoFit();
     }
+    target.setAttribute('aria-busy', 'false');
   } catch (error) {
     console.error('Failed to render standings block.', error);
     target.innerHTML = '<div class="standings-card"><div style="padding:18px">Не удалось загрузить таблицу.</div></div>';
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
@@ -1813,6 +1817,156 @@ function renderClubCardSkeleton(index = 0) {
   `;
 }
 
+function renderLoadingLine(width = '100%', className = '') {
+  const normalizedWidth = typeof width === 'number' ? `${width}%` : width;
+  return `<div class="loading-skeleton-block loading-skeleton-line ${className}" style="width:${escapeHtml(normalizedWidth)}"></div>`;
+}
+
+function renderLoadingStateCard(message = 'Загружаем данные...') {
+  return `
+    <div class="card media-loading-card site-loading-state-card">
+      <div class="site-loading-copy">
+        <div class="site-loading-label">${escapeHtml(message)}</div>
+        <div class="site-loading-stack">
+          ${renderLoadingLine('72%')}
+          ${renderLoadingLine('54%')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderUpcomingCardLoading(index = 0) {
+  return `
+    <div class="upcoming-card site-loading-card" aria-hidden="true">
+      <div class="upcoming-header">
+        <div class="site-loading-stack">
+          ${renderLoadingLine(`${38 + (index % 3) * 8}%`, 'loading-skeleton-line--sm')}
+          ${renderLoadingLine(`${56 + (index % 4) * 8}%`)}
+        </div>
+        <div class="loading-skeleton-block loading-skeleton-pill"></div>
+      </div>
+      <div class="upcoming-teams">
+        ${[0, 1].map((rowIndex) => `
+          <div class="upcoming-team-row site-loading-match-row">
+            <div class="loading-skeleton-block loading-skeleton-logo"></div>
+            ${renderLoadingLine(`${58 + ((index + rowIndex) % 3) * 10}%`, 'loading-skeleton-line--md')}
+            <div class="loading-skeleton-block loading-skeleton-score"></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderNewsCardLoading(index = 0) {
+  return `
+    <div class="news-preview-card site-loading-card" aria-hidden="true">
+      <div class="news-preview-cover loading-skeleton-block"></div>
+      <div class="news-preview-content">
+        ${renderLoadingLine(`${28 + (index % 3) * 8}%`, 'loading-skeleton-line--sm')}
+        <div class="site-loading-stack">
+          ${renderLoadingLine(`${74 - (index % 2) * 10}%`, 'loading-skeleton-line--lg')}
+          ${renderLoadingLine(`${62 + (index % 3) * 8}%`, 'loading-skeleton-line--lg')}
+        </div>
+        <div class="site-loading-stack">
+          ${renderLoadingLine('92%')}
+          ${renderLoadingLine(`${78 - (index % 3) * 8}%`)}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTournamentCardLoading(index = 0) {
+  return `
+    <div class="tournament-card site-loading-card" aria-hidden="true">
+      <div class="tournament-card-top">
+        <div class="loading-skeleton-block loading-skeleton-pill" style="width:74px"></div>
+        <div class="loading-skeleton-block loading-skeleton-pill" style="width:${88 + (index % 2) * 20}px"></div>
+      </div>
+      <div class="site-loading-copy">
+        ${renderLoadingLine(`${62 + (index % 3) * 8}%`, 'loading-skeleton-line--lg')}
+        ${renderLoadingLine('86%')}
+        ${renderLoadingLine(`${68 + (index % 3) * 8}%`)}
+      </div>
+      <div class="site-loading-stack">
+        ${renderLoadingLine('44%')}
+        ${renderLoadingLine('38%')}
+      </div>
+      ${renderLoadingLine(`${42 + (index % 2) * 18}%`)}
+      <div class="loading-skeleton-block loading-skeleton-button"></div>
+    </div>
+  `;
+}
+
+function renderMediaFeatureLoading() {
+  return `
+    <section class="card media-feature-card site-loading-card" aria-hidden="true">
+      <div class="media-feature-shell">
+        <div class="site-loading-copy">
+          <div class="site-loading-stack">
+            ${renderLoadingLine('28%', 'loading-skeleton-line--sm')}
+            ${renderLoadingLine('62%', 'loading-skeleton-line--xl')}
+            ${renderLoadingLine('48%')}
+          </div>
+          <div class="site-loading-stack">
+            ${renderLoadingLine('96%')}
+            ${renderLoadingLine('92%')}
+            ${renderLoadingLine('78%')}
+          </div>
+          <div class="loading-skeleton-block loading-skeleton-button"></div>
+        </div>
+        <div class="loading-skeleton-block site-loading-media-frame"></div>
+      </div>
+    </section>
+  `;
+}
+
+function renderDetailPageLoading(message = 'Загружаем страницу...') {
+  return `
+    <section class="section">
+      <div class="container">
+        <div class="card site-loading-card site-loading-detail-card" aria-hidden="true">
+          <div class="site-loading-copy">
+            ${renderLoadingLine('24%', 'loading-skeleton-line--sm')}
+            ${renderLoadingLine('56%', 'loading-skeleton-line--xl')}
+            ${renderLoadingLine('38%')}
+          </div>
+          <div class="loading-skeleton-block site-loading-detail-media"></div>
+          <div class="site-loading-stack">
+            ${renderLoadingLine('94%')}
+            ${renderLoadingLine('88%')}
+            ${renderLoadingLine('74%')}
+          </div>
+          <div class="site-loading-note">${escapeHtml(message)}</div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderStandingsLoadingCard() {
+  return `
+    <div class="standings-card site-loading-card" aria-hidden="true">
+      <div class="standings-scroll">
+        <div class="site-loading-detail-card">
+          <div class="site-loading-stack">
+            ${renderLoadingLine('26%', 'loading-skeleton-line--sm')}
+            ${renderLoadingLine('42%', 'loading-skeleton-line--lg')}
+          </div>
+          <div class="site-loading-stack">
+            ${renderLoadingLine('100%')}
+            ${renderLoadingLine('96%')}
+            ${renderLoadingLine('92%')}
+            ${renderLoadingLine('88%')}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 async function renderClubsGrid(selector, limit = null) {
   const target = document.querySelector(selector);
   if (!target) return;
@@ -1820,7 +1974,11 @@ async function renderClubsGrid(selector, limit = null) {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: skeletonCount }, (_, index) => renderClubCardSkeleton(index)).join('');
   const clubs = await fetchApi('/api/clubs');
-  if (!clubs) return;
+  if (!clubs) {
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить команды.');
+    target.setAttribute('aria-busy', 'false');
+    return;
+  }
   const publicClubs = clubs.filter(club => !isPlaceholderClub(club));
   const items = limit ? publicClubs.slice(0, limit) : publicClubs;
   target.innerHTML = items.map(renderClubCard).join('');
@@ -1831,13 +1989,19 @@ async function renderClubsGrid(selector, limit = null) {
 async function renderTournamentsGrid() {
   const target = document.querySelector('#home-tournaments');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 2 }, (_, index) => renderTournamentCardLoading(index)).join('');
   const tournaments = await fetchApi('/api/tournaments');
   const liveTournaments = Array.isArray(tournaments) ? tournaments : [];
   const archiveEntries = buildArchiveTournamentEntries().filter(archiveItem => {
     return !liveTournaments.some(item => Number(item?.season_year || 0) === Number(archiveItem.season_year || 0));
   });
   const allTournaments = [...liveTournaments, ...archiveEntries];
-  if (!allTournaments.length) return;
+  if (!allTournaments.length) {
+    target.innerHTML = renderLoadingStateCard('Турниры появятся позже.');
+    target.setAttribute('aria-busy', 'false');
+    return;
+  }
 
   target.innerHTML = allTournaments.map(item => {
     const isArchive = Boolean(item.is_archive) || ['completed', 'archived'].includes(String(item.status || '').trim().toLowerCase()) && Number(item.season_year || 0) < 2026;
@@ -1869,6 +2033,7 @@ async function renderTournamentsGrid() {
     </article>
   `;
   }).join('');
+  target.setAttribute('aria-busy', 'false');
 }
 
 const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.webp';
@@ -1974,15 +2139,19 @@ async function renderPartnersForFeaturedTournament() {
 async function renderClubPage() {
   const target = document.querySelector('#club-page-root');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = renderDetailPageLoading('Загружаем страницу клуба...');
   const slug = new URLSearchParams(window.location.search).get('slug');
   if (!slug) {
     target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб не найден</h2><p class="muted">В ссылке не указан slug клуба.</p></div></section>';
+    target.setAttribute('aria-busy', 'false');
     return;
   }
   const club = await fetchApi(`/api/clubs/${encodeURIComponent(slug)}`);
   const clubData = club || getHistoricalClubFallback(slug);
   if (!clubData) {
     target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб недоступен</h2><p class="muted">API ещё не подключён или клуб не найден.</p></div></section>';
+    target.setAttribute('aria-busy', 'false');
     return;
   }
   const locationLabel = formatClubLocation(clubData);
@@ -2032,6 +2201,7 @@ async function renderClubPage() {
       </div>
     </section>
   `;
+  target.setAttribute('aria-busy', 'false');
 }
 
 
@@ -2057,6 +2227,8 @@ function runAutoFit() {
 async function renderUpcomingMatches() {
   const target = document.querySelector('#home-upcoming-matches');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 3 }, (_, index) => renderUpcomingCardLoading(index)).join('');
   try {
     const items = await fetchJson('data/matches.json');
     target.innerHTML = items.map(item => {
@@ -2091,21 +2263,27 @@ async function renderUpcomingMatches() {
         </div>
       </a>`;
     }).join('');
+    target.setAttribute('aria-busy', 'false');
     autoFitTeamNames('.team-name');
   } catch (e) {
-    target.innerHTML = '<div class="card">Не удалось загрузить матчи.</div>';
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить матчи.');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
 async function renderHomeNews() {
   const target = document.querySelector('#home-latest-news');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
     const items = await fetchJson('data/news.json');
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
+    target.setAttribute('aria-busy', 'false');
     runAutoFit();
   } catch (e) {
-    target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить новости.');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
@@ -2129,6 +2307,8 @@ function renderNewsPreviewCard(item) {
 async function renderMatchesPage() {
   const target = document.querySelector('#matches-list');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 4 }, (_, index) => renderUpcomingCardLoading(index)).join('');
   try {
     const items = await fetchJson('data/matches.json');
     target.innerHTML = items.map(item => {
@@ -2163,21 +2343,27 @@ async function renderMatchesPage() {
         </div>
       </a>`;
     }).join('');
+    target.setAttribute('aria-busy', 'false');
     autoFitTeamNames('#matches-list .team-name');
   } catch (e) {
-    target.innerHTML = '<div class="card">Не удалось загрузить список матчей.</div>';
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить список матчей.');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
 async function renderNewsPage() {
   const target = document.querySelector('#news-list');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 6 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
     const items = await fetchJson('data/news.json');
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
+    target.setAttribute('aria-busy', 'false');
     runAutoFit();
   } catch (e) {
-    target.innerHTML = '<div class="card">Не удалось загрузить новости.</div>';
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить новости.');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
@@ -2473,15 +2659,19 @@ async function loadRenderableMediaAlbums() {
 async function renderMediaAlbumCollection(targetSelector = '#media-stories') {
   const target = document.querySelector(targetSelector);
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
 
   try {
     const albums = await loadRenderableMediaAlbums();
     target.innerHTML = albums.length
       ? albums.map(renderMediaAlbumCard).join('')
-      : '<div class="card media-empty-card">Фотоальбомы появятся здесь после публикации первых фотоматериалов.</div>';
+      : renderLoadingStateCard('Фотоальбомы появятся здесь после публикации первых фотоматериалов.');
+    target.setAttribute('aria-busy', 'false');
     runAutoFit();
   } catch (error) {
     target.innerHTML = getDefaultMediaAlbums().map(renderMediaAlbumCard).join('');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
@@ -2556,6 +2746,12 @@ async function renderMultimediaPage() {
   const libraryTarget = document.querySelector('#media-library');
   const storiesTarget = document.querySelector('#media-stories');
   if (!featuredTarget || !libraryTarget || !storiesTarget) return;
+  featuredTarget.setAttribute('aria-busy', 'true');
+  libraryTarget.setAttribute('aria-busy', 'true');
+  storiesTarget.setAttribute('aria-busy', 'true');
+  featuredTarget.innerHTML = renderMediaFeatureLoading();
+  libraryTarget.innerHTML = Array.from({ length: 2 }, (_, index) => renderUpcomingCardLoading(index)).join('');
+  storiesTarget.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
 
   try {
     const matchesRaw = await fetchJson('data/matches.json');
@@ -2575,6 +2771,9 @@ async function renderMultimediaPage() {
     storiesTarget.innerHTML = albums.length
       ? albums.map(renderMediaAlbumCard).join('')
       : '<div class="card media-empty-card">Фотоальбомы появятся здесь после публикации первых фотоматериалов.</div>';
+    featuredTarget.setAttribute('aria-busy', 'false');
+    libraryTarget.setAttribute('aria-busy', 'false');
+    storiesTarget.setAttribute('aria-busy', 'false');
 
     if (featuredMatch) initMatchMediaTabs(featuredTarget);
     initMediaLibrarySlider();
@@ -2583,12 +2782,17 @@ async function renderMultimediaPage() {
     featuredTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить главный эфир.</div>';
     libraryTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить материалы матчей.</div>';
     storiesTarget.innerHTML = getDefaultMediaAlbums().map(renderMediaAlbumCard).join('');
+    featuredTarget.setAttribute('aria-busy', 'false');
+    libraryTarget.setAttribute('aria-busy', 'false');
+    storiesTarget.setAttribute('aria-busy', 'false');
   }
 }
 
 async function renderMediaAlbumPage() {
   const root = document.querySelector('#media-album-page-root');
   if (!root) return;
+  root.setAttribute('aria-busy', 'true');
+  root.innerHTML = renderDetailPageLoading('Загружаем фотоальбом...');
 
   const params = new URLSearchParams(window.location.search);
   const requestedSlug = String(params.get('slug') || '').trim();
@@ -2612,6 +2816,7 @@ async function renderMediaAlbumPage() {
 
     if (!album) {
       root.innerHTML = '<div class="card">Фотоальбом пока недоступен.</div>';
+      root.setAttribute('aria-busy', 'false');
       return;
     }
 
@@ -2658,6 +2863,7 @@ async function renderMediaAlbumPage() {
         </div>
       </div>
     `;
+    root.setAttribute('aria-busy', 'false');
     initMediaAlbumSlider();
     initMediaAlbumLightbox(photos);
     runAutoFit();
@@ -2665,6 +2871,7 @@ async function renderMediaAlbumPage() {
     const album = findMediaAlbumBySlug(fallbackAlbums, requestedSlug) || fallbackAlbums[0] || null;
     if (!album) {
       root.innerHTML = '<div class="card">Не удалось загрузить фотоальбом.</div>';
+      root.setAttribute('aria-busy', 'false');
       return;
     }
 
@@ -2710,6 +2917,7 @@ async function renderMediaAlbumPage() {
         </div>
       </div>
     `;
+    root.setAttribute('aria-busy', 'false');
     initMediaAlbumSlider();
     initMediaAlbumLightbox(photos);
     runAutoFit();
@@ -2719,6 +2927,8 @@ async function renderMediaAlbumPage() {
 async function renderNewsArticlePage() {
   const root = document.querySelector('#news-article-page');
   if (!root) return;
+  root.setAttribute('aria-busy', 'true');
+  root.innerHTML = renderDetailPageLoading('Загружаем новость...');
 
   try {
     const items = await fetchJson('data/news.json');
@@ -2734,6 +2944,7 @@ async function renderNewsArticlePage() {
 
     if (!item) {
       root.innerHTML = '<div class="card">Не удалось найти новость.</div>';
+      root.setAttribute('aria-busy', 'false');
       return;
     }
 
@@ -2755,14 +2966,18 @@ async function renderNewsArticlePage() {
         </div>
       </article>
     `;
+    root.setAttribute('aria-busy', 'false');
   } catch (e) {
     root.innerHTML = '<div class="card">Не удалось загрузить новость.</div>';
+    root.setAttribute('aria-busy', 'false');
   }
 }
 
 async function renderResultsList() {
   const target = document.querySelector('#results-list');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 3 }, () => renderLoadingStateCard('Загружаем результаты...')).join('');
   try {
     const items = await fetchJson('data/results.json');
     target.innerHTML = items.map(item => `
@@ -2772,8 +2987,10 @@ async function renderResultsList() {
         <div class="result-score">${escapeHtml(item.score)}</div>
       </div>
     `).join('');
+    target.setAttribute('aria-busy', 'false');
   } catch (e) {
-    target.innerHTML = '<div class="card">Не удалось загрузить результаты.</div>';
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить результаты.');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
@@ -2781,6 +2998,8 @@ async function renderResultsList() {
 async function renderResultsMatches() {
   const target = document.querySelector('#results-matches');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: 3 }, (_, index) => renderUpcomingCardLoading(index)).join('');
   try {
     const items = await fetchJson('data/matches.json');
     target.innerHTML = items.map(item => {
@@ -2815,15 +3034,19 @@ async function renderResultsMatches() {
         </div>
       </a>`;
     }).join('');
+    target.setAttribute('aria-busy', 'false');
     autoFitTeamNames('#results-matches .team-name');
   } catch (e) {
-    target.innerHTML = '<div class="card">Не удалось загрузить матчи.</div>';
+    target.innerHTML = renderLoadingStateCard('Не удалось загрузить матчи.');
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
 async function renderMatchPageFromJson() {
   const target = document.querySelector('#match-page-json');
   if (!target) return;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = renderDetailPageLoading('Загружаем страницу матча...');
   try {
     const items = await fetchJson('data/matches.json');
     const params = new URLSearchParams(window.location.search);
@@ -2925,10 +3148,12 @@ async function renderMatchPageFromJson() {
         </section>
       </div>
     `;
+    target.setAttribute('aria-busy', 'false');
     initMatchMediaTabs(target);
     runAutoFit();
   } catch (e) {
     target.innerHTML = '<div class="container"><div class="card">Не удалось загрузить матч.</div></div>';
+    target.setAttribute('aria-busy', 'false');
   }
 }
 
