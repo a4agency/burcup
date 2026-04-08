@@ -581,6 +581,7 @@ const clubsQuery = `
     COUNT(DISTINCT m.id) AS matches_count
   FROM clubs c
   LEFT JOIN matches m ON m.home_club_id = c.id OR m.away_club_id = c.id
+  WHERE c.is_active IS TRUE
   GROUP BY
     c.id,
     c.slug,

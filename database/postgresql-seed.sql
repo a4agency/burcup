@@ -64,25 +64,27 @@ INSERT INTO clubs (
   logo_path,
   country,
   city,
-  description
+  description,
+  is_active
 )
 VALUES
-  ('almaz-antey', 'Алмаз-Антей', 'Алмаз-Антей', 'images/team-almaz-antey.webp', 'Россия', 'Санкт-Петербург', 'Футбольный клуб, регулярно участвующий в турнирах Burchalkin Cup.'),
-  ('zenit', 'Зенит', 'Зенит', 'images/team-zenit.webp', 'Россия', 'Санкт-Петербург', 'Один из ключевых клубов турнирной сетки и истории матчей сайта.'),
-  ('palmeiras', 'Палмейрас', 'Палмейрас', 'images/team-palmeiras.webp', 'Бразилия', NULL, 'Международный участник турнира Burchalkin Cup.'),
-  ('kairat', 'Кайрат', 'Кайрат', 'images/team-kairat.webp', 'Казахстан', 'Алматы', 'Клуб для международной турнирной линейки и страницы истории матчей.'),
-  ('crvena-zvezda', 'Црвена Звезда', 'Црвена Звезда', 'images/team-crvena-zvezda.webp', 'Сербия', 'Белград', 'Участник международного состава турнира.'),
-  ('fenerbahce', 'Фенербахче', 'Фенербахче', 'images/team-fenerbahce.webp', 'Турция', 'Стамбул', 'Клуб для будущих и архивных сезонов турнира.'),
-  ('san-lorenzo', 'Сан-Лоренсо', 'Сан-Лоренсо', 'images/team-san-lorenzo.webp', 'Аргентина', 'Буэнос-Айрес', 'Клуб с будущими и архивными матчами в общей истории сайта.'),
-  ('dinamo-minsk', 'Динамо-Минск', 'Динамо-Минск', 'images/team-dinamo-minsk.webp', 'Беларусь', 'Минск', 'Клуб для турнирной истории и карточки команды.'),
-  ('placeholder-team-1', 'Команда 1', 'Команда 1', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-2', 'Команда 2', 'Команда 2', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-3', 'Команда 3', 'Команда 3', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-4', 'Команда 4', 'Команда 4', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-5', 'Команда 5', 'Команда 5', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-6', 'Команда 6', 'Команда 6', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-7', 'Команда 7', 'Команда 7', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.'),
-  ('placeholder-team-8', 'Команда 8', 'Команда 8', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.')
+  ('almaz-antey', 'Алмаз-Антей', 'Алмаз-Антей', 'images/team-almaz-antey.webp', 'Россия', 'Санкт-Петербург', 'Футбольный клуб, регулярно участвующий в турнирах Burchalkin Cup.', TRUE),
+  ('zenit', 'Зенит', 'Зенит', 'images/team-zenit.webp', 'Россия', 'Санкт-Петербург', 'Один из ключевых клубов турнирной сетки и истории матчей сайта.', TRUE),
+  ('palmeiras', 'Палмейрас', 'Палмейрас', 'images/team-palmeiras.webp', 'Бразилия', NULL, 'Международный участник турнира Burchalkin Cup.', TRUE),
+  ('kairat', 'Кайрат', 'Кайрат', 'images/team-kairat.webp', 'Казахстан', 'Алматы', 'Исторический участник турнира и архивной страницы клуба.', FALSE),
+  ('cruz-azul', 'Крус Асуль', 'Крус Асуль', 'images/team-cruz-azul.webp', 'Мексика', 'Мехико', 'Международный участник текущего розыгрыша Кубка Бурчалкина.', TRUE),
+  ('crvena-zvezda', 'Црвена Звезда', 'Црвена Звезда', 'images/team-crvena-zvezda.webp', 'Сербия', 'Белград', 'Участник международного состава турнира.', TRUE),
+  ('fenerbahce', 'Фенербахче', 'Фенербахче', 'images/team-fenerbahce.webp', 'Турция', 'Стамбул', 'Клуб для будущих и архивных сезонов турнира.', TRUE),
+  ('san-lorenzo', 'Сан-Лоренсо', 'Сан-Лоренсо', 'images/team-san-lorenzo.webp', 'Аргентина', 'Буэнос-Айрес', 'Клуб с будущими и архивными матчами в общей истории сайта.', TRUE),
+  ('dinamo-minsk', 'Динамо-Минск', 'Динамо-Минск', 'images/team-dinamo-minsk.webp', 'Беларусь', 'Минск', 'Клуб для турнирной истории и карточки команды.', TRUE),
+  ('placeholder-team-1', 'Команда 1', 'Команда 1', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-2', 'Команда 2', 'Команда 2', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-3', 'Команда 3', 'Команда 3', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-4', 'Команда 4', 'Команда 4', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-5', 'Команда 5', 'Команда 5', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-6', 'Команда 6', 'Команда 6', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-7', 'Команда 7', 'Команда 7', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
+  ('placeholder-team-8', 'Команда 8', 'Команда 8', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE)
 ON CONFLICT (slug) DO UPDATE
 SET
   name = EXCLUDED.name,
@@ -90,7 +92,8 @@ SET
   logo_path = EXCLUDED.logo_path,
   country = EXCLUDED.country,
   city = EXCLUDED.city,
-  description = EXCLUDED.description;
+  description = EXCLUDED.description,
+  is_active = EXCLUDED.is_active;
 
 INSERT INTO tournament_clubs (
   tournament_id,
@@ -107,7 +110,7 @@ FROM (
     ('burchalkin-cup-2026', 'zenit', 'A', 3, ''),
     ('burchalkin-cup-2026', 'dinamo-minsk', 'A', 4, ''),
     ('burchalkin-cup-2026', 'palmeiras', 'B', 1, ''),
-    ('burchalkin-cup-2026', 'kairat', 'B', 2, ''),
+    ('burchalkin-cup-2026', 'cruz-azul', 'B', 2, ''),
     ('burchalkin-cup-2026', 'fenerbahce', 'B', 3, ''),
     ('burchalkin-cup-2026', 'san-lorenzo', 'B', 4, ''),
     ('burchalkin-cup-2025', 'almaz-antey', NULL, 1, 'Архивный участник для прошлогоднего турнира'),
@@ -152,7 +155,7 @@ FROM (
     ('burchalkin-cup-2026', 'almaz-antey', 'overall', 1, 3, 2, 1, 0, 16, 3, 7),
     ('burchalkin-cup-2026', 'zenit', 'overall', 2, 3, 2, 0, 1, 5, 4, 6),
     ('burchalkin-cup-2026', 'palmeiras', 'overall', 3, 3, 1, 2, 0, 4, 3, 5),
-    ('burchalkin-cup-2026', 'kairat', 'overall', 4, 3, 1, 1, 1, 4, 4, 4),
+    ('burchalkin-cup-2026', 'cruz-azul', 'overall', 4, 3, 1, 1, 1, 4, 4, 4),
     ('burchalkin-cup-2026', 'crvena-zvezda', 'overall', 5, 3, 1, 1, 1, 3, 3, 4),
     ('burchalkin-cup-2026', 'fenerbahce', 'overall', 6, 3, 1, 0, 2, 3, 5, 3),
     ('burchalkin-cup-2026', 'san-lorenzo', 'overall', 7, 3, 0, 1, 2, 2, 5, 1),
@@ -217,11 +220,11 @@ SELECT
 FROM (
   VALUES
     (1::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '10:00'::TIME, 'done', 'Завершен', 'almaz-antey', 'crvena-zvezda', 10, 3, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239434&hash=a4ca6ca1e82ce6c4&hd=4', NULL::TEXT, NULL::TEXT, FALSE, 'Открывающий матч игрового дня. На этой странице можно показывать прямой эфир или запись игры.', 1),
-    (2::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '12:00'::TIME, 'live', 'В эфире', 'zenit', 'kairat', 4, 1, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239431&hash=90e82e3d00ac220b&hd=4', NULL::TEXT, NULL::TEXT, TRUE, 'Матч идёт в прямом эфире', 2),
+    (2::BIGINT, 'burchalkin-cup-2026', 'Группа A', '1 тур', 'День 1', DATE '2026-05-15', '12:00'::TIME, 'live', 'В эфире', 'zenit', 'cruz-azul', 4, 1, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239431&hash=90e82e3d00ac220b&hd=4', NULL::TEXT, NULL::TEXT, TRUE, 'Матч идёт в прямом эфире', 2),
     (3::BIGINT, 'burchalkin-cup-2026', 'Группа B', '1 тур', 'День 1', DATE '2026-05-15', '14:00'::TIME, 'soon', 'Скоро', 'san-lorenzo', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239505&hash=eabac0fc9cb32fa5&hd=4', NULL::TEXT, NULL::TEXT, FALSE, 'Матч группового этапа. Перед началом можно показывать анонс, а после — запись встречи.', 3),
     (1773883313332::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'dinamo-minsk', 'palmeiras', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 4),
     (1773883426669::BIGINT, 'burchalkin-cup-2026', 'Группа A', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'almaz-antey', 'zenit', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 5),
-    (1773883471638::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'kairat', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 6),
+    (1773883471638::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'cruz-azul', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 6),
     (2025051601::BIGINT, 'burchalkin-cup-2025', 'Группа B', '1 тур', 'Архив', DATE '2025-05-16', '12:00'::TIME, 'done', 'Завершен', 'zenit', 'kairat', 2, 0, 'Стадион "Алмаз-Антей"', 'https://www.youtube.com/embed/5qap5aO4i9A', NULL::TEXT, NULL::TEXT, FALSE, 'Архивный матч для проверки сквозной истории клуба.', 1)
 ) AS data(id, tournament_slug, stage_name, round_name, matchday_label, match_date, match_time, status, status_label, home_club_slug, away_club_slug, home_score, away_score, venue, video_url, review_video_url, interview_video_url, is_featured_media, summary, sort_order)
 JOIN tournaments tournament ON tournament.slug = data.tournament_slug

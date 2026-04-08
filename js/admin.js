@@ -3,6 +3,7 @@ const TEAM_LOGOS = [
   { name: 'Динамо-Минск', path: 'images/team-dinamo-minsk.webp' },
   { name: 'Црвена Звезда', path: 'images/team-crvena-zvezda.webp' },
   { name: 'Фенербахче', path: 'images/team-fenerbahce.webp' },
+  { name: 'Крус Асуль', path: 'images/team-cruz-azul.webp' },
   { name: 'Кайрат', path: 'images/team-kairat.webp' },
   { name: 'Палмейрас', path: 'images/team-palmeiras.webp' },
   { name: 'Сан-Лоренсо', path: 'images/team-san-lorenzo.webp' },

@@ -960,6 +960,15 @@ const CLUB_LOCATION_OVERRIDES = {
   }
 };
 const HISTORICAL_CLUB_FALLBACKS = {
+  kairat: {
+    slug: 'kairat',
+    name: 'Кайрат',
+    logo: 'images/team-kairat.webp',
+    country: 'Казахстан',
+    city: 'Алматы',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
   villarreal: {
     slug: 'villarreal',
     name: 'Вильярреал',
@@ -981,10 +990,10 @@ const HISTORICAL_CLUB_FALLBACKS = {
   'cruz-azul': {
     slug: 'cruz-azul',
     name: 'Крус Асуль',
-    logo: 'images/history-cruz-azul.webp',
+    logo: 'images/team-cruz-azul.webp',
     country: 'Мексика',
     city: 'Мехико',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Международный участник текущего розыгрыша Кубка Бурчалкина.',
     matches: []
   },
   victoria: {
