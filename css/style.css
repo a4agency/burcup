@@ -4191,6 +4191,10 @@ button,
   gap:24px;
 }
 
+.standings-view[hidden]{
+  display:none !important;
+}
+
 .group-standings-stack{
   display:grid;
   gap:28px;
@@ -4253,13 +4257,15 @@ button,
 .playoff-rounds{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
+  gap:34px;
   align-items:start;
+  position:relative;
 }
 
 .playoff-round{
   display:grid;
   gap:12px;
+  align-content:start;
 }
 
 .playoff-round-title{
@@ -4272,7 +4278,7 @@ button,
 
 .playoff-round-matches{
   display:grid;
-  gap:14px;
+  gap:22px;
 }
 
 .playoff-match-card,
@@ -4286,6 +4292,7 @@ button,
 .playoff-match-card{
   display:grid;
   gap:12px;
+  position:relative;
 }
 
 .playoff-match-label{
@@ -4352,6 +4359,48 @@ button,
   letter-spacing:.06em;
 }
 
+.playoff-round:first-child .playoff-match-card{
+  padding-right:40px;
+}
+
+.playoff-round:first-child .playoff-match-card::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  right:-34px;
+  width:34px;
+  border-top:2px solid rgba(13, 43, 99, .18);
+  transform:translateY(-50%);
+}
+
+.playoff-round:first-child .playoff-match-card::before{
+  content:"";
+  position:absolute;
+  top:calc(50% - 38px);
+  right:0;
+  width:18px;
+  height:76px;
+  border-right:2px solid rgba(13, 43, 99, .18);
+  border-top:2px solid rgba(13, 43, 99, .18);
+  border-bottom:2px solid rgba(13, 43, 99, .18);
+  border-radius:0 16px 16px 0;
+  transform:translateY(-50%);
+}
+
+.playoff-round:last-child .playoff-match-card{
+  padding-left:34px;
+}
+
+.playoff-round:last-child .playoff-match-card::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:-34px;
+  width:34px;
+  border-top:2px solid rgba(13, 43, 99, .18);
+  transform:translateY(-50%);
+}
+
 .playoff-empty-card{
   display:grid;
   gap:10px;
@@ -4374,6 +4423,18 @@ button,
 @media (max-width: 860px){
   .playoff-rounds{
     grid-template-columns:1fr;
+  }
+
+  .playoff-round:first-child .playoff-match-card,
+  .playoff-round:last-child .playoff-match-card{
+    padding-left:18px;
+    padding-right:18px;
+  }
+
+  .playoff-round:first-child .playoff-match-card::before,
+  .playoff-round:first-child .playoff-match-card::after,
+  .playoff-round:last-child .playoff-match-card::before{
+    display:none;
   }
 }
 

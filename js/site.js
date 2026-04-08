@@ -774,6 +774,8 @@ function initStandingsViewSwitch(root) {
       setActiveView(button.dataset.standingsSwitch || 'table');
     });
   });
+
+  setActiveView('table');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
