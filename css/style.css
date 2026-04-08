@@ -4320,7 +4320,7 @@ button,
 
 .playoff-board-head{
   display:grid;
-  gap:8px;
+  gap:0;
 }
 
 .playoff-board-title{
@@ -4354,7 +4354,8 @@ button,
   font-weight:800;
   letter-spacing:.08em;
   text-transform:uppercase;
-  text-align:left;
+  text-align:center;
+  justify-self:center;
 }
 
 .playoff-board-grid-col-title-semis{
@@ -4391,6 +4392,8 @@ button,
   grid-area:label;
   align-self:start;
   padding-bottom:4px;
+  text-align:center;
+  justify-self:center;
 }
 
 .playoff-band-grid-stage{
@@ -4687,6 +4690,12 @@ button,
       "semis"
       "finals";
     gap:16px;
+  }
+
+  .playoff-board-grid-col-title,
+  .playoff-band-grid-label{
+    justify-self:start;
+    text-align:left;
   }
 
   .playoff-band-grid-connector,

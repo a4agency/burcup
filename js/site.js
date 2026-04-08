@@ -716,7 +716,7 @@ function renderPlayoffBracket(groups = []) {
   const topBracket = {
     title: 'Плей-офф за 1–4 места',
     roundOneTitle: 'Полуфиналы',
-    roundTwoTitle: 'Финальный день',
+    roundTwoTitle: 'Финалы',
     roundOne: [
       {
         label: 'Полуфинал 1',
@@ -746,7 +746,7 @@ function renderPlayoffBracket(groups = []) {
   const placementBracket = {
     title: 'Плей-офф за 5–8 места',
     roundOneTitle: 'Полуфиналы',
-    roundTwoTitle: 'Финальный день',
+    roundTwoTitle: 'Финалы',
     roundOne: [
       {
         label: 'Полуфинал 5–8 №1',
@@ -777,7 +777,6 @@ function renderPlayoffBracket(groups = []) {
     <div class="playoff-board">
       <div class="playoff-board-head">
         <h3 class="playoff-board-title">Сетка плей-офф</h3>
-        <p class="playoff-board-subtitle">Пары формируются автоматически по текущим местам в группах.</p>
       </div>
       <div class="playoff-board-grid-head">
         <div class="playoff-board-grid-col-title playoff-board-grid-col-title-semis">${escapeHtml(topBracket.roundOneTitle || '')}</div>
