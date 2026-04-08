@@ -7238,7 +7238,9 @@ button,
 
 .admin-album-photos{
   display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:16px;
+  align-items:start;
 }
 
 .admin-album-bulk-actions{
@@ -7275,7 +7277,7 @@ button,
 .admin-album-photo-row{
   border:1px solid rgba(13,43,99,.08);
   border-radius:18px;
-  padding:16px;
+  padding:14px;
   background:#fbfcff;
 }
 
@@ -7292,7 +7294,11 @@ button,
 }
 
 .admin-album-photo-grid .admin-preview-box{
-  min-height:180px;
+  min-height:140px;
+}
+
+.admin-album-photo-grid .admin-preview-box img{
+  max-height:120px;
 }
 
 .admin-album-photo-add{
@@ -7300,6 +7306,10 @@ button,
 }
 
 @media (max-width: 1100px){
+  .admin-album-photos{
+    grid-template-columns:1fr;
+  }
+
   .archive-edition-grid{
     grid-template-columns:repeat(2, minmax(0, 1fr));
   }
