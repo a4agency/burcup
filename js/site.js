@@ -2893,10 +2893,14 @@ function initMediaAlbumLightbox(photos = []) {
   const closeBtn = document.getElementById('media-album-lightbox-close');
   const prevBtn = document.getElementById('media-album-lightbox-prev');
   const nextBtn = document.getElementById('media-album-lightbox-next');
-  if (!items.length || !modal || !image || !counter || !closeBtn || !prevBtn || !nextBtn) return;
+  const stage = modal?.querySelector('.media-album-lightbox-stage');
+  if (!items.length || !modal || !image || !counter || !closeBtn || !prevBtn || !nextBtn || !stage) return;
 
   let currentIndex = 0;
   let previousOverflow = '';
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let hasTouchStart = false;
 
   const updateSlide = () => {
     const current = items[currentIndex];
@@ -2946,6 +2950,37 @@ function initMediaAlbumLightbox(photos = []) {
   closeBtn.addEventListener('click', closeLightbox);
   prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
   nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+
+  stage.addEventListener('touchstart', (event) => {
+    if (items.length <= 1) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    hasTouchStart = true;
+  }, { passive: true });
+
+  stage.addEventListener('touchend', (event) => {
+    if (!hasTouchStart || items.length <= 1) return;
+    hasTouchStart = false;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+
+    if (Math.abs(deltaX) < 42 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+    if (deltaX > 0) {
+      showSlide(currentIndex - 1);
+    } else {
+      showSlide(currentIndex + 1);
+    }
+  }, { passive: true });
+
+  stage.addEventListener('touchcancel', () => {
+    hasTouchStart = false;
+  }, { passive: true });
 
   modal.addEventListener('click', (event) => {
     if (event.target === modal || event.target.classList.contains('media-album-lightbox-backdrop')) {
