@@ -4339,9 +4339,10 @@ button,
 
 .playoff-board-grid-head{
   display:grid;
-  grid-template-columns:minmax(0, 1fr) 136px minmax(0, 1fr);
+  grid-template-columns:314px 136px 314px;
   gap:28px;
   align-items:end;
+  justify-content:center;
 }
 
 .playoff-board-grid-head-spacer{
@@ -4355,7 +4356,7 @@ button,
   letter-spacing:.08em;
   text-transform:uppercase;
   text-align:center;
-  justify-self:center;
+  justify-self:stretch;
 }
 
 .playoff-board-grid-col-title-semis{
@@ -4369,13 +4370,13 @@ button,
 
 .playoff-band-grid{
   display:grid;
-  grid-template-columns:minmax(260px, 330px) 136px minmax(260px, 330px);
+  grid-template-columns:314px 136px 314px;
   grid-template-areas:
     "label label label"
     "semis connector finals";
   gap:20px 28px;
   align-items:stretch;
-  justify-content:start;
+  justify-content:center;
 }
 
 .playoff-band-grid + .playoff-band-grid{
@@ -4393,7 +4394,7 @@ button,
   align-self:start;
   padding-bottom:4px;
   text-align:center;
-  justify-self:center;
+  justify-self:stretch;
 }
 
 .playoff-band-grid-stage{
