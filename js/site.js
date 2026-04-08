@@ -82,16 +82,39 @@ function initHeaderCompactState() {
   if (!header) return;
 
   const desktopBreakpoint = 900;
-  const compactThreshold = 28;
+  const compactEnterThreshold = 72;
+  const compactExitThreshold = 28;
+  let isCompact = header.classList.contains('is-compact');
+  let frameId = null;
 
   const syncHeaderState = () => {
-    const shouldCompact = window.innerWidth > desktopBreakpoint && window.scrollY > compactThreshold;
-    header.classList.toggle('is-compact', shouldCompact);
+    frameId = null;
+
+    if (window.innerWidth <= desktopBreakpoint) {
+      isCompact = false;
+      header.classList.remove('is-compact');
+      return;
+    }
+
+    const scrollY = window.scrollY;
+    const shouldCompact = isCompact
+      ? scrollY > compactExitThreshold
+      : scrollY > compactEnterThreshold;
+
+    if (shouldCompact === isCompact) return;
+
+    isCompact = shouldCompact;
+    header.classList.toggle('is-compact', isCompact);
+  };
+
+  const requestSync = () => {
+    if (frameId !== null) return;
+    frameId = window.requestAnimationFrame(syncHeaderState);
   };
 
   syncHeaderState();
-  window.addEventListener('scroll', syncHeaderState, { passive: true });
-  window.addEventListener('resize', syncHeaderState);
+  window.addEventListener('scroll', requestSync, { passive: true });
+  window.addEventListener('resize', requestSync);
 }
 
 function initActiveHeaderLink() {
