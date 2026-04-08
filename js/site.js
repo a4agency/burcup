@@ -587,7 +587,6 @@ function buildPlayoffProgressSeed(seed, label) {
 function renderPlayoffSeed(seed = {}) {
   const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
   const body = `
-    <span class="playoff-seed-badge">${escapeHtml(seed.seed || '')}</span>
     ${seed.logo
       ? `<span class="playoff-seed-logo">${renderImageMarkup({ src: seed.logo, alt: seed.label || '', width: 72 })}</span>`
       : ''}
@@ -606,7 +605,7 @@ function renderPlayoffMatch(match = {}) {
     <article class="playoff-match-card">
       <div class="playoff-match-label">${escapeHtml(match.label || '')}</div>
       ${renderPlayoffSeed(match.home)}
-      <div class="playoff-match-divider">vs</div>
+      <div class="playoff-match-score">${escapeHtml(match.score || '— : —')}</div>
       ${renderPlayoffSeed(match.away)}
     </article>
   `;
@@ -671,14 +670,14 @@ function renderPlayoffBracket(groups = []) {
     ],
     roundTwo: [
       {
-        label: 'Матч за 3 место',
-        home: buildPlayoffProgressSeed('L1', 'Проигравший полуфинала 1'),
-        away: buildPlayoffProgressSeed('L2', 'Проигравший полуфинала 2')
-      },
-      {
         label: 'Матч за 1 место',
         home: buildPlayoffProgressSeed('W1', 'Победитель полуфинала 1'),
         away: buildPlayoffProgressSeed('W2', 'Победитель полуфинала 2')
+      },
+      {
+        label: 'Матч за 3 место',
+        home: buildPlayoffProgressSeed('L1', 'Проигравший полуфинала 1'),
+        away: buildPlayoffProgressSeed('L2', 'Проигравший полуфинала 2')
       }
     ]
   };
@@ -701,14 +700,14 @@ function renderPlayoffBracket(groups = []) {
     ],
     roundTwo: [
       {
-        label: 'Матч за 7 место',
-        home: buildPlayoffProgressSeed('L3', 'Проигравший 5–8 №1'),
-        away: buildPlayoffProgressSeed('L4', 'Проигравший 5–8 №2')
-      },
-      {
         label: 'Матч за 5 место',
         home: buildPlayoffProgressSeed('W3', 'Победитель 5–8 №1'),
         away: buildPlayoffProgressSeed('W4', 'Победитель 5–8 №2')
+      },
+      {
+        label: 'Матч за 7 место',
+        home: buildPlayoffProgressSeed('L3', 'Проигравший 5–8 №1'),
+        away: buildPlayoffProgressSeed('L4', 'Проигравший 5–8 №2')
       }
     ]
   };

@@ -4285,12 +4285,13 @@ button,
 
 .playoff-band-grid{
   display:grid;
-  grid-template-columns:minmax(0, 1fr) 136px minmax(0, 1fr);
+  grid-template-columns:minmax(260px, 330px) 136px minmax(260px, 330px);
   grid-template-areas:
     "label label label"
     "semis connector finals";
   gap:20px 28px;
   align-items:stretch;
+  justify-content:start;
 }
 
 .playoff-band-grid + .playoff-band-grid{
@@ -4317,6 +4318,7 @@ button,
 
 .playoff-band-grid-stage-semis{
   grid-area:semis;
+  justify-items:start;
 }
 
 .playoff-band-grid-stage-semis .playoff-match-card{
@@ -4335,6 +4337,7 @@ button,
 
 .playoff-band-grid-stage-finals{
   grid-area:finals;
+  justify-items:start;
 }
 
 .playoff-band-grid-stage-finals .playoff-match-card{
@@ -4438,6 +4441,7 @@ button,
   position:relative;
   min-height:164px;
   padding:16px 18px;
+  width:min(100%, 330px);
 }
 
 .playoff-match-label{
@@ -4448,7 +4452,7 @@ button,
 
 .playoff-seed-row{
   display:grid;
-  grid-template-columns:auto auto minmax(0, 1fr);
+  grid-template-columns:auto minmax(0, 1fr);
   gap:10px;
   align-items:center;
   color:var(--navy);
@@ -4457,25 +4461,6 @@ button,
 
 .playoff-seed-row-link:hover{
   opacity:.82;
-}
-
-.playoff-seed-row.is-placeholder{
-  grid-template-columns:auto minmax(0, 1fr);
-}
-
-.playoff-seed-badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:38px;
-  height:38px;
-  padding:0 10px;
-  border-radius:999px;
-  background:#e9f0fb;
-  color:var(--navy);
-  font-size:13px;
-  font-weight:800;
-  letter-spacing:.04em;
 }
 
 .playoff-seed-logo img{
@@ -4501,6 +4486,17 @@ button,
   font-size:13px;
   font-weight:700;
   text-transform:uppercase;
+  letter-spacing:.06em;
+}
+
+.playoff-match-score{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:20px;
+  color:var(--navy);
+  font-size:16px;
+  font-weight:800;
   letter-spacing:.06em;
 }
 
