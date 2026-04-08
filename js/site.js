@@ -584,7 +584,7 @@ function buildPlayoffProgressSeed(seed, label) {
   };
 }
 
-function renderPlayoffSeed(seed = {}, score = '—') {
+function renderPlayoffSeed(seed = {}, score = '0') {
   const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
   const body = `
     <div class="team-left">
@@ -604,8 +604,9 @@ function renderPlayoffSeed(seed = {}, score = '—') {
 }
 
 function renderPlayoffMatch(match = {}) {
-  const homeScore = match.homeScore ?? '—';
-  const awayScore = match.awayScore ?? '—';
+  const normalizeScore = (value) => (value === undefined || value === null || value === '' ? '0' : String(value));
+  const homeScore = normalizeScore(match.homeScore);
+  const awayScore = normalizeScore(match.awayScore);
 
   return `
     <article class="playoff-match-card upcoming-card playoff-upcoming-card">

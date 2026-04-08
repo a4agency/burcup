@@ -4314,6 +4314,14 @@ button,
   display:grid;
   gap:26px;
   align-content:start;
+  overflow:visible;
+}
+
+.playoff-band-grid-slot{
+  position:relative;
+  display:flex;
+  width:min(100%, 314px);
+  overflow:visible;
 }
 
 .playoff-band-grid-stage-semis{
@@ -4321,15 +4329,11 @@ button,
   justify-items:start;
 }
 
-.playoff-band-grid-stage-semis .playoff-match-card{
-  position:relative;
-}
-
-.playoff-band-grid-stage-semis .playoff-match-card::after{
+.playoff-band-grid-stage-semis .playoff-band-grid-slot::after{
   content:"";
   position:absolute;
   top:50%;
-  right:-72px;
+  left:100%;
   width:72px;
   border-top:2px solid rgba(13, 43, 99, .18);
   transform:translateY(-50%);
@@ -4340,11 +4344,7 @@ button,
   justify-items:start;
 }
 
-.playoff-band-grid-stage-finals .playoff-match-card{
-  position:relative;
-}
-
-.playoff-band-grid-stage-finals .playoff-match-card::before{
+.playoff-band-grid-stage-finals .playoff-band-grid-slot::before{
   content:"";
   position:absolute;
   top:50%;
@@ -4441,8 +4441,12 @@ button,
   position:relative;
   min-height:auto;
   padding:18px 20px;
-  width:min(100%, 314px);
+  width:100%;
   background:#fff;
+}
+
+.playoff-upcoming-card{
+  overflow:visible !important;
 }
 
 .playoff-match-label{
@@ -4613,8 +4617,8 @@ button,
     grid-template-columns:1fr;
   }
 
-  .playoff-band-grid-stage-semis .playoff-match-card::after,
-  .playoff-band-grid-stage-finals .playoff-match-card::before{
+  .playoff-band-grid-stage-semis .playoff-band-grid-slot::after,
+  .playoff-band-grid-stage-finals .playoff-band-grid-slot::before{
     display:none;
   }
 
