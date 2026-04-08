@@ -287,54 +287,6 @@ function renderStandingsTable(data = []) {
     `;
   }).join('');
 
-  const mobileCards = (Array.isArray(data) ? data : []).map((item, index) => {
-    const clubUrl = getClubPageUrl(item);
-    const teamMarkup = clubUrl
-      ? `<a class="standings-team standings-team-link standings-team-mobile" href="${escapeHtml(clubUrl)}">
-          ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
-          <span>${item.team}</span>
-        </a>`
-      : `<div class="standings-team standings-team-mobile">
-          ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
-          <span>${item.team}</span>
-        </div>`;
-
-    return `
-      <article class="standings-mobile-item">
-        <div class="standings-mobile-main">
-          <div class="standings-mobile-rank">${item.position || index + 1}</div>
-          ${teamMarkup}
-        </div>
-        <div class="standings-mobile-stats">
-          <div class="standings-mobile-stat">
-            <span>Игр</span>
-            <strong>${item.played}</strong>
-          </div>
-          <div class="standings-mobile-stat">
-            <span>Очки</span>
-            <strong>${item.points}</strong>
-          </div>
-          <div class="standings-mobile-stat">
-            <span>Побед</span>
-            <strong>${formatStandingStat(item.won)}</strong>
-          </div>
-          <div class="standings-mobile-stat">
-            <span>Ничьих</span>
-            <strong>${formatStandingStat(item.drawn)}</strong>
-          </div>
-          <div class="standings-mobile-stat">
-            <span>Поражений</span>
-            <strong>${formatStandingStat(item.lost)}</strong>
-          </div>
-          <div class="standings-mobile-stat">
-            <span>Мячи</span>
-            <strong>${escapeHtml(formatStandingGoals(item))}</strong>
-          </div>
-        </div>
-      </article>
-    `;
-  }).join('');
-
   return `
     <div class="standings-card">
       <div class="standings-scroll">
@@ -364,7 +316,6 @@ function renderStandingsTable(data = []) {
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <div class="standings-mobile-list">${mobileCards}</div>
     </div>
   `;
 }
@@ -633,6 +584,15 @@ function buildPlayoffProgressSeed(seed, label) {
   };
 }
 
+function buildPlayoffGenericSeed(index) {
+  return {
+    type: 'placeholder',
+    seed: `T${index}`,
+    label: `Команда ${index}`,
+    logo: 'images/logo-burchalkin.webp'
+  };
+}
+
 function renderPlayoffSeed(seed = {}, score = '0') {
   const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
   const body = `
@@ -699,20 +659,6 @@ function renderPlayoffBandGrid(config = {}) {
 }
 
 function renderPlayoffBracket(groups = []) {
-  const hasCompleteGroups = ['A', 'B'].every(groupKey => {
-    const group = groups.find(item => item.key === groupKey);
-    return Array.isArray(group?.rows) && group.rows.length >= 4;
-  });
-
-  if (!hasCompleteGroups) {
-    return `
-      <div class="playoff-empty-card">
-        <strong>Сетка плей-офф появится здесь.</strong>
-        <span>Как только в обеих группах будет по четыре команды, сайт автоматически покажет пары за 1–4 и 5–8 места.</span>
-      </div>
-    `;
-  }
-
   const topBracket = {
     title: 'Плей-офф за 1–4 места',
     roundOneTitle: 'Полуфиналы',
@@ -720,13 +666,13 @@ function renderPlayoffBracket(groups = []) {
     roundOne: [
       {
         label: 'Полуфинал 1',
-        home: buildPlayoffSeed(groups, 'A', 1),
-        away: buildPlayoffSeed(groups, 'B', 2)
+        home: buildPlayoffGenericSeed(1),
+        away: buildPlayoffGenericSeed(2)
       },
       {
         label: 'Полуфинал 2',
-        home: buildPlayoffSeed(groups, 'B', 1),
-        away: buildPlayoffSeed(groups, 'A', 2)
+        home: buildPlayoffGenericSeed(3),
+        away: buildPlayoffGenericSeed(4)
       }
     ],
     roundTwo: [
@@ -750,13 +696,13 @@ function renderPlayoffBracket(groups = []) {
     roundOne: [
       {
         label: 'Полуфинал 5–8 №1',
-        home: buildPlayoffSeed(groups, 'A', 3),
-        away: buildPlayoffSeed(groups, 'B', 4)
+        home: buildPlayoffGenericSeed(5),
+        away: buildPlayoffGenericSeed(6)
       },
       {
         label: 'Полуфинал 5–8 №2',
-        home: buildPlayoffSeed(groups, 'B', 3),
-        away: buildPlayoffSeed(groups, 'A', 4)
+        home: buildPlayoffGenericSeed(7),
+        away: buildPlayoffGenericSeed(8)
       }
     ],
     roundTwo: [
