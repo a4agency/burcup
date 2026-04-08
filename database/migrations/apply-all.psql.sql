@@ -9,3 +9,4 @@
 \ir 0007_create_content_translations.sql
 \ir 0008_add_match_featured_media_flag.sql
 \ir 0009_create_media_albums.sql
+\ir 0010_add_manual_standings_and_playoff.sql

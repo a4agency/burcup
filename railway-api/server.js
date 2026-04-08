@@ -444,6 +444,18 @@ async function hasTournamentCountdownColumn(queryable = pool) {
   return rows[0]?.exists === true;
 }
 
+async function hasTournamentManualModeColumns(queryable = pool) {
+  const { rows } = await queryable.query(`
+    SELECT COUNT(*)::int AS count
+    FROM information_schema.columns
+    WHERE table_schema = current_schema()
+      AND table_name = 'tournaments'
+      AND column_name = ANY(ARRAY['standings_mode', 'playoff_mode']);
+  `);
+
+  return Number(rows[0]?.count || 0) === 2;
+}
+
 async function hasMatchMediaColumns(queryable = pool) {
   const { rows } = await queryable.query(`
     SELECT COUNT(*)::int AS count
@@ -470,7 +482,20 @@ async function hasMatchFeaturedMediaColumn(queryable = pool) {
   return rows[0]?.exists === true;
 }
 
-function buildTournamentsQuery(includeCountdown) {
+async function hasTournamentPlayoffTable(queryable = pool) {
+  const { rows } = await queryable.query(`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.tables
+      WHERE table_schema = current_schema()
+        AND table_name = 'tournament_playoff_matches'
+    ) AS exists;
+  `);
+
+  return rows[0]?.exists === true;
+}
+
+function buildTournamentsQuery(includeCountdown, includeManualModes) {
   return `
     SELECT
       t.id,
@@ -487,6 +512,8 @@ function buildTournamentsQuery(includeCountdown) {
       t.status,
       t.is_featured,
       ${includeCountdown ? 't.countdown_enabled' : 'TRUE::boolean AS countdown_enabled'},
+      ${includeManualModes ? 't.standings_mode' : '\'auto\'::text AS standings_mode'},
+      ${includeManualModes ? 't.playoff_mode' : '\'auto\'::text AS playoff_mode'},
       COUNT(DISTINCT tc.club_id) AS clubs_count,
       COUNT(DISTINCT m.id) AS matches_count
     FROM tournaments t
@@ -507,11 +534,12 @@ function buildTournamentsQuery(includeCountdown) {
       t.status,
       t.is_featured
       ${includeCountdown ? ', t.countdown_enabled' : ''}
+      ${includeManualModes ? ', t.standings_mode, t.playoff_mode' : ''}
     ORDER BY t.season_year DESC NULLS LAST, t.start_date DESC NULLS LAST, t.id DESC;
   `;
 }
 
-function buildTournamentDetailsQuery(includeCountdown) {
+function buildTournamentDetailsQuery(includeCountdown, includeManualModes) {
   return `
     SELECT
       t.id,
@@ -527,7 +555,9 @@ function buildTournamentDetailsQuery(includeCountdown) {
       t.location,
       t.status,
       t.is_featured,
-      ${includeCountdown ? 't.countdown_enabled' : 'TRUE::boolean AS countdown_enabled'}
+      ${includeCountdown ? 't.countdown_enabled' : 'TRUE::boolean AS countdown_enabled'},
+      ${includeManualModes ? 't.standings_mode' : '\'auto\'::text AS standings_mode'},
+      ${includeManualModes ? 't.playoff_mode' : '\'auto\'::text AS playoff_mode'}
     FROM tournaments t
     WHERE t.slug = $1
     LIMIT 1;
@@ -731,10 +761,172 @@ function mapStandingsRow(row) {
   };
 }
 
+function buildDefaultPlayoffRows(tournamentSlug = 'burchalkin-cup-2026') {
+  const logo = 'images/logo-burchalkin.webp';
+  return [
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'top',
+      round_group: 'semifinal',
+      match_key: 'top_sf1',
+      sort_order: 1,
+      label: 'Полуфинал 1–4 №1',
+      home_team: 'Команда 1',
+      home_team_slug: '',
+      home_logo: logo,
+      away_team: 'Команда 2',
+      away_team_slug: '',
+      away_logo: logo,
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'top',
+      round_group: 'semifinal',
+      match_key: 'top_sf2',
+      sort_order: 2,
+      label: 'Полуфинал 1–4 №2',
+      home_team: 'Команда 3',
+      home_team_slug: '',
+      home_logo: logo,
+      away_team: 'Команда 4',
+      away_team_slug: '',
+      away_logo: logo,
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'top',
+      round_group: 'final',
+      match_key: 'top_final',
+      sort_order: 1,
+      label: 'Матч за 1 место',
+      home_team: 'Победитель 1–4 №1',
+      home_team_slug: '',
+      home_logo: '',
+      away_team: 'Победитель 1–4 №2',
+      away_team_slug: '',
+      away_logo: '',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'top',
+      round_group: 'final',
+      match_key: 'top_third',
+      sort_order: 2,
+      label: 'Матч за 3 место',
+      home_team: 'Проигравший 1–4 №1',
+      home_team_slug: '',
+      home_logo: '',
+      away_team: 'Проигравший 1–4 №2',
+      away_team_slug: '',
+      away_logo: '',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'placement',
+      round_group: 'semifinal',
+      match_key: 'placement_sf1',
+      sort_order: 1,
+      label: 'Полуфинал 5–8 №1',
+      home_team: 'Команда 5',
+      home_team_slug: '',
+      home_logo: logo,
+      away_team: 'Команда 6',
+      away_team_slug: '',
+      away_logo: logo,
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'placement',
+      round_group: 'semifinal',
+      match_key: 'placement_sf2',
+      sort_order: 2,
+      label: 'Полуфинал 5–8 №2',
+      home_team: 'Команда 7',
+      home_team_slug: '',
+      home_logo: logo,
+      away_team: 'Команда 8',
+      away_team_slug: '',
+      away_logo: logo,
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'placement',
+      round_group: 'final',
+      match_key: 'placement_fifth',
+      sort_order: 1,
+      label: 'Матч за 5 место',
+      home_team: 'Победитель 5–8 №1',
+      home_team_slug: '',
+      home_logo: '',
+      away_team: 'Победитель 5–8 №2',
+      away_team_slug: '',
+      away_logo: '',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      tournament_slug: tournamentSlug,
+      bracket_group: 'placement',
+      round_group: 'final',
+      match_key: 'placement_seventh',
+      sort_order: 2,
+      label: 'Матч за 7 место',
+      home_team: 'Проигравший 5–8 №1',
+      home_team_slug: '',
+      home_logo: '',
+      away_team: 'Проигравший 5–8 №2',
+      away_team_slug: '',
+      away_logo: '',
+      home_score: 0,
+      away_score: 0,
+    }
+  ];
+}
+
+function mapPlayoffRow(row) {
+  return {
+    tournament_slug: row.tournament_slug,
+    tournament_name: row.tournament_name || '',
+    bracket_group: row.bracket_group,
+    round_group: row.round_group,
+    match_key: row.match_key,
+    sort_order: parseInteger(row.sort_order, 0),
+    label: row.label || '',
+    home_team: row.home_team_name || row.home_team || '',
+    home_team_slug: row.home_team_slug || '',
+    home_logo: row.home_team_logo || row.home_logo || '',
+    away_team: row.away_team_name || row.away_team || '',
+    away_team_slug: row.away_team_slug || '',
+    away_logo: row.away_team_logo || row.away_logo || '',
+    home_score: parseInteger(row.home_score, 0),
+    away_score: parseInteger(row.away_score, 0),
+  };
+}
+
 async function getTargetTournament(queryable, tournamentSlug = null) {
+  const includeManualModes = await hasTournamentManualModeColumns(queryable);
   const { rows } = await queryable.query(
     `
-      SELECT id, slug, is_featured
+      SELECT
+        id,
+        slug,
+        name,
+        season_year,
+        is_featured,
+        ${includeManualModes ? 'standings_mode' : '\'auto\'::text AS standings_mode'},
+        ${includeManualModes ? 'playoff_mode' : '\'auto\'::text AS playoff_mode'}
       FROM tournaments
       WHERE slug = COALESCE($1, (SELECT slug FROM tournaments WHERE is_featured = TRUE ORDER BY season_year DESC NULLS LAST, id DESC LIMIT 1))
       LIMIT 1;
@@ -748,7 +940,7 @@ async function getStandingsRows(queryable, tournamentSlug = null) {
   const tournament = await getTargetTournament(queryable, tournamentSlug);
   if (!tournament) return [];
 
-  if (tournament.is_featured !== true) {
+  if (String(tournament.standings_mode || 'auto') === 'manual' || tournament.is_featured !== true) {
     const { rows } = await queryable.query(standingsQuery, [tournament.slug]);
     return rows;
   }
@@ -758,6 +950,23 @@ async function getStandingsRows(queryable, tournamentSlug = null) {
 
   const storedResult = await queryable.query(standingsQuery, [tournament.slug]);
   return storedResult.rows;
+}
+
+async function getPlayoffRows(queryable, tournamentSlug = null) {
+  const tournament = await getTargetTournament(queryable, tournamentSlug);
+  if (!tournament) return [];
+
+  const includePlayoffTable = await hasTournamentPlayoffTable(queryable);
+  if (!includePlayoffTable || String(tournament.playoff_mode || 'auto') !== 'manual') {
+    return buildDefaultPlayoffRows(tournament.slug);
+  }
+
+  const { rows } = await queryable.query(adminPlayoffQuery, [tournament.slug]);
+  if (!rows.length) {
+    return buildDefaultPlayoffRows(tournament.slug);
+  }
+
+  return rows.map(mapPlayoffRow);
 }
 
 function buildMatchesQuery(includeMatchMedia, includeFeaturedMedia) {
@@ -1047,8 +1256,44 @@ const adminStandingsQuery = `
   ORDER BY t.season_year DESC NULLS LAST, t.slug, ts.group_name, ts.position, c.name;
 `;
 
+const adminPlayoffQuery = `
+  SELECT
+    t.slug AS tournament_slug,
+    t.name AS tournament_name,
+    tpm.bracket_group,
+    tpm.round_group,
+    tpm.match_key,
+    tpm.sort_order,
+    tpm.label,
+    home.slug AS home_team_slug,
+    COALESCE(home.name, tpm.home_label) AS home_team_name,
+    COALESCE(home.logo_path, tpm.home_logo_path) AS home_team_logo,
+    away.slug AS away_team_slug,
+    COALESCE(away.name, tpm.away_label) AS away_team_name,
+    COALESCE(away.logo_path, tpm.away_logo_path) AS away_team_logo,
+    tpm.home_score,
+    tpm.away_score
+  FROM tournament_playoff_matches tpm
+  JOIN tournaments t ON t.id = tpm.tournament_id
+  LEFT JOIN clubs home ON home.id = tpm.home_club_id
+  LEFT JOIN clubs away ON away.id = tpm.away_club_id
+  WHERE t.slug = $1
+  ORDER BY
+    CASE tpm.bracket_group
+      WHEN 'top' THEN 0
+      ELSE 1
+    END,
+    CASE tpm.round_group
+      WHEN 'semifinal' THEN 0
+      ELSE 1
+    END,
+    tpm.sort_order,
+    tpm.id;
+`;
+
 async function getAdminTournaments(client) {
   const includeCountdown = await hasTournamentCountdownColumn(client);
+  const includeManualModes = await hasTournamentManualModeColumns(client);
   const { rows } = await client.query(`
     SELECT
       slug,
@@ -1063,7 +1308,9 @@ async function getAdminTournaments(client) {
       hero_image_url,
       description,
       is_featured,
-      ${includeCountdown ? 'countdown_enabled' : 'TRUE::boolean AS countdown_enabled'}
+      ${includeCountdown ? 'countdown_enabled' : 'TRUE::boolean AS countdown_enabled'},
+      ${includeManualModes ? 'standings_mode' : '\'auto\'::text AS standings_mode'},
+      ${includeManualModes ? 'playoff_mode' : '\'auto\'::text AS playoff_mode'}
     FROM tournaments
     ORDER BY season_year DESC NULLS LAST, start_date DESC NULLS LAST, id DESC;
   `);
@@ -1082,6 +1329,8 @@ async function getAdminTournaments(client) {
     description: row.description || '',
     is_featured: row.is_featured,
     countdown_enabled: row.countdown_enabled !== false,
+    standings_mode: row.standings_mode || 'auto',
+    playoff_mode: row.playoff_mode || 'auto',
   }));
 }
 
@@ -1188,7 +1437,7 @@ async function getAdminPartners(client) {
 
 async function getAdminStandings(client) {
   const { rows } = await client.query(adminStandingsQuery);
-  return rows.map(row => ({
+  const storedItems = rows.map(row => ({
     tournament_slug: row.tournament_slug,
     tournament_name: row.tournament_name,
     season_year: row.season_year,
@@ -1205,6 +1454,53 @@ async function getAdminStandings(client) {
     team: row.team_name || '',
     logo: row.team_logo || '',
   }));
+
+  const currentTournament = await getTargetTournament(client, null);
+  if (!currentTournament) return storedItems;
+
+  const archiveItems = storedItems.filter(item => item.tournament_slug !== currentTournament.slug);
+  if (String(currentTournament.standings_mode || 'auto') === 'manual') {
+    const currentItems = storedItems.filter(item => item.tournament_slug === currentTournament.slug);
+    return [...archiveItems, ...currentItems];
+  }
+
+  const computedResult = await client.query(computedStandingsQuery, [Number(currentTournament.id)]);
+  const currentItems = computedResult.rows.map(row => ({
+    tournament_slug: currentTournament.slug,
+    tournament_name: currentTournament.name,
+    season_year: currentTournament.season_year,
+    group_name: row.group_name || '',
+    position: parseInteger(row.position, 0),
+    played: parseInteger(row.played, 0),
+    won: parseInteger(row.won, 0),
+    drawn: parseInteger(row.drawn, 0),
+    lost: parseInteger(row.lost, 0),
+    goals_for: parseInteger(row.goals_for, 0),
+    goals_against: parseInteger(row.goals_against, 0),
+    points: parseInteger(row.points, 0),
+    team_slug: row.team_slug || '',
+    team: row.team || '',
+    logo: row.logo || '',
+  }));
+
+  return [...archiveItems, ...currentItems];
+}
+
+async function getAdminPlayoff(client) {
+  const currentTournament = await getTargetTournament(client, null);
+  if (!currentTournament) return [];
+
+  const includePlayoffTable = await hasTournamentPlayoffTable(client);
+  if (!includePlayoffTable) {
+    return buildDefaultPlayoffRows(currentTournament.slug);
+  }
+
+  const { rows } = await client.query(adminPlayoffQuery, [currentTournament.slug]);
+  if (!rows.length) {
+    return buildDefaultPlayoffRows(currentTournament.slug);
+  }
+
+  return rows.map(mapPlayoffRow);
 }
 
 async function getMediaAlbumPhotoMap(client, albumIds = []) {
@@ -1379,9 +1675,18 @@ async function replaceTournaments(client, payload) {
   const items = ensureArray(payload);
   const slugs = [];
   const includeCountdown = await hasTournamentCountdownColumn(client);
+  const includeManualModes = await hasTournamentManualModeColumns(client);
 
   if (!includeCountdown && items.some(item => parseBoolean(item.countdown_enabled, true) === false)) {
     throw new Error('Сначала примените миграцию 0005_add_tournament_countdown_flag.sql, чтобы скрывать таймер турнира.');
+  }
+
+  if (!includeManualModes && items.some(item => {
+    const standingsMode = normalizeString(item.standings_mode) || 'auto';
+    const playoffMode = normalizeString(item.playoff_mode) || 'auto';
+    return standingsMode !== 'auto' || playoffMode !== 'auto';
+  })) {
+    throw new Error('Сначала примените миграцию 0010_add_manual_standings_and_playoff.sql, чтобы вручную управлять таблицей и сеткой плей-офф.');
   }
 
   await client.query('UPDATE tournaments SET is_featured = FALSE');
@@ -1393,6 +1698,62 @@ async function replaceTournaments(client, payload) {
       throw new Error('Each tournament must have slug and name');
     }
     slugs.push(slug);
+    if (includeCountdown && includeManualModes) {
+      await client.query(`
+        INSERT INTO tournaments (
+          slug,
+          name,
+          season_year,
+          short_label,
+          logo_path,
+          hero_image_url,
+          description,
+          start_date,
+          end_date,
+          location,
+          status,
+          is_featured,
+          countdown_enabled,
+          standings_mode,
+          playoff_mode
+        )
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+        ON CONFLICT (slug) DO UPDATE
+        SET
+          name = EXCLUDED.name,
+          season_year = EXCLUDED.season_year,
+          short_label = EXCLUDED.short_label,
+          logo_path = EXCLUDED.logo_path,
+          hero_image_url = EXCLUDED.hero_image_url,
+          description = EXCLUDED.description,
+          start_date = EXCLUDED.start_date,
+          end_date = EXCLUDED.end_date,
+          location = EXCLUDED.location,
+          status = EXCLUDED.status,
+          is_featured = EXCLUDED.is_featured,
+          countdown_enabled = EXCLUDED.countdown_enabled,
+          standings_mode = EXCLUDED.standings_mode,
+          playoff_mode = EXCLUDED.playoff_mode
+      `, [
+        slug,
+        name,
+        item.season_year ? parseInteger(item.season_year, null) : null,
+        nullIfEmpty(item.short_label),
+        nullIfEmpty(item.logo),
+        nullIfEmpty(item.hero_image),
+        normalizeString(item.description),
+        nullIfEmpty(item.start_date),
+        nullIfEmpty(item.end_date),
+        nullIfEmpty(item.location),
+        normalizeString(item.status) || 'draft',
+        parseBoolean(item.is_featured, false),
+        parseBoolean(item.countdown_enabled, true),
+        normalizeString(item.standings_mode) || 'auto',
+        normalizeString(item.playoff_mode) || 'auto',
+      ]);
+      continue;
+    }
+
     if (includeCountdown) {
       await client.query(`
         INSERT INTO tournaments (
@@ -2126,6 +2487,71 @@ async function replaceStandings(client, payload) {
   }
 }
 
+async function replacePlayoff(client, payload) {
+  const includePlayoffTable = await hasTournamentPlayoffTable(client);
+  if (!includePlayoffTable) {
+    throw new Error('Сначала примените миграцию 0010_add_manual_standings_and_playoff.sql, чтобы вручную управлять сеткой плей-офф.');
+  }
+
+  const currentTournament = await getTargetTournament(client, null);
+  if (!currentTournament) {
+    throw new Error('Current tournament not found');
+  }
+
+  const items = ensureArray(payload);
+  const clubs = await client.query('SELECT id, slug, name, logo_path FROM clubs');
+  const clubMap = new Map(clubs.rows.map(row => [row.slug, row]));
+
+  await client.query('DELETE FROM tournament_playoff_matches WHERE tournament_id = $1', [Number(currentTournament.id)]);
+
+  for (const item of items) {
+    const matchKey = normalizeString(item.match_key);
+    if (!matchKey) {
+      throw new Error('Each playoff match must have match_key');
+    }
+
+    const homeSlug = normalizeString(item.home_team_slug);
+    const awaySlug = normalizeString(item.away_team_slug);
+    const homeClub = homeSlug ? clubMap.get(homeSlug) || null : null;
+    const awayClub = awaySlug ? clubMap.get(awaySlug) || null : null;
+
+    await client.query(`
+      INSERT INTO tournament_playoff_matches (
+        tournament_id,
+        bracket_group,
+        round_group,
+        match_key,
+        sort_order,
+        label,
+        home_club_id,
+        away_club_id,
+        home_label,
+        away_label,
+        home_logo_path,
+        away_logo_path,
+        home_score,
+        away_score
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14);
+    `, [
+      Number(currentTournament.id),
+      normalizeString(item.bracket_group) || 'top',
+      normalizeString(item.round_group) || 'semifinal',
+      matchKey,
+      parseInteger(item.sort_order, 0),
+      normalizeString(item.label),
+      homeClub ? Number(homeClub.id) : null,
+      awayClub ? Number(awayClub.id) : null,
+      normalizeString(item.home_team) || normalizeString(homeClub?.name),
+      normalizeString(item.away_team) || normalizeString(awayClub?.name),
+      nullIfEmpty(item.home_logo) || nullIfEmpty(homeClub?.logo_path),
+      nullIfEmpty(item.away_logo) || nullIfEmpty(awayClub?.logo_path),
+      parseInteger(item.home_score, 0),
+      parseInteger(item.away_score, 0),
+    ]);
+  }
+}
+
 async function loadAdminResource(client, resource) {
   switch (resource) {
     case 'tournaments':
@@ -2140,6 +2566,8 @@ async function loadAdminResource(client, resource) {
       return getAdminPartners(client);
     case 'standings':
       return getAdminStandings(client);
+    case 'playoff':
+      return getAdminPlayoff(client);
     case 'albums':
       return getAdminAlbums(client);
     default:
@@ -2161,6 +2589,8 @@ async function saveAdminResource(client, resource, payload) {
       return replacePartners(client, payload);
     case 'standings':
       return replaceStandings(client, payload);
+    case 'playoff':
+      return replacePlayoff(client, payload);
     case 'albums':
       return replaceAlbums(client, payload);
     default:
@@ -2279,7 +2709,8 @@ app.put('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
 app.get('/api/tournaments', async (req, res, next) => {
   try {
     const includeCountdown = await hasTournamentCountdownColumn(pool);
-    const { rows } = await pool.query(buildTournamentsQuery(includeCountdown));
+    const includeManualModes = await hasTournamentManualModeColumns(pool);
+    const { rows } = await pool.query(buildTournamentsQuery(includeCountdown, includeManualModes));
     res.json(rows.map(row => ({
       id: Number(row.id),
       slug: row.slug,
@@ -2295,6 +2726,8 @@ app.get('/api/tournaments', async (req, res, next) => {
       status: row.status,
       is_featured: row.is_featured,
       countdown_enabled: row.countdown_enabled !== false,
+      standings_mode: row.standings_mode || 'auto',
+      playoff_mode: row.playoff_mode || 'auto',
       clubs_count: Number(row.clubs_count || 0),
       matches_count: Number(row.matches_count || 0),
     })));
@@ -2306,13 +2739,15 @@ app.get('/api/tournaments', async (req, res, next) => {
 app.get('/api/tournaments/:slug', async (req, res, next) => {
   try {
     const includeCountdown = await hasTournamentCountdownColumn(pool);
-    const tournamentResult = await pool.query(buildTournamentDetailsQuery(includeCountdown), [req.params.slug]);
+    const includeManualModes = await hasTournamentManualModeColumns(pool);
+    const tournamentResult = await pool.query(buildTournamentDetailsQuery(includeCountdown, includeManualModes), [req.params.slug]);
     if (!tournamentResult.rows.length) {
       return res.status(404).json({ error: 'Tournament not found' });
     }
     const tournament = tournamentResult.rows[0];
-    const [standingsRows, matchesResult, newsResult, partnersResult] = await Promise.all([
+    const [standingsRows, playoffRows, matchesResult, newsResult, partnersResult] = await Promise.all([
       getStandingsRows(pool, req.params.slug),
+      getPlayoffRows(pool, req.params.slug),
       queryMatches(pool, req.params.slug),
       pool.query(newsQuery, [req.params.slug]),
       pool.query(tournamentPartnersQuery, [req.params.slug]),
@@ -2354,7 +2789,10 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       status: tournament.status,
       is_featured: tournament.is_featured,
       countdown_enabled: tournament.countdown_enabled !== false,
+      standings_mode: tournament.standings_mode || 'auto',
+      playoff_mode: tournament.playoff_mode || 'auto',
       standings: standingsRows.map(mapStandingsRow),
+      playoff: playoffRows,
       matches: matchesResult.rows.map(formatMatchRow),
       news: newsResult.rows.map(row => ({
         id: Number(row.id),
@@ -2377,6 +2815,15 @@ app.get('/api/tournaments/:slug/standings', async (req, res, next) => {
   try {
     const rows = await getStandingsRows(pool, req.params.slug);
     res.json(rows.map(mapStandingsRow));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/tournaments/:slug/playoff', async (req, res, next) => {
+  try {
+    const rows = await getPlayoffRows(pool, req.params.slug);
+    res.json(rows);
   } catch (error) {
     next(error);
   }
@@ -2495,6 +2942,15 @@ app.get('/api/standings', async (req, res, next) => {
   try {
     const rows = await getStandingsRows(pool, null);
     res.json(rows.map(mapStandingsRow));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/playoff', async (req, res, next) => {
+  try {
+    const rows = await getPlayoffRows(pool, null);
+    res.json(rows);
   } catch (error) {
     next(error);
   }

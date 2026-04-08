@@ -90,6 +90,145 @@ const DEFAULT_MEDIA_ALBUMS = [
   }
 ];
 
+const DEFAULT_PLAYOFF_ROWS = [
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'top',
+    round_group: 'semifinal',
+    match_key: 'top_sf1',
+    sort_order: 1,
+    label: 'Полуфинал 1–4 №1',
+    home_team: 'Команда 1',
+    home_team_slug: '',
+    home_logo: 'images/logo-burchalkin.webp',
+    away_team: 'Команда 2',
+    away_team_slug: '',
+    away_logo: 'images/logo-burchalkin.webp',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'top',
+    round_group: 'semifinal',
+    match_key: 'top_sf2',
+    sort_order: 2,
+    label: 'Полуфинал 1–4 №2',
+    home_team: 'Команда 3',
+    home_team_slug: '',
+    home_logo: 'images/logo-burchalkin.webp',
+    away_team: 'Команда 4',
+    away_team_slug: '',
+    away_logo: 'images/logo-burchalkin.webp',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'top',
+    round_group: 'final',
+    match_key: 'top_final',
+    sort_order: 1,
+    label: 'Матч за 1 место',
+    home_team: 'Победитель 1–4 №1',
+    home_team_slug: '',
+    home_logo: '',
+    away_team: 'Победитель 1–4 №2',
+    away_team_slug: '',
+    away_logo: '',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'top',
+    round_group: 'final',
+    match_key: 'top_third',
+    sort_order: 2,
+    label: 'Матч за 3 место',
+    home_team: 'Проигравший 1–4 №1',
+    home_team_slug: '',
+    home_logo: '',
+    away_team: 'Проигравший 1–4 №2',
+    away_team_slug: '',
+    away_logo: '',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'placement',
+    round_group: 'semifinal',
+    match_key: 'placement_sf1',
+    sort_order: 1,
+    label: 'Полуфинал 5–8 №1',
+    home_team: 'Команда 5',
+    home_team_slug: '',
+    home_logo: 'images/logo-burchalkin.webp',
+    away_team: 'Команда 6',
+    away_team_slug: '',
+    away_logo: 'images/logo-burchalkin.webp',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'placement',
+    round_group: 'semifinal',
+    match_key: 'placement_sf2',
+    sort_order: 2,
+    label: 'Полуфинал 5–8 №2',
+    home_team: 'Команда 7',
+    home_team_slug: '',
+    home_logo: 'images/logo-burchalkin.webp',
+    away_team: 'Команда 8',
+    away_team_slug: '',
+    away_logo: 'images/logo-burchalkin.webp',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'placement',
+    round_group: 'final',
+    match_key: 'placement_fifth',
+    sort_order: 1,
+    label: 'Матч за 5 место',
+    home_team: 'Победитель 5–8 №1',
+    home_team_slug: '',
+    home_logo: '',
+    away_team: 'Победитель 5–8 №2',
+    away_team_slug: '',
+    away_logo: '',
+    home_score: 0,
+    away_score: 0,
+  },
+  {
+    tournament_slug: 'burchalkin-cup-2026',
+    tournament_name: 'Кубок Бурчалкина 2026',
+    bracket_group: 'placement',
+    round_group: 'final',
+    match_key: 'placement_seventh',
+    sort_order: 2,
+    label: 'Матч за 7 место',
+    home_team: 'Проигравший 5–8 №1',
+    home_team_slug: '',
+    home_logo: '',
+    away_team: 'Проигравший 5–8 №2',
+    away_team_slug: '',
+    away_logo: '',
+    home_score: 0,
+    away_score: 0,
+  }
+];
+
 const ADMIN_TOKEN_KEY = 'bcup_admin_session_token';
 
 function escapeHtml(value) {
@@ -127,6 +266,8 @@ const ADMIN_SOURCES = {
         description: 'Основной турнир сезона 2026 года.',
         is_featured: true,
         countdown_enabled: true,
+        standings_mode: 'auto',
+        playoff_mode: 'auto',
       }
     ],
     empty: () => ({
@@ -143,6 +284,8 @@ const ADMIN_SOURCES = {
       description: '',
       is_featured: false,
       countdown_enabled: true,
+      standings_mode: 'auto',
+      playoff_mode: 'auto',
     }),
     fields: [
       ['slug', 'Slug', 'text'],
@@ -157,6 +300,8 @@ const ADMIN_SOURCES = {
       ['hero_image', 'Hero image', 'image'],
       ['is_featured', 'Текущий турнир', 'checkbox'],
       ['countdown_enabled', 'Показывать таймер на главной', 'checkbox'],
+      ['standings_mode', 'Режим таблицы', 'select', ['auto', 'manual']],
+      ['playoff_mode', 'Режим плей-офф', 'select', ['auto', 'manual']],
       ['description', 'Описание', 'textarea'],
     ],
   },
@@ -398,6 +543,103 @@ const ADMIN_SOURCES = {
       ['review_video', 'Ссылка на обзор', 'url'],
       ['interview_video', 'Ссылка на интервью', 'url'],
       ['summary', 'Описание', 'textarea'],
+    ],
+  },
+  standings: {
+    key: 'bcup_standings_current',
+    exportName: 'standings-current.json',
+    title: 'Турнирная таблица',
+    help: 'Текущая турнирная таблица. Эти строки используются на сайте, если у текущего турнира включён ручной режим таблицы.',
+    defaultData: [
+      {
+        tournament_slug: 'burchalkin-cup-2026',
+        tournament_name: 'Кубок Бурчалкина 2026',
+        season_year: 2026,
+        group_name: 'Группа A',
+        position: 1,
+        played: 0,
+        won: 0,
+        drawn: 0,
+        lost: 0,
+        goals_for: 0,
+        goals_against: 0,
+        points: 0,
+        team_slug: '',
+        team: '',
+        logo: '',
+      }
+    ],
+    empty: () => ({
+      tournament_slug: 'burchalkin-cup-2026',
+      tournament_name: 'Кубок Бурчалкина 2026',
+      season_year: 2026,
+      group_name: 'Группа A',
+      position: 1,
+      played: 0,
+      won: 0,
+      drawn: 0,
+      lost: 0,
+      goals_for: 0,
+      goals_against: 0,
+      points: 0,
+      team_slug: '',
+      team: '',
+      logo: '',
+    }),
+    fields: [
+      ['tournament_slug', 'Турнир', 'text'],
+      ['group_name', 'Группа', 'text'],
+      ['position', 'Место', 'number'],
+      ['team', 'Команда', 'text'],
+      ['team_slug', 'Slug команды', 'text'],
+      ['logo', 'Логотип', 'logo'],
+      ['played', 'Игр', 'number'],
+      ['won', 'Побед', 'number'],
+      ['drawn', 'Ничьих', 'number'],
+      ['lost', 'Поражений', 'number'],
+      ['goals_for', 'Забито', 'number'],
+      ['goals_against', 'Пропущено', 'number'],
+      ['points', 'Очки', 'number'],
+    ],
+  },
+  playoff: {
+    key: 'bcup_playoff_current',
+    exportName: 'playoff-current.json',
+    title: 'Сетка плей-офф',
+    help: 'Текущая сетка плей-офф. Эти матчи показываются на сайте, если у текущего турнира включён ручной режим плей-офф.',
+    defaultData: DEFAULT_PLAYOFF_ROWS,
+    empty: () => ({
+      tournament_slug: 'burchalkin-cup-2026',
+      tournament_name: 'Кубок Бурчалкина 2026',
+      bracket_group: 'top',
+      round_group: 'semifinal',
+      match_key: `playoff_${Date.now()}`,
+      sort_order: 1,
+      label: '',
+      home_team: '',
+      home_team_slug: '',
+      home_logo: '',
+      away_team: '',
+      away_team_slug: '',
+      away_logo: '',
+      home_score: 0,
+      away_score: 0,
+    }),
+    fields: [
+      ['tournament_slug', 'Турнир', 'text'],
+      ['bracket_group', 'Блок', 'select', ['top', 'placement']],
+      ['round_group', 'Раунд', 'select', ['semifinal', 'final']],
+      ['match_key', 'Ключ матча', 'text'],
+      ['sort_order', 'Порядок', 'number'],
+      ['label', 'Заголовок', 'text'],
+      ['home_team', 'Хозяева', 'text'],
+      ['home_team_slug', 'Slug хозяев', 'text'],
+      ['home_logo', 'Логотип хозяев', 'logo'],
+      ['home_score', 'Счёт хозяев', 'number'],
+      ['away_team', 'Гости', 'text'],
+      ['away_team_slug', 'Slug гостей', 'text'],
+      ['away_logo', 'Логотип гостей', 'logo'],
+      ['away_score', 'Счёт гостей', 'number'],
     ],
   },
   media: {
@@ -870,6 +1112,8 @@ function normalizeTournamentAdminItem(item) {
   return {
     ...item,
     countdown_enabled: item?.countdown_enabled !== false,
+    standings_mode: String(item?.standings_mode || 'auto').trim() || 'auto',
+    playoff_mode: String(item?.playoff_mode || 'auto').trim() || 'auto',
   };
 }
 
@@ -890,6 +1134,48 @@ function normalizeMatchAdminItem(item) {
   return {
     ...item,
     status_label: getAdminMatchStatusLabel(item?.status, item?.status_label),
+  };
+}
+
+function normalizeStandingAdminItem(item, index = 0) {
+  return {
+    ...item,
+    tournament_slug: String(item?.tournament_slug || 'burchalkin-cup-2026').trim() || 'burchalkin-cup-2026',
+    tournament_name: String(item?.tournament_name || '').trim(),
+    season_year: Number(item?.season_year || 2026) || 2026,
+    group_name: String(item?.group_name || '').trim(),
+    position: Number(item?.position || index + 1) || index + 1,
+    played: Number(item?.played || 0) || 0,
+    won: Number(item?.won || 0) || 0,
+    drawn: Number(item?.drawn || 0) || 0,
+    lost: Number(item?.lost || 0) || 0,
+    goals_for: Number(item?.goals_for || 0) || 0,
+    goals_against: Number(item?.goals_against || 0) || 0,
+    points: Number(item?.points || 0) || 0,
+    team_slug: String(item?.team_slug || '').trim(),
+    team: String(item?.team || '').trim(),
+    logo: String(item?.logo || '').trim(),
+  };
+}
+
+function normalizePlayoffAdminItem(item, index = 0) {
+  return {
+    ...item,
+    tournament_slug: String(item?.tournament_slug || 'burchalkin-cup-2026').trim() || 'burchalkin-cup-2026',
+    tournament_name: String(item?.tournament_name || '').trim(),
+    bracket_group: String(item?.bracket_group || 'top').trim() || 'top',
+    round_group: String(item?.round_group || 'semifinal').trim() || 'semifinal',
+    match_key: String(item?.match_key || `playoff_${index + 1}`).trim() || `playoff_${index + 1}`,
+    sort_order: Number(item?.sort_order || index + 1) || index + 1,
+    label: String(item?.label || '').trim(),
+    home_team: String(item?.home_team || '').trim(),
+    home_team_slug: String(item?.home_team_slug || '').trim(),
+    home_logo: String(item?.home_logo || '').trim(),
+    away_team: String(item?.away_team || '').trim(),
+    away_team_slug: String(item?.away_team_slug || '').trim(),
+    away_logo: String(item?.away_logo || '').trim(),
+    home_score: Number(item?.home_score || 0) || 0,
+    away_score: Number(item?.away_score || 0) || 0,
   };
 }
 
@@ -956,11 +1242,45 @@ function normalizeSourceData(sourceName, data) {
       featured_match_id: String(items[0]?.featured_match_id || '').trim()
     }];
   }
+  if (sourceName === 'standings') {
+    return items
+      .map((item, index) => normalizeStandingAdminItem(item, index))
+      .filter(item => String(item?.tournament_slug || '').trim() === 'burchalkin-cup-2026')
+      .sort((left, right) => {
+        const groupCompare = String(left.group_name || '').localeCompare(String(right.group_name || ''), 'ru');
+        if (groupCompare !== 0) return groupCompare;
+        return Number(left.position || 0) - Number(right.position || 0);
+      });
+  }
   if (sourceName === 'archive_standings') {
-    return items.filter(item => {
-      const tournamentSlug = String(item?.tournament_slug || '').trim();
-      return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
-    });
+    return items
+      .map((item, index) => normalizeStandingAdminItem(item, index))
+      .filter(item => {
+        const tournamentSlug = String(item?.tournament_slug || '').trim();
+        return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
+      })
+      .sort((left, right) => {
+        const tournamentCompare = String(left.tournament_slug || '').localeCompare(String(right.tournament_slug || ''), 'ru');
+        if (tournamentCompare !== 0) return tournamentCompare;
+        const groupCompare = String(left.group_name || '').localeCompare(String(right.group_name || ''), 'ru');
+        if (groupCompare !== 0) return groupCompare;
+        return Number(left.position || 0) - Number(right.position || 0);
+      });
+  }
+  if (sourceName === 'playoff') {
+    return items
+      .map((item, index) => normalizePlayoffAdminItem(item, index))
+      .sort((left, right) => {
+        const leftBracketWeight = left.bracket_group === 'top' ? 0 : 1;
+        const rightBracketWeight = right.bracket_group === 'top' ? 0 : 1;
+        if (leftBracketWeight !== rightBracketWeight) return leftBracketWeight - rightBracketWeight;
+
+        const leftRoundWeight = left.round_group === 'semifinal' ? 0 : 1;
+        const rightRoundWeight = right.round_group === 'semifinal' ? 0 : 1;
+        if (leftRoundWeight !== rightRoundWeight) return leftRoundWeight - rightRoundWeight;
+
+        return Number(left.sort_order || 0) - Number(right.sort_order || 0);
+      });
   }
   if (sourceName === 'albums') {
     return items.map((item, index) => normalizeAlbumAdminItem(item, index));
@@ -1043,6 +1363,15 @@ async function pushAdminSource(sourceName, data) {
       ...allStandings.filter(item => {
         const tournamentSlug = String(item?.tournament_slug || '').trim();
         return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
+      }),
+      ...normalizeSourceData(sourceName, data),
+    ];
+  } else if (sourceName === 'standings') {
+    const allStandings = await fetchAdminCollection(apiSourceName);
+    payload = [
+      ...allStandings.filter(item => {
+        const tournamentSlug = String(item?.tournament_slug || '').trim();
+        return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
       }),
       ...normalizeSourceData(sourceName, data),
     ];
@@ -1697,9 +2026,10 @@ function renderAlbumAdminCard(item, index) {
   `;
 }
 
-function renderTournamentAdminCard(item, index) {
+function renderTournamentAdminCard(item, index, sourceName = 'tournaments') {
   const seasonYear = Number(item?.season_year || 0);
   const isFeatured = item?.is_featured === true;
+  const isCurrentTournamentCard = sourceName === 'tournaments' && isFeatured;
   const panelNote = isFeatured
     ? 'Эта запись управляет карточкой текущего турнира на главной странице.'
     : seasonYear && seasonYear < 2026
@@ -1712,36 +2042,79 @@ function renderTournamentAdminCard(item, index) {
       gridClass: 'admin-record-grid-3',
       content: `
         <div class="admin-record-note">${escapeHtml(panelNote)}</div>
-        ${makeFieldsByKeys('tournaments', ['slug', 'name', 'season_year', 'short_label', 'status', 'location', 'start_date', 'end_date'], item, index)}
+        ${makeFieldsByKeys(sourceName, ['slug', 'name', 'season_year', 'short_label', 'status', 'location', 'start_date', 'end_date'], item, index)}
       `
     },
     {
       title: 'Визуал и настройки',
       gridClass: 'admin-record-grid-2',
-      content: makeFieldsByKeys('tournaments', ['logo', 'hero_image', 'is_featured', 'countdown_enabled'], item, index)
+      content: makeFieldsByKeys(sourceName, ['logo', 'hero_image', 'is_featured', 'countdown_enabled'], item, index)
     },
+    ...(isCurrentTournamentCard ? [{
+      title: 'Режимы данных',
+      gridClass: 'admin-record-grid-2',
+      content: `
+        <div class="admin-record-note">` +
+          'Режим <strong>auto</strong> считает данные по матчам автоматически. ' +
+          'Режим <strong>manual</strong> берёт ручные данные из разделов «Турнирная таблица» и «Сетка плей-офф».'
+        + `</div>
+        ${makeFieldsByKeys(sourceName, ['standings_mode', 'playoff_mode'], item, index)}
+      `
+    }] : []),
     {
       title: 'Описание',
       gridClass: 'admin-record-grid-1',
-      content: makeFieldsByKeys('tournaments', ['description'], item, index)
-    }
+      content: makeFieldsByKeys(sourceName, ['description'], item, index)
+    },
   ]);
 }
 
-function renderStandingAdminCard(item, index) {
+function renderStandingAdminCard(item, index, sourceName = 'archive_standings') {
   return renderSectionedAdminCard('Турнирная строка', index, [
     {
       title: 'Привязка',
       gridClass: 'admin-record-grid-3',
       content: `
         ${makeStandingClubSelect(item, index)}
-        ${makeFieldsByKeys('archive_standings', ['tournament_slug', 'group_name', 'position', 'team', 'team_slug', 'logo'], item, index)}
+        ${makeFieldsByKeys(sourceName, ['tournament_slug', 'group_name', 'position', 'team', 'team_slug', 'logo'], item, index)}
       `
     },
     {
       title: 'Статистика',
       gridClass: 'admin-record-grid-3',
-      content: makeFieldsByKeys('archive_standings', ['played', 'won', 'drawn', 'lost', 'goals_for', 'goals_against', 'points'], item, index)
+      content: makeFieldsByKeys(sourceName, ['played', 'won', 'drawn', 'lost', 'goals_for', 'goals_against', 'points'], item, index)
+    }
+  ]);
+}
+
+function renderPlayoffAdminCard(item, index) {
+  return renderSectionedAdminCard('Матч плей-офф', index, [
+    {
+      title: 'Параметры матча',
+      gridClass: 'admin-record-grid-3',
+      content: makeFieldsByKeys('playoff', ['tournament_slug', 'bracket_group', 'round_group', 'match_key', 'sort_order', 'label'], item, index)
+    },
+    {
+      title: 'Команды',
+      gridClass: 'admin-record-grid-1',
+      content: `
+        <div class="admin-match-teams-grid">
+          <div class="admin-match-team-card">
+            <div class="admin-match-team-title">Хозяева</div>
+            <div class="admin-form-grid admin-match-team-grid">
+              ${makeMatchClubSelect(item, 'home', index)}
+              ${makeFieldsByKeys('playoff', ['home_team', 'home_team_slug', 'home_logo', 'home_score'], item, index)}
+            </div>
+          </div>
+          <div class="admin-match-team-card">
+            <div class="admin-match-team-title">Гости</div>
+            <div class="admin-form-grid admin-match-team-grid">
+              ${makeMatchClubSelect(item, 'away', index)}
+              ${makeFieldsByKeys('playoff', ['away_team', 'away_team_slug', 'away_logo', 'away_score'], item, index)}
+            </div>
+          </div>
+        </div>
+      `
     }
   ]);
 }
@@ -1842,8 +2215,10 @@ function renderAdminCardBySource(sourceName, item, index, allItems) {
   if (sourceName === 'media') return renderMediaAdminCard(item);
   if (sourceName === 'albums') return renderAlbumAdminCard(item, index);
   if (sourceName === 'matches' || sourceName === 'archive_matches') return renderMatchAdminCard(item, index, allItems);
-  if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') return renderTournamentAdminCard(item, index);
-  if (sourceName === 'archive_standings') return renderStandingAdminCard(item, index);
+  if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') return renderTournamentAdminCard(item, index, sourceName);
+  if (sourceName === 'standings') return renderStandingAdminCard(item, index, 'standings');
+  if (sourceName === 'archive_standings') return renderStandingAdminCard(item, index, 'archive_standings');
+  if (sourceName === 'playoff') return renderPlayoffAdminCard(item, index);
   if (sourceName === 'clubs') return renderClubAdminCard(item, index);
   if (sourceName === 'news') return renderNewsAdminCard(item, index);
   if (sourceName === 'partners' || sourceName === 'partners_media') return renderPartnerAdminCard(item, index);
@@ -2392,7 +2767,7 @@ async function adminShowSource(sourceName, options = {}) {
     btn.classList.toggle('active', btn.dataset.source === sourceName);
   });
 
-  if ((sourceName === 'matches' || sourceName === 'archive_matches' || sourceName === 'archive_standings' || sourceName === 'media') && !defaultsCache.clubs) {
+  if ((sourceName === 'matches' || sourceName === 'archive_matches' || sourceName === 'standings' || sourceName === 'archive_standings' || sourceName === 'playoff' || sourceName === 'media') && !defaultsCache.clubs) {
     try {
       const clubs = await loadSourceData('clubs');
       defaultsCache.clubs = structuredClone(clubs);

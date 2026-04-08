@@ -232,20 +232,25 @@ document.addEventListener('error', handleCloudinaryImageFallback, true);
 async function renderStandings(selector) {
   const target = document.querySelector(selector);
   if (!target) return;
-  const [standingsResult, matchesResult] = await Promise.allSettled([
+  const [standingsResult, matchesResult, playoffResult] = await Promise.allSettled([
     fetchJson('data/standings.json'),
-    fetchJson('data/matches.json')
+    fetchJson('data/matches.json'),
+    fetchApi('/api/playoff')
   ]);
 
   const standingsData = standingsResult.status === 'fulfilled' ? standingsResult.value : [];
   const matchesData = matchesResult.status === 'fulfilled' ? matchesResult.value : [];
+  const playoffData = playoffResult.status === 'fulfilled' && Array.isArray(playoffResult.value)
+    ? playoffResult.value
+    : [];
 
   try {
     const groupedStandings = buildGroupedStandings(matchesData, standingsData);
     target.innerHTML = renderStandingsSection({
       groupedStandings,
       standings: Array.isArray(standingsData) ? standingsData : [],
-      matches: Array.isArray(matchesData) ? matchesData : []
+      matches: Array.isArray(matchesData) ? matchesData : [],
+      playoff: playoffData
     });
     initStandingsViewSwitch(target);
     if (window.i18n?.translateTextTree) {
@@ -593,6 +598,145 @@ function buildPlayoffGenericSeed(index) {
   };
 }
 
+function buildDefaultPlayoffRowsClient() {
+  return [
+    {
+      bracket_group: 'top',
+      round_group: 'semifinal',
+      match_key: 'top_sf1',
+      sort_order: 1,
+      label: 'Полуфинал 1–4 №1',
+      home_team: 'Команда 1',
+      home_logo: 'images/logo-burchalkin.webp',
+      away_team: 'Команда 2',
+      away_logo: 'images/logo-burchalkin.webp',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'top',
+      round_group: 'semifinal',
+      match_key: 'top_sf2',
+      sort_order: 2,
+      label: 'Полуфинал 1–4 №2',
+      home_team: 'Команда 3',
+      home_logo: 'images/logo-burchalkin.webp',
+      away_team: 'Команда 4',
+      away_logo: 'images/logo-burchalkin.webp',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'top',
+      round_group: 'final',
+      match_key: 'top_final',
+      sort_order: 1,
+      label: 'Матч за 1 место',
+      home_team: 'Победитель 1–4 №1',
+      away_team: 'Победитель 1–4 №2',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'top',
+      round_group: 'final',
+      match_key: 'top_third',
+      sort_order: 2,
+      label: 'Матч за 3 место',
+      home_team: 'Проигравший 1–4 №1',
+      away_team: 'Проигравший 1–4 №2',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'placement',
+      round_group: 'semifinal',
+      match_key: 'placement_sf1',
+      sort_order: 1,
+      label: 'Полуфинал 5–8 №1',
+      home_team: 'Команда 5',
+      home_logo: 'images/logo-burchalkin.webp',
+      away_team: 'Команда 6',
+      away_logo: 'images/logo-burchalkin.webp',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'placement',
+      round_group: 'semifinal',
+      match_key: 'placement_sf2',
+      sort_order: 2,
+      label: 'Полуфинал 5–8 №2',
+      home_team: 'Команда 7',
+      home_logo: 'images/logo-burchalkin.webp',
+      away_team: 'Команда 8',
+      away_logo: 'images/logo-burchalkin.webp',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'placement',
+      round_group: 'final',
+      match_key: 'placement_fifth',
+      sort_order: 1,
+      label: 'Матч за 5 место',
+      home_team: 'Победитель 5–8 №1',
+      away_team: 'Победитель 5–8 №2',
+      home_score: 0,
+      away_score: 0,
+    },
+    {
+      bracket_group: 'placement',
+      round_group: 'final',
+      match_key: 'placement_seventh',
+      sort_order: 2,
+      label: 'Матч за 7 место',
+      home_team: 'Проигравший 5–8 №1',
+      away_team: 'Проигравший 5–8 №2',
+      home_score: 0,
+      away_score: 0,
+    }
+  ];
+}
+
+function sortPlayoffRows(rows = []) {
+  return [...rows].sort((left, right) => {
+    const leftBracketWeight = String(left?.bracket_group || '') === 'top' ? 0 : 1;
+    const rightBracketWeight = String(right?.bracket_group || '') === 'top' ? 0 : 1;
+    if (leftBracketWeight !== rightBracketWeight) return leftBracketWeight - rightBracketWeight;
+
+    const leftRoundWeight = String(left?.round_group || '') === 'semifinal' ? 0 : 1;
+    const rightRoundWeight = String(right?.round_group || '') === 'semifinal' ? 0 : 1;
+    if (leftRoundWeight !== rightRoundWeight) return leftRoundWeight - rightRoundWeight;
+
+    return Number(left?.sort_order || 0) - Number(right?.sort_order || 0);
+  });
+}
+
+function createPlayoffSeedFromRow(row = {}, side = 'home') {
+  const isHome = side === 'home';
+  const label = String(isHome ? row.home_team : row.away_team || '').trim();
+  const logo = String(isHome ? row.home_logo : row.away_logo || '').trim();
+  const slug = String(isHome ? row.home_team_slug : row.away_team_slug || '').trim();
+
+  return {
+    type: slug ? 'team' : 'placeholder',
+    label,
+    logo,
+    slug
+  };
+}
+
+function createPlayoffMatchFromRow(row = {}, fallbackLabel = '') {
+  return {
+    label: String(row?.label || fallbackLabel || '').trim(),
+    home: createPlayoffSeedFromRow(row, 'home'),
+    away: createPlayoffSeedFromRow(row, 'away'),
+    homeScore: row?.home_score ?? 0,
+    awayScore: row?.away_score ?? 0,
+  };
+}
+
 function renderPlayoffSeed(seed = {}, score = '0') {
   const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
   const seedClasses = [
@@ -665,34 +809,26 @@ function renderPlayoffBandGrid(config = {}) {
   `;
 }
 
-function renderPlayoffBracket(groups = []) {
+function renderPlayoffBracket(playoffRows = []) {
+  const rows = sortPlayoffRows(Array.isArray(playoffRows) && playoffRows.length ? playoffRows : buildDefaultPlayoffRowsClient());
+  const getRow = (bracketGroup, roundGroup, sortOrder) =>
+    rows.find(row =>
+      String(row?.bracket_group || '') === bracketGroup
+      && String(row?.round_group || '') === roundGroup
+      && Number(row?.sort_order || 0) === sortOrder
+    ) || null;
+
   const topBracket = {
     title: 'Плей-офф за 1–4 места',
     roundOneTitle: 'Полуфиналы',
     roundTwoTitle: 'Финалы',
     roundOne: [
-      {
-        label: 'Полуфинал 1–4 №1',
-        home: buildPlayoffGenericSeed(1),
-        away: buildPlayoffGenericSeed(2)
-      },
-      {
-        label: 'Полуфинал 1–4 №2',
-        home: buildPlayoffGenericSeed(3),
-        away: buildPlayoffGenericSeed(4)
-      }
+      createPlayoffMatchFromRow(getRow('top', 'semifinal', 1), 'Полуфинал 1–4 №1'),
+      createPlayoffMatchFromRow(getRow('top', 'semifinal', 2), 'Полуфинал 1–4 №2')
     ],
     roundTwo: [
-      {
-        label: 'Матч за 1 место',
-        home: buildPlayoffProgressSeed('W1', 'Победитель 1–4 №1'),
-        away: buildPlayoffProgressSeed('W2', 'Победитель 1–4 №2')
-      },
-      {
-        label: 'Матч за 3 место',
-        home: buildPlayoffProgressSeed('L1', 'Проигравший 1–4 №1'),
-        away: buildPlayoffProgressSeed('L2', 'Проигравший 1–4 №2')
-      }
+      createPlayoffMatchFromRow(getRow('top', 'final', 1), 'Матч за 1 место'),
+      createPlayoffMatchFromRow(getRow('top', 'final', 2), 'Матч за 3 место')
     ]
   };
 
@@ -701,28 +837,12 @@ function renderPlayoffBracket(groups = []) {
     roundOneTitle: 'Полуфиналы',
     roundTwoTitle: 'Финалы',
     roundOne: [
-      {
-        label: 'Полуфинал 5–8 №1',
-        home: buildPlayoffGenericSeed(5),
-        away: buildPlayoffGenericSeed(6)
-      },
-      {
-        label: 'Полуфинал 5–8 №2',
-        home: buildPlayoffGenericSeed(7),
-        away: buildPlayoffGenericSeed(8)
-      }
+      createPlayoffMatchFromRow(getRow('placement', 'semifinal', 1), 'Полуфинал 5–8 №1'),
+      createPlayoffMatchFromRow(getRow('placement', 'semifinal', 2), 'Полуфинал 5–8 №2')
     ],
     roundTwo: [
-      {
-        label: 'Матч за 5 место',
-        home: buildPlayoffProgressSeed('W3', 'Победитель 5–8 №1'),
-        away: buildPlayoffProgressSeed('W4', 'Победитель 5–8 №2')
-      },
-      {
-        label: 'Матч за 7 место',
-        home: buildPlayoffProgressSeed('L3', 'Проигравший 5–8 №1'),
-        away: buildPlayoffProgressSeed('L4', 'Проигравший 5–8 №2')
-      }
+      createPlayoffMatchFromRow(getRow('placement', 'final', 1), 'Матч за 5 место'),
+      createPlayoffMatchFromRow(getRow('placement', 'final', 2), 'Матч за 7 место')
     ]
   };
 
@@ -748,7 +868,7 @@ function renderPlayoffBracket(groups = []) {
   `;
 }
 
-function renderStandingsSection({ groupedStandings = [], standings = [], matches = [] } = {}) {
+function renderStandingsSection({ groupedStandings = [], standings = [], matches = [], playoff = [] } = {}) {
   const hasGroupedStandings = Array.isArray(groupedStandings) && groupedStandings.length > 0;
   const hasOverallStandings = Array.isArray(standings) && standings.length > 0;
   const hasMatches = Array.isArray(matches) && matches.length > 0;
@@ -758,7 +878,7 @@ function renderStandingsSection({ groupedStandings = [], standings = [], matches
   const tableMarkup = hasGroupedStandings
     ? renderGroupedStandings(groupedStandings)
     : renderStandingsTable(standings);
-  const playoffMarkup = renderPlayoffBracket(groupedStandings);
+  const playoffMarkup = renderPlayoffBracket(playoff);
 
   return `
     <div class="standings-panel">

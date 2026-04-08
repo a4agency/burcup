@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS tournaments (
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'upcoming', 'active', 'completed', 'archived')),
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
   countdown_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  standings_mode TEXT NOT NULL DEFAULT 'auto' CHECK (standings_mode IN ('auto', 'manual')),
+  playoff_mode TEXT NOT NULL DEFAULT 'auto' CHECK (playoff_mode IN ('auto', 'manual')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -168,6 +170,27 @@ CREATE TABLE IF NOT EXISTS media_album_photos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS tournament_playoff_matches (
+  id BIGSERIAL PRIMARY KEY,
+  tournament_id BIGINT NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+  bracket_group TEXT NOT NULL CHECK (bracket_group IN ('top', 'placement')),
+  round_group TEXT NOT NULL CHECK (round_group IN ('semifinal', 'final')),
+  match_key TEXT NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  label TEXT NOT NULL DEFAULT '',
+  home_club_id BIGINT REFERENCES clubs(id) ON DELETE SET NULL,
+  away_club_id BIGINT REFERENCES clubs(id) ON DELETE SET NULL,
+  home_label TEXT NOT NULL DEFAULT '',
+  away_label TEXT NOT NULL DEFAULT '',
+  home_logo_path TEXT,
+  away_logo_path TEXT,
+  home_score INTEGER NOT NULL DEFAULT 0 CHECK (home_score >= 0),
+  away_score INTEGER NOT NULL DEFAULT 0 CHECK (away_score >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (tournament_id, match_key)
+);
+
 CREATE TABLE IF NOT EXISTS partner_categories (
   id BIGSERIAL PRIMARY KEY,
   slug TEXT NOT NULL UNIQUE,
@@ -240,6 +263,7 @@ CREATE INDEX IF NOT EXISTS idx_match_events_match_id ON match_events(match_id, s
 CREATE UNIQUE INDEX IF NOT EXISTS idx_match_events_unique_order ON match_events(match_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_news_articles_tournament ON news_articles(tournament_id, published_on DESC);
 CREATE INDEX IF NOT EXISTS idx_media_albums_tournament ON media_albums(tournament_id, sort_order, published_on DESC);
+CREATE INDEX IF NOT EXISTS idx_tournament_playoff_matches_order ON tournament_playoff_matches(tournament_id, bracket_group, round_group, sort_order, id);
 CREATE INDEX IF NOT EXISTS idx_media_album_photos_album ON media_album_photos(album_id, sort_order, id);
 CREATE INDEX IF NOT EXISTS idx_partner_logo_assets_partner ON partner_logo_assets(partner_id, uploaded_at DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tournament_partners_unique ON tournament_partners(tournament_id, partner_id, category_id);
@@ -280,6 +304,12 @@ BEFORE UPDATE ON media_albums
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
+DROP TRIGGER IF EXISTS tournament_playoff_matches_set_updated_at ON tournament_playoff_matches;
+CREATE TRIGGER tournament_playoff_matches_set_updated_at
+BEFORE UPDATE ON tournament_playoff_matches
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 DROP TRIGGER IF EXISTS partners_set_updated_at ON partners;
 CREATE TRIGGER partners_set_updated_at
 BEFORE UPDATE ON partners
@@ -296,7 +326,8 @@ VALUES
   ('0006', 'add_match_media_links'),
   ('0007', 'create_content_translations'),
   ('0008', 'add_match_featured_media_flag'),
-  ('0009', 'create_media_albums')
+  ('0009', 'create_media_albums'),
+  ('0010', 'add_manual_standings_and_playoff')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;
