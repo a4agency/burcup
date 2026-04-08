@@ -1663,7 +1663,6 @@ function normalizeMediaAlbum(item = {}, index = 0) {
         .map((photo, photoIndex) => ({
           image_url: String(photo?.image_url || '').trim(),
           alt_text: String(photo?.alt_text || '').trim(),
-          caption: String(photo?.caption || '').trim(),
           sort_order: Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1
         }))
         .filter(photo => photo.image_url)
@@ -1719,8 +1718,7 @@ function renderMediaAlbumPlaceholderTile(index) {
 
 function renderMediaAlbumPhotoCard(photo = {}) {
   const imageUrl = String(photo.image_url || '').trim();
-  const alt = String(photo.alt_text || photo.caption || 'Фотоальбом').trim();
-  const caption = String(photo.caption || '').trim();
+  const alt = String(photo.alt_text || 'Фотоальбом').trim();
 
   return `
     <a class="media-album-photo-card" href="${escapeHtml(imageUrl)}" target="_blank" rel="noreferrer">
@@ -1732,7 +1730,6 @@ function renderMediaAlbumPhotoCard(photo = {}) {
           width: 640
         })}
       </div>
-      ${caption ? `<div class="media-album-photo-caption">${escapeHtml(caption)}</div>` : ''}
     </a>
   `;
 }

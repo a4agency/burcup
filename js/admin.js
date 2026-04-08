@@ -911,7 +911,6 @@ function normalizeAlbumAdminItem(item, index = 0) {
       ? item.photos.map((photo, photoIndex) => ({
         image_url: String(photo?.image_url || '').trim(),
         alt_text: String(photo?.alt_text || '').trim(),
-        caption: String(photo?.caption || '').trim(),
         sort_order: Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1
       }))
       : []
@@ -1633,10 +1632,6 @@ function renderAlbumPhotoEditor(photo, itemIndex, photoIndex) {
           <label>Порядок</label>
           <input type="number" min="1" step="1" value="${Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1}" data-photo-key="sort_order" data-index="${itemIndex}" data-photo-index="${photoIndex}">
         </div>
-        <div class="admin-field" style="grid-column:1/-1">
-          <label>Подпись под фото</label>
-          <textarea data-photo-key="caption" data-index="${itemIndex}" data-photo-index="${photoIndex}">${escapeHtml(photo?.caption || '')}</textarea>
-        </div>
       </div>
     </div>
   `;
@@ -1682,7 +1677,7 @@ function renderAlbumAdminCard(item, index) {
 
         <div class="admin-record-section">
           <div class="admin-record-section-head">Фотографии альбома</div>
-          <div class="admin-record-note">Загружай фотографии через кнопку «Загрузить файл». Файлы уйдут во внешний storage, а на сайт и в базу сохранится только их URL и подписи.</div>
+          <div class="admin-record-note">Загружай фотографии через кнопку «Загрузить файл». Файлы уйдут во внешний storage, а на сайт и в базу сохранится только их URL.</div>
           <div class="admin-album-photos">
             <div class="admin-inline-actions admin-album-bulk-actions">
               <label class="admin-small-btn">
@@ -1951,7 +1946,7 @@ function readFormData(sourceName) {
 
       item.photos = photoIndexes.map(photoIndex => {
         const photoBase = structuredClone((Array.isArray(item.photos) ? item.photos[photoIndex] : null) || {});
-        ['image_url', 'alt_text', 'caption', 'sort_order'].forEach((key) => {
+        ['image_url', 'alt_text', 'sort_order'].forEach((key) => {
           const field = card.querySelector(`[data-photo-key="${key}"][data-index="${sourceIndex}"][data-photo-index="${photoIndex}"]`);
           if (!field) return;
           let value = field.value;
@@ -2057,7 +2052,6 @@ function renderForm(sourceName, data) {
         {
           image_url: '',
           alt_text: '',
-          caption: '',
           sort_order: currentPhotos.length + 1
         }
       ];
@@ -2106,7 +2100,6 @@ function renderForm(sourceName, data) {
         appendedPhotos.push({
           image_url: url,
           alt_text: String(file.name || '').replace(/\.[^.]+$/, '').trim(),
-          caption: '',
           sort_order: currentPhotos.length + appendedPhotos.length + 1
         });
       }

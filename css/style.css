@@ -456,12 +456,6 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   background:#f4f7fd;
 }
 
-.media-album-photo-caption{
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.5;
-}
-
 .media-album-photo-card.is-placeholder .media-album-photo-frame{
   border-style:dashed;
   color:var(--muted);
@@ -7248,6 +7242,7 @@ button,
 }
 
 .admin-album-bulk-actions{
+  display:flex;
   align-items:center;
   justify-content:flex-start;
   gap:12px;
@@ -7262,6 +7257,19 @@ button,
   align-items:center;
   justify-content:center;
   box-sizing:border-box;
+  white-space:nowrap;
+  border-radius:16px;
+  font-size:18px;
+  font-weight:800;
+  line-height:1;
+}
+
+.admin-album-bulk-actions .admin-add{
+  margin-top:0;
+}
+
+.admin-album-bulk-actions > *{
+  margin:0;
 }
 
 .admin-album-photo-row{
