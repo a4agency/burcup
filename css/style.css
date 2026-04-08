@@ -4148,6 +4148,260 @@ button,
   text-align:left !important;
 }
 
+.standings-panel{
+  display:grid;
+  gap:22px;
+}
+
+.standings-switch{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.standings-switch-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  appearance:none;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--navy);
+  border-radius:999px;
+  padding:12px 22px;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+  transition:background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.standings-switch-btn:hover,
+.standings-switch-btn:focus-visible{
+  border-color:rgba(13,43,99,.28);
+}
+
+.standings-switch-btn.is-active{
+  background:var(--navy);
+  border-color:var(--navy);
+  color:#fff;
+}
+
+.standings-view{
+  display:grid;
+  gap:24px;
+}
+
+.group-standings-stack{
+  display:grid;
+  gap:28px;
+}
+
+.group-standings-block{
+  display:grid;
+  gap:14px;
+}
+
+.group-standings-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.group-standings-title{
+  margin:0;
+  color:var(--navy);
+  font-size:clamp(26px, 2.6vw, 34px);
+  line-height:1.05;
+}
+
+.playoff-layout{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:24px;
+}
+
+.playoff-bracket-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:22px;
+  box-shadow:var(--shadow);
+  padding:24px;
+  display:grid;
+  gap:20px;
+}
+
+.playoff-bracket-head{
+  display:grid;
+  gap:8px;
+}
+
+.playoff-bracket-title{
+  margin:0;
+  color:var(--navy);
+  font-size:clamp(24px, 2.4vw, 30px);
+  line-height:1.08;
+}
+
+.playoff-bracket-subtitle{
+  margin:0;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.45;
+}
+
+.playoff-rounds{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:18px;
+  align-items:start;
+}
+
+.playoff-round{
+  display:grid;
+  gap:12px;
+}
+
+.playoff-round-title{
+  color:var(--navy);
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.playoff-round-matches{
+  display:grid;
+  gap:14px;
+}
+
+.playoff-match-card,
+.playoff-empty-card{
+  background:#f8fbff;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:18px;
+}
+
+.playoff-match-card{
+  display:grid;
+  gap:12px;
+}
+
+.playoff-match-label{
+  color:var(--navy);
+  font-size:16px;
+  font-weight:800;
+}
+
+.playoff-seed-row{
+  display:grid;
+  grid-template-columns:auto auto minmax(0, 1fr);
+  gap:10px;
+  align-items:center;
+  color:var(--navy);
+  text-decoration:none;
+}
+
+.playoff-seed-row-link:hover{
+  opacity:.82;
+}
+
+.playoff-seed-row.is-placeholder{
+  grid-template-columns:auto minmax(0, 1fr);
+}
+
+.playoff-seed-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:38px;
+  height:38px;
+  padding:0 10px;
+  border-radius:999px;
+  background:#e9f0fb;
+  color:var(--navy);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+.playoff-seed-logo img{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  display:block;
+}
+
+.playoff-seed-name{
+  min-width:0;
+  font-size:16px;
+  font-weight:700;
+  line-height:1.35;
+}
+
+.playoff-match-divider{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:16px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+
+.playoff-empty-card{
+  display:grid;
+  gap:10px;
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.5;
+}
+
+.playoff-empty-card strong{
+  color:var(--navy);
+  font-size:18px;
+}
+
+@media (max-width: 1180px){
+  .playoff-layout{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 860px){
+  .playoff-rounds{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 640px){
+  .standings-switch-btn{
+    width:100%;
+    justify-content:center;
+  }
+
+  .group-standings-title,
+  .playoff-bracket-title{
+    font-size:24px;
+  }
+
+  .playoff-bracket-card{
+    padding:18px;
+  }
+
+  .playoff-seed-row,
+  .playoff-seed-row.is-placeholder{
+    grid-template-columns:auto minmax(0, 1fr);
+  }
+
+  .playoff-seed-logo{
+    display:none;
+  }
+}
+
 .standings-team{
   display:grid !important;
   grid-template-columns:28px minmax(0,1fr);

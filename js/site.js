@@ -232,10 +232,30 @@ document.addEventListener('error', handleCloudinaryImageFallback, true);
 async function renderStandings(selector) {
   const target = document.querySelector(selector);
   if (!target) return;
+  const [standingsResult, matchesResult] = await Promise.allSettled([
+    fetchJson('data/standings.json'),
+    fetchJson('data/matches.json')
+  ]);
+
+  const standingsData = standingsResult.status === 'fulfilled' ? standingsResult.value : [];
+  const matchesData = matchesResult.status === 'fulfilled' ? matchesResult.value : [];
+
   try {
-    const data = await fetchJson('data/standings.json');
-    target.innerHTML = renderStandingsTable(data);
+    const groupedStandings = buildGroupedStandings(matchesData, standingsData);
+    target.innerHTML = renderStandingsSection({
+      groupedStandings,
+      standings: Array.isArray(standingsData) ? standingsData : [],
+      matches: Array.isArray(matchesData) ? matchesData : []
+    });
+    initStandingsViewSwitch(target);
+    if (window.i18n?.translateTextTree) {
+      window.i18n.translateTextTree(target);
+    }
+    if (typeof runAutoFit === 'function') {
+      runAutoFit();
+    }
   } catch (error) {
+    console.error('Failed to render standings block.', error);
     target.innerHTML = '<div class="standings-card"><div style="padding:18px">Не удалось загрузить таблицу.</div></div>';
   }
 }
@@ -298,6 +318,462 @@ function renderStandingsTable(data = []) {
       </div>
     </div>
   `;
+}
+
+function normalizeStandingsGroupKey(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return '';
+
+  const compact = raw.replace(/\s+/g, '');
+  const lastChar = compact.slice(-1);
+  if (lastChar === 'a' || lastChar === 'а') return 'A';
+  if (lastChar === 'b' || lastChar === 'в') return 'B';
+
+  return '';
+}
+
+function getStandingsGroupLabel(groupKey) {
+  return groupKey ? `Группа ${groupKey}` : '';
+}
+
+function inferTeamSlug(item = {}) {
+  const explicitSlug = String(item.slug || item.team_slug || '').trim();
+  if (explicitSlug) return explicitSlug;
+
+  const logoPath = String(item.logo || item.home_logo || item.away_logo || '').trim();
+  const logoSlugMatch = logoPath.match(/team-([a-z0-9-]+)\.(?:png|jpe?g|webp|svg)$/i);
+  return logoSlugMatch?.[1] ? logoSlugMatch[1].toLowerCase() : '';
+}
+
+function parseMatchScore(match = {}) {
+  const explicitHome = Number(match.home_score);
+  const explicitAway = Number(match.away_score);
+  if (Number.isFinite(explicitHome) && Number.isFinite(explicitAway)) {
+    return { home: explicitHome, away: explicitAway };
+  }
+
+  const scoreLabel = String(match.score || '').trim();
+  const scoreMatch = scoreLabel.match(/(\d+)\s*[:\-]\s*(\d+)/);
+  if (!scoreMatch) return null;
+
+  return {
+    home: Number(scoreMatch[1]),
+    away: Number(scoreMatch[2])
+  };
+}
+
+function compareStandingsRows(a, b) {
+  const pointsDiff = Number(b.points || 0) - Number(a.points || 0);
+  if (pointsDiff !== 0) return pointsDiff;
+
+  const goalDiffA = Number(a.goals_for || 0) - Number(a.goals_against || 0);
+  const goalDiffB = Number(b.goals_for || 0) - Number(b.goals_against || 0);
+  if (goalDiffB !== goalDiffA) return goalDiffB - goalDiffA;
+
+  const goalsForDiff = Number(b.goals_for || 0) - Number(a.goals_for || 0);
+  if (goalsForDiff !== 0) return goalsForDiff;
+
+  return String(a.team || '').localeCompare(String(b.team || ''), 'ru');
+}
+
+function createStandingsTeamSeed(team = {}, fallback = {}) {
+  return {
+    slug: inferTeamSlug(team) || inferTeamSlug(fallback),
+    team: String(team.team || team.name || fallback.team || fallback.name || '').trim(),
+    logo: String(team.logo || fallback.logo || '').trim(),
+    city: String(team.city || fallback.city || '').trim(),
+    country: String(team.country || fallback.country || '').trim(),
+    played: 0,
+    won: 0,
+    drawn: 0,
+    lost: 0,
+    goals_for: 0,
+    goals_against: 0,
+    points: 0
+  };
+}
+
+function upsertGroupedStandingsTeam(bucket, groupKey, clubSeed = {}) {
+  const key = String(inferTeamSlug(clubSeed) || clubSeed.team || clubSeed.name || '').trim().toLowerCase();
+  if (!key) return null;
+
+  if (!bucket.has(key)) {
+    bucket.set(key, createStandingsTeamSeed(clubSeed));
+  } else {
+    const current = bucket.get(key);
+    current.slug = current.slug || inferTeamSlug(clubSeed);
+    current.logo = current.logo || String(clubSeed.logo || '').trim();
+    current.city = current.city || String(clubSeed.city || '').trim();
+    current.country = current.country || String(clubSeed.country || '').trim();
+    current.team = current.team || String(clubSeed.team || clubSeed.name || '').trim();
+  }
+
+  const record = bucket.get(key);
+  record.group = getStandingsGroupLabel(groupKey);
+  return record;
+}
+
+function buildGroupedStandingsFromRows(rows = []) {
+  const groups = new Map();
+
+  (Array.isArray(rows) ? rows : []).forEach(item => {
+    const groupKey = normalizeStandingsGroupKey(item.group);
+    if (!groupKey) return;
+
+    if (!groups.has(groupKey)) groups.set(groupKey, []);
+    groups.get(groupKey).push({
+      ...item,
+      slug: inferTeamSlug(item),
+      team: item.team || item.name || '',
+      logo: item.logo || '',
+      city: item.city || '',
+      country: item.country || '',
+      group: getStandingsGroupLabel(groupKey),
+      goals_for: Number(String(item.goals || '').split('-')[0]) || Number(item.goals_for || 0),
+      goals_against: Number(String(item.goals || '').split('-')[1]) || Number(item.goals_against || 0)
+    });
+  });
+
+  return Array.from(groups.entries())
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+    .map(([groupKey, groupRows]) => ({
+      key: groupKey,
+      label: getStandingsGroupLabel(groupKey),
+      rows: groupRows
+        .sort(compareStandingsRows)
+        .map((row, index) => ({
+          ...row,
+          position: index + 1,
+          goals: formatStandingGoals(row)
+        }))
+    }));
+}
+
+function buildGroupedStandingsFromMatches(matches = [], fallbackStandings = []) {
+  const buckets = new Map([
+    ['A', new Map()],
+    ['B', new Map()]
+  ]);
+  let hasGroupMatches = false;
+
+  (Array.isArray(matches) ? matches : []).forEach(match => {
+    const groupKey = normalizeStandingsGroupKey(match.group || match.stage || match.round);
+    if (!groupKey || !buckets.has(groupKey)) return;
+
+    hasGroupMatches = true;
+    const fallbackHome = (Array.isArray(fallbackStandings) ? fallbackStandings : []).find(item =>
+      inferTeamSlug(item) === inferTeamSlug({ slug: match.home_team_slug, logo: match.home_logo })
+    ) || {};
+    const fallbackAway = (Array.isArray(fallbackStandings) ? fallbackStandings : []).find(item =>
+      inferTeamSlug(item) === inferTeamSlug({ slug: match.away_team_slug, logo: match.away_logo })
+    ) || {};
+
+    const groupBucket = buckets.get(groupKey);
+    const home = upsertGroupedStandingsTeam(groupBucket, groupKey, {
+      ...fallbackHome,
+      slug: match.home_team_slug || fallbackHome.slug,
+      team: match.home_team || fallbackHome.team || fallbackHome.name,
+      logo: match.home_logo || fallbackHome.logo,
+      city: match.home_city || fallbackHome.city,
+      country: match.home_country || fallbackHome.country
+    });
+    const away = upsertGroupedStandingsTeam(groupBucket, groupKey, {
+      ...fallbackAway,
+      slug: match.away_team_slug || fallbackAway.slug,
+      team: match.away_team || fallbackAway.team || fallbackAway.name,
+      logo: match.away_logo || fallbackAway.logo,
+      city: match.away_city || fallbackAway.city,
+      country: match.away_country || fallbackAway.country
+    });
+
+    if (!home || !away) return;
+    if (String(match.status || '').trim().toLowerCase() !== 'done') return;
+
+    const parsedScore = parseMatchScore(match);
+    if (!parsedScore) return;
+
+    home.played += 1;
+    away.played += 1;
+    home.goals_for += parsedScore.home;
+    home.goals_against += parsedScore.away;
+    away.goals_for += parsedScore.away;
+    away.goals_against += parsedScore.home;
+
+    if (parsedScore.home > parsedScore.away) {
+      home.won += 1;
+      away.lost += 1;
+      home.points += 3;
+    } else if (parsedScore.home < parsedScore.away) {
+      away.won += 1;
+      home.lost += 1;
+      away.points += 3;
+    } else {
+      home.drawn += 1;
+      away.drawn += 1;
+      home.points += 1;
+      away.points += 1;
+    }
+  });
+
+  if (!hasGroupMatches) {
+    return buildGroupedStandingsFromRows(fallbackStandings);
+  }
+
+  return Array.from(buckets.entries())
+    .map(([groupKey, bucket]) => ({
+      key: groupKey,
+      label: getStandingsGroupLabel(groupKey),
+      rows: Array.from(bucket.values())
+        .sort(compareStandingsRows)
+        .map((row, index) => ({
+          ...row,
+          position: index + 1,
+          goals: `${row.goals_for}-${row.goals_against}`
+        }))
+    }))
+    .filter(group => group.rows.length);
+}
+
+function buildGroupedStandings(matches = [], fallbackStandings = []) {
+  const groupedFromMatches = buildGroupedStandingsFromMatches(matches, fallbackStandings);
+  if (groupedFromMatches.length) return groupedFromMatches;
+  return buildGroupedStandingsFromRows(fallbackStandings);
+}
+
+function renderGroupedStandings(groups = []) {
+  return `
+    <div class="group-standings-stack">
+      ${groups.map(group => `
+        <section class="group-standings-block">
+          <div class="group-standings-head">
+            <h3 class="group-standings-title">${escapeHtml(group.label)}</h3>
+          </div>
+          ${renderStandingsTable(group.rows)}
+        </section>
+      `).join('')}
+    </div>
+  `;
+}
+
+function buildPlayoffSeed(groups = [], groupKey, position) {
+  const group = groups.find(item => item.key === groupKey);
+  const team = Array.isArray(group?.rows) ? group.rows[position - 1] : null;
+
+  if (team) {
+    return {
+      type: 'team',
+      seed: `${groupKey}${position}`,
+      label: team.team,
+      logo: team.logo,
+      slug: team.slug || team.team_slug || ''
+    };
+  }
+
+  return {
+    type: 'placeholder',
+    seed: `${groupKey}${position}`,
+    label: `${position} место группы ${groupKey}`
+  };
+}
+
+function buildPlayoffProgressSeed(seed, label) {
+  return {
+    type: 'placeholder',
+    seed,
+    label
+  };
+}
+
+function renderPlayoffSeed(seed = {}) {
+  const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
+  const body = `
+    <span class="playoff-seed-badge">${escapeHtml(seed.seed || '')}</span>
+    ${seed.logo
+      ? `<span class="playoff-seed-logo">${renderImageMarkup({ src: seed.logo, alt: seed.label || '', width: 72 })}</span>`
+      : ''}
+    <span class="playoff-seed-name">${escapeHtml(seed.label || '—')}</span>
+  `;
+
+  if (clubUrl && seed.type === 'team') {
+    return `<a class="playoff-seed-row playoff-seed-row-link" href="${escapeHtml(clubUrl)}">${body}</a>`;
+  }
+
+  return `<div class="playoff-seed-row${seed.type === 'placeholder' ? ' is-placeholder' : ''}">${body}</div>`;
+}
+
+function renderPlayoffMatch(match = {}) {
+  return `
+    <article class="playoff-match-card">
+      <div class="playoff-match-label">${escapeHtml(match.label || '')}</div>
+      ${renderPlayoffSeed(match.home)}
+      <div class="playoff-match-divider">vs</div>
+      ${renderPlayoffSeed(match.away)}
+    </article>
+  `;
+}
+
+function renderPlayoffBracketCard(config = {}) {
+  return `
+    <section class="playoff-bracket-card">
+      <div class="playoff-bracket-head">
+        <h3 class="playoff-bracket-title">${escapeHtml(config.title || '')}</h3>
+        ${config.subtitle ? `<p class="playoff-bracket-subtitle">${escapeHtml(config.subtitle)}</p>` : ''}
+      </div>
+      <div class="playoff-rounds">
+        <div class="playoff-round">
+          <div class="playoff-round-title">${escapeHtml(config.roundOneTitle || '')}</div>
+          <div class="playoff-round-matches">
+            ${(config.roundOne || []).map(renderPlayoffMatch).join('')}
+          </div>
+        </div>
+        <div class="playoff-round">
+          <div class="playoff-round-title">${escapeHtml(config.roundTwoTitle || '')}</div>
+          <div class="playoff-round-matches">
+            ${(config.roundTwo || []).map(renderPlayoffMatch).join('')}
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderPlayoffBracket(groups = []) {
+  const hasCompleteGroups = ['A', 'B'].every(groupKey => {
+    const group = groups.find(item => item.key === groupKey);
+    return Array.isArray(group?.rows) && group.rows.length >= 4;
+  });
+
+  if (!hasCompleteGroups) {
+    return `
+      <div class="playoff-empty-card">
+        <strong>Сетка плей-офф появится здесь.</strong>
+        <span>Как только в обеих группах будет по четыре команды, сайт автоматически покажет пары за 1–4 и 5–8 места.</span>
+      </div>
+    `;
+  }
+
+  const topBracket = {
+    title: 'Плей-офф за 1–4 места',
+    subtitle: 'Полуфиналы определяются по текущим местам в группах.',
+    roundOneTitle: '1/2 финала',
+    roundTwoTitle: 'Финальный день',
+    roundOne: [
+      {
+        label: 'Полуфинал 1',
+        home: buildPlayoffSeed(groups, 'A', 1),
+        away: buildPlayoffSeed(groups, 'B', 2)
+      },
+      {
+        label: 'Полуфинал 2',
+        home: buildPlayoffSeed(groups, 'B', 1),
+        away: buildPlayoffSeed(groups, 'A', 2)
+      }
+    ],
+    roundTwo: [
+      {
+        label: 'Матч за 3 место',
+        home: buildPlayoffProgressSeed('L1', 'Проигравший полуфинала 1'),
+        away: buildPlayoffProgressSeed('L2', 'Проигравший полуфинала 2')
+      },
+      {
+        label: 'Матч за 1 место',
+        home: buildPlayoffProgressSeed('W1', 'Победитель полуфинала 1'),
+        away: buildPlayoffProgressSeed('W2', 'Победитель полуфинала 2')
+      }
+    ]
+  };
+
+  const placementBracket = {
+    title: 'Плей-офф за 5–8 места',
+    subtitle: 'Команды третьих и четвёртых мест продолжают борьбу за позиции.',
+    roundOneTitle: 'Полуфиналы 5–8',
+    roundTwoTitle: 'Финальный день',
+    roundOne: [
+      {
+        label: 'Полуфинал 5–8 №1',
+        home: buildPlayoffSeed(groups, 'A', 3),
+        away: buildPlayoffSeed(groups, 'B', 4)
+      },
+      {
+        label: 'Полуфинал 5–8 №2',
+        home: buildPlayoffSeed(groups, 'B', 3),
+        away: buildPlayoffSeed(groups, 'A', 4)
+      }
+    ],
+    roundTwo: [
+      {
+        label: 'Матч за 7 место',
+        home: buildPlayoffProgressSeed('L3', 'Проигравший 5–8 №1'),
+        away: buildPlayoffProgressSeed('L4', 'Проигравший 5–8 №2')
+      },
+      {
+        label: 'Матч за 5 место',
+        home: buildPlayoffProgressSeed('W3', 'Победитель 5–8 №1'),
+        away: buildPlayoffProgressSeed('W4', 'Победитель 5–8 №2')
+      }
+    ]
+  };
+
+  return `
+    <div class="playoff-layout">
+      ${renderPlayoffBracketCard(topBracket)}
+      ${renderPlayoffBracketCard(placementBracket)}
+    </div>
+  `;
+}
+
+function renderStandingsSection({ groupedStandings = [], standings = [], matches = [] } = {}) {
+  const hasGroupedStandings = Array.isArray(groupedStandings) && groupedStandings.length > 0;
+  const hasOverallStandings = Array.isArray(standings) && standings.length > 0;
+  const hasMatches = Array.isArray(matches) && matches.length > 0;
+  if (!hasGroupedStandings && !hasOverallStandings && !hasMatches) {
+    return '<div class="standings-card"><div style="padding:18px">Не удалось загрузить таблицу.</div></div>';
+  }
+  const tableMarkup = hasGroupedStandings
+    ? renderGroupedStandings(groupedStandings)
+    : renderStandingsTable(standings);
+  const playoffMarkup = renderPlayoffBracket(groupedStandings);
+
+  return `
+    <div class="standings-panel">
+      <div class="standings-switch" role="tablist" aria-label="Выбор формата турнира">
+        <button class="standings-switch-btn is-active" type="button" data-standings-switch="table" aria-selected="true">Турнирная таблица</button>
+        <button class="standings-switch-btn" type="button" data-standings-switch="playoff" aria-selected="false">Сетка плей-офф</button>
+      </div>
+      <div class="standings-view is-active" data-standings-view="table">
+        ${tableMarkup}
+      </div>
+      <div class="standings-view" data-standings-view="playoff" hidden>
+        ${playoffMarkup}
+      </div>
+    </div>
+  `;
+}
+
+function initStandingsViewSwitch(root) {
+  const buttons = Array.from(root.querySelectorAll('[data-standings-switch]'));
+  const views = Array.from(root.querySelectorAll('[data-standings-view]'));
+  if (!buttons.length || !views.length) return;
+
+  const setActiveView = (nextView) => {
+    buttons.forEach(button => {
+      const isActive = button.dataset.standingsSwitch === nextView;
+      button.classList.toggle('is-active', isActive);
+      button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    views.forEach(view => {
+      const isActive = view.dataset.standingsView === nextView;
+      view.classList.toggle('is-active', isActive);
+      view.hidden = !isActive;
+    });
+  };
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      setActiveView(button.dataset.standingsSwitch || 'table');
+    });
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
