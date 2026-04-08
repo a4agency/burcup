@@ -778,14 +778,18 @@ function renderPlayoffBracket(groups = []) {
       <div class="playoff-board-head">
         <h3 class="playoff-board-title">Сетка плей-офф</h3>
       </div>
-      <div class="playoff-board-grid-head">
-        <div class="playoff-board-grid-col-title playoff-board-grid-col-title-semis">${escapeHtml(topBracket.roundOneTitle || '')}</div>
-        <div class="playoff-board-grid-head-spacer" aria-hidden="true"></div>
-        <div class="playoff-board-grid-col-title">${escapeHtml(topBracket.roundTwoTitle || '')}</div>
-      </div>
-      <div class="playoff-board-grid">
-        ${renderPlayoffBandGrid(topBracket)}
-        ${renderPlayoffBandGrid(placementBracket)}
+      <div class="playoff-board-shell">
+        <div class="playoff-board-shell-inner">
+          <div class="playoff-board-grid-head">
+            <div class="playoff-board-grid-col-title playoff-board-grid-col-title-semis">${escapeHtml(topBracket.roundOneTitle || '')}</div>
+            <div class="playoff-board-grid-head-spacer" aria-hidden="true"></div>
+            <div class="playoff-board-grid-col-title">${escapeHtml(topBracket.roundTwoTitle || '')}</div>
+          </div>
+          <div class="playoff-board-grid">
+            ${renderPlayoffBandGrid(topBracket)}
+            ${renderPlayoffBandGrid(placementBracket)}
+          </div>
+        </div>
       </div>
     </div>
   `;

@@ -4316,11 +4316,20 @@ button,
   padding:24px;
   display:grid;
   gap:24px;
+  overflow:hidden;
 }
 
 .playoff-board-head{
   display:grid;
   gap:0;
+}
+
+.playoff-board-shell{
+  min-width:0;
+}
+
+.playoff-board-shell-inner{
+  min-width:0;
 }
 
 .playoff-board-title{
@@ -4677,62 +4686,32 @@ button,
   font-size:18px;
 }
 
-@media (max-width: 1180px){
-  .playoff-layout,
-  .playoff-pyramid-shell{
-    grid-template-columns:1fr;
+@media (min-width: 641px) and (max-width: 1180px){
+  .playoff-board-shell{
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-bottom:8px;
+    scrollbar-width:none;
+  }
+
+  .playoff-board-shell::-webkit-scrollbar{
+    display:none;
+  }
+
+  .playoff-board-shell-inner{
+    min-width:820px;
   }
 
   .playoff-board-grid-head,
   .playoff-band-grid{
-    grid-template-columns:1fr;
-    grid-template-areas:
-      "label"
-      "semis"
-      "finals";
-    gap:16px;
+    grid-template-columns:314px 136px 314px;
+    justify-content:center;
   }
 
   .playoff-board-grid-col-title,
   .playoff-band-grid-label{
-    justify-self:start;
-    text-align:left;
-  }
-
-  .playoff-band-grid-connector,
-  .playoff-board-grid-head-spacer{
-    display:none;
-  }
-}
-
-@media (max-width: 860px){
-  .playoff-rounds{
-    grid-template-columns:1fr;
-  }
-
-  .playoff-band-grid-stage-semis .playoff-band-grid-slot::after,
-  .playoff-band-grid-stage-finals .playoff-band-grid-slot::before{
-    display:none;
-  }
-
-  .playoff-board-round.is-left .playoff-match-card,
-  .playoff-board-round.is-right .playoff-match-card,
-  .playoff-round:first-child .playoff-match-card,
-  .playoff-round:last-child .playoff-match-card{
-    padding-left:18px;
-    padding-right:18px;
-  }
-
-  .playoff-match-card{
-    width:100%;
-  }
-
-  .playoff-board-round.is-left .playoff-match-card::after,
-  .playoff-board-round.is-right .playoff-match-card::before,
-  .playoff-round:first-child .playoff-match-card::before,
-  .playoff-round:first-child .playoff-match-card::after,
-  .playoff-round:last-child .playoff-match-card::before{
-    display:none;
+    justify-self:stretch;
+    text-align:center;
   }
 }
 
@@ -4757,6 +4736,40 @@ button,
 
   .playoff-bracket-card{
     padding:18px;
+  }
+
+  .playoff-board-shell{
+    overflow:visible;
+  }
+
+  .playoff-board-shell-inner{
+    min-width:0;
+  }
+
+  .playoff-board-grid-head,
+  .playoff-band-grid{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "label"
+      "semis"
+      "finals";
+    gap:16px;
+  }
+
+  .playoff-board-grid-col-title,
+  .playoff-band-grid-label{
+    justify-self:start;
+    text-align:left;
+  }
+
+  .playoff-band-grid-connector,
+  .playoff-board-grid-head-spacer{
+    display:none;
+  }
+
+  .playoff-band-grid-stage-semis .playoff-band-grid-slot::after,
+  .playoff-band-grid-stage-finals .playoff-band-grid-slot::before{
+    display:none;
   }
 
   .playoff-board,
