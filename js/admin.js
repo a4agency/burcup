@@ -100,10 +100,10 @@ const DEFAULT_PLAYOFF_ROWS = [
     sort_order: 1,
     label: 'Полуфинал 1–4 №1',
     home_team: 'Команда 1',
-    home_team_slug: '',
+    home_team_slug: 'placeholder-team-1',
     home_logo: 'images/logo-burchalkin.webp',
     away_team: 'Команда 2',
-    away_team_slug: '',
+    away_team_slug: 'placeholder-team-2',
     away_logo: 'images/logo-burchalkin.webp',
     home_score: 0,
     away_score: 0,
@@ -117,10 +117,10 @@ const DEFAULT_PLAYOFF_ROWS = [
     sort_order: 2,
     label: 'Полуфинал 1–4 №2',
     home_team: 'Команда 3',
-    home_team_slug: '',
+    home_team_slug: 'placeholder-team-3',
     home_logo: 'images/logo-burchalkin.webp',
     away_team: 'Команда 4',
-    away_team_slug: '',
+    away_team_slug: 'placeholder-team-4',
     away_logo: 'images/logo-burchalkin.webp',
     home_score: 0,
     away_score: 0,
@@ -168,10 +168,10 @@ const DEFAULT_PLAYOFF_ROWS = [
     sort_order: 1,
     label: 'Полуфинал 5–8 №1',
     home_team: 'Команда 5',
-    home_team_slug: '',
+    home_team_slug: 'placeholder-team-5',
     home_logo: 'images/logo-burchalkin.webp',
     away_team: 'Команда 6',
-    away_team_slug: '',
+    away_team_slug: 'placeholder-team-6',
     away_logo: 'images/logo-burchalkin.webp',
     home_score: 0,
     away_score: 0,
@@ -185,10 +185,10 @@ const DEFAULT_PLAYOFF_ROWS = [
     sort_order: 2,
     label: 'Полуфинал 5–8 №2',
     home_team: 'Команда 7',
-    home_team_slug: '',
+    home_team_slug: 'placeholder-team-7',
     home_logo: 'images/logo-burchalkin.webp',
     away_team: 'Команда 8',
-    away_team_slug: '',
+    away_team_slug: 'placeholder-team-8',
     away_logo: 'images/logo-burchalkin.webp',
     home_score: 0,
     away_score: 0,
@@ -1685,7 +1685,15 @@ function getAdminClubsCatalog() {
   const base = localClubs || defaultsCache.clubs || ADMIN_SOURCES.clubs.defaultData || [];
   return normalizeSourceData('clubs', structuredClone(base))
     .filter(club => club && String(club.name || '').trim())
-    .sort((left, right) => String(left.name || '').localeCompare(String(right.name || ''), 'ru'));
+    .sort((left, right) => {
+      const leftIsPlaceholder = /^placeholder-team-\d+$/i.test(String(left.slug || '').trim());
+      const rightIsPlaceholder = /^placeholder-team-\d+$/i.test(String(right.slug || '').trim());
+      if (leftIsPlaceholder !== rightIsPlaceholder) {
+        return leftIsPlaceholder ? 1 : -1;
+      }
+
+      return String(left.name || '').localeCompare(String(right.name || ''), 'ru');
+    });
 }
 
 function findAdminClubByMatchSide(item, side) {

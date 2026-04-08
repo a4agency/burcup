@@ -594,7 +594,9 @@ const clubsQuery = `
     c.hero_image_url,
     c.description,
     c.is_active
-  ORDER BY c.name;
+  ORDER BY
+    CASE WHEN c.slug LIKE 'placeholder-team-%' THEN 1 ELSE 0 END,
+    c.name;
 `;
 
 const clubDetailsQuery = `
@@ -772,10 +774,10 @@ function buildDefaultPlayoffRows(tournamentSlug = 'burchalkin-cup-2026') {
       sort_order: 1,
       label: 'Полуфинал 1–4 №1',
       home_team: 'Команда 1',
-      home_team_slug: '',
+      home_team_slug: 'placeholder-team-1',
       home_logo: logo,
       away_team: 'Команда 2',
-      away_team_slug: '',
+      away_team_slug: 'placeholder-team-2',
       away_logo: logo,
       home_score: 0,
       away_score: 0,
@@ -788,10 +790,10 @@ function buildDefaultPlayoffRows(tournamentSlug = 'burchalkin-cup-2026') {
       sort_order: 2,
       label: 'Полуфинал 1–4 №2',
       home_team: 'Команда 3',
-      home_team_slug: '',
+      home_team_slug: 'placeholder-team-3',
       home_logo: logo,
       away_team: 'Команда 4',
-      away_team_slug: '',
+      away_team_slug: 'placeholder-team-4',
       away_logo: logo,
       home_score: 0,
       away_score: 0,
@@ -836,10 +838,10 @@ function buildDefaultPlayoffRows(tournamentSlug = 'burchalkin-cup-2026') {
       sort_order: 1,
       label: 'Полуфинал 5–8 №1',
       home_team: 'Команда 5',
-      home_team_slug: '',
+      home_team_slug: 'placeholder-team-5',
       home_logo: logo,
       away_team: 'Команда 6',
-      away_team_slug: '',
+      away_team_slug: 'placeholder-team-6',
       away_logo: logo,
       home_score: 0,
       away_score: 0,
@@ -852,10 +854,10 @@ function buildDefaultPlayoffRows(tournamentSlug = 'burchalkin-cup-2026') {
       sort_order: 2,
       label: 'Полуфинал 5–8 №2',
       home_team: 'Команда 7',
-      home_team_slug: '',
+      home_team_slug: 'placeholder-team-7',
       home_logo: logo,
       away_team: 'Команда 8',
-      away_team_slug: '',
+      away_team_slug: 'placeholder-team-8',
       away_logo: logo,
       home_score: 0,
       away_score: 0,
@@ -1349,7 +1351,9 @@ async function getAdminClubs(client) {
       description,
       is_active
     FROM clubs
-    ORDER BY name;
+    ORDER BY
+      CASE WHEN slug LIKE 'placeholder-team-%' THEN 1 ELSE 0 END,
+      name;
   `);
 
   return rows.map(row => ({
