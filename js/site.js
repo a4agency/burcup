@@ -1593,38 +1593,153 @@ function renderMediaFeatureCard(item) {
   `;
 }
 
-const MEDIA_ALBUM_PLACEHOLDERS = [
+const MEDIA_ALBUM_FALLBACKS = [
   {
-    title: 'Фотоальбом открытия',
-    excerpt: 'Фотографии церемонии открытия и первых эмоций турнира.',
-    badge: 'Скоро'
+    slug: 'opening-day-2026',
+    title: 'Открытие турнира',
+    tournament_slug: 'burchalkin-cup-2026',
+    published_on: '2026-05-15',
+    badge: 'Фотоальбом',
+    cover_image_url: 'images/news-1.webp',
+    cover_alt_text: 'Открытие Кубка Бурчалкина 2026',
+    card_excerpt: 'Церемония открытия, первые эмоции игроков, болельщики и стартовые кадры турнира.',
+    description: 'В этом альбоме позже появятся фотографии церемонии открытия, первых матчей и атмосферы стартового дня турнира.',
+    sort_order: 1,
+    is_visible: true,
+    photos: []
   },
   {
-    title: 'Лучшие кадры игрового дня',
-    excerpt: 'Подборка игровых моментов, болельщиков и атмосферы матчей.',
-    badge: 'Скоро'
+    slug: 'matchday-one-2026',
+    title: 'Первый игровой день',
+    tournament_slug: 'burchalkin-cup-2026',
+    published_on: '2026-05-15',
+    badge: 'Фотоальбом',
+    cover_image_url: 'images/news-2.webp',
+    cover_alt_text: 'Первый игровой день Кубка Бурчалкина 2026',
+    card_excerpt: 'Подборка лучших кадров матчей, скамейки, болельщиков и деталей первого дня турнира.',
+    description: 'Здесь будет собрана визуальная история первого игрового дня: матчи, голы, эмоции и работа всей турнирной команды.',
+    sort_order: 2,
+    is_visible: true,
+    photos: []
   },
   {
+    slug: 'closing-ceremony-2026',
     title: 'Награждение и закрытие',
-    excerpt: 'Отдельный альбом с награждением, кубком и финальными кадрами.',
-    badge: 'Скоро'
+    tournament_slug: 'burchalkin-cup-2026',
+    published_on: '2026-05-17',
+    badge: 'Фотоальбом',
+    cover_image_url: 'images/news-3.webp',
+    cover_alt_text: 'Награждение и закрытие Кубка Бурчалкина 2026',
+    card_excerpt: 'Кубок, медали, победители, эмоции команд и финальные кадры церемонии закрытия.',
+    description: 'Этот альбом предназначен для фотографий награждения, вручения кубка и всех финальных моментов турнира.',
+    sort_order: 3,
+    is_visible: true,
+    photos: []
   }
 ];
 
-function renderMediaAlbumPlaceholderCard(item) {
+function getDefaultMediaAlbums() {
+  return MEDIA_ALBUM_FALLBACKS.map(item => ({
+    ...item,
+    photos: Array.isArray(item.photos) ? item.photos.map(photo => ({ ...photo })) : []
+  }));
+}
+
+function normalizeMediaAlbum(item = {}, index = 0) {
+  return {
+    slug: String(item.slug || '').trim(),
+    title: String(item.title || '').trim(),
+    tournament_slug: String(item.tournament_slug || '').trim(),
+    published_on: String(item.published_on || '').trim(),
+    badge: String(item.badge || 'Фотоальбом').trim() || 'Фотоальбом',
+    cover_image_url: String(item.cover_image_url || '').trim(),
+    cover_alt_text: String(item.cover_alt_text || item.title || '').trim(),
+    card_excerpt: String(item.card_excerpt || '').trim(),
+    description: String(item.description || '').trim(),
+    sort_order: Number(item.sort_order || index + 1) || index + 1,
+    is_visible: item.is_visible !== false,
+    photos: Array.isArray(item.photos)
+      ? item.photos
+        .map((photo, photoIndex) => ({
+          image_url: String(photo?.image_url || '').trim(),
+          alt_text: String(photo?.alt_text || '').trim(),
+          caption: String(photo?.caption || '').trim(),
+          sort_order: Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1
+        }))
+        .filter(photo => photo.image_url)
+        .sort((left, right) => left.sort_order - right.sort_order)
+      : []
+  };
+}
+
+function formatMediaAlbumPublishedOn(value) {
+  return formatTournamentDisplayDate(value) || 'Фотографии будут добавлены позднее';
+}
+
+function getMediaAlbumHref(item = {}) {
+  const slug = String(item.slug || '').trim();
+  return slug ? `media-album.html?slug=${encodeURIComponent(slug)}` : 'multimedia.html';
+}
+
+function renderMediaAlbumCard(item) {
+  const album = normalizeMediaAlbum(item);
+  const coverMarkup = album.cover_image_url
+    ? renderImageMarkup({
+      src: album.cover_image_url,
+      alt: album.cover_alt_text || album.title,
+      className: 'media-album-cover-img',
+      width: 960
+    })
+    : '<div class="media-album-icon">Фотоальбом</div>';
+
   return `
-    <article class="news-preview-card media-album-card">
+    <a class="news-preview-card media-album-card" href="${escapeHtml(getMediaAlbumHref(album))}">
       <div class="news-preview-cover media-album-cover">
-        <span class="archive-stat-chip media-album-badge">${escapeHtml(item.badge || 'Скоро')}</span>
-        <div class="media-album-icon">Фотоальбом</div>
+        ${coverMarkup}
+        <span class="archive-stat-chip media-album-badge">${escapeHtml(album.badge || 'Фотоальбом')}</span>
       </div>
       <div class="news-preview-content media-album-content">
-        <div class="news-preview-date">Будущий материал</div>
-        <h3>${escapeHtml(item.title || '')}</h3>
-        <p>${escapeHtml(item.excerpt || '')}</p>
+        <div class="news-preview-date">${escapeHtml(formatMediaAlbumPublishedOn(album.published_on))}</div>
+        <h3>${escapeHtml(album.title || '')}</h3>
+        <p>${escapeHtml(album.card_excerpt || album.description || 'Фотографии турнира появятся здесь позже.')}</p>
       </div>
-    </article>
+    </a>
   `;
+}
+
+function renderMediaAlbumPlaceholderTile(index) {
+  return `
+    <div class="media-album-photo-card is-placeholder" aria-hidden="true">
+      <div class="media-album-photo-frame">
+        <span>Фото ${index + 1}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderMediaAlbumPhotoCard(photo = {}) {
+  const imageUrl = String(photo.image_url || '').trim();
+  const alt = String(photo.alt_text || photo.caption || 'Фотоальбом').trim();
+  const caption = String(photo.caption || '').trim();
+
+  return `
+    <a class="media-album-photo-card" href="${escapeHtml(imageUrl)}" target="_blank" rel="noreferrer">
+      <div class="media-album-photo-frame">
+        ${renderImageMarkup({
+          src: imageUrl,
+          alt,
+          className: 'media-album-photo-image',
+          width: 640
+        })}
+      </div>
+      ${caption ? `<div class="media-album-photo-caption">${escapeHtml(caption)}</div>` : ''}
+    </a>
+  `;
+}
+
+function findMediaAlbumBySlug(albums = [], slug = '') {
+  const normalizedSlug = String(slug || '').trim();
+  return albums.find(item => String(item?.slug || '').trim() === normalizedSlug) || null;
 }
 
 function renderMediaOverviewCards(matches = [], storiesCount = 0) {
@@ -1701,6 +1816,10 @@ async function renderMultimediaPage() {
 
   try {
     const matchesRaw = await fetchJson('data/matches.json');
+    const albumsRaw = await fetchApi('/api/media/albums');
+    const albums = Array.isArray(albumsRaw) && albumsRaw.length
+      ? albumsRaw.map((item, index) => normalizeMediaAlbum(item, index)).filter(item => item.is_visible !== false)
+      : getDefaultMediaAlbums().map((item, index) => normalizeMediaAlbum(item, index));
     const allMatches = sortMediaMatches(Array.isArray(matchesRaw) ? matchesRaw : []);
     const featuredMatch = pickFeaturedMediaMatch(allMatches);
     const matches = sortMatchesChronologically(allMatches.filter(hasAnyMatchMedia));
@@ -1713,7 +1832,9 @@ async function renderMultimediaPage() {
       ? matches.map(renderMediaMatchCard).join('')
       : '<div class="card media-empty-card">Материалы матчей появятся после публикации первых эфиров.</div>';
 
-    storiesTarget.innerHTML = MEDIA_ALBUM_PLACEHOLDERS.map(renderMediaAlbumPlaceholderCard).join('');
+    storiesTarget.innerHTML = albums.length
+      ? albums.map(renderMediaAlbumCard).join('')
+      : '<div class="card media-empty-card">Фотоальбомы появятся здесь после публикации первых фотоматериалов.</div>';
 
     if (featuredMatch) initMatchMediaTabs(featuredTarget);
     initMediaLibrarySlider();
@@ -1721,7 +1842,109 @@ async function renderMultimediaPage() {
   } catch (error) {
     featuredTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить главный эфир.</div>';
     libraryTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить материалы матчей.</div>';
-    storiesTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить фоторепортажи.</div>';
+    storiesTarget.innerHTML = getDefaultMediaAlbums().map(renderMediaAlbumCard).join('');
+  }
+}
+
+async function renderMediaAlbumPage() {
+  const root = document.querySelector('#media-album-page-root');
+  if (!root) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const requestedSlug = String(params.get('slug') || '').trim();
+  const fallbackAlbums = getDefaultMediaAlbums().map((item, index) => normalizeMediaAlbum(item, index));
+
+  try {
+    const albumsRaw = await fetchApi('/api/media/albums');
+    const albums = Array.isArray(albumsRaw) && albumsRaw.length
+      ? albumsRaw.map((item, index) => normalizeMediaAlbum(item, index))
+      : fallbackAlbums;
+
+    let album = null;
+    if (requestedSlug) {
+      const remoteAlbum = await fetchApi(`/api/media/albums/${encodeURIComponent(requestedSlug)}`);
+      album = remoteAlbum ? normalizeMediaAlbum(remoteAlbum) : findMediaAlbumBySlug(albums, requestedSlug);
+    }
+
+    if (!album) {
+      album = findMediaAlbumBySlug(albums, requestedSlug) || albums[0] || fallbackAlbums[0] || null;
+    }
+
+    if (!album) {
+      root.innerHTML = '<div class="card">Фотоальбом пока недоступен.</div>';
+      return;
+    }
+
+    document.title = `Burchalkin Cup — ${album.title || 'Фотоальбом'}`;
+    const photos = Array.isArray(album.photos) ? album.photos : [];
+    const placeholdersCount = Math.max(0, 16 - photos.length);
+    const photoGridMarkup = [
+      ...photos.map(renderMediaAlbumPhotoCard),
+      ...Array.from({ length: placeholdersCount }, (_, index) => renderMediaAlbumPlaceholderTile(photos.length + index))
+    ].join('');
+
+    root.innerHTML = `
+      <article class="media-album-page-card">
+        <a class="news-article-back" href="multimedia.html">← Все фотоальбомы</a>
+        <div class="media-album-page-topline">
+          <span class="archive-stat-chip">${escapeHtml(album.badge || 'Фотоальбом')}</span>
+          <span class="media-album-page-date">${escapeHtml(formatMediaAlbumPublishedOn(album.published_on))}</span>
+        </div>
+        <h1 class="media-album-page-title">${escapeHtml(album.title || '')}</h1>
+        ${album.card_excerpt ? `<p class="media-album-page-lead">${escapeHtml(album.card_excerpt)}</p>` : ''}
+        ${album.description ? `<p class="media-album-page-description">${escapeHtml(album.description)}</p>` : ''}
+        ${album.cover_image_url ? `
+          <div class="media-album-page-cover">
+            ${renderImageMarkup({
+              src: album.cover_image_url,
+              alt: album.cover_alt_text || album.title,
+              className: 'media-album-page-cover-image',
+              width: 1600,
+              loading: 'eager',
+              decoding: 'async'
+            })}
+          </div>
+        ` : ''}
+        <div class="home-block-head media-album-grid-head">
+          <h2 class="section-title home-block-title">Фотографии альбома</h2>
+          <div class="home-block-link">${photos.length ? `${photos.length} фото` : 'Скоро здесь появится сетка фотографий'}</div>
+        </div>
+        <div class="media-album-grid">${photoGridMarkup}</div>
+      </article>
+    `;
+    runAutoFit();
+  } catch (error) {
+    const album = findMediaAlbumBySlug(fallbackAlbums, requestedSlug) || fallbackAlbums[0] || null;
+    if (!album) {
+      root.innerHTML = '<div class="card">Не удалось загрузить фотоальбом.</div>';
+      return;
+    }
+
+    root.innerHTML = `
+      <article class="media-album-page-card">
+        <a class="news-article-back" href="multimedia.html">← Все фотоальбомы</a>
+        <div class="media-album-page-topline">
+          <span class="archive-stat-chip">${escapeHtml(album.badge || 'Фотоальбом')}</span>
+          <span class="media-album-page-date">${escapeHtml(formatMediaAlbumPublishedOn(album.published_on))}</span>
+        </div>
+        <h1 class="media-album-page-title">${escapeHtml(album.title || '')}</h1>
+        ${album.card_excerpt ? `<p class="media-album-page-lead">${escapeHtml(album.card_excerpt)}</p>` : ''}
+        ${album.description ? `<p class="media-album-page-description">${escapeHtml(album.description)}</p>` : ''}
+        ${album.cover_image_url ? `
+          <div class="media-album-page-cover">
+            ${renderImageMarkup({
+              src: album.cover_image_url,
+              alt: album.cover_alt_text || album.title,
+              className: 'media-album-page-cover-image',
+              width: 1600,
+              loading: 'eager',
+              decoding: 'async'
+            })}
+          </div>
+        ` : ''}
+        <div class="media-album-grid">${Array.from({ length: 16 }, (_, index) => renderMediaAlbumPlaceholderTile(index)).join('')}</div>
+      </article>
+    `;
   }
 }
 
@@ -2180,6 +2403,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderUpcomingMatches();
   renderHomeNews();
   renderMultimediaPage();
+  renderMediaAlbumPage();
   renderMatchesPage();
   renderNewsPage();
   renderNewsArticlePage();

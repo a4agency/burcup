@@ -1207,6 +1207,174 @@ async function getAdminStandings(client) {
   }));
 }
 
+async function getMediaAlbumPhotoMap(client, albumIds = []) {
+  if (!albumIds.length) return new Map();
+
+  const { rows } = await client.query(`
+    SELECT
+      album_id,
+      image_url,
+      alt_text,
+      caption,
+      sort_order
+    FROM media_album_photos
+    WHERE album_id = ANY($1::bigint[])
+    ORDER BY album_id, sort_order, id;
+  `, [albumIds]);
+
+  return rows.reduce((acc, row) => {
+    const albumId = Number(row.album_id);
+    if (!acc.has(albumId)) acc.set(albumId, []);
+    acc.get(albumId).push({
+      image_url: row.image_url || '',
+      alt_text: row.alt_text || '',
+      caption: row.caption || '',
+      sort_order: parseInteger(row.sort_order, 0),
+    });
+    return acc;
+  }, new Map());
+}
+
+async function getAdminAlbums(client) {
+  const { rows } = await client.query(`
+    SELECT
+      a.id,
+      a.slug,
+      a.title,
+      a.card_excerpt,
+      a.description,
+      a.badge,
+      a.cover_image_url,
+      a.cover_alt_text,
+      TO_CHAR(a.published_on, 'YYYY-MM-DD') AS published_on,
+      a.sort_order,
+      a.is_visible,
+      t.slug AS tournament_slug
+    FROM media_albums a
+    LEFT JOIN tournaments t ON t.id = a.tournament_id
+    ORDER BY a.sort_order, a.published_on DESC NULLS LAST, a.id;
+  `);
+
+  const photoMap = await getMediaAlbumPhotoMap(client, rows.map(row => Number(row.id)));
+
+  return rows.map(row => ({
+    slug: row.slug,
+    title: row.title,
+    tournament_slug: row.tournament_slug || '',
+    published_on: normalizeDate(row.published_on),
+    badge: row.badge || 'Фотоальбом',
+    cover_image_url: row.cover_image_url || '',
+    cover_alt_text: row.cover_alt_text || row.title,
+    card_excerpt: row.card_excerpt || '',
+    description: row.description || '',
+    sort_order: parseInteger(row.sort_order, 0),
+    is_visible: row.is_visible !== false,
+    photos: photoMap.get(Number(row.id)) || [],
+  }));
+}
+
+async function replaceAlbums(client, payload) {
+  const items = ensureArray(payload);
+  const tournaments = await client.query('SELECT id, slug FROM tournaments');
+  const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
+  const slugs = [];
+
+  for (const item of items) {
+    const title = normalizeString(item.title);
+    const slug = normalizeString(item.slug) || slugify(title);
+    if (!slug || !title) {
+      throw new Error('Each album must have slug and title');
+    }
+
+    const tournamentSlug = normalizeString(item.tournament_slug);
+    const tournamentId = tournamentSlug ? tournamentMap.get(tournamentSlug) || null : null;
+    if (tournamentSlug && !tournamentId) {
+      throw new Error(`Tournament not found for album: ${tournamentSlug}`);
+    }
+
+    slugs.push(slug);
+
+    const albumResult = await client.query(`
+      INSERT INTO media_albums (
+        slug,
+        tournament_id,
+        title,
+        card_excerpt,
+        description,
+        badge,
+        cover_image_url,
+        cover_alt_text,
+        published_on,
+        sort_order,
+        is_visible
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      ON CONFLICT (slug) DO UPDATE
+      SET
+        tournament_id = EXCLUDED.tournament_id,
+        title = EXCLUDED.title,
+        card_excerpt = EXCLUDED.card_excerpt,
+        description = EXCLUDED.description,
+        badge = EXCLUDED.badge,
+        cover_image_url = EXCLUDED.cover_image_url,
+        cover_alt_text = EXCLUDED.cover_alt_text,
+        published_on = EXCLUDED.published_on,
+        sort_order = EXCLUDED.sort_order,
+        is_visible = EXCLUDED.is_visible
+      RETURNING id;
+    `, [
+      slug,
+      tournamentId,
+      title,
+      normalizeString(item.card_excerpt),
+      normalizeString(item.description),
+      normalizeString(item.badge) || 'Фотоальбом',
+      nullIfEmpty(item.cover_image_url),
+      normalizeString(item.cover_alt_text) || title,
+      nullIfEmpty(item.published_on),
+      parseInteger(item.sort_order, 0),
+      parseBoolean(item.is_visible, true),
+    ]);
+
+    const albumId = Number(albumResult.rows[0].id);
+    await client.query('DELETE FROM media_album_photos WHERE album_id = $1', [albumId]);
+
+    const photos = ensureArray(item.photos)
+      .map((photo, index) => ({
+        image_url: normalizeString(photo?.image_url),
+        alt_text: normalizeString(photo?.alt_text),
+        caption: normalizeString(photo?.caption),
+        sort_order: parseInteger(photo?.sort_order, index + 1),
+      }))
+      .filter(photo => photo.image_url);
+
+    for (const photo of photos) {
+      await client.query(`
+        INSERT INTO media_album_photos (
+          album_id,
+          image_url,
+          alt_text,
+          caption,
+          sort_order
+        )
+        VALUES ($1,$2,$3,$4,$5);
+      `, [
+        albumId,
+        photo.image_url,
+        photo.alt_text || '',
+        photo.caption || '',
+        photo.sort_order,
+      ]);
+    }
+  }
+
+  if (slugs.length) {
+    await client.query('DELETE FROM media_albums WHERE NOT (slug = ANY($1::text[]))', [slugs]);
+  } else {
+    await client.query('DELETE FROM media_albums');
+  }
+}
+
 async function replaceTournaments(client, payload) {
   const items = ensureArray(payload);
   const slugs = [];
@@ -1972,6 +2140,8 @@ async function loadAdminResource(client, resource) {
       return getAdminPartners(client);
     case 'standings':
       return getAdminStandings(client);
+    case 'albums':
+      return getAdminAlbums(client);
     default:
       throw new Error('Unknown admin resource');
   }
@@ -1991,6 +2161,8 @@ async function saveAdminResource(client, resource, payload) {
       return replacePartners(client, payload);
     case 'standings':
       return replaceStandings(client, payload);
+    case 'albums':
+      return replaceAlbums(client, payload);
     default:
       throw new Error('Unknown admin resource');
   }
@@ -2015,6 +2187,8 @@ app.get('/', (req, res) => {
       '/api/matches',
       '/api/news',
       '/api/results',
+      '/api/media/albums',
+      '/api/media/albums/:slug',
       '/api/translate',
       '/api/admin/session',
       '/api/admin/:resource',
@@ -2350,6 +2524,99 @@ app.get('/api/news', async (req, res, next) => {
       tournament_slug: row.tournament_slug || '',
       tournament_name: row.tournament_name || '',
     })));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/media/albums', async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        a.id,
+        a.slug,
+        a.title,
+        a.card_excerpt,
+        a.description,
+        a.badge,
+        a.cover_image_url,
+        a.cover_alt_text,
+        TO_CHAR(a.published_on, 'YYYY-MM-DD') AS published_on,
+        a.sort_order,
+        t.slug AS tournament_slug,
+        t.name AS tournament_name,
+        COUNT(p.id) AS photos_count
+      FROM media_albums a
+      LEFT JOIN tournaments t ON t.id = a.tournament_id
+      LEFT JOIN media_album_photos p ON p.album_id = a.id
+      WHERE a.is_visible = TRUE
+      GROUP BY a.id, t.slug, t.name
+      ORDER BY a.sort_order, a.published_on DESC NULLS LAST, a.id;
+    `);
+
+    res.json(rows.map(row => ({
+      slug: row.slug,
+      title: row.title,
+      tournament_slug: row.tournament_slug || '',
+      tournament_name: row.tournament_name || '',
+      published_on: normalizeDate(row.published_on),
+      badge: row.badge || 'Фотоальбом',
+      cover_image_url: row.cover_image_url || '',
+      cover_alt_text: row.cover_alt_text || row.title,
+      card_excerpt: row.card_excerpt || '',
+      description: row.description || '',
+      sort_order: parseInteger(row.sort_order, 0),
+      photos_count: parseInteger(row.photos_count, 0),
+    })));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/media/albums/:slug', async (req, res, next) => {
+  try {
+    const albumResult = await pool.query(`
+      SELECT
+        a.id,
+        a.slug,
+        a.title,
+        a.card_excerpt,
+        a.description,
+        a.badge,
+        a.cover_image_url,
+        a.cover_alt_text,
+        TO_CHAR(a.published_on, 'YYYY-MM-DD') AS published_on,
+        a.sort_order,
+        t.slug AS tournament_slug,
+        t.name AS tournament_name
+      FROM media_albums a
+      LEFT JOIN tournaments t ON t.id = a.tournament_id
+      WHERE a.slug = $1
+        AND a.is_visible = TRUE
+      LIMIT 1;
+    `, [req.params.slug]);
+
+    if (!albumResult.rows.length) {
+      return res.status(404).json({ error: 'Album not found' });
+    }
+
+    const album = albumResult.rows[0];
+    const photos = await getMediaAlbumPhotoMap(pool, [Number(album.id)]);
+
+    res.json({
+      slug: album.slug,
+      title: album.title,
+      tournament_slug: album.tournament_slug || '',
+      tournament_name: album.tournament_name || '',
+      published_on: normalizeDate(album.published_on),
+      badge: album.badge || 'Фотоальбом',
+      cover_image_url: album.cover_image_url || '',
+      cover_alt_text: album.cover_alt_text || album.title,
+      card_excerpt: album.card_excerpt || '',
+      description: album.description || '',
+      sort_order: parseInteger(album.sort_order, 0),
+      photos: photos.get(Number(album.id)) || [],
+    });
   } catch (error) {
     next(error);
   }

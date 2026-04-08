@@ -45,6 +45,51 @@ const DEFAULT_PARTNERS = [
   note: '',
 }));
 
+const DEFAULT_MEDIA_ALBUMS = [
+  {
+    slug: 'opening-day-2026',
+    title: 'Открытие турнира',
+    tournament_slug: 'burchalkin-cup-2026',
+    published_on: '2026-05-15',
+    badge: 'Фотоальбом',
+    cover_image_url: 'images/news-1.webp',
+    cover_alt_text: 'Открытие Кубка Бурчалкина 2026',
+    card_excerpt: 'Церемония открытия, первые эмоции игроков и стартовые кадры турнира.',
+    description: 'Комментарий к альбому. Здесь можно описать, что вошло в фотоотчёт и какой момент турнира он показывает.',
+    sort_order: 1,
+    is_visible: true,
+    photos: []
+  },
+  {
+    slug: 'matchday-one-2026',
+    title: 'Первый игровой день',
+    tournament_slug: 'burchalkin-cup-2026',
+    published_on: '2026-05-15',
+    badge: 'Фотоальбом',
+    cover_image_url: 'images/news-2.webp',
+    cover_alt_text: 'Первый игровой день Кубка Бурчалкина 2026',
+    card_excerpt: 'Ключевые кадры матчей, болельщиков и атмосферы первого дня турнира.',
+    description: 'Комментарий к альбому. Здесь можно описать, какие матчи и какие события попали в этот фотоальбом.',
+    sort_order: 2,
+    is_visible: true,
+    photos: []
+  },
+  {
+    slug: 'closing-ceremony-2026',
+    title: 'Награждение и закрытие',
+    tournament_slug: 'burchalkin-cup-2026',
+    published_on: '2026-05-17',
+    badge: 'Фотоальбом',
+    cover_image_url: 'images/news-3.webp',
+    cover_alt_text: 'Награждение и закрытие Кубка Бурчалкина 2026',
+    card_excerpt: 'Кубок, медали, победители и финальные кадры церемонии закрытия.',
+    description: 'Комментарий к альбому. Здесь можно описать церемонию награждения, победителей и завершающие моменты турнира.',
+    sort_order: 3,
+    is_visible: true,
+    photos: []
+  }
+];
+
 const ADMIN_TOKEN_KEY = 'bcup_admin_session_token';
 
 function escapeHtml(value) {
@@ -370,6 +415,40 @@ const ADMIN_SOURCES = {
     }),
     fields: [
       ['featured_match_id', 'Главный матч', 'text'],
+    ],
+  },
+  albums: {
+    key: 'bcup_media_albums',
+    exportName: 'media-albums.json',
+    title: 'Фотоальбомы',
+    help: 'Карточки фотоальбомов на странице «Медиа» и сами альбомы с фотографиями. Обложки и фотографии лучше загружать во внешний storage, а в базе хранить только URL.',
+    defaultData: DEFAULT_MEDIA_ALBUMS,
+    empty: () => ({
+      slug: '',
+      title: '',
+      tournament_slug: 'burchalkin-cup-2026',
+      published_on: '',
+      badge: 'Фотоальбом',
+      cover_image_url: '',
+      cover_alt_text: '',
+      card_excerpt: '',
+      description: '',
+      sort_order: 0,
+      is_visible: true,
+      photos: []
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['title', 'Название альбома', 'text'],
+      ['tournament_slug', 'Турнир', 'text'],
+      ['published_on', 'Дата публикации', 'date'],
+      ['badge', 'Бейдж карточки', 'text'],
+      ['sort_order', 'Порядок', 'number'],
+      ['is_visible', 'Показывать на сайте', 'checkbox'],
+      ['cover_image_url', 'Обложка карточки', 'image'],
+      ['cover_alt_text', 'Alt обложки', 'text'],
+      ['card_excerpt', 'Подпись на карточке', 'textarea'],
+      ['description', 'Комментарий к альбому', 'textarea'],
     ],
   },
   archive_matches: {
@@ -814,6 +893,31 @@ function normalizeMatchAdminItem(item) {
   };
 }
 
+function normalizeAlbumAdminItem(item, index = 0) {
+  return {
+    ...item,
+    slug: String(item?.slug || '').trim(),
+    title: String(item?.title || '').trim(),
+    tournament_slug: String(item?.tournament_slug || '').trim(),
+    published_on: String(item?.published_on || '').trim(),
+    badge: String(item?.badge || 'Фотоальбом').trim() || 'Фотоальбом',
+    cover_image_url: String(item?.cover_image_url || '').trim(),
+    cover_alt_text: String(item?.cover_alt_text || item?.title || '').trim(),
+    card_excerpt: String(item?.card_excerpt || '').trim(),
+    description: String(item?.description || '').trim(),
+    sort_order: Number(item?.sort_order || index + 1) || index + 1,
+    is_visible: item?.is_visible !== false,
+    photos: Array.isArray(item?.photos)
+      ? item.photos.map((photo, photoIndex) => ({
+        image_url: String(photo?.image_url || '').trim(),
+        alt_text: String(photo?.alt_text || '').trim(),
+        caption: String(photo?.caption || '').trim(),
+        sort_order: Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1
+      }))
+      : []
+  };
+}
+
 function normalizeSourceData(sourceName, data) {
   const sourceMeta = getAdminSourceMeta(sourceName);
   const items = Array.isArray(data) ? data : [];
@@ -858,6 +962,9 @@ function normalizeSourceData(sourceName, data) {
       const tournamentSlug = String(item?.tournament_slug || '').trim();
       return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
     });
+  }
+  if (sourceName === 'albums') {
+    return items.map((item, index) => normalizeAlbumAdminItem(item, index));
   }
   if (sourceMeta?.filterCategory) {
     return items.filter(item => String(item?.category || 'general') === sourceMeta.filterCategory);
@@ -1467,6 +1574,119 @@ function renderMediaAdminCard(item) {
   `;
 }
 
+function makeAlbumPhotoImageField(photo, itemIndex, photoIndex) {
+  const safeValue = String(photo?.image_url || '').trim();
+  return `
+    <div class="admin-field admin-field-photo" style="grid-column:1/-1">
+      <label>Фотография</label>
+      <input
+        type="text"
+        value="${safeValue}"
+        data-photo-key="image_url"
+        data-index="${itemIndex}"
+        data-photo-index="${photoIndex}"
+        class="admin-image-input admin-album-photo-input"
+      >
+      <div class="admin-inline-actions">
+        <label class="admin-small-btn">
+          Загрузить файл
+          <input
+            type="file"
+            accept="image/*"
+            data-upload-image="image_url"
+            data-index="${itemIndex}"
+            data-photo-index="${photoIndex}"
+            style="display:none"
+          >
+        </label>
+      </div>
+      <div class="admin-preview-box admin-album-photo-preview">
+        ${safeValue ? `<img src="${safeValue}" alt="preview">` : '<div>Превью появится здесь</div>'}
+      </div>
+    </div>
+  `;
+}
+
+function renderAlbumPhotoEditor(photo, itemIndex, photoIndex) {
+  return `
+    <div class="admin-album-photo-row" data-index="${itemIndex}" data-photo-row="${photoIndex}">
+      <div class="admin-album-photo-head">
+        <strong>Фото #${photoIndex + 1}</strong>
+        <button type="button" class="admin-item-remove admin-album-photo-remove" data-remove-album-photo="${photoIndex}" data-index="${itemIndex}">Удалить фото</button>
+      </div>
+      <div class="admin-form-grid admin-record-grid-2 admin-album-photo-grid">
+        ${makeAlbumPhotoImageField(photo, itemIndex, photoIndex)}
+        <div class="admin-field">
+          <label>Alt текст</label>
+          <input type="text" value="${escapeHtml(photo?.alt_text || '')}" data-photo-key="alt_text" data-index="${itemIndex}" data-photo-index="${photoIndex}">
+        </div>
+        <div class="admin-field">
+          <label>Порядок</label>
+          <input type="number" min="1" step="1" value="${Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1}" data-photo-key="sort_order" data-index="${itemIndex}" data-photo-index="${photoIndex}">
+        </div>
+        <div class="admin-field" style="grid-column:1/-1">
+          <label>Подпись под фото</label>
+          <textarea data-photo-key="caption" data-index="${itemIndex}" data-photo-index="${photoIndex}">${escapeHtml(photo?.caption || '')}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAlbumAdminCard(item, index) {
+  const photos = Array.isArray(item?.photos) ? item.photos : [];
+  return `
+    <div class="admin-item-card admin-record-card admin-album-card" data-item-index="${index}">
+      <div class="admin-item-head">
+        <strong>Фотоальбом #${index + 1}</strong>
+        <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+      </div>
+
+      <div class="admin-record-layout">
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Основная информация</div>
+          <div class="admin-form-grid admin-record-grid-3">
+            ${makeFieldsByKeys('albums', ['slug', 'title', 'tournament_slug', 'published_on', 'badge', 'sort_order', 'is_visible'], item, index)}
+          </div>
+        </div>
+
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Карточка альбома</div>
+          <div class="admin-form-grid admin-record-grid-2">
+            ${makeFieldsByKeys('albums', ['cover_image_url', 'cover_alt_text'], item, index)}
+            <div class="admin-field" style="grid-column:1/-1">
+              <label>Подпись на карточке</label>
+              <textarea data-key="card_excerpt" data-index="${index}">${escapeHtml(item?.card_excerpt || '')}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Комментарий к альбому</div>
+          <div class="admin-form-grid admin-record-grid-1">
+            <div class="admin-field" style="grid-column:1/-1">
+              <label>Комментарий</label>
+              <textarea data-key="description" data-index="${index}">${escapeHtml(item?.description || '')}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Фотографии альбома</div>
+          <div class="admin-record-note">Загружай фотографии через кнопку «Загрузить файл». Файлы уйдут во внешний storage, а на сайт и в базу сохранится только их URL и подписи.</div>
+          <div class="admin-album-photos">
+            ${photos.length
+              ? photos.map((photo, photoIndex) => renderAlbumPhotoEditor(photo, index, photoIndex)).join('')
+              : '<div class="admin-match-preview-empty">Пока в альбоме нет фотографий. Добавь фото ниже.</div>'
+            }
+            <button type="button" class="admin-add admin-album-photo-add" data-add-album-photo="${index}">+ Добавить фото</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderTournamentAdminCard(item, index) {
   const seasonYear = Number(item?.season_year || 0);
   const isFeatured = item?.is_featured === true;
@@ -1610,6 +1830,7 @@ function renderPartnerSourceCards(sourceName, data) {
 
 function renderAdminCardBySource(sourceName, item, index, allItems) {
   if (sourceName === 'media') return renderMediaAdminCard(item);
+  if (sourceName === 'albums') return renderAlbumAdminCard(item, index);
   if (sourceName === 'matches' || sourceName === 'archive_matches') return renderMatchAdminCard(item, index, allItems);
   if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') return renderTournamentAdminCard(item, index);
   if (sourceName === 'archive_standings') return renderStandingAdminCard(item, index);
@@ -1705,6 +1926,27 @@ function readFormData(sourceName) {
       if (type === 'checkbox') value = value === 'true';
       item[key] = value;
     });
+
+    if (sourceName === 'albums') {
+      const photoIndexes = Array.from(new Set(
+        Array.from(card.querySelectorAll('[data-photo-index]'))
+          .map(node => Number(node.dataset.photoIndex))
+          .filter(index => Number.isFinite(index))
+      )).sort((left, right) => left - right);
+
+      item.photos = photoIndexes.map(photoIndex => {
+        const photoBase = structuredClone((Array.isArray(item.photos) ? item.photos[photoIndex] : null) || {});
+        ['image_url', 'alt_text', 'caption', 'sort_order'].forEach((key) => {
+          const field = card.querySelector(`[data-photo-key="${key}"][data-index="${sourceIndex}"][data-photo-index="${photoIndex}"]`);
+          if (!field) return;
+          let value = field.value;
+          if (key === 'sort_order') value = value === '' ? photoIndex + 1 : Number(value);
+          photoBase[key] = value;
+        });
+        return photoBase;
+      }).filter(photo => String(photo.image_url || '').trim());
+    }
+
     items[sourceIndex] = item;
   });
   return items.filter(Boolean);
@@ -1758,6 +2000,13 @@ function renderForm(sourceName, data) {
   const addBtn = document.getElementById('admin-add-item');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
+      if (sourceName === 'albums') {
+        addDraftItem(
+          { sort_order: readFormData(sourceName).length + 1 },
+          'Новый фотоальбом добавлен в черновик. Нажми «Сохранить», чтобы отправить его в API.'
+        );
+        return;
+      }
       addDraftItem();
     });
   }
@@ -1782,6 +2031,46 @@ function renderForm(sourceName, data) {
     });
   }
 
+  wrap.querySelectorAll('[data-add-album-photo]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = Number(btn.dataset.addAlbumPhoto);
+      const next = readFormData(sourceName);
+      if (!next[index]) return;
+      const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
+      next[index].photos = [
+        ...currentPhotos,
+        {
+          image_url: '',
+          alt_text: '',
+          caption: '',
+          sort_order: currentPhotos.length + 1
+        }
+      ];
+      setSourceData(sourceName, next);
+      renderForm(sourceName, next);
+      setStatus('Фото добавлено в черновик альбома. Нажми «Сохранить», чтобы отправить изменения в API.');
+    });
+  });
+
+  wrap.querySelectorAll('[data-remove-album-photo]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = Number(btn.dataset.index);
+      const photoIndex = Number(btn.dataset.removeAlbumPhoto);
+      const next = readFormData(sourceName);
+      if (!next[index]) return;
+      const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
+      next[index].photos = currentPhotos
+        .filter((_, currentIndex) => currentIndex !== photoIndex)
+        .map((photo, currentIndex) => ({
+          ...photo,
+          sort_order: currentIndex + 1
+        }));
+      setSourceData(sourceName, next);
+      renderForm(sourceName, next);
+      setStatus('Фото удалено из черновика альбома. Нажми «Сохранить», чтобы отправить изменения в API.');
+    });
+  });
+
   wrap.querySelectorAll('[data-pick-logo]').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.pickLogo;
@@ -1801,7 +2090,11 @@ function renderForm(sourceName, data) {
       if (!file) return;
       const key = e.target.dataset.uploadImage;
       const index = e.target.dataset.index;
-      const textInput = wrap.querySelector(`[data-key="${key}"][data-index="${index}"]`);
+      const photoIndex = e.target.dataset.photoIndex;
+      const isPhotoField = photoIndex !== undefined && photoIndex !== '';
+      const textInput = isPhotoField
+        ? wrap.querySelector(`[data-photo-key="${key}"][data-index="${index}"][data-photo-index="${photoIndex}"]`)
+        : wrap.querySelector(`[data-key="${key}"][data-index="${index}"]`);
       const previewBox = textInput?.parentElement.querySelector('.admin-preview-box');
 
       setStatus('Загружаю изображение в storage...');
@@ -1827,6 +2120,16 @@ function renderForm(sourceName, data) {
               item.logo_bytes = result.bytes ?? null;
             });
           }
+          if (sourceName === 'albums' && isPhotoField) {
+            const next = readFormData(sourceName);
+            const album = next[Number(index)];
+            const photo = album?.photos?.[Number(photoIndex)];
+            if (photo) {
+              photo.image_url = result.url;
+              if (!photo.alt_text) photo.alt_text = file.name || album.title || '';
+            }
+            setSourceData(sourceName, next);
+          }
           setStatus('Изображение загружено в storage. Нажми «Сохранить», чтобы записать URL в базу.');
         })
         .catch(async error => {
@@ -1850,6 +2153,16 @@ function renderForm(sourceName, data) {
                 item.logo_height = null;
                 item.logo_bytes = file.size || null;
               });
+            }
+            if (sourceName === 'albums' && isPhotoField) {
+              const next = readFormData(sourceName);
+              const album = next[Number(index)];
+              const photo = album?.photos?.[Number(photoIndex)];
+              if (photo) {
+                photo.image_url = String(reader.result || '');
+                if (!photo.alt_text) photo.alt_text = file.name || album.title || '';
+              }
+              setSourceData(sourceName, next);
             }
             setStatus(`Storage недоступен: ${error.message}. В форму подставлен base64 как временный fallback.`);
           };
@@ -1971,6 +2284,12 @@ async function loadSourceData(sourceName, options = {}) {
   if (!forceRemote) {
     try {
       const remote = await fetchAdminSource(sourceName);
+      if (sourceName === 'albums' && Array.isArray(remote) && !remote.length) {
+        const fallback = cloneDefaultData(sourceName);
+        defaultsCache[sourceName] = structuredClone(fallback);
+        setSourceData(sourceName, fallback);
+        return fallback;
+      }
       defaultsCache[sourceName] = structuredClone(remote);
       setSourceData(sourceName, remote);
       return remote;
@@ -1983,6 +2302,12 @@ async function loadSourceData(sourceName, options = {}) {
   }
 
   const remote = await fetchAdminSource(sourceName);
+  if (sourceName === 'albums' && Array.isArray(remote) && !remote.length) {
+    const fallback = cloneDefaultData(sourceName);
+    defaultsCache[sourceName] = structuredClone(fallback);
+    setSourceData(sourceName, fallback);
+    return fallback;
+  }
   defaultsCache[sourceName] = structuredClone(remote);
   setSourceData(sourceName, remote);
   return remote;

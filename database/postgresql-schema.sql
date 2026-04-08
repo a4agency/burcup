@@ -141,6 +141,33 @@ CREATE TABLE IF NOT EXISTS news_articles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS media_albums (
+  id BIGSERIAL PRIMARY KEY,
+  tournament_id BIGINT REFERENCES tournaments(id) ON DELETE SET NULL,
+  slug TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL,
+  card_excerpt TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  badge TEXT NOT NULL DEFAULT 'Фотоальбом',
+  cover_image_url TEXT,
+  cover_alt_text TEXT NOT NULL DEFAULT '',
+  published_on DATE,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS media_album_photos (
+  id BIGSERIAL PRIMARY KEY,
+  album_id BIGINT NOT NULL REFERENCES media_albums(id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
+  alt_text TEXT NOT NULL DEFAULT '',
+  caption TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS partner_categories (
   id BIGSERIAL PRIMARY KEY,
   slug TEXT NOT NULL UNIQUE,
@@ -212,6 +239,8 @@ CREATE INDEX IF NOT EXISTS idx_matches_away_club ON matches(away_club_id, match_
 CREATE INDEX IF NOT EXISTS idx_match_events_match_id ON match_events(match_id, sort_order);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_match_events_unique_order ON match_events(match_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_news_articles_tournament ON news_articles(tournament_id, published_on DESC);
+CREATE INDEX IF NOT EXISTS idx_media_albums_tournament ON media_albums(tournament_id, sort_order, published_on DESC);
+CREATE INDEX IF NOT EXISTS idx_media_album_photos_album ON media_album_photos(album_id, sort_order, id);
 CREATE INDEX IF NOT EXISTS idx_partner_logo_assets_partner ON partner_logo_assets(partner_id, uploaded_at DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tournament_partners_unique ON tournament_partners(tournament_id, partner_id, category_id);
 
@@ -245,6 +274,12 @@ BEFORE UPDATE ON news_articles
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
+DROP TRIGGER IF EXISTS media_albums_set_updated_at ON media_albums;
+CREATE TRIGGER media_albums_set_updated_at
+BEFORE UPDATE ON media_albums
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 DROP TRIGGER IF EXISTS partners_set_updated_at ON partners;
 CREATE TRIGGER partners_set_updated_at
 BEFORE UPDATE ON partners
@@ -260,7 +295,8 @@ VALUES
   ('0005', 'add_tournament_countdown_flag'),
   ('0006', 'add_match_media_links'),
   ('0007', 'create_content_translations'),
-  ('0008', 'add_match_featured_media_flag')
+  ('0008', 'add_match_featured_media_flag'),
+  ('0009', 'create_media_albums')
 ON CONFLICT (version) DO NOTHING;
 
 COMMIT;
