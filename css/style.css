@@ -1372,6 +1372,35 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   text-decoration:none;
 }
 
+.team-logo-card-skeleton{
+  pointer-events:none;
+}
+
+.team-logo-wrap-skeleton{
+  width:min(220px, 74%);
+  aspect-ratio:1/1;
+  border-radius:24px;
+  background:linear-gradient(90deg, rgba(13,43,99,.06), rgba(13,43,99,.12), rgba(13,43,99,.06));
+}
+
+.team-logo-title-skeleton,
+.team-logo-meta-skeleton{
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(13,43,99,.06), rgba(13,43,99,.12), rgba(13,43,99,.06));
+}
+
+.team-logo-title-skeleton{
+  width:72%;
+  height:22px;
+  margin-top:6px;
+}
+
+.team-logo-meta-skeleton{
+  width:58%;
+  height:16px;
+  margin-top:8px;
+}
+
 .club-card-meta{
   margin-top:10px;
   color:var(--accent);

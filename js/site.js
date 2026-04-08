@@ -1803,14 +1803,28 @@ function isPlaceholderClub(item = {}) {
   return /^placeholder-team-\d+$/i.test(String(item.slug || '').trim());
 }
 
+function renderClubCardSkeleton(index = 0) {
+  return `
+    <div class="team-logo-card team-logo-card-skeleton" aria-hidden="true">
+      <div class="team-logo-wrap team-logo-wrap-skeleton"></div>
+      <div class="team-logo-title-skeleton" style="width:${68 + (index % 3) * 8}%"></div>
+      <div class="team-logo-meta-skeleton" style="width:${54 + (index % 4) * 6}%"></div>
+    </div>
+  `;
+}
+
 async function renderClubsGrid(selector, limit = null) {
   const target = document.querySelector(selector);
   if (!target) return;
+  const skeletonCount = limit || 8;
+  target.setAttribute('aria-busy', 'true');
+  target.innerHTML = Array.from({ length: skeletonCount }, (_, index) => renderClubCardSkeleton(index)).join('');
   const clubs = await fetchApi('/api/clubs');
   if (!clubs) return;
   const publicClubs = clubs.filter(club => !isPlaceholderClub(club));
   const items = limit ? publicClubs.slice(0, limit) : publicClubs;
   target.innerHTML = items.map(renderClubCard).join('');
+  target.setAttribute('aria-busy', 'false');
   runAutoFit();
 }
 
