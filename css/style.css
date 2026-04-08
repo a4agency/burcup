@@ -4590,15 +4590,6 @@ button,
   font-size:18px;
 }
 
-.playoff-seed-row.is-placeholder{
-  align-items:flex-start;
-}
-
-.playoff-seed-row.is-placeholder .team-left{
-  gap:0;
-  align-items:flex-start;
-}
-
 .playoff-seed-row.is-placeholder .playoff-seed-logo-fallback{
   display:none;
 }
@@ -4613,6 +4604,8 @@ button,
 .playoff-seed-row.is-placeholder.no-logo .team-left{
   display:block;
   min-width:0;
+  gap:0;
+  align-items:flex-start;
 }
 
 .playoff-seed-row.is-placeholder.no-logo .playoff-team-name{
@@ -4627,6 +4620,15 @@ button,
   min-width:36px;
   flex:0 0 36px;
   align-self:center;
+}
+
+.playoff-seed-row.is-placeholder.has-logo{
+  align-items:center;
+}
+
+.playoff-seed-row.is-placeholder.has-logo .team-left{
+  gap:14px;
+  align-items:center;
 }
 
 .playoff-match-score{
