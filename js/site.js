@@ -287,6 +287,54 @@ function renderStandingsTable(data = []) {
     `;
   }).join('');
 
+  const mobileCards = (Array.isArray(data) ? data : []).map((item, index) => {
+    const clubUrl = getClubPageUrl(item);
+    const teamMarkup = clubUrl
+      ? `<a class="standings-team standings-team-link standings-team-mobile" href="${escapeHtml(clubUrl)}">
+          ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
+          <span>${item.team}</span>
+        </a>`
+      : `<div class="standings-team standings-team-mobile">
+          ${renderImageMarkup({ src: item.logo, alt: item.team, width: 96 })}
+          <span>${item.team}</span>
+        </div>`;
+
+    return `
+      <article class="standings-mobile-item">
+        <div class="standings-mobile-main">
+          <div class="standings-mobile-rank">${item.position || index + 1}</div>
+          ${teamMarkup}
+        </div>
+        <div class="standings-mobile-stats">
+          <div class="standings-mobile-stat">
+            <span>Игр</span>
+            <strong>${item.played}</strong>
+          </div>
+          <div class="standings-mobile-stat">
+            <span>Очки</span>
+            <strong>${item.points}</strong>
+          </div>
+          <div class="standings-mobile-stat">
+            <span>Побед</span>
+            <strong>${formatStandingStat(item.won)}</strong>
+          </div>
+          <div class="standings-mobile-stat">
+            <span>Ничьих</span>
+            <strong>${formatStandingStat(item.drawn)}</strong>
+          </div>
+          <div class="standings-mobile-stat">
+            <span>Поражений</span>
+            <strong>${formatStandingStat(item.lost)}</strong>
+          </div>
+          <div class="standings-mobile-stat">
+            <span>Мячи</span>
+            <strong>${escapeHtml(formatStandingGoals(item))}</strong>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+
   return `
     <div class="standings-card">
       <div class="standings-scroll">
@@ -316,6 +364,7 @@ function renderStandingsTable(data = []) {
           <tbody>${rows}</tbody>
         </table>
       </div>
+      <div class="standings-mobile-list">${mobileCards}</div>
     </div>
   `;
 }

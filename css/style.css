@@ -4195,6 +4195,89 @@ button,
   display:none !important;
 }
 
+.standings-mobile-list{
+  display:none;
+}
+
+.standings-mobile-item{
+  display:grid;
+  gap:14px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+}
+
+.standings-mobile-item:last-child{
+  border-bottom:none;
+}
+
+.standings-mobile-main{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr);
+  gap:12px;
+  align-items:center;
+}
+
+.standings-mobile-rank{
+  min-width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:#eff4fd;
+  color:var(--navy);
+  font-size:15px;
+  font-weight:800;
+}
+
+.standings-team-mobile{
+  min-width:0;
+}
+
+.standings-team-mobile img{
+  width:34px;
+  height:34px;
+  flex-basis:34px;
+}
+
+.standings-team-mobile span{
+  white-space:normal !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+  line-height:1.2;
+}
+
+.standings-mobile-stats{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+
+.standings-mobile-stat{
+  display:grid;
+  gap:4px;
+  padding:10px 12px;
+  border:1px solid rgba(13,43,99,.08);
+  border-radius:14px;
+  background:#f8fbff;
+}
+
+.standings-mobile-stat span{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+  line-height:1.1;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+.standings-mobile-stat strong{
+  color:var(--navy);
+  font-size:18px;
+  font-weight:900;
+  line-height:1.1;
+}
+
 .group-standings-stack{
   display:grid;
   gap:28px;
@@ -4644,6 +4727,14 @@ button,
 }
 
 @media (max-width: 640px){
+  .standings-scroll{
+    display:none;
+  }
+
+  .standings-mobile-list{
+    display:grid;
+  }
+
   .standings-switch-btn{
     width:100%;
     justify-content:center;
@@ -7049,14 +7140,14 @@ button,
   }
 
   .header-toggle{
-    width:44px;
-    height:44px;
-    border-radius:12px;
+    width:48px;
+    height:48px;
+    border-radius:14px;
   }
 
   .has-js .header-menu a{
-    font-size:13px !important;
-    padding:12px 14px !important;
+    font-size:14px !important;
+    padding:14px 16px !important;
   }
 }
 
