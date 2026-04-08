@@ -4256,8 +4256,8 @@ button,
 
 .playoff-board-grid-head{
   display:grid;
-  grid-template-columns:180px minmax(0, 1fr) 92px minmax(0, 1fr);
-  gap:20px;
+  grid-template-columns:minmax(0, 1fr) 136px minmax(0, 1fr);
+  gap:28px;
   align-items:end;
 }
 
@@ -4271,17 +4271,25 @@ button,
   font-weight:800;
   letter-spacing:.08em;
   text-transform:uppercase;
+  text-align:left;
+}
+
+.playoff-board-grid-col-title-semis{
+  grid-column:1;
 }
 
 .playoff-board-grid{
   display:grid;
-  gap:28px;
+  gap:32px;
 }
 
 .playoff-band-grid{
   display:grid;
-  grid-template-columns:180px minmax(0, 1fr) 92px minmax(0, 1fr);
-  gap:20px;
+  grid-template-columns:minmax(0, 1fr) 136px minmax(0, 1fr);
+  grid-template-areas:
+    "label label label"
+    "semis connector finals";
+  gap:20px 28px;
   align-items:stretch;
 }
 
@@ -4296,13 +4304,19 @@ button,
   font-weight:800;
   letter-spacing:.08em;
   text-transform:uppercase;
-  align-self:center;
+  grid-area:label;
+  align-self:start;
+  padding-bottom:4px;
 }
 
 .playoff-band-grid-stage{
   display:grid;
-  gap:20px;
+  gap:26px;
   align-content:start;
+}
+
+.playoff-band-grid-stage-semis{
+  grid-area:semis;
 }
 
 .playoff-band-grid-stage-semis .playoff-match-card{
@@ -4313,10 +4327,14 @@ button,
   content:"";
   position:absolute;
   top:50%;
-  right:-56px;
-  width:56px;
+  right:-72px;
+  width:72px;
   border-top:2px solid rgba(13, 43, 99, .18);
   transform:translateY(-50%);
+}
+
+.playoff-band-grid-stage-finals{
+  grid-area:finals;
 }
 
 .playoff-band-grid-stage-finals .playoff-match-card{
@@ -4327,23 +4345,24 @@ button,
   content:"";
   position:absolute;
   top:50%;
-  left:-56px;
-  width:56px;
+  left:-72px;
+  width:72px;
   border-top:2px solid rgba(13, 43, 99, .18);
   transform:translateY(-50%);
 }
 
 .playoff-band-grid-connector{
   position:relative;
-  min-width:92px;
+  grid-area:connector;
+  min-width:136px;
 }
 
 .playoff-band-grid-connector::before{
   content:"";
   position:absolute;
   left:50%;
-  top:25%;
-  bottom:25%;
+  top:18%;
+  bottom:18%;
   width:2px;
   background:rgba(13, 43, 99, .18);
   transform:translateX(-50%);
@@ -4415,13 +4434,15 @@ button,
 
 .playoff-match-card{
   display:grid;
-  gap:12px;
+  gap:10px;
   position:relative;
+  min-height:164px;
+  padding:16px 18px;
 }
 
 .playoff-match-label{
   color:var(--navy);
-  font-size:16px;
+  font-size:15px;
   font-weight:800;
 }
 
@@ -4466,7 +4487,7 @@ button,
 
 .playoff-seed-name{
   min-width:0;
-  font-size:16px;
+  font-size:15px;
   font-weight:700;
   line-height:1.35;
 }
@@ -4575,6 +4596,10 @@ button,
   .playoff-board-grid-head,
   .playoff-band-grid{
     grid-template-columns:1fr;
+    grid-template-areas:
+      "label"
+      "semis"
+      "finals";
     gap:16px;
   }
 

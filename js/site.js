@@ -720,8 +720,7 @@ function renderPlayoffBracket(groups = []) {
         <p class="playoff-board-subtitle">Пары формируются автоматически по текущим местам в группах.</p>
       </div>
       <div class="playoff-board-grid-head">
-        <div class="playoff-board-grid-head-spacer" aria-hidden="true"></div>
-        <div class="playoff-board-grid-col-title">${escapeHtml(topBracket.roundOneTitle || '')}</div>
+        <div class="playoff-board-grid-col-title playoff-board-grid-col-title-semis">${escapeHtml(topBracket.roundOneTitle || '')}</div>
         <div class="playoff-board-grid-head-spacer" aria-hidden="true"></div>
         <div class="playoff-board-grid-col-title">${escapeHtml(topBracket.roundTwoTitle || '')}</div>
       </div>
