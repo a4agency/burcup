@@ -1963,6 +1963,7 @@ async function renderMediaAlbumPage() {
           </div>
           <button class="home-upcoming-arrow home-upcoming-next" id="media-album-next" type="button" aria-label="Следующие фотографии">›</button>
         </div>
+        ${photos.length ? '<div class="media-album-mobile-counter" id="media-album-mobile-counter" aria-live="polite"></div>' : ''}
       </article>
       <div class="media-album-lightbox" id="media-album-lightbox" hidden>
         <div class="media-album-lightbox-backdrop"></div>
@@ -2014,6 +2015,7 @@ async function renderMediaAlbumPage() {
           </div>
           <button class="home-upcoming-arrow home-upcoming-next" id="media-album-next" type="button" aria-label="Следующие фотографии">›</button>
         </div>
+        ${photos.length ? '<div class="media-album-mobile-counter" id="media-album-mobile-counter" aria-live="polite"></div>' : ''}
       </article>
       <div class="media-album-lightbox" id="media-album-lightbox" hidden>
         <div class="media-album-lightbox-backdrop"></div>
@@ -2811,6 +2813,7 @@ function initMediaAlbumSlider() {
   const track = document.getElementById('media-album-track');
   const prevBtn = document.getElementById('media-album-prev');
   const nextBtn = document.getElementById('media-album-next');
+  const counter = document.getElementById('media-album-mobile-counter');
   if (!track || !prevBtn || !nextBtn) return;
 
   function getStep() {
@@ -2825,6 +2828,18 @@ function initMediaAlbumSlider() {
     const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
     prevBtn.disabled = track.scrollLeft <= 2;
     nextBtn.disabled = track.scrollLeft >= maxScroll;
+
+    if (counter) {
+      const slides = Array.from(track.querySelectorAll('.media-album-page-slide'));
+      const total = slides.length;
+      if (!total) {
+        counter.textContent = '';
+      } else {
+        const step = getStep();
+        const current = Math.min(total, Math.max(1, Math.round(track.scrollLeft / step) + 1));
+        counter.textContent = `${current} / ${total}`;
+      }
+    }
   }
 
   function goPrev() {

@@ -403,6 +403,16 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   margin-top:4px;
 }
 
+.media-album-mobile-counter{
+  display:none;
+  margin-top:10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+  font-weight:700;
+  line-height:1;
+}
+
 .media-album-track{
   display:grid;
   grid-auto-flow:column;
@@ -876,6 +886,10 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 
   .media-album-photo-image{
     border-radius:18px;
+  }
+
+  .media-album-mobile-counter{
+    display:block;
   }
 
   .media-album-lightbox{
