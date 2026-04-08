@@ -4687,6 +4687,7 @@ button,
   top:0;
   z-index:50;
   box-shadow:0 10px 30px rgba(0,0,0,.12);
+  transition:box-shadow .24s ease, background .24s ease;
 }
 
 .header-inner{
@@ -4696,6 +4697,7 @@ button,
   justify-content:center;
   gap:18px;
   padding:18px 0 12px;
+  transition:padding .24s ease, gap .24s ease;
 }
 
 .header-brand{
@@ -4706,6 +4708,7 @@ button,
   gap:10px;
   text-align:center;
   color:#fff;
+  transition:gap .24s ease, transform .24s ease;
 }
 
 .header-brand-mark{
@@ -4718,6 +4721,7 @@ button,
   justify-content:center;
   background:#fff;
   box-shadow:0 10px 24px rgba(0,0,0,.18);
+  transition:width .24s ease, height .24s ease, box-shadow .24s ease, transform .24s ease;
 }
 
 .header-brand-mark img{
@@ -4731,6 +4735,7 @@ button,
   font-weight:900;
   letter-spacing:.02em;
   line-height:1;
+  transition:font-size .24s ease, transform .24s ease;
 }
 
 .header-menu{
@@ -4742,6 +4747,7 @@ button,
   gap:0;
   border-top:1px solid rgba(255,255,255,.12);
   padding-top:12px;
+  transition:padding-top .24s ease, border-color .24s ease, gap .24s ease;
 }
 
 .header-menu a{
@@ -4813,6 +4819,78 @@ button,
     font-size:13px;
     padding:10px 12px;
     background:rgba(255,255,255,.06);
+  }
+}
+
+@media (min-width: 901px){
+  .header.is-compact{
+    box-shadow:0 8px 24px rgba(0,0,0,.10);
+  }
+
+  .header.is-compact .header-inner{
+    gap:10px;
+    padding:10px 0 8px;
+  }
+
+  .header.is-compact .header-brand{
+    flex-direction:row;
+    gap:12px;
+    text-align:left;
+  }
+
+  .header.is-compact .header-brand-mark{
+    width:46px;
+    height:46px;
+    box-shadow:0 8px 18px rgba(0,0,0,.16);
+  }
+
+  .header.is-compact .header-brand-title{
+    font-size:24px;
+  }
+
+  .header.is-compact .header-menu{
+    padding-top:8px;
+  }
+}
+
+@media (min-width: 1200px){
+  .header.is-compact .header-inner{
+    display:grid;
+    grid-template-columns:auto minmax(0, 1fr);
+    align-items:center;
+    column-gap:26px;
+    row-gap:0;
+  }
+
+  .header.is-compact .header-brand{
+    justify-content:flex-start;
+    justify-self:start;
+  }
+
+  .header.is-compact .header-menu{
+    width:auto;
+    min-width:0;
+    margin-left:auto;
+    justify-content:flex-end !important;
+    flex-wrap:nowrap !important;
+    border-top:none;
+    padding-top:0;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+
+  .header.is-compact .header-menu::-webkit-scrollbar{
+    display:none;
+  }
+
+  .header.is-compact .header-menu a{
+    font-size:13px !important;
+    padding:12px 10px !important;
+  }
+
+  .header.is-compact .lang-switcher{
+    margin-left:6px !important;
+    padding-left:6px !important;
   }
 }
 

@@ -77,6 +77,23 @@ function initHeaderMenu() {
   });
 }
 
+function initHeaderCompactState() {
+  const header = document.querySelector('.header');
+  if (!header) return;
+
+  const desktopBreakpoint = 900;
+  const compactThreshold = 28;
+
+  const syncHeaderState = () => {
+    const shouldCompact = window.innerWidth > desktopBreakpoint && window.scrollY > compactThreshold;
+    header.classList.toggle('is-compact', shouldCompact);
+  };
+
+  syncHeaderState();
+  window.addEventListener('scroll', syncHeaderState, { passive: true });
+  window.addEventListener('resize', syncHeaderState);
+}
+
 function initActiveHeaderLink() {
   const links = Array.from(document.querySelectorAll('.header-menu a[href]'));
   if (!links.length) return;
@@ -181,6 +198,7 @@ async function initTournamentCountdown() {
 document.addEventListener('DOMContentLoaded', function(){
   initActiveHeaderLink();
   initHeaderMenu();
+  initHeaderCompactState();
   initTournamentCountdown();
   upgradeStaticImagesForCloudinary();
 });
