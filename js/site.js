@@ -1802,6 +1802,28 @@ function findMediaAlbumBySlug(albums = [], slug = '') {
   return albums.find(item => String(item?.slug || '').trim() === normalizedSlug) || null;
 }
 
+async function loadRenderableMediaAlbums() {
+  const albumsRaw = await fetchApi('/api/media/albums');
+  return Array.isArray(albumsRaw) && albumsRaw.length
+    ? albumsRaw.map((item, index) => normalizeMediaAlbum(item, index)).filter(item => item.is_visible !== false)
+    : getDefaultMediaAlbums().map((item, index) => normalizeMediaAlbum(item, index));
+}
+
+async function renderMediaAlbumCollection(targetSelector = '#media-stories') {
+  const target = document.querySelector(targetSelector);
+  if (!target) return;
+
+  try {
+    const albums = await loadRenderableMediaAlbums();
+    target.innerHTML = albums.length
+      ? albums.map(renderMediaAlbumCard).join('')
+      : '<div class="card media-empty-card">Фотоальбомы появятся здесь после публикации первых фотоматериалов.</div>';
+    runAutoFit();
+  } catch (error) {
+    target.innerHTML = getDefaultMediaAlbums().map(renderMediaAlbumCard).join('');
+  }
+}
+
 function renderMediaOverviewCards(matches = [], storiesCount = 0) {
   const streamsCount = matches.filter(item => String(item.video || '').trim()).length;
   const reviewsCount = matches.filter(item => String(item.review_video || '').trim()).length;
@@ -1876,10 +1898,7 @@ async function renderMultimediaPage() {
 
   try {
     const matchesRaw = await fetchJson('data/matches.json');
-    const albumsRaw = await fetchApi('/api/media/albums');
-    const albums = Array.isArray(albumsRaw) && albumsRaw.length
-      ? albumsRaw.map((item, index) => normalizeMediaAlbum(item, index)).filter(item => item.is_visible !== false)
-      : getDefaultMediaAlbums().map((item, index) => normalizeMediaAlbum(item, index));
+    const albums = await loadRenderableMediaAlbums();
     const allMatches = sortMediaMatches(Array.isArray(matchesRaw) ? matchesRaw : []);
     const featuredMatch = pickFeaturedMediaMatch(allMatches);
     const matches = sortMatchesChronologically(allMatches.filter(hasAnyMatchMedia));
@@ -2490,6 +2509,7 @@ function renderArchiveTournamentPage() {
 document.addEventListener('DOMContentLoaded', () => {
   renderUpcomingMatches();
   renderHomeNews();
+  renderMediaAlbumCollection('#home-media-stories');
   renderMultimediaPage();
   renderMediaAlbumPage();
   renderMatchesPage();
