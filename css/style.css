@@ -7254,6 +7254,16 @@ button,
   flex-wrap:wrap;
 }
 
+.admin-album-bulk-actions .admin-small-btn,
+.admin-album-bulk-actions .admin-add{
+  min-height:56px;
+  padding:0 22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
 .admin-album-photo-row{
   border:1px solid rgba(13,43,99,.08);
   border-radius:18px;
