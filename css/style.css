@@ -4749,13 +4749,47 @@ button,
     padding:18px;
   }
 
+  .playoff-board,
+  .playoff-board-grid,
+  .playoff-band-grid,
+  .playoff-band-grid-stage,
+  .playoff-band-grid-slot,
+  .playoff-match-card{
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .playoff-band-grid-stage{
+    justify-items:stretch;
+  }
+
+  .playoff-band-grid-slot{
+    width:100%;
+  }
+
   .playoff-seed-row,
   .playoff-seed-row.is-placeholder{
     display:flex;
+    min-width:0;
   }
 
   .playoff-seed-logo{
     display:none;
+  }
+
+  .playoff-seed-row .team-left{
+    min-width:0;
+  }
+
+  .playoff-team-name{
+    min-width:0;
+    font-size:16px;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    overflow-wrap:anywhere;
+    word-break:normal;
   }
 }
 
