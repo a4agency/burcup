@@ -4588,6 +4588,26 @@ button,
   font-size:18px;
 }
 
+.playoff-seed-row.is-placeholder{
+  align-items:flex-start;
+}
+
+.playoff-seed-row.is-placeholder .team-left{
+  gap:0;
+  align-items:flex-start;
+}
+
+.playoff-seed-row.is-placeholder .playoff-seed-logo-fallback{
+  display:none;
+}
+
+.playoff-seed-row.is-placeholder .playoff-team-name{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  line-height:1.2;
+}
+
 .playoff-match-score{
   display:flex;
   align-items:center;
