@@ -672,12 +672,12 @@ function renderPlayoffBracket(groups = []) {
     roundTwoTitle: 'Финалы',
     roundOne: [
       {
-        label: 'Полуфинал 1',
+        label: 'Полуфинал 1–4 №1',
         home: buildPlayoffGenericSeed(1),
         away: buildPlayoffGenericSeed(2)
       },
       {
-        label: 'Полуфинал 2',
+        label: 'Полуфинал 1–4 №2',
         home: buildPlayoffGenericSeed(3),
         away: buildPlayoffGenericSeed(4)
       }
@@ -685,13 +685,13 @@ function renderPlayoffBracket(groups = []) {
     roundTwo: [
       {
         label: 'Матч за 1 место',
-        home: buildPlayoffProgressSeed('W1', 'Победитель полуфинала 1'),
-        away: buildPlayoffProgressSeed('W2', 'Победитель полуфинала 2')
+        home: buildPlayoffProgressSeed('W1', 'Победитель 1–4 №1'),
+        away: buildPlayoffProgressSeed('W2', 'Победитель 1–4 №2')
       },
       {
         label: 'Матч за 3 место',
-        home: buildPlayoffProgressSeed('L1', 'Проигравший полуфинала 1'),
-        away: buildPlayoffProgressSeed('L2', 'Проигравший полуфинала 2')
+        home: buildPlayoffProgressSeed('L1', 'Проигравший 1–4 №1'),
+        away: buildPlayoffProgressSeed('L2', 'Проигравший 1–4 №2')
       }
     ]
   };
