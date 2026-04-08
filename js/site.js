@@ -612,26 +612,24 @@ function renderPlayoffMatch(match = {}) {
   `;
 }
 
-function renderPlayoffBracketCard(config = {}) {
+function renderPlayoffRoundColumn(title, matches = [], sourceClass = '') {
   return `
-    <section class="playoff-bracket-card">
-      <div class="playoff-bracket-head">
-        <h3 class="playoff-bracket-title">${escapeHtml(config.title || '')}</h3>
-        ${config.subtitle ? `<p class="playoff-bracket-subtitle">${escapeHtml(config.subtitle)}</p>` : ''}
+    <div class="playoff-board-round ${sourceClass}">
+      <div class="playoff-board-round-title">${escapeHtml(title || '')}</div>
+      <div class="playoff-round-matches">
+        ${(matches || []).map(renderPlayoffMatch).join('')}
       </div>
-      <div class="playoff-rounds">
-        <div class="playoff-round">
-          <div class="playoff-round-title">${escapeHtml(config.roundOneTitle || '')}</div>
-          <div class="playoff-round-matches">
-            ${(config.roundOne || []).map(renderPlayoffMatch).join('')}
-          </div>
-        </div>
-        <div class="playoff-round">
-          <div class="playoff-round-title">${escapeHtml(config.roundTwoTitle || '')}</div>
-          <div class="playoff-round-matches">
-            ${(config.roundTwo || []).map(renderPlayoffMatch).join('')}
-          </div>
-        </div>
+    </div>
+  `;
+}
+
+function renderPlayoffBoardBand(config = {}) {
+  return `
+    <section class="playoff-board-band">
+      <div class="playoff-board-band-label">${escapeHtml(config.title || '')}</div>
+      <div class="playoff-board-grid">
+        ${renderPlayoffRoundColumn(config.roundOneTitle || '', config.roundOne || [], 'is-source')}
+        ${renderPlayoffRoundColumn(config.roundTwoTitle || '', config.roundTwo || [], 'is-target')}
       </div>
     </section>
   `;
@@ -654,8 +652,7 @@ function renderPlayoffBracket(groups = []) {
 
   const topBracket = {
     title: 'Плей-офф за 1–4 места',
-    subtitle: 'Полуфиналы определяются по текущим местам в группах.',
-    roundOneTitle: '1/2 финала',
+    roundOneTitle: 'Полуфиналы',
     roundTwoTitle: 'Финальный день',
     roundOne: [
       {
@@ -685,8 +682,7 @@ function renderPlayoffBracket(groups = []) {
 
   const placementBracket = {
     title: 'Плей-офф за 5–8 места',
-    subtitle: 'Команды третьих и четвёртых мест продолжают борьбу за позиции.',
-    roundOneTitle: 'Полуфиналы 5–8',
+    roundOneTitle: 'Полуфиналы',
     roundTwoTitle: 'Финальный день',
     roundOne: [
       {
@@ -715,9 +711,13 @@ function renderPlayoffBracket(groups = []) {
   };
 
   return `
-    <div class="playoff-layout">
-      ${renderPlayoffBracketCard(topBracket)}
-      ${renderPlayoffBracketCard(placementBracket)}
+    <div class="playoff-board">
+      <div class="playoff-board-head">
+        <h3 class="playoff-board-title">Сетка плей-офф</h3>
+        <p class="playoff-board-subtitle">Пары формируются автоматически по текущим местам в группах.</p>
+      </div>
+      ${renderPlayoffBoardBand(topBracket)}
+      ${renderPlayoffBoardBand(placementBracket)}
     </div>
   `;
 }
