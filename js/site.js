@@ -1737,6 +1737,28 @@ function renderMediaAlbumPhotoCard(photo = {}) {
   `;
 }
 
+function buildMediaAlbumPhotoPages(photos = [], pageSize = 16) {
+  if (!Array.isArray(photos) || !photos.length) {
+    return [
+      Array.from({ length: pageSize }, (_, index) => renderMediaAlbumPlaceholderTile(index))
+    ];
+  }
+
+  const pages = [];
+  for (let index = 0; index < photos.length; index += pageSize) {
+    const slice = photos.slice(index, index + pageSize);
+    const placeholdersCount = Math.max(0, pageSize - slice.length);
+    pages.push([
+      ...slice.map(renderMediaAlbumPhotoCard),
+      ...Array.from({ length: placeholdersCount }, (_, placeholderIndex) =>
+        renderMediaAlbumPlaceholderTile(index + slice.length + placeholderIndex)
+      )
+    ]);
+  }
+
+  return pages;
+}
+
 function findMediaAlbumBySlug(albums = [], slug = '') {
   const normalizedSlug = String(slug || '').trim();
   return albums.find(item => String(item?.slug || '').trim() === normalizedSlug) || null;
@@ -1877,11 +1899,9 @@ async function renderMediaAlbumPage() {
 
     document.title = `Burchalkin Cup — ${album.title || 'Фотоальбом'}`;
     const photos = Array.isArray(album.photos) ? album.photos : [];
-    const placeholdersCount = Math.max(0, 16 - photos.length);
-    const photoGridMarkup = [
-      ...photos.map(renderMediaAlbumPhotoCard),
-      ...Array.from({ length: placeholdersCount }, (_, index) => renderMediaAlbumPlaceholderTile(photos.length + index))
-    ].join('');
+    const photoPagesMarkup = buildMediaAlbumPhotoPages(photos)
+      .map(pageItems => `<div class="media-album-page-slide">${pageItems.join('')}</div>`)
+      .join('');
 
     root.innerHTML = `
       <article class="media-album-page-card">
@@ -1893,25 +1913,20 @@ async function renderMediaAlbumPage() {
         <h1 class="media-album-page-title">${escapeHtml(album.title || '')}</h1>
         ${album.card_excerpt ? `<p class="media-album-page-lead">${escapeHtml(album.card_excerpt)}</p>` : ''}
         ${album.description ? `<p class="media-album-page-description">${escapeHtml(album.description)}</p>` : ''}
-        ${album.cover_image_url ? `
-          <div class="media-album-page-cover">
-            ${renderImageMarkup({
-              src: album.cover_image_url,
-              alt: album.cover_alt_text || album.title,
-              className: 'media-album-page-cover-image',
-              width: 1600,
-              loading: 'eager',
-              decoding: 'async'
-            })}
-          </div>
-        ` : ''}
         <div class="home-block-head media-album-grid-head">
           <h2 class="section-title home-block-title">Фотографии альбома</h2>
           <div class="home-block-link">${photos.length ? `${photos.length} фото` : 'Скоро здесь появится сетка фотографий'}</div>
         </div>
-        <div class="media-album-grid">${photoGridMarkup}</div>
+        <div class="home-upcoming-slider media-album-slider">
+          <button class="home-upcoming-arrow home-upcoming-prev" id="media-album-prev" type="button" aria-label="Предыдущие фотографии">‹</button>
+          <div class="home-upcoming-viewport">
+            <div id="media-album-track" class="media-album-track">${photoPagesMarkup}</div>
+          </div>
+          <button class="home-upcoming-arrow home-upcoming-next" id="media-album-next" type="button" aria-label="Следующие фотографии">›</button>
+        </div>
       </article>
     `;
+    initMediaAlbumSlider();
     runAutoFit();
   } catch (error) {
     const album = findMediaAlbumBySlug(fallbackAlbums, requestedSlug) || fallbackAlbums[0] || null;
@@ -1930,21 +1945,23 @@ async function renderMediaAlbumPage() {
         <h1 class="media-album-page-title">${escapeHtml(album.title || '')}</h1>
         ${album.card_excerpt ? `<p class="media-album-page-lead">${escapeHtml(album.card_excerpt)}</p>` : ''}
         ${album.description ? `<p class="media-album-page-description">${escapeHtml(album.description)}</p>` : ''}
-        ${album.cover_image_url ? `
-          <div class="media-album-page-cover">
-            ${renderImageMarkup({
-              src: album.cover_image_url,
-              alt: album.cover_alt_text || album.title,
-              className: 'media-album-page-cover-image',
-              width: 1600,
-              loading: 'eager',
-              decoding: 'async'
-            })}
+        <div class="home-block-head media-album-grid-head">
+          <h2 class="section-title home-block-title">Фотографии альбома</h2>
+          <div class="home-block-link">Скоро здесь появится сетка фотографий</div>
+        </div>
+        <div class="home-upcoming-slider media-album-slider">
+          <button class="home-upcoming-arrow home-upcoming-prev" id="media-album-prev" type="button" aria-label="Предыдущие фотографии">‹</button>
+          <div class="home-upcoming-viewport">
+            <div id="media-album-track" class="media-album-track">
+              <div class="media-album-page-slide">${Array.from({ length: 16 }, (_, index) => renderMediaAlbumPlaceholderTile(index)).join('')}</div>
+            </div>
           </div>
-        ` : ''}
-        <div class="media-album-grid">${Array.from({ length: 16 }, (_, index) => renderMediaAlbumPlaceholderTile(index)).join('')}</div>
+          <button class="home-upcoming-arrow home-upcoming-next" id="media-album-next" type="button" aria-label="Следующие фотографии">›</button>
+        </div>
       </article>
     `;
+    initMediaAlbumSlider();
+    runAutoFit();
   }
 }
 
@@ -2696,6 +2713,43 @@ function initMediaLibrarySlider() {
     const style = window.getComputedStyle(track);
     const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
     return firstCard.getBoundingClientRect().width + gap;
+  }
+
+  function updateButtons() {
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
+    prevBtn.disabled = track.scrollLeft <= 2;
+    nextBtn.disabled = track.scrollLeft >= maxScroll;
+  }
+
+  prevBtn.onclick = () => {
+    track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+  };
+
+  nextBtn.onclick = () => {
+    track.scrollBy({ left: getStep(), behavior: 'smooth' });
+  };
+
+  track.addEventListener('scroll', updateButtons, { passive: true });
+  window.addEventListener('resize', updateButtons);
+
+  const observer = new MutationObserver(updateButtons);
+  observer.observe(track, { childList: true, subtree: true });
+
+  setTimeout(updateButtons, 80);
+}
+
+function initMediaAlbumSlider() {
+  const track = document.getElementById('media-album-track');
+  const prevBtn = document.getElementById('media-album-prev');
+  const nextBtn = document.getElementById('media-album-next');
+  if (!track || !prevBtn || !nextBtn) return;
+
+  function getStep() {
+    const firstPage = track.querySelector('.media-album-page-slide');
+    if (!firstPage) return Math.max(track.clientWidth * 0.98, 720);
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
+    return firstPage.getBoundingClientRect().width + gap;
   }
 
   function updateButtons() {
