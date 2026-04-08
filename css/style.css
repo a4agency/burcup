@@ -7101,7 +7101,11 @@ button,
   }
 
   .has-js .header-menu a{
+    display:flex;
+    align-items:center;
     width:100%;
+    max-width:none !important;
+    box-sizing:border-box;
     text-align:left;
     font-size:14px !important;
     padding:14px 16px !important;
