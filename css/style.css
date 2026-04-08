@@ -4717,11 +4717,14 @@ button,
 
 @media (max-width: 640px){
   .standings-scroll{
-    display:none;
+    display:block;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
   }
 
   .standings-mobile-list{
-    display:grid;
+    display:none !important;
   }
 
   .standings-switch-btn{
@@ -4739,37 +4742,40 @@ button,
   }
 
   .playoff-board-shell{
-    overflow:visible;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding-bottom:8px;
+    -webkit-overflow-scrolling:touch;
   }
 
   .playoff-board-shell-inner{
-    min-width:0;
+    min-width:820px;
   }
 
   .playoff-board-grid-head,
   .playoff-band-grid{
-    grid-template-columns:1fr;
+    grid-template-columns:314px 136px 314px;
     grid-template-areas:
-      "label"
-      "semis"
-      "finals";
-    gap:16px;
+      "label label label"
+      "semis connector finals";
+    gap:20px 28px;
+    justify-content:center;
   }
 
   .playoff-board-grid-col-title,
   .playoff-band-grid-label{
-    justify-self:start;
-    text-align:left;
+    justify-self:stretch;
+    text-align:center;
   }
 
   .playoff-band-grid-connector,
   .playoff-board-grid-head-spacer{
-    display:none;
+    display:block;
   }
 
   .playoff-band-grid-stage-semis .playoff-band-grid-slot::after,
   .playoff-band-grid-stage-finals .playoff-band-grid-slot::before{
-    display:none;
+    display:block;
   }
 
   .playoff-board,
@@ -4778,17 +4784,17 @@ button,
   .playoff-band-grid-stage,
   .playoff-band-grid-slot,
   .playoff-match-card{
-    min-width:0;
-    max-width:100%;
+    min-width:auto;
+    max-width:none;
     box-sizing:border-box;
   }
 
   .playoff-band-grid-stage{
-    justify-items:stretch;
+    justify-items:start;
   }
 
   .playoff-band-grid-slot{
-    width:100%;
+    width:min(100%, 314px);
   }
 
   .playoff-seed-row,
@@ -4798,7 +4804,7 @@ button,
   }
 
   .playoff-seed-logo{
-    display:none;
+    display:block;
   }
 
   .playoff-seed-row .team-left{
@@ -4807,11 +4813,11 @@ button,
 
   .playoff-team-name{
     min-width:0;
-    font-size:16px;
-    white-space:normal;
-    overflow:visible;
-    text-overflow:clip;
-    overflow-wrap:anywhere;
+    font-size:18px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    overflow-wrap:normal;
     word-break:normal;
   }
 }
