@@ -1716,12 +1716,12 @@ function renderMediaAlbumPlaceholderTile(index) {
   `;
 }
 
-function renderMediaAlbumPhotoCard(photo = {}) {
+function renderMediaAlbumPhotoCard(photo = {}, index = 0) {
   const imageUrl = String(photo.image_url || '').trim();
   const alt = String(photo.alt_text || 'Фотоальбом').trim();
 
   return `
-    <a class="media-album-photo-card" href="${escapeHtml(imageUrl)}" target="_blank" rel="noreferrer">
+    <button class="media-album-photo-card" type="button" data-album-photo-index="${index}" aria-label="Открыть фото ${index + 1}">
       <div class="media-album-photo-frame">
         ${renderImageMarkup({
           src: imageUrl,
@@ -1730,7 +1730,7 @@ function renderMediaAlbumPhotoCard(photo = {}) {
           width: 640
         })}
       </div>
-    </a>
+    </button>
   `;
 }
 
@@ -1746,7 +1746,7 @@ function buildMediaAlbumPhotoPages(photos = [], pageSize = 16) {
     const slice = photos.slice(index, index + pageSize);
     const placeholdersCount = Math.max(0, pageSize - slice.length);
     pages.push([
-      ...slice.map(renderMediaAlbumPhotoCard),
+      ...slice.map((photo, offset) => renderMediaAlbumPhotoCard(photo, index + offset)),
       ...Array.from({ length: placeholdersCount }, (_, placeholderIndex) =>
         renderMediaAlbumPlaceholderTile(index + slice.length + placeholderIndex)
       )
@@ -1922,8 +1922,21 @@ async function renderMediaAlbumPage() {
           <button class="home-upcoming-arrow home-upcoming-next" id="media-album-next" type="button" aria-label="Следующие фотографии">›</button>
         </div>
       </article>
+      <div class="media-album-lightbox" id="media-album-lightbox" hidden>
+        <div class="media-album-lightbox-backdrop"></div>
+        <div class="media-album-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Просмотр фотографии">
+          <button class="media-album-lightbox-close" id="media-album-lightbox-close" type="button" aria-label="Закрыть просмотр">×</button>
+          <button class="media-album-lightbox-arrow media-album-lightbox-prev" id="media-album-lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <div class="media-album-lightbox-stage">
+            <img id="media-album-lightbox-image" class="media-album-lightbox-image" src="" alt="">
+          </div>
+          <button class="media-album-lightbox-arrow media-album-lightbox-next" id="media-album-lightbox-next" type="button" aria-label="Следующее фото">›</button>
+          <div class="media-album-lightbox-counter" id="media-album-lightbox-counter"></div>
+        </div>
+      </div>
     `;
     initMediaAlbumSlider();
+    initMediaAlbumLightbox(photos);
     runAutoFit();
   } catch (error) {
     const album = findMediaAlbumBySlug(fallbackAlbums, requestedSlug) || fallbackAlbums[0] || null;
@@ -1931,6 +1944,11 @@ async function renderMediaAlbumPage() {
       root.innerHTML = '<div class="card">Не удалось загрузить фотоальбом.</div>';
       return;
     }
+
+    const photos = Array.isArray(album.photos) ? album.photos : [];
+    const photoPagesMarkup = buildMediaAlbumPhotoPages(photos)
+      .map(pageItems => `<div class="media-album-page-slide">${pageItems.join('')}</div>`)
+      .join('');
 
     root.innerHTML = `
       <article class="media-album-page-card">
@@ -1944,20 +1962,31 @@ async function renderMediaAlbumPage() {
         ${album.description ? `<p class="media-album-page-description">${escapeHtml(album.description)}</p>` : ''}
         <div class="home-block-head media-album-grid-head">
           <h2 class="section-title home-block-title">Фотографии альбома</h2>
-          <div class="home-block-link">Скоро здесь появится сетка фотографий</div>
+          <div class="home-block-link">${photos.length ? `${photos.length} фото` : 'Скоро здесь появится сетка фотографий'}</div>
         </div>
         <div class="home-upcoming-slider media-album-slider">
           <button class="home-upcoming-arrow home-upcoming-prev" id="media-album-prev" type="button" aria-label="Предыдущие фотографии">‹</button>
           <div class="home-upcoming-viewport">
-            <div id="media-album-track" class="media-album-track">
-              <div class="media-album-page-slide">${Array.from({ length: 16 }, (_, index) => renderMediaAlbumPlaceholderTile(index)).join('')}</div>
-            </div>
+            <div id="media-album-track" class="media-album-track">${photoPagesMarkup}</div>
           </div>
           <button class="home-upcoming-arrow home-upcoming-next" id="media-album-next" type="button" aria-label="Следующие фотографии">›</button>
         </div>
       </article>
+      <div class="media-album-lightbox" id="media-album-lightbox" hidden>
+        <div class="media-album-lightbox-backdrop"></div>
+        <div class="media-album-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Просмотр фотографии">
+          <button class="media-album-lightbox-close" id="media-album-lightbox-close" type="button" aria-label="Закрыть просмотр">×</button>
+          <button class="media-album-lightbox-arrow media-album-lightbox-prev" id="media-album-lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button>
+          <div class="media-album-lightbox-stage">
+            <img id="media-album-lightbox-image" class="media-album-lightbox-image" src="" alt="">
+          </div>
+          <button class="media-album-lightbox-arrow media-album-lightbox-next" id="media-album-lightbox-next" type="button" aria-label="Следующее фото">›</button>
+          <div class="media-album-lightbox-counter" id="media-album-lightbox-counter"></div>
+        </div>
+      </div>
     `;
     initMediaAlbumSlider();
+    initMediaAlbumLightbox(photos);
     runAutoFit();
   }
 }
@@ -2770,4 +2799,82 @@ function initMediaAlbumSlider() {
   observer.observe(track, { childList: true, subtree: true });
 
   setTimeout(updateButtons, 80);
+}
+
+function initMediaAlbumLightbox(photos = []) {
+  const items = Array.isArray(photos) ? photos.filter((photo) => String(photo?.image_url || '').trim()) : [];
+  const modal = document.getElementById('media-album-lightbox');
+  const image = document.getElementById('media-album-lightbox-image');
+  const counter = document.getElementById('media-album-lightbox-counter');
+  const closeBtn = document.getElementById('media-album-lightbox-close');
+  const prevBtn = document.getElementById('media-album-lightbox-prev');
+  const nextBtn = document.getElementById('media-album-lightbox-next');
+  if (!items.length || !modal || !image || !counter || !closeBtn || !prevBtn || !nextBtn) return;
+
+  let currentIndex = 0;
+  let previousOverflow = '';
+
+  const updateSlide = () => {
+    const current = items[currentIndex];
+    if (!current) return;
+    image.src = String(current.image_url || '').trim();
+    image.alt = String(current.alt_text || `Фото ${currentIndex + 1}`).trim();
+    counter.textContent = `${currentIndex + 1} / ${items.length}`;
+    const disableNav = items.length <= 1;
+    prevBtn.disabled = disableNav;
+    nextBtn.disabled = disableNav;
+  };
+
+  const showSlide = (index) => {
+    if (!items.length) return;
+    const total = items.length;
+    currentIndex = ((index % total) + total) % total;
+    updateSlide();
+  };
+
+  const openLightbox = (index) => {
+    previousOverflow = document.body.style.overflow || '';
+    document.body.style.overflow = 'hidden';
+    showSlide(index);
+    modal.hidden = false;
+    requestAnimationFrame(() => {
+      modal.classList.add('is-open');
+      closeBtn.focus();
+    });
+  };
+
+  const closeLightbox = () => {
+    modal.classList.remove('is-open');
+    modal.hidden = true;
+    document.body.style.overflow = previousOverflow;
+  };
+
+  document.querySelectorAll('[data-album-photo-index]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.albumPhotoIndex);
+      if (!Number.isFinite(index)) return;
+      openLightbox(index);
+    });
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+  prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
+  nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal || event.target.classList.contains('media-album-lightbox-backdrop')) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (modal.hidden) return;
+    if (event.key === 'Escape') {
+      closeLightbox();
+    } else if (event.key === 'ArrowLeft') {
+      showSlide(currentIndex - 1);
+    } else if (event.key === 'ArrowRight') {
+      showSlide(currentIndex + 1);
+    }
+  });
 }
