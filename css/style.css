@@ -4687,7 +4687,7 @@ button,
   top:0;
   z-index:50;
   box-shadow:0 10px 30px rgba(0,0,0,.12);
-  transition:box-shadow .34s cubic-bezier(.22,.61,.36,1), background .34s cubic-bezier(.22,.61,.36,1);
+  transition:none;
 }
 
 .header-inner{
@@ -4697,7 +4697,7 @@ button,
   justify-content:center;
   gap:18px;
   padding:18px 0 12px;
-  transition:padding .34s cubic-bezier(.22,.61,.36,1), gap .34s cubic-bezier(.22,.61,.36,1);
+  transition:none;
 }
 
 .header-brand{
@@ -4708,7 +4708,7 @@ button,
   gap:10px;
   text-align:center;
   color:#fff;
-  transition:gap .34s cubic-bezier(.22,.61,.36,1), transform .34s cubic-bezier(.22,.61,.36,1);
+  transition:none;
 }
 
 .header-brand-mark{
@@ -4721,7 +4721,7 @@ button,
   justify-content:center;
   background:#fff;
   box-shadow:0 10px 24px rgba(0,0,0,.18);
-  transition:width .34s cubic-bezier(.22,.61,.36,1), height .34s cubic-bezier(.22,.61,.36,1), box-shadow .34s cubic-bezier(.22,.61,.36,1), transform .34s cubic-bezier(.22,.61,.36,1);
+  transition:none;
 }
 
 .header-brand-mark img{
@@ -4735,7 +4735,7 @@ button,
   font-weight:900;
   letter-spacing:.02em;
   line-height:1;
-  transition:font-size .34s cubic-bezier(.22,.61,.36,1), transform .34s cubic-bezier(.22,.61,.36,1), opacity .28s ease;
+  transition:none;
 }
 
 .header-menu{
@@ -4747,7 +4747,7 @@ button,
   gap:0;
   border-top:1px solid rgba(255,255,255,.12);
   padding-top:12px;
-  transition:padding-top .34s cubic-bezier(.22,.61,.36,1), border-color .34s cubic-bezier(.22,.61,.36,1), gap .34s cubic-bezier(.22,.61,.36,1);
+  transition:none;
 }
 
 .header-menu a{
@@ -4760,7 +4760,7 @@ button,
   border-radius:12px;
   max-width:220px;
   overflow:hidden;
-  transition:background-color .22s ease, color .22s ease, box-shadow .22s ease, opacity .28s ease, transform .34s cubic-bezier(.22,.61,.36,1), max-width .34s cubic-bezier(.22,.61,.36,1), padding .34s cubic-bezier(.22,.61,.36,1), margin .34s cubic-bezier(.22,.61,.36,1);
+  transition:background-color .18s ease, color .18s ease, box-shadow .18s ease;
 }
 
 .header-menu a:hover{
@@ -4892,13 +4892,7 @@ button,
   }
 
   .header.is-compact .header-menu > a:first-of-type{
-    max-width:0;
-    opacity:0;
-    padding-left:0 !important;
-    padding-right:0 !important;
-    margin-right:-6px;
-    pointer-events:none;
-    transform:translateX(-10px);
+    display:none;
   }
 
   .header.is-compact .lang-switcher{
