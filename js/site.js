@@ -1790,12 +1790,17 @@ function renderClubCard(item) {
   `;
 }
 
+function isPlaceholderClub(item = {}) {
+  return /^placeholder-team-\d+$/i.test(String(item.slug || '').trim());
+}
+
 async function renderClubsGrid(selector, limit = null) {
   const target = document.querySelector(selector);
   if (!target) return;
   const clubs = await fetchApi('/api/clubs');
   if (!clubs) return;
-  const items = limit ? clubs.slice(0, limit) : clubs;
+  const publicClubs = clubs.filter(club => !isPlaceholderClub(club));
+  const items = limit ? publicClubs.slice(0, limit) : publicClubs;
   target.innerHTML = items.map(renderClubCard).join('');
   runAutoFit();
 }
