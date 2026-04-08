@@ -4437,11 +4437,12 @@ button,
 
 .playoff-match-card{
   display:grid;
-  gap:10px;
+  gap:0;
   position:relative;
-  min-height:164px;
-  padding:16px 18px;
-  width:min(100%, 330px);
+  min-height:auto;
+  padding:18px 20px;
+  width:min(100%, 314px);
+  background:#fff;
 }
 
 .playoff-match-label{
@@ -4451,9 +4452,8 @@ button,
 }
 
 .playoff-seed-row{
-  display:grid;
-  grid-template-columns:auto minmax(0, 1fr);
-  gap:10px;
+  display:flex;
+  justify-content:space-between;
   align-items:center;
   color:var(--navy);
   text-decoration:none;
@@ -4463,6 +4463,14 @@ button,
   opacity:.82;
 }
 
+.playoff-card-header{
+  margin-bottom:14px;
+}
+
+.playoff-upcoming-teams{
+  gap:12px;
+}
+
 .playoff-seed-logo img{
   width:34px;
   height:34px;
@@ -4470,34 +4478,29 @@ button,
   display:block;
 }
 
-.playoff-seed-name{
-  min-width:0;
-  font-size:15px;
-  font-weight:700;
-  line-height:1.35;
+.playoff-seed-logo-fallback{
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
 }
 
-.playoff-match-divider{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:16px;
-  color:var(--muted);
-  font-size:13px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.06em;
+.playoff-team-name{
+  font-size:18px;
 }
 
 .playoff-match-score{
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height:20px;
   color:var(--navy);
-  font-size:16px;
+  font-size:28px;
   font-weight:800;
-  letter-spacing:.06em;
+  line-height:1;
+}
+
+.playoff-team-score{
+  min-width:22px;
+  text-align:right;
 }
 
 .playoff-round:first-child .playoff-match-card{
@@ -4623,6 +4626,10 @@ button,
     padding-right:18px;
   }
 
+  .playoff-match-card{
+    width:100%;
+  }
+
   .playoff-board-round.is-left .playoff-match-card::after,
   .playoff-board-round.is-right .playoff-match-card::before,
   .playoff-round:first-child .playoff-match-card::before,
@@ -4649,7 +4656,7 @@ button,
 
   .playoff-seed-row,
   .playoff-seed-row.is-placeholder{
-    grid-template-columns:auto minmax(0, 1fr);
+    display:flex;
   }
 
   .playoff-seed-logo{

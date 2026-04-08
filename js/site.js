@@ -584,29 +584,40 @@ function buildPlayoffProgressSeed(seed, label) {
   };
 }
 
-function renderPlayoffSeed(seed = {}) {
+function renderPlayoffSeed(seed = {}, score = '—') {
   const clubUrl = getClubPageUrl({ slug: seed.slug, logo: seed.logo });
   const body = `
-    ${seed.logo
-      ? `<span class="playoff-seed-logo">${renderImageMarkup({ src: seed.logo, alt: seed.label || '', width: 72 })}</span>`
-      : ''}
-    <span class="playoff-seed-name">${escapeHtml(seed.label || '—')}</span>
+    <div class="team-left">
+      ${seed.logo
+        ? renderImageMarkup({ src: seed.logo, alt: seed.label || '', width: 72, className: 'team-logo' })
+        : '<span class="playoff-seed-logo-fallback"></span>'}
+      <span class="team-name playoff-team-name">${escapeHtml(seed.label || '—')}</span>
+    </div>
+    <div class="team-score playoff-team-score">${escapeHtml(score)}</div>
   `;
 
   if (clubUrl && seed.type === 'team') {
-    return `<a class="playoff-seed-row playoff-seed-row-link" href="${escapeHtml(clubUrl)}">${body}</a>`;
+    return `<a class="upcoming-team-row playoff-seed-row playoff-seed-row-link" href="${escapeHtml(clubUrl)}">${body}</a>`;
   }
 
-  return `<div class="playoff-seed-row${seed.type === 'placeholder' ? ' is-placeholder' : ''}">${body}</div>`;
+  return `<div class="upcoming-team-row playoff-seed-row${seed.type === 'placeholder' ? ' is-placeholder' : ''}">${body}</div>`;
 }
 
 function renderPlayoffMatch(match = {}) {
+  const homeScore = match.homeScore ?? '—';
+  const awayScore = match.awayScore ?? '—';
+
   return `
-    <article class="playoff-match-card">
-      <div class="playoff-match-label">${escapeHtml(match.label || '')}</div>
-      ${renderPlayoffSeed(match.home)}
-      <div class="playoff-match-score">${escapeHtml(match.score || '— : —')}</div>
-      ${renderPlayoffSeed(match.away)}
+    <article class="playoff-match-card upcoming-card playoff-upcoming-card">
+      <div class="upcoming-header playoff-card-header">
+        <div>
+          <div class="playoff-match-label">${escapeHtml(match.label || '')}</div>
+        </div>
+      </div>
+      <div class="upcoming-teams playoff-upcoming-teams">
+        ${renderPlayoffSeed(match.home, homeScore)}
+        ${renderPlayoffSeed(match.away, awayScore)}
+      </div>
     </article>
   `;
 }
