@@ -612,24 +612,27 @@ function renderPlayoffMatch(match = {}) {
   `;
 }
 
-function renderPlayoffRoundColumn(title, matches = [], sourceClass = '') {
-  return `
-    <div class="playoff-board-round ${sourceClass}">
-      <div class="playoff-board-round-title">${escapeHtml(title || '')}</div>
-      <div class="playoff-round-matches">
-        ${(matches || []).map(renderPlayoffMatch).join('')}
-      </div>
-    </div>
-  `;
-}
+function renderPlayoffBandGrid(config = {}) {
+  const roundOne = Array.isArray(config.roundOne) ? config.roundOne : [];
+  const roundTwo = Array.isArray(config.roundTwo) ? config.roundTwo : [];
 
-function renderPlayoffBoardBand(config = {}) {
   return `
-    <section class="playoff-board-band">
-      <div class="playoff-board-band-label">${escapeHtml(config.title || '')}</div>
-      <div class="playoff-board-grid">
-        ${renderPlayoffRoundColumn(config.roundOneTitle || '', config.roundOne || [], 'is-source')}
-        ${renderPlayoffRoundColumn(config.roundTwoTitle || '', config.roundTwo || [], 'is-target')}
+    <section class="playoff-band-grid">
+      <div class="playoff-band-grid-label">${escapeHtml(config.title || '')}</div>
+      <div class="playoff-band-grid-stage playoff-band-grid-stage-semis">
+        ${roundOne.map((match, index) => `
+          <div class="playoff-band-grid-slot playoff-band-grid-slot-semi-${index + 1}">
+            ${renderPlayoffMatch(match)}
+          </div>
+        `).join('')}
+      </div>
+      <div class="playoff-band-grid-connector" aria-hidden="true"></div>
+      <div class="playoff-band-grid-stage playoff-band-grid-stage-finals">
+        ${roundTwo.map((match, index) => `
+          <div class="playoff-band-grid-slot playoff-band-grid-slot-final-${index + 1}">
+            ${renderPlayoffMatch(match)}
+          </div>
+        `).join('')}
       </div>
     </section>
   `;
@@ -716,8 +719,16 @@ function renderPlayoffBracket(groups = []) {
         <h3 class="playoff-board-title">Сетка плей-офф</h3>
         <p class="playoff-board-subtitle">Пары формируются автоматически по текущим местам в группах.</p>
       </div>
-      ${renderPlayoffBoardBand(topBracket)}
-      ${renderPlayoffBoardBand(placementBracket)}
+      <div class="playoff-board-grid-head">
+        <div class="playoff-board-grid-head-spacer" aria-hidden="true"></div>
+        <div class="playoff-board-grid-col-title">${escapeHtml(topBracket.roundOneTitle || '')}</div>
+        <div class="playoff-board-grid-head-spacer" aria-hidden="true"></div>
+        <div class="playoff-board-grid-col-title">${escapeHtml(topBracket.roundTwoTitle || '')}</div>
+      </div>
+      <div class="playoff-board-grid">
+        ${renderPlayoffBandGrid(topBracket)}
+        ${renderPlayoffBandGrid(placementBracket)}
+      </div>
     </div>
   `;
 }

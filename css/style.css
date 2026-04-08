@@ -4254,19 +4254,20 @@ button,
   line-height:1.5;
 }
 
-.playoff-board-band{
+.playoff-board-grid-head{
   display:grid;
-  gap:16px;
+  grid-template-columns:180px minmax(0, 1fr) 92px minmax(0, 1fr);
+  gap:20px;
+  align-items:end;
 }
 
-.playoff-board-band + .playoff-board-band{
-  padding-top:24px;
-  border-top:1px solid rgba(13, 43, 99, .1);
+.playoff-board-grid-head-spacer{
+  min-height:1px;
 }
 
-.playoff-board-band-label{
+.playoff-board-grid-col-title{
   color:var(--navy);
-  font-size:15px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:.08em;
   text-transform:uppercase;
@@ -4274,23 +4275,78 @@ button,
 
 .playoff-board-grid{
   display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:56px;
-  align-items:start;
+  gap:28px;
 }
 
-.playoff-board-round{
+.playoff-band-grid{
   display:grid;
-  gap:14px;
-  position:relative;
+  grid-template-columns:180px minmax(0, 1fr) 92px minmax(0, 1fr);
+  gap:20px;
+  align-items:stretch;
 }
 
-.playoff-board-round-title{
+.playoff-band-grid + .playoff-band-grid{
+  padding-top:28px;
+  border-top:1px solid rgba(13, 43, 99, .1);
+}
+
+.playoff-band-grid-label{
   color:var(--navy);
-  font-size:14px;
+  font-size:15px;
   font-weight:800;
   letter-spacing:.08em;
   text-transform:uppercase;
+  align-self:center;
+}
+
+.playoff-band-grid-stage{
+  display:grid;
+  gap:20px;
+  align-content:start;
+}
+
+.playoff-band-grid-stage-semis .playoff-match-card{
+  position:relative;
+}
+
+.playoff-band-grid-stage-semis .playoff-match-card::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  right:-56px;
+  width:56px;
+  border-top:2px solid rgba(13, 43, 99, .18);
+  transform:translateY(-50%);
+}
+
+.playoff-band-grid-stage-finals .playoff-match-card{
+  position:relative;
+}
+
+.playoff-band-grid-stage-finals .playoff-match-card::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:-56px;
+  width:56px;
+  border-top:2px solid rgba(13, 43, 99, .18);
+  transform:translateY(-50%);
+}
+
+.playoff-band-grid-connector{
+  position:relative;
+  min-width:92px;
+}
+
+.playoff-band-grid-connector::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:25%;
+  bottom:25%;
+  width:2px;
+  background:rgba(13, 43, 99, .18);
+  transform:translateX(-50%);
 }
 
 .playoff-bracket-card{
@@ -4470,43 +4526,29 @@ button,
 }
 
 .playoff-board-round.is-source .playoff-match-card{
-  padding-right:44px;
+  padding-right:18px;
 }
 
-.playoff-board-round.is-source .playoff-match-card::after{
+.playoff-board-round.is-left .playoff-match-card::after{
   content:"";
   position:absolute;
   top:50%;
-  right:-40px;
-  width:40px;
+  right:-44px;
+  width:44px;
   border-top:2px solid rgba(13, 43, 99, .18);
   transform:translateY(-50%);
 }
 
-.playoff-board-round.is-source .playoff-match-card::before{
-  content:"";
-  position:absolute;
-  top:calc(50% - 44px);
-  right:0;
-  width:18px;
-  height:88px;
-  border-right:2px solid rgba(13, 43, 99, .18);
-  border-top:2px solid rgba(13, 43, 99, .18);
-  border-bottom:2px solid rgba(13, 43, 99, .18);
-  border-radius:0 18px 18px 0;
-  transform:translateY(-50%);
+.playoff-board-round.is-right .playoff-match-card{
+  padding-left:18px;
 }
 
-.playoff-board-round.is-target .playoff-match-card{
-  padding-left:40px;
-}
-
-.playoff-board-round.is-target .playoff-match-card::before{
+.playoff-board-round.is-right .playoff-match-card::before{
   content:"";
   position:absolute;
   top:50%;
-  left:-40px;
-  width:40px;
+  left:-44px;
+  width:44px;
   border-top:2px solid rgba(13, 43, 99, .18);
   transform:translateY(-50%);
 }
@@ -4526,8 +4568,19 @@ button,
 
 @media (max-width: 1180px){
   .playoff-layout,
-  .playoff-board-grid{
+  .playoff-pyramid-shell{
     grid-template-columns:1fr;
+  }
+
+  .playoff-board-grid-head,
+  .playoff-band-grid{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+
+  .playoff-band-grid-connector,
+  .playoff-board-grid-head-spacer{
+    display:none;
   }
 }
 
@@ -4536,17 +4589,21 @@ button,
     grid-template-columns:1fr;
   }
 
-  .playoff-board-round.is-source .playoff-match-card,
-  .playoff-board-round.is-target .playoff-match-card,
+  .playoff-band-grid-stage-semis .playoff-match-card::after,
+  .playoff-band-grid-stage-finals .playoff-match-card::before{
+    display:none;
+  }
+
+  .playoff-board-round.is-left .playoff-match-card,
+  .playoff-board-round.is-right .playoff-match-card,
   .playoff-round:first-child .playoff-match-card,
   .playoff-round:last-child .playoff-match-card{
     padding-left:18px;
     padding-right:18px;
   }
 
-  .playoff-board-round.is-source .playoff-match-card::before,
-  .playoff-board-round.is-source .playoff-match-card::after,
-  .playoff-board-round.is-target .playoff-match-card::before,
+  .playoff-board-round.is-left .playoff-match-card::after,
+  .playoff-board-round.is-right .playoff-match-card::before,
   .playoff-round:first-child .playoff-match-card::before,
   .playoff-round:first-child .playoff-match-card::after,
   .playoff-round:last-child .playoff-match-card::before{
