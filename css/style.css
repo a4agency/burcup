@@ -411,9 +411,11 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   overflow-x:auto;
   overflow-y:hidden;
   scroll-behavior:smooth;
-  scroll-snap-type:x proximity;
+  scroll-snap-type:x mandatory;
   padding:4px 2px 8px;
   scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y pinch-zoom;
 }
 
 .media-album-track::-webkit-scrollbar{
@@ -426,6 +428,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   gap:16px;
   align-items:start;
   scroll-snap-align:start;
+  scroll-snap-stop:always;
 }
 
 .media-album-photo-card{
@@ -853,6 +856,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 
   .media-album-page-slide{
     grid-template-columns:1fr;
+    gap:0;
   }
 
   #media-library.media-library-track{
@@ -863,6 +867,15 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 
   .media-album-track{
     gap:14px;
+    padding-inline:0;
+  }
+
+  .media-album-photo-card{
+    width:100%;
+  }
+
+  .media-album-photo-image{
+    border-radius:18px;
   }
 
   .media-album-lightbox{

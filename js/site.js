@@ -1775,7 +1775,7 @@ function renderMediaAlbumPhotoCard(photo = {}, index = 0) {
   `;
 }
 
-function buildMediaAlbumPhotoPages(photos = [], pageSize = 16) {
+function buildMediaAlbumPhotoPages(photos = [], pageSize = 16, padLastPage = true) {
   if (!Array.isArray(photos) || !photos.length) {
     return [
       Array.from({ length: pageSize }, (_, index) => renderMediaAlbumPlaceholderTile(index))
@@ -1785,7 +1785,7 @@ function buildMediaAlbumPhotoPages(photos = [], pageSize = 16) {
   const pages = [];
   for (let index = 0; index < photos.length; index += pageSize) {
     const slice = photos.slice(index, index + pageSize);
-    const placeholdersCount = Math.max(0, pageSize - slice.length);
+    const placeholdersCount = padLastPage ? Math.max(0, pageSize - slice.length) : 0;
     pages.push([
       ...slice.map((photo, offset) => renderMediaAlbumPhotoCard(photo, index + offset)),
       ...Array.from({ length: placeholdersCount }, (_, placeholderIndex) =>
@@ -1937,7 +1937,8 @@ async function renderMediaAlbumPage() {
 
     document.title = `Burchalkin Cup — ${album.title || 'Фотоальбом'}`;
     const photos = Array.isArray(album.photos) ? album.photos : [];
-    const photoPagesMarkup = buildMediaAlbumPhotoPages(photos)
+    const isMobileAlbum = window.innerWidth <= 640;
+    const photoPagesMarkup = buildMediaAlbumPhotoPages(photos, isMobileAlbum ? 1 : 16, !isMobileAlbum)
       .map(pageItems => `<div class="media-album-page-slide">${pageItems.join('')}</div>`)
       .join('');
 
@@ -1987,7 +1988,8 @@ async function renderMediaAlbumPage() {
     }
 
     const photos = Array.isArray(album.photos) ? album.photos : [];
-    const photoPagesMarkup = buildMediaAlbumPhotoPages(photos)
+    const isMobileAlbum = window.innerWidth <= 640;
+    const photoPagesMarkup = buildMediaAlbumPhotoPages(photos, isMobileAlbum ? 1 : 16, !isMobileAlbum)
       .map(pageItems => `<div class="media-album-page-slide">${pageItems.join('')}</div>`)
       .join('');
 
@@ -2825,13 +2827,53 @@ function initMediaAlbumSlider() {
     nextBtn.disabled = track.scrollLeft >= maxScroll;
   }
 
-  prevBtn.onclick = () => {
+  function goPrev() {
     track.scrollBy({ left: -getStep(), behavior: 'smooth' });
-  };
+  }
 
-  nextBtn.onclick = () => {
+  function goNext() {
     track.scrollBy({ left: getStep(), behavior: 'smooth' });
-  };
+  }
+
+  prevBtn.onclick = goPrev;
+  nextBtn.onclick = goNext;
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let hasTouchStart = false;
+
+  track.addEventListener('touchstart', (event) => {
+    if (window.innerWidth > 640) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    hasTouchStart = true;
+  }, { passive: true });
+
+  track.addEventListener('touchend', (event) => {
+    if (!hasTouchStart || window.innerWidth > 640) return;
+    hasTouchStart = false;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - touchStartX;
+    const deltaY = touch.clientY - touchStartY;
+
+    if (Math.abs(deltaX) < 42 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+    track.dataset.suppressClicksUntil = String(Date.now() + 320);
+
+    if (deltaX > 0) {
+      goPrev();
+    } else {
+      goNext();
+    }
+  }, { passive: true });
+
+  track.addEventListener('touchcancel', () => {
+    hasTouchStart = false;
+  }, { passive: true });
 
   track.addEventListener('scroll', updateButtons, { passive: true });
   window.addEventListener('resize', updateButtons);
@@ -2844,6 +2886,7 @@ function initMediaAlbumSlider() {
 
 function initMediaAlbumLightbox(photos = []) {
   const items = Array.isArray(photos) ? photos.filter((photo) => String(photo?.image_url || '').trim()) : [];
+  const track = document.getElementById('media-album-track');
   const modal = document.getElementById('media-album-lightbox');
   const image = document.getElementById('media-album-lightbox-image');
   const counter = document.getElementById('media-album-lightbox-counter');
@@ -2892,6 +2935,8 @@ function initMediaAlbumLightbox(photos = []) {
 
   document.querySelectorAll('[data-album-photo-index]').forEach((button) => {
     button.addEventListener('click', () => {
+      const suppressClicksUntil = Number(track?.dataset.suppressClicksUntil || 0);
+      if (suppressClicksUntil && Date.now() < suppressClicksUntil) return;
       const index = Number(button.dataset.albumPhotoIndex);
       if (!Number.isFinite(index)) return;
       openLightbox(index);
