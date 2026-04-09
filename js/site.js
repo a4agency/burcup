@@ -1060,16 +1060,16 @@ const ARCHIVE_TOURNAMENTS = {
     status: 'Страница уже готова как архивная точка входа. Материалы можно будет постепенно добавить позже.',
     detail: {
       clubs_count: 8,
-      matches_count: 3,
+      matches_count: 5,
       standings: [
         { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
         { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
-        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
-        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
+        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 3, goals_against: 1, points: 4 },
+        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 2, goals_against: 1, points: 4 },
         { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
         { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 },
-        { position: 7, team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 0, won: 0, drawn: 0, lost: 0, goals_for: 0, goals_against: 0, points: 0 },
-        { position: 8, team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 0, won: 0, drawn: 0, lost: 0, goals_for: 0, goals_against: 0, points: 0 }
+        { position: 7, team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
+        { position: 8, team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
       ],
       matches: [
         {
@@ -1113,6 +1113,34 @@ const ARCHIVE_TOURNAMENTS = {
           away_team: 'Сан-Лоренсо',
           away_team_slug: 'san-lorenzo',
           away_logo: 'images/team-san-lorenzo.webp'
+        },
+        {
+          id: 'archive-2025-4',
+          date: '2025-05-15',
+          time: '16:00',
+          status_label: 'Завершён',
+          score: '2:0',
+          group: 'Группа B',
+          home_team: 'Палмейрас',
+          home_team_slug: 'palmeiras',
+          home_logo: 'images/team-palmeiras.webp',
+          away_team: 'Црвена Звезда',
+          away_team_slug: 'crvena-zvezda',
+          away_logo: 'images/team-crvena-zvezda.webp'
+        },
+        {
+          id: 'archive-2025-5',
+          date: '2025-05-15',
+          time: '18:00',
+          status_label: 'Завершён',
+          score: '1:0',
+          group: 'Группа B',
+          home_team: 'Сан-Лоренсо',
+          home_team_slug: 'san-lorenzo',
+          home_logo: 'images/team-san-lorenzo.webp',
+          away_team: 'Фенербахче',
+          away_team_slug: 'fenerbahce',
+          away_logo: 'images/team-fenerbahce.webp'
         }
       ],
       partners: [
