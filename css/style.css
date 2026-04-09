@@ -8211,11 +8211,10 @@ button,
   display:grid;
   grid-template-columns:repeat(3, minmax(240px, 280px));
   gap:24px;
-  align-items:start;
+  align-items:end;
   justify-content:center;
   max-width:920px;
   margin:0 auto;
-  padding-top:8px;
 }
 
 .archive-podium-item{
@@ -8225,14 +8224,6 @@ button,
   min-width:0;
   color:inherit;
   text-decoration:none;
-}
-
-.archive-podium-item.archive-podium-item-silver{
-  margin-top:56px;
-}
-
-.archive-podium-item.archive-podium-item-bronze{
-  margin-top:112px;
 }
 
 .archive-podium-logo-wrap{
@@ -8602,11 +8593,6 @@ button,
   .archive-podium{
     grid-template-columns:1fr;
     max-width:420px;
-  }
-
-  .archive-podium-item.archive-podium-item-silver,
-  .archive-podium-item.archive-podium-item-bronze{
-    margin-top:0;
   }
 
   .archive-podium-logo-wrap{
