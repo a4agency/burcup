@@ -3487,8 +3487,6 @@ function renderArchiveTournamentPage() {
   const slug = params.get('slug') || getArchiveTournamentSlug(year);
   const titleNode = page.querySelector('[data-archive-title]');
   const seasonNode = page.querySelector('[data-archive-season]');
-  const descriptionNode = page.querySelector('[data-archive-description]');
-  const statusNode = page.querySelector('[data-archive-status]');
   const statsNode = page.querySelector('[data-archive-stats]');
   const competitionNode = page.querySelector('[data-archive-competition]');
   const teamsNode = page.querySelector('[data-archive-teams]');
@@ -3585,8 +3583,6 @@ function renderArchiveTournamentPage() {
     const resolvedDetail = mergeArchiveDetail(detail);
     if (titleNode) titleNode.textContent = translateRuntimeText(archive.title);
     if (seasonNode) seasonNode.textContent = translateRuntimeText(archive.season);
-    if (descriptionNode) descriptionNode.textContent = translateRuntimeText(archive.description);
-    if (statusNode) statusNode.textContent = translateRuntimeText(archive.status);
     document.title = `${archive.title} - Burchalkin Cup`;
 
     if (statsNode) {
