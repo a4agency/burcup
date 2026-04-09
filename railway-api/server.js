@@ -39,6 +39,7 @@ const CATEGORY_NAMES = {
 };
 
 let translationTableEnsured = false;
+let editablePagesTableEnsured = false;
 
 app.use(cors({
   origin(origin, callback) {
@@ -61,6 +62,10 @@ function normalizeTime(value) {
 }
 
 function normalizeString(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function normalizeHtmlString(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
@@ -200,6 +205,23 @@ async function ensureTranslationCacheTable(queryable = pool) {
   `);
 
   translationTableEnsured = true;
+}
+
+async function ensureEditablePagesTable(queryable = pool) {
+  if (editablePagesTableEnsured) return;
+
+  await queryable.query(`
+    CREATE TABLE IF NOT EXISTS site_pages (
+      slug TEXT PRIMARY KEY,
+      title TEXT NOT NULL DEFAULT '',
+      subtitle TEXT NOT NULL DEFAULT '',
+      body_html TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  editablePagesTableEnsured = true;
 }
 
 async function translateTextWithGoogleGtx(text, sourceLang, targetLang) {
@@ -2557,6 +2579,55 @@ async function replacePlayoff(client, payload) {
   }
 }
 
+async function getAdminPages(client) {
+  await ensureEditablePagesTable(client);
+  const { rows } = await client.query(`
+    SELECT slug, title, subtitle, body_html
+    FROM site_pages
+    ORDER BY slug ASC;
+  `);
+
+  return rows.map(row => ({
+    slug: row.slug,
+    title: row.title || '',
+    subtitle: row.subtitle || '',
+    body_html: row.body_html || '',
+  }));
+}
+
+async function replacePages(client, payload) {
+  await ensureEditablePagesTable(client);
+
+  const items = ensureArray(payload)
+    .map(item => ({
+      slug: normalizeString(item?.slug),
+      title: normalizeString(item?.title),
+      subtitle: normalizeString(item?.subtitle),
+      body_html: normalizeHtmlString(item?.body_html),
+    }))
+    .filter(item => item.slug);
+
+  const slugs = items.map(item => item.slug);
+
+  if (slugs.length) {
+    await client.query('DELETE FROM site_pages WHERE NOT (slug = ANY($1::text[]))', [slugs]);
+  } else {
+    await client.query('DELETE FROM site_pages');
+  }
+
+  for (const item of items) {
+    await client.query(`
+      INSERT INTO site_pages (slug, title, subtitle, body_html, updated_at)
+      VALUES ($1, $2, $3, $4, NOW())
+      ON CONFLICT (slug) DO UPDATE
+      SET title = EXCLUDED.title,
+          subtitle = EXCLUDED.subtitle,
+          body_html = EXCLUDED.body_html,
+          updated_at = NOW();
+    `, [item.slug, item.title, item.subtitle, item.body_html]);
+  }
+}
+
 async function loadAdminResource(client, resource) {
   switch (resource) {
     case 'tournaments':
@@ -2575,6 +2646,8 @@ async function loadAdminResource(client, resource) {
       return getAdminPlayoff(client);
     case 'albums':
       return getAdminAlbums(client);
+    case 'pages':
+      return getAdminPages(client);
     default:
       throw new Error('Unknown admin resource');
   }
@@ -2598,6 +2671,8 @@ async function saveAdminResource(client, resource, payload) {
       return replacePlayoff(client, payload);
     case 'albums':
       return replaceAlbums(client, payload);
+    case 'pages':
+      return replacePages(client, payload);
     default:
       throw new Error('Unknown admin resource');
   }
@@ -2624,6 +2699,7 @@ app.get('/', (req, res) => {
       '/api/results',
       '/api/media/albums',
       '/api/media/albums/:slug',
+      '/api/pages/:slug',
       '/api/translate',
       '/api/admin/session',
       '/api/admin/:resource',
@@ -2650,6 +2726,36 @@ app.get('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
     if (error.message === 'Unknown admin resource') {
       return res.status(404).json({ error: error.message });
     }
+    return next(error);
+  }
+});
+
+app.get('/api/pages/:slug', async (req, res, next) => {
+  try {
+    await ensureEditablePagesTable(pool);
+    const { rows } = await pool.query(`
+      SELECT slug, title, subtitle, body_html
+      FROM site_pages
+      WHERE slug = $1
+      LIMIT 1;
+    `, [req.params.slug]);
+
+    if (!rows.length) {
+      return res.json({
+        slug: req.params.slug,
+        title: '',
+        subtitle: '',
+        body_html: ''
+      });
+    }
+
+    return res.json({
+      slug: rows[0].slug,
+      title: rows[0].title || '',
+      subtitle: rows[0].subtitle || '',
+      body_html: rows[0].body_html || ''
+    });
+  } catch (error) {
     return next(error);
   }
 });

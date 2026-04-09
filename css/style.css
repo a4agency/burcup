@@ -8789,6 +8789,20 @@ button,
   line-height:1.45;
 }
 
+.admin-page-card{
+  max-width:1200px;
+}
+
+.admin-page-body-field{
+  grid-column:1/-1;
+}
+
+.admin-page-body-field textarea{
+  min-height:28rem;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  line-height:1.55;
+}
+
 .admin-media-card{
   max-width:980px;
 }

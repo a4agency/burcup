@@ -255,8 +255,8 @@ async function renderStandings(selector) {
       playoff: playoffData
     });
     initStandingsViewSwitch(target);
-    if (window.i18n?.translateTextTree) {
-      window.i18n.translateTextTree(target);
+    if (window.BCI18N?.translateTextTree) {
+      window.BCI18N.translateTextTree(target);
     }
     if (typeof runAutoFit === 'function') {
       runAutoFit();
@@ -2008,6 +2008,39 @@ async function fetchJson(path) {
   return response.json();
 }
 
+async function renderEditableStaticPage() {
+  const page = document.querySelector('[data-editable-page]');
+  if (!page) return;
+
+  const slug = String(page.dataset.editablePage || '').trim();
+  const titleNode = page.querySelector('[data-page-title]');
+  const subtitleNode = page.querySelector('[data-page-subtitle]');
+  const bodyNode = page.querySelector('[data-page-body]');
+  if (!slug || !titleNode || !subtitleNode || !bodyNode) return;
+
+  const data = await fetchApi(`/api/pages/${encodeURIComponent(slug)}`);
+  if (!data || typeof data !== 'object') return;
+
+  const title = String(data.title || '').trim();
+  const subtitle = String(data.subtitle || '').trim();
+  const bodyHtml = String(data.body_html || '').trim();
+  if (!title && !subtitle && !bodyHtml) return;
+
+  if (title) titleNode.textContent = title;
+  if (subtitle) subtitleNode.textContent = subtitle;
+  if (bodyHtml) bodyNode.innerHTML = bodyHtml;
+
+  document.title = `Burchalkin Cup — ${title || titleNode.textContent.trim() || ''}`.trim();
+  document.documentElement.dataset.bcOriginalTitle = document.title;
+  upgradeStaticImagesForCloudinary();
+  if (window.BCI18N?.translateTextTree) {
+    window.BCI18N.translateTextTree(page);
+  }
+  if (typeof runAutoFit === 'function') {
+    runAutoFit();
+  }
+}
+
 function renderClubCard(item) {
   return `
     <a class="team-logo-card club-card-link" href="club.html?slug=${encodeURIComponent(item.slug)}">
@@ -3655,6 +3688,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPartnersForFeaturedTournament();
   renderClubPage();
   renderArchiveTournamentPage();
+  renderEditableStaticPage();
   runAutoFit();
 });
 

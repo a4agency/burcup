@@ -231,6 +231,7 @@ const DEFAULT_PLAYOFF_ROWS = [
 ];
 
 const ADMIN_TOKEN_KEY = 'bcup_admin_session_token';
+const EDITABLE_PAGE_TEMPLATE_CACHE = {};
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -694,6 +695,72 @@ const ADMIN_SOURCES = {
       ['description', 'Комментарий к альбому', 'textarea'],
     ],
   },
+  page_about_tournament: {
+    key: 'bcup_page_about_tournament',
+    exportName: 'page-about-tournament.json',
+    title: 'О турнире',
+    help: 'Редактирование публичной страницы «О турнире». Заголовок, подзаголовок и основное содержимое страницы.',
+    singleton: true,
+    pageSlug: 'about-tournament',
+    pageFile: 'about-tournament.html',
+    defaultData: [],
+    empty: () => ({
+      slug: 'about-tournament',
+      title: 'О турнире',
+      subtitle: 'История и смысл Кубка Льва Бурчалкина.',
+      body_html: '',
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['title', 'Заголовок страницы', 'text'],
+      ['subtitle', 'Подзаголовок', 'text'],
+      ['body_html', 'HTML содержимое', 'textarea'],
+    ],
+  },
+  page_about_lev_burchalkin: {
+    key: 'bcup_page_about_lev_burchalkin',
+    exportName: 'page-about-lev-burchalkin.json',
+    title: 'О Льве Бурчалкине',
+    help: 'Редактирование публичной страницы «О Льве Бурчалкине».',
+    singleton: true,
+    pageSlug: 'about-lev-burchalkin',
+    pageFile: 'about-lev-burchalkin.html',
+    defaultData: [],
+    empty: () => ({
+      slug: 'about-lev-burchalkin',
+      title: 'О Льве Бурчалкине',
+      subtitle: 'Легендарный ленинградский футболист, в честь которого назван турнир.',
+      body_html: '',
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['title', 'Заголовок страницы', 'text'],
+      ['subtitle', 'Подзаголовок', 'text'],
+      ['body_html', 'HTML содержимое', 'textarea'],
+    ],
+  },
+  page_contacts: {
+    key: 'bcup_page_contacts',
+    exportName: 'page-contacts.json',
+    title: 'Контакты',
+    help: 'Редактирование публичной страницы «Контакты».',
+    singleton: true,
+    pageSlug: 'contacts',
+    pageFile: 'contacts.html',
+    defaultData: [],
+    empty: () => ({
+      slug: 'contacts',
+      title: 'Контакты',
+      subtitle: 'Контактные данные для локальной версии сайта.',
+      body_html: '',
+    }),
+    fields: [
+      ['slug', 'Slug', 'text'],
+      ['title', 'Заголовок страницы', 'text'],
+      ['subtitle', 'Подзаголовок', 'text'],
+      ['body_html', 'HTML содержимое', 'textarea'],
+    ],
+  },
   archive_matches: {
     key: 'bcup_archive_matches',
     exportName: 'archive-matches.json',
@@ -1101,6 +1168,7 @@ function getAdminSourceMeta(sourceName) {
 }
 
 function getAdminApiSourceName(sourceName) {
+  if (getAdminSourceMeta(sourceName)?.pageSlug) return 'pages';
   if (sourceName === 'partners_media') return 'partners';
   if (sourceName === 'archive_tournaments') return 'tournaments';
   if (sourceName === 'archive_matches') return 'matches';
@@ -1204,9 +1272,27 @@ function normalizeAlbumAdminItem(item, index = 0) {
   };
 }
 
+function normalizeEditablePageAdminItem(item, fallbackSlug = '') {
+  return {
+    slug: String(item?.slug || fallbackSlug).trim() || fallbackSlug,
+    title: String(item?.title || '').trim(),
+    subtitle: String(item?.subtitle || '').trim(),
+    body_html: typeof item?.body_html === 'string' ? item.body_html.trim() : '',
+  };
+}
+
 function normalizeSourceData(sourceName, data) {
   const sourceMeta = getAdminSourceMeta(sourceName);
   const items = Array.isArray(data) ? data : [];
+  if (sourceMeta?.pageSlug) {
+    const normalizedItems = items
+      .map(item => normalizeEditablePageAdminItem(item, sourceMeta.pageSlug))
+      .filter(item => String(item.slug || '').trim() === sourceMeta.pageSlug);
+
+    return normalizedItems.length
+      ? [normalizedItems[0]]
+      : [];
+  }
   if (sourceName === 'tournaments' || sourceName === 'archive_tournaments') {
     const normalizedItems = items.map(normalizeTournamentAdminItem);
     if (sourceMeta?.filterArchived) {
@@ -1326,6 +1412,74 @@ async function fetchAdminSource(sourceName) {
   return normalizeSourceData(sourceName, data);
 }
 
+async function loadEditablePageTemplate(sourceName) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
+  if (!sourceMeta?.pageSlug || !sourceMeta?.pageFile) {
+    return cloneDefaultData(sourceName);
+  }
+
+  if (EDITABLE_PAGE_TEMPLATE_CACHE[sourceName]) {
+    return structuredClone(EDITABLE_PAGE_TEMPLATE_CACHE[sourceName]);
+  }
+
+  try {
+    const response = await fetch(sourceMeta.pageFile, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`Не удалось загрузить шаблон страницы ${sourceMeta.pageFile}`);
+    }
+
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const title = String(doc.querySelector('[data-page-title]')?.textContent || '').trim();
+    const subtitle = String(doc.querySelector('[data-page-subtitle]')?.textContent || '').trim();
+    const bodyHtml = String(doc.querySelector('[data-page-body]')?.innerHTML || '').trim();
+
+    const data = [
+      normalizeEditablePageAdminItem({
+        slug: sourceMeta.pageSlug,
+        title: title || sourceMeta.empty().title,
+        subtitle: subtitle || sourceMeta.empty().subtitle,
+        body_html: bodyHtml,
+      }, sourceMeta.pageSlug)
+    ];
+
+    EDITABLE_PAGE_TEMPLATE_CACHE[sourceName] = structuredClone(data);
+    return structuredClone(data);
+  } catch (error) {
+    const fallback = [normalizeEditablePageAdminItem(sourceMeta.empty(), sourceMeta.pageSlug)];
+    EDITABLE_PAGE_TEMPLATE_CACHE[sourceName] = structuredClone(fallback);
+    return structuredClone(fallback);
+  }
+}
+
+async function getSourceFallbackData(sourceName) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
+  if (sourceMeta?.pageSlug) {
+    return loadEditablePageTemplate(sourceName);
+  }
+  return cloneDefaultData(sourceName);
+}
+
+async function resolveLoadedSourceData(sourceName, data) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
+  if (sourceMeta?.pageSlug) {
+    const normalized = normalizeSourceData(sourceName, data);
+    return normalized.length ? normalized : getSourceFallbackData(sourceName);
+  }
+
+  if (sourceName === 'albums' && Array.isArray(data) && !data.length) {
+    return getSourceFallbackData(sourceName);
+  }
+
+  return normalizeSourceData(sourceName, data);
+}
+
 async function pushAdminSource(sourceName, data) {
   const sourceMeta = getAdminSourceMeta(sourceName);
   const apiSourceName = getAdminApiSourceName(sourceName);
@@ -1344,6 +1498,12 @@ async function pushAdminSource(sourceName, data) {
     const allPartners = await fetchAdminCollection(apiSourceName);
     payload = [
       ...allPartners.filter(item => String(item?.category || 'general') !== sourceMeta.filterCategory),
+      ...normalizeSourceData(sourceName, data),
+    ];
+  } else if (sourceMeta?.pageSlug) {
+    const allPages = await fetchAdminCollection(apiSourceName);
+    payload = [
+      ...ensureArray(allPages).filter(item => String(item?.slug || '').trim() !== sourceMeta.pageSlug),
       ...normalizeSourceData(sourceName, data),
     ];
   } else if (sourceName === 'archive_tournaments') {
@@ -1463,12 +1623,12 @@ async function adminLoadDefault(sourceName) {
   if (defaultsCache[sourceName]) return structuredClone(defaultsCache[sourceName]);
 
   try {
-    const data = await fetchAdminSource(sourceName);
+    const data = await resolveLoadedSourceData(sourceName, await fetchAdminSource(sourceName));
     defaultsCache[sourceName] = structuredClone(data);
     setSourceData(sourceName, data);
     return structuredClone(data);
   } catch (error) {
-    defaultsCache[sourceName] = cloneDefaultData(sourceName);
+    defaultsCache[sourceName] = await getSourceFallbackData(sourceName);
     return structuredClone(defaultsCache[sourceName]);
   }
 }
@@ -2224,6 +2384,8 @@ function renderPartnerSourceCards(sourceName, data) {
 }
 
 function renderAdminCardBySource(sourceName, item, index, allItems) {
+  const sourceMeta = getAdminSourceMeta(sourceName);
+  if (sourceMeta?.pageSlug) return renderEditablePageAdminCard(sourceName, item, index);
   if (sourceName === 'media') return renderMediaAdminCard(item);
   if (sourceName === 'albums') return renderAlbumAdminCard(item, index);
   if (sourceName === 'matches' || sourceName === 'archive_matches') return renderMatchAdminCard(item, index, allItems);
@@ -2244,6 +2406,38 @@ function renderAdminCardBySource(sourceName, item, index, allItems) {
       </div>
       <div class="admin-form-grid">
         ${source.fields.map(field => makeField(field, item[field[0]], index)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderEditablePageAdminCard(sourceName, item, index) {
+  const source = getAdminSourceMeta(sourceName);
+  const safeItem = normalizeEditablePageAdminItem(item, source?.pageSlug || '');
+  return `
+    <div class="admin-item-card admin-page-card" data-item-index="${index}">
+      <div class="admin-item-head">
+        <strong>${escapeHtml(source?.title || 'Страница')}</strong>
+      </div>
+      <div class="admin-record-layout">
+        <div class="admin-record-note">
+          Редактируй заголовок, подзаголовок и HTML-контент страницы. Этот раздел управляет файлом <b>${escapeHtml(source?.pageFile || '')}</b>.
+        </div>
+        <input type="hidden" value="${escapeHtml(safeItem.slug)}" data-key="slug" data-index="${index}">
+        <div class="admin-form-grid admin-record-grid-2">
+          <div class="admin-field">
+            <label>Заголовок страницы</label>
+            <input type="text" value="${escapeHtml(safeItem.title)}" data-key="title" data-index="${index}">
+          </div>
+          <div class="admin-field">
+            <label>Подзаголовок</label>
+            <input type="text" value="${escapeHtml(safeItem.subtitle)}" data-key="subtitle" data-index="${index}">
+          </div>
+        </div>
+        <div class="admin-field admin-page-body-field">
+          <label>HTML содержимое страницы</label>
+          <textarea data-key="body_html" data-index="${index}">${escapeHtml(safeItem.body_html)}</textarea>
+        </div>
       </div>
     </div>
   `;
@@ -2352,6 +2546,7 @@ function readFormData(sourceName) {
 function renderForm(sourceName, data) {
   const source = ADMIN_SOURCES[sourceName];
   const wrap = document.getElementById('admin-form-wrap');
+  const hideToolbar = !!source.singleton || sourceName === 'media';
   setRenderedData(sourceName, data);
   wrap.innerHTML = `
     ${sourceName === 'media'
@@ -2360,7 +2555,7 @@ function renderForm(sourceName, data) {
       ? renderPartnerSourceCards(sourceName, data)
       : `<div class="admin-form-list">${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}</div>`
     }
-    <div class="admin-toolbar"${sourceName === 'media' ? ' hidden' : ''}>
+    <div class="admin-toolbar"${hideToolbar ? ' hidden' : ''}>
       ${(sourceName === 'partners' || sourceName === 'partners_media')
         ? (
           sourceName === 'partners'
@@ -2741,13 +2936,7 @@ async function loadSourceData(sourceName, options = {}) {
 
   if (!forceRemote) {
     try {
-      const remote = await fetchAdminSource(sourceName);
-      if (sourceName === 'albums' && Array.isArray(remote) && !remote.length) {
-        const fallback = cloneDefaultData(sourceName);
-        defaultsCache[sourceName] = structuredClone(fallback);
-        setSourceData(sourceName, fallback);
-        return fallback;
-      }
+      const remote = await resolveLoadedSourceData(sourceName, await fetchAdminSource(sourceName));
       defaultsCache[sourceName] = structuredClone(remote);
       setSourceData(sourceName, remote);
       return remote;
@@ -2759,13 +2948,7 @@ async function loadSourceData(sourceName, options = {}) {
     }
   }
 
-  const remote = await fetchAdminSource(sourceName);
-  if (sourceName === 'albums' && Array.isArray(remote) && !remote.length) {
-    const fallback = cloneDefaultData(sourceName);
-    defaultsCache[sourceName] = structuredClone(fallback);
-    setSourceData(sourceName, fallback);
-    return fallback;
-  }
+  const remote = await resolveLoadedSourceData(sourceName, await fetchAdminSource(sourceName));
   defaultsCache[sourceName] = structuredClone(remote);
   setSourceData(sourceName, remote);
   return remote;
@@ -2838,7 +3021,7 @@ async function adminReset() {
     renderForm(currentSource, data);
     setStatus('Черновик очищен. Данные загружены заново.');
   } catch (error) {
-    const fallback = cloneDefaultData(currentSource);
+    const fallback = await getSourceFallbackData(currentSource);
     const textarea = document.getElementById('admin-textarea');
     if (textarea) textarea.value = JSON.stringify(fallback, null, 2);
     renderForm(currentSource, fallback);
