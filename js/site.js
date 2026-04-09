@@ -951,6 +951,12 @@ function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
 }
 
+function translateRuntimeText(value) {
+  const text = String(value ?? '');
+  const translate = window.BCI18N?.translateString;
+  return typeof translate === 'function' ? translate(text) : text;
+}
+
 const TRANSPARENT_IMAGE_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 const NEWS_IMAGE_FALLBACKS = [
   { id: 1, slug: 'applications-open', src: 'images/news-1.webp' },
@@ -2009,7 +2015,7 @@ async function renderTournamentsGrid() {
       ? `archive-tournament.html?year=${encodeURIComponent(String(item.season_year || ''))}${item.slug ? `&slug=${encodeURIComponent(item.slug)}` : ''}`
       : `results.html?tournament=${encodeURIComponent(item.slug || '')}`;
     const actionLabel = isArchive ? 'Открыть архив' : 'Открыть турнир';
-    const datesLabel = formatTournamentDateRange(item.start_date, item.end_date) || escapeHtml(String(item.start_date || '').trim());
+    const datesLabel = translateRuntimeText(formatTournamentDateRange(item.start_date, item.end_date) || String(item.start_date || '').trim());
     const displayName = Number(item.season_year || 0) === 2026
       ? 'Кубок Бурчалкина 2026'
       : String(item.name || '').trim();
@@ -2020,15 +2026,15 @@ async function renderTournamentsGrid() {
         <div class="tournament-card-year">${escapeHtml(item.season_year || '')}</div>
         <div class="tournament-card-status ${escapeHtml(item.status)}">${escapeHtml(formatTournamentStatus(item.status))}</div>
       </div>
-      <h3>${escapeHtml(displayName)}</h3>
-      <p>${escapeHtml(item.description || '')}</p>
+      <h3>${escapeHtml(translateRuntimeText(displayName))}</h3>
+      <p>${escapeHtml(translateRuntimeText(item.description || ''))}</p>
       <div class="tournament-card-meta">
-        <span>${escapeHtml(formatCountLabel(item.clubs_count, ['клуб', 'клуба', 'клубов']))}</span>
-        <span>${escapeHtml(formatCountLabel(item.matches_count, ['матч', 'матча', 'матчей']))}</span>
+        <span>${escapeHtml(translateRuntimeText(formatCountLabel(item.clubs_count, ['клуб', 'клуба', 'клубов'])))}</span>
+        <span>${escapeHtml(translateRuntimeText(formatCountLabel(item.matches_count, ['матч', 'матча', 'матчей'])))}</span>
       </div>
-      <div class="tournament-card-dates">${datesLabel}</div>
+      <div class="tournament-card-dates">${escapeHtml(datesLabel)}</div>
       <div class="tournament-card-actions">
-        <a class="tournament-card-button" href="${escapeHtml(actionHref)}">${actionLabel}</a>
+        <a class="tournament-card-button" href="${escapeHtml(actionHref)}">${escapeHtml(translateRuntimeText(actionLabel))}</a>
       </div>
     </article>
   `;
@@ -3303,19 +3309,19 @@ function renderArchiveTournamentPage() {
 
   function applyArchiveData(archive, detail = null) {
     const resolvedDetail = detail || archiveFallback.detail || null;
-    if (titleNode) titleNode.textContent = archive.title;
-    if (seasonNode) seasonNode.textContent = archive.season;
-    if (descriptionNode) descriptionNode.textContent = archive.description;
-    if (statusNode) statusNode.textContent = archive.status;
+    if (titleNode) titleNode.textContent = translateRuntimeText(archive.title);
+    if (seasonNode) seasonNode.textContent = translateRuntimeText(archive.season);
+    if (descriptionNode) descriptionNode.textContent = translateRuntimeText(archive.description);
+    if (statusNode) statusNode.textContent = translateRuntimeText(archive.status);
     document.title = `${archive.title} - Burchalkin Cup`;
 
     if (statsNode) {
       const stats = [];
       const clubsCount = Number(resolvedDetail?.clubs_count || getArchiveTournamentClubs(resolvedDetail || {}).length || 0);
       const matchesCount = Number(resolvedDetail?.matches_count || (Array.isArray(resolvedDetail?.matches) ? resolvedDetail.matches.length : 0) || 0);
-      if (clubsCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(formatCountLabel(clubsCount, ['клуб', 'клуба', 'клубов']))}</div>`);
-      if (matchesCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей']))}</div>`);
-      stats.push(`<div class="archive-stat-chip">${escapeHtml(archive.season)}</div>`);
+      if (clubsCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(translateRuntimeText(formatCountLabel(clubsCount, ['клуб', 'клуба', 'клубов'])))}</div>`);
+      if (matchesCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(translateRuntimeText(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей'])))}</div>`);
+      stats.push(`<div class="archive-stat-chip">${escapeHtml(translateRuntimeText(archive.season))}</div>`);
       statsNode.innerHTML = stats.join('');
     }
 
