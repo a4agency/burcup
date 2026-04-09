@@ -8226,6 +8226,14 @@ button,
   text-decoration:none;
 }
 
+.archive-podium-item.archive-podium-item-silver{
+  margin-top:44px;
+}
+
+.archive-podium-item.archive-podium-item-bronze{
+  margin-top:86px;
+}
+
 .archive-podium-logo-wrap{
   width:100%;
   height:92px;
@@ -8593,6 +8601,11 @@ button,
   .archive-podium{
     grid-template-columns:1fr;
     max-width:420px;
+  }
+
+  .archive-podium-item.archive-podium-item-silver,
+  .archive-podium-item.archive-podium-item-bronze{
+    margin-top:0;
   }
 
   .archive-podium-logo-wrap{
