@@ -1071,6 +1071,128 @@ const ARCHIVE_TOURNAMENTS = {
         { position: 7, team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
         { position: 8, team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
       ],
+      playoff: [
+        {
+          bracket_group: 'top',
+          round_group: 'semifinal',
+          match_key: 'archive_2025_top_sf1',
+          sort_order: 1,
+          label: 'Полуфинал 1–4 №1',
+          home_team: 'Зенит',
+          home_team_slug: 'zenit',
+          home_logo: 'images/team-zenit.webp',
+          away_team: 'Сан-Лоренсо',
+          away_team_slug: 'san-lorenzo',
+          away_logo: 'images/team-san-lorenzo.webp',
+          home_score: 3,
+          away_score: 1
+        },
+        {
+          bracket_group: 'top',
+          round_group: 'semifinal',
+          match_key: 'archive_2025_top_sf2',
+          sort_order: 2,
+          label: 'Полуфинал 1–4 №2',
+          home_team: 'Алмаз-Антей',
+          home_team_slug: 'almaz-antey',
+          home_logo: 'images/team-almaz-antey.webp',
+          away_team: 'Палмейрас',
+          away_team_slug: 'palmeiras',
+          away_logo: 'images/team-palmeiras.webp',
+          home_score: 2,
+          away_score: 1
+        },
+        {
+          bracket_group: 'top',
+          round_group: 'final',
+          match_key: 'archive_2025_top_final',
+          sort_order: 1,
+          label: 'Матч за 1 место',
+          home_team: 'Зенит',
+          home_team_slug: 'zenit',
+          home_logo: 'images/team-zenit.webp',
+          away_team: 'Алмаз-Антей',
+          away_team_slug: 'almaz-antey',
+          away_logo: 'images/team-almaz-antey.webp',
+          home_score: 1,
+          away_score: 2
+        },
+        {
+          bracket_group: 'top',
+          round_group: 'final',
+          match_key: 'archive_2025_top_third',
+          sort_order: 2,
+          label: 'Матч за 3 место',
+          home_team: 'Сан-Лоренсо',
+          home_team_slug: 'san-lorenzo',
+          home_logo: 'images/team-san-lorenzo.webp',
+          away_team: 'Палмейрас',
+          away_team_slug: 'palmeiras',
+          away_logo: 'images/team-palmeiras.webp',
+          home_score: 0,
+          away_score: 1
+        },
+        {
+          bracket_group: 'placement',
+          round_group: 'semifinal',
+          match_key: 'archive_2025_place_sf1',
+          sort_order: 1,
+          label: 'Полуфинал 5–8 №1',
+          home_team: 'Динамо-Минск',
+          home_team_slug: 'dinamo-minsk',
+          home_logo: 'images/team-dinamo-minsk.webp',
+          away_team: 'Црвена Звезда',
+          away_team_slug: 'crvena-zvezda',
+          away_logo: 'images/team-crvena-zvezda.webp',
+          home_score: 1,
+          away_score: 0
+        },
+        {
+          bracket_group: 'placement',
+          round_group: 'semifinal',
+          match_key: 'archive_2025_place_sf2',
+          sort_order: 2,
+          label: 'Полуфинал 5–8 №2',
+          home_team: 'Кайрат',
+          home_team_slug: 'kairat',
+          home_logo: 'images/team-kairat.webp',
+          away_team: 'Фенербахче',
+          away_team_slug: 'fenerbahce',
+          away_logo: 'images/team-fenerbahce.webp',
+          home_score: 0,
+          away_score: 2
+        },
+        {
+          bracket_group: 'placement',
+          round_group: 'final',
+          match_key: 'archive_2025_place_fifth',
+          sort_order: 1,
+          label: 'Матч за 5 место',
+          home_team: 'Динамо-Минск',
+          home_team_slug: 'dinamo-minsk',
+          home_logo: 'images/team-dinamo-minsk.webp',
+          away_team: 'Фенербахче',
+          away_team_slug: 'fenerbahce',
+          away_logo: 'images/team-fenerbahce.webp',
+          home_score: 1,
+          away_score: 2
+        },
+        {
+          bracket_group: 'placement',
+          round_group: 'final',
+          match_key: 'archive_2025_place_seventh',
+          sort_order: 2,
+          label: 'Матч за 7 место',
+          home_team: 'Црвена Звезда',
+          home_team_slug: 'crvena-zvezda',
+          home_logo: 'images/team-crvena-zvezda.webp',
+          away_team: 'Кайрат',
+          away_team_slug: 'kairat',
+          away_logo: 'images/team-kairat.webp',
+          home_score: 1,
+          away_score: 0
+        }
+      ],
       matches: [
         {
           id: 'archive-2025-1',
@@ -3262,7 +3384,19 @@ function renderArchiveTournamentPage() {
   const statsNode = page.querySelector('[data-archive-stats]');
   const teamsNode = page.querySelector('[data-archive-teams]');
   const standingsNode = page.querySelector('[data-archive-standings]');
+  const playoffNode = page.querySelector('[data-archive-playoff]');
   const matchesNode = page.querySelector('[data-archive-matches]');
+  const mergeArchiveDetail = (detail = null) => {
+    const fallbackDetail = archiveFallback.detail || {};
+    const source = detail || {};
+    return {
+      ...fallbackDetail,
+      ...source,
+      standings: Array.isArray(source.standings) && source.standings.length ? source.standings : (Array.isArray(fallbackDetail.standings) ? fallbackDetail.standings : []),
+      playoff: Array.isArray(source.playoff) && source.playoff.length ? source.playoff : (Array.isArray(fallbackDetail.playoff) ? fallbackDetail.playoff : []),
+      matches: Array.isArray(source.matches) && source.matches.length ? source.matches : (Array.isArray(fallbackDetail.matches) ? fallbackDetail.matches : [])
+    };
+  };
 
   function renderArchiveClubCardContent(item, rank, options = {}) {
     const showLogo = options.showLogo !== false;
@@ -3338,7 +3472,7 @@ function renderArchiveTournamentPage() {
   }
 
   function applyArchiveData(archive, detail = null) {
-    const resolvedDetail = detail || archiveFallback.detail || null;
+    const resolvedDetail = mergeArchiveDetail(detail);
     if (titleNode) titleNode.textContent = translateRuntimeText(archive.title);
     if (seasonNode) seasonNode.textContent = translateRuntimeText(archive.season);
     if (descriptionNode) descriptionNode.textContent = translateRuntimeText(archive.description);
@@ -3396,6 +3530,13 @@ function renderArchiveTournamentPage() {
       standingsNode.innerHTML = standings.length
         ? renderStandingsTable(standings)
         : '<div class="archive-empty-state">Турнирная таблица появится позднее.</div>';
+    }
+
+    if (playoffNode) {
+      const playoff = Array.isArray(resolvedDetail?.playoff) ? resolvedDetail.playoff : [];
+      playoffNode.innerHTML = playoff.length
+        ? renderPlayoffBracket(playoff)
+        : '<div class="archive-empty-state">Сетка плей-офф появится позднее.</div>';
     }
 
     if (matchesNode) {
