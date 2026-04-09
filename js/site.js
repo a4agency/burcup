@@ -1059,7 +1059,7 @@ const ARCHIVE_TOURNAMENTS = {
     description: 'Позже здесь появятся команды турнира, результаты матчей, сетка, фотографии и архивные материалы розыгрыша 2025 года.',
     status: 'Страница уже готова как архивная точка входа. Материалы можно будет постепенно добавить позже.',
     detail: {
-      clubs_count: 6,
+      clubs_count: 8,
       matches_count: 3,
       standings: [
         { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
@@ -1067,7 +1067,9 @@ const ARCHIVE_TOURNAMENTS = {
         { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
         { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 1, won: 0, drawn: 1, lost: 0, goals_for: 1, goals_against: 1, points: 1 },
         { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
-        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
+        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 },
+        { position: 7, team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 0, won: 0, drawn: 0, lost: 0, goals_for: 0, goals_against: 0, points: 0 },
+        { position: 8, team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 0, won: 0, drawn: 0, lost: 0, goals_for: 0, goals_against: 0, points: 0 }
       ],
       matches: [
         {
