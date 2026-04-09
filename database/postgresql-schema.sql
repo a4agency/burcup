@@ -143,6 +143,15 @@ CREATE TABLE IF NOT EXISTS news_articles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS news_article_photos (
+  id BIGSERIAL PRIMARY KEY,
+  news_article_id BIGINT NOT NULL REFERENCES news_articles(id) ON DELETE CASCADE,
+  image_url TEXT NOT NULL,
+  alt_text TEXT NOT NULL DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS media_albums (
   id BIGSERIAL PRIMARY KEY,
   tournament_id BIGINT REFERENCES tournaments(id) ON DELETE SET NULL,
@@ -262,6 +271,7 @@ CREATE INDEX IF NOT EXISTS idx_matches_away_club ON matches(away_club_id, match_
 CREATE INDEX IF NOT EXISTS idx_match_events_match_id ON match_events(match_id, sort_order);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_match_events_unique_order ON match_events(match_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_news_articles_tournament ON news_articles(tournament_id, published_on DESC);
+CREATE INDEX IF NOT EXISTS idx_news_article_photos_article ON news_article_photos(news_article_id, sort_order, id);
 CREATE INDEX IF NOT EXISTS idx_media_albums_tournament ON media_albums(tournament_id, sort_order, published_on DESC);
 CREATE INDEX IF NOT EXISTS idx_tournament_playoff_matches_order ON tournament_playoff_matches(tournament_id, bracket_group, round_group, sort_order, id);
 CREATE INDEX IF NOT EXISTS idx_media_album_photos_album ON media_album_photos(album_id, sort_order, id);

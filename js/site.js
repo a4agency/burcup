@@ -1851,9 +1851,72 @@ function renderNewsCoverImage(src, alt, className = 'news-preview-cover') {
   `;
 }
 
+function buildNewsArticlePhotos(item, coverImage = '') {
+  const photos = [];
+  const seen = new Set();
+
+  const pushPhoto = (src, alt = '') => {
+    const imageUrl = String(src || '').trim();
+    if (!imageUrl || seen.has(imageUrl)) return;
+    seen.add(imageUrl);
+    photos.push({
+      image_url: imageUrl,
+      alt_text: String(alt || '').trim(),
+    });
+  };
+
+  pushPhoto(coverImage, String(item?.title || '').trim());
+
+  if (Array.isArray(item?.photos)) {
+    item.photos.forEach(photo => {
+      pushPhoto(photo?.image_url, photo?.alt_text || item?.title || '');
+    });
+  }
+
+  return photos;
+}
+
+function getNewsArticleParagraphs(item) {
+  if (Array.isArray(item?.content)) {
+    return item.content.map(paragraph => String(paragraph || '').trim()).filter(Boolean);
+  }
+
+  return String(item?.body || '')
+    .split(/\n\s*\n+/)
+    .map(paragraph => String(paragraph || '').trim())
+    .filter(Boolean);
+}
+
+function renderNewsArticlePhotoButton(photo, index, className = 'news-article-gallery-item') {
+  const imageUrl = String(photo?.image_url || '').trim();
+  const altText = String(photo?.alt_text || '').trim();
+  if (!imageUrl) return '';
+
+  return `
+    <button
+      class="${escapeHtml(className)}"
+      type="button"
+      data-album-photo-index="${index}"
+      aria-label="Открыть фотографию ${index + 1}"
+    >
+      ${renderImageMarkup({
+        src: imageUrl,
+        alt: altText,
+        className: `${className}-img`,
+        width: 960
+      })}
+    </button>
+  `;
+}
+
 function resolveNewsImage(item) {
   const primaryImage = String(item?.image || '').trim();
   if (primaryImage) return primaryImage;
+
+  const firstGalleryImage = Array.isArray(item?.photos)
+    ? String(item.photos.find(photo => String(photo?.image_url || '').trim())?.image_url || '').trim()
+    : '';
+  if (firstGalleryImage) return firstGalleryImage;
 
   const itemId = Number(item?.id);
   const itemSlug = String(item?.slug || '').trim();
@@ -3216,23 +3279,50 @@ async function renderNewsArticlePage() {
 
     document.title = `Burchalkin Cup — ${item.title || 'Новость'}`;
     const imageSrc = resolveNewsImage(item);
-    const content = Array.isArray(item.content) ? item.content : [];
+    const content = getNewsArticleParagraphs(item);
+    const articlePhotos = buildNewsArticlePhotos(item, imageSrc);
+    const galleryPhotos = articlePhotos.slice(imageSrc ? 1 : 0);
 
     root.innerHTML = `
       <article class="news-article-card">
         <a class="news-article-back" href="news.html">← Все новости</a>
         <h1 class="news-article-title">${escapeHtml(item.title || '')}</h1>
-        ${renderNewsCoverImage(imageSrc, item.title, 'news-article-cover')}
+        ${articlePhotos[0]
+          ? renderNewsArticlePhotoButton(articlePhotos[0], 0, 'news-article-cover')
+          : renderNewsCoverImage('', item.title, 'news-article-cover')
+        }
         <div class="news-article-body">
           ${item.excerpt ? `<p class="news-article-lead">${escapeHtml(item.excerpt)}</p>` : ''}
           ${content.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join('')}
         </div>
+        ${galleryPhotos.length ? `
+          <div class="news-article-gallery">
+            ${galleryPhotos.map((photo, index) => renderNewsArticlePhotoButton(photo, index + 1)).join('')}
+          </div>
+        ` : ''}
         <div class="news-article-footer">
           <div class="news-article-date">Добавлено: ${escapeHtml(item.date || '')}</div>
         </div>
       </article>
+      ${articlePhotos.length ? `
+        <div class="media-album-lightbox" id="media-album-lightbox" hidden>
+          <div class="media-album-lightbox-backdrop"></div>
+          <div class="media-album-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Просмотр фотографии">
+            <button class="media-album-lightbox-close" id="media-album-lightbox-close" type="button" aria-label="Закрыть просмотр">×</button>
+            <button class="media-album-lightbox-arrow media-album-lightbox-prev" id="media-album-lightbox-prev" type="button" aria-label="Предыдущее фото">‹</button>
+            <div class="media-album-lightbox-stage">
+              <img id="media-album-lightbox-image" class="media-album-lightbox-image" src="" alt="">
+            </div>
+            <button class="media-album-lightbox-arrow media-album-lightbox-next" id="media-album-lightbox-next" type="button" aria-label="Следующее фото">›</button>
+            <div class="media-album-lightbox-counter" id="media-album-lightbox-counter"></div>
+          </div>
+        </div>
+      ` : ''}
     `;
     root.setAttribute('aria-busy', 'false');
+    if (articlePhotos.length) {
+      initMediaAlbumLightbox(articlePhotos);
+    }
   } catch (e) {
     root.innerHTML = '<div class="card">Не удалось загрузить новость.</div>';
     root.setAttribute('aria-busy', 'false');

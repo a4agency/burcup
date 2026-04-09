@@ -42,6 +42,7 @@ const CATEGORY_NAMES = {
 
 let translationTableEnsured = false;
 let editablePagesTableEnsured = false;
+let newsArticlePhotosTableEnsured = false;
 
 function isStaticSiteRoot(candidatePath) {
   if (!candidatePath) return false;
@@ -250,6 +251,28 @@ async function ensureEditablePagesTable(queryable = pool) {
   `);
 
   editablePagesTableEnsured = true;
+}
+
+async function ensureNewsArticlePhotosTable(queryable = pool) {
+  if (newsArticlePhotosTableEnsured) return;
+
+  await queryable.query(`
+    CREATE TABLE IF NOT EXISTS news_article_photos (
+      id BIGSERIAL PRIMARY KEY,
+      news_article_id BIGINT NOT NULL REFERENCES news_articles(id) ON DELETE CASCADE,
+      image_url TEXT NOT NULL,
+      alt_text TEXT NOT NULL DEFAULT '',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await queryable.query(`
+    CREATE INDEX IF NOT EXISTS idx_news_article_photos_article
+    ON news_article_photos(news_article_id, sort_order, id);
+  `);
+
+  newsArticlePhotosTableEnsured = true;
 }
 
 async function translateTextWithGoogleGtx(text, sourceLang, targetLang) {
@@ -1183,6 +1206,60 @@ async function queryClubMatches(queryable, clubSlug) {
   return queryable.query(buildClubMatchesQuery(includeMatchMedia), [clubSlug]);
 }
 
+async function getNewsArticlePhotoMap(client, articleIds = []) {
+  if (!articleIds.length) return new Map();
+
+  await ensureNewsArticlePhotosTable(client);
+
+  const { rows } = await client.query(`
+    SELECT
+      news_article_id,
+      image_url,
+      alt_text,
+      sort_order
+    FROM news_article_photos
+    WHERE news_article_id = ANY($1::bigint[])
+    ORDER BY news_article_id, sort_order, id;
+  `, [articleIds]);
+
+  return rows.reduce((acc, row) => {
+    const articleId = Number(row.news_article_id);
+    if (!acc.has(articleId)) acc.set(articleId, []);
+    acc.get(articleId).push({
+      image_url: row.image_url || '',
+      alt_text: row.alt_text || '',
+      sort_order: parseInteger(row.sort_order, 0),
+    });
+    return acc;
+  }, new Map());
+}
+
+function splitNewsBodyToContent(body) {
+  return String(body || '')
+    .split(/\n\s*\n+/)
+    .map(part => String(part || '').trim())
+    .filter(Boolean);
+}
+
+function mapNewsArticleRow(row, photos = []) {
+  const body = row.body || '';
+  return {
+    id: Number(row.id),
+    slug: row.slug || '',
+    date: normalizeDate(row.published_on),
+    title: row.title || '',
+    excerpt: row.excerpt || '',
+    body,
+    content: splitNewsBodyToContent(body),
+    link: row.link_path || '',
+    image: row.image_url || '',
+    photos: Array.isArray(photos) ? photos : [],
+    tournament_slug: row.tournament_slug || '',
+    tournament_name: row.tournament_name || '',
+    is_published: row.is_published !== false,
+  };
+}
+
 const newsQuery = `
   SELECT
     n.id,
@@ -1452,18 +1529,8 @@ async function getAdminMatches(client) {
 
 async function getAdminNews(client) {
   const { rows } = await client.query(adminNewsQuery);
-  return rows.map(row => ({
-    id: Number(row.id),
-    tournament_slug: row.tournament_slug || '',
-    slug: row.slug || '',
-    date: normalizeDate(row.published_on),
-    title: row.title,
-    excerpt: row.excerpt,
-    body: row.body || '',
-    link: row.link_path,
-    image: row.image_url || '',
-    is_published: row.is_published,
-  }));
+  const photoMap = await getNewsArticlePhotoMap(client, rows.map(row => Number(row.id)));
+  return rows.map(row => mapNewsArticleRow(row, photoMap.get(Number(row.id)) || []));
 }
 
 async function getAdminPartners(client) {
@@ -2230,6 +2297,8 @@ async function replaceNews(client, payload) {
   const tournaments = await client.query('SELECT id, slug FROM tournaments');
   const tournamentMap = new Map(tournaments.rows.map(row => [row.slug, Number(row.id)]));
 
+  await ensureNewsArticlePhotosTable(client);
+
   for (const item of items) {
     const id = parseInteger(item.id, 0);
     if (!id) {
@@ -2279,6 +2348,33 @@ async function replaceNews(client, payload) {
       nullIfEmpty(item.image),
       parseBoolean(item.is_published, true),
     ]);
+
+    await client.query('DELETE FROM news_article_photos WHERE news_article_id = $1', [id]);
+
+    const photos = ensureArray(item.photos)
+      .map((photo, index) => ({
+        image_url: normalizeString(photo?.image_url),
+        alt_text: normalizeString(photo?.alt_text),
+        sort_order: parseInteger(photo?.sort_order, index + 1),
+      }))
+      .filter(photo => photo.image_url);
+
+    for (const photo of photos) {
+      await client.query(`
+        INSERT INTO news_article_photos (
+          news_article_id,
+          image_url,
+          alt_text,
+          sort_order
+        )
+        VALUES ($1,$2,$3,$4);
+      `, [
+        id,
+        photo.image_url,
+        photo.alt_text || '',
+        photo.sort_order,
+      ]);
+    }
   }
 
   if (ids.length) {
@@ -2860,6 +2956,7 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       pool.query(newsQuery, [req.params.slug]),
       pool.query(tournamentPartnersQuery, [req.params.slug]),
     ]);
+    const newsPhotoMap = await getNewsArticlePhotoMap(pool, newsResult.rows.map(row => Number(row.id)));
 
     const groupedPartners = partnersResult.rows.reduce((acc, row) => {
       const key = row.category_slug || 'other';
@@ -2902,16 +2999,7 @@ app.get('/api/tournaments/:slug', async (req, res, next) => {
       standings: standingsRows.map(mapStandingsRow),
       playoff: playoffRows,
       matches: matchesResult.rows.map(formatMatchRow),
-      news: newsResult.rows.map(row => ({
-        id: Number(row.id),
-        slug: row.slug,
-        date: normalizeDate(row.published_on),
-        title: row.title,
-        excerpt: row.excerpt,
-        body: row.body || '',
-        link: row.link_path,
-        image: row.image_url || '',
-      })),
+      news: newsResult.rows.map(row => mapNewsArticleRow(row, newsPhotoMap.get(Number(row.id)) || [])),
       partners: Object.values(groupedPartners),
     });
   } catch (error) {
@@ -2949,18 +3037,8 @@ app.get('/api/tournaments/:slug/matches', async (req, res, next) => {
 app.get('/api/tournaments/:slug/news', async (req, res, next) => {
   try {
     const { rows } = await pool.query(newsQuery, [req.params.slug]);
-    res.json(rows.map(row => ({
-      id: Number(row.id),
-      slug: row.slug,
-      date: normalizeDate(row.published_on),
-      title: row.title,
-      excerpt: row.excerpt,
-      body: row.body || '',
-      link: row.link_path,
-      image: row.image_url || '',
-      tournament_slug: row.tournament_slug || '',
-      tournament_name: row.tournament_name || '',
-    })));
+    const photoMap = await getNewsArticlePhotoMap(pool, rows.map(row => Number(row.id)));
+    res.json(rows.map(row => mapNewsArticleRow(row, photoMap.get(Number(row.id)) || [])));
   } catch (error) {
     next(error);
   }
@@ -3076,18 +3154,8 @@ app.get('/api/matches', async (req, res, next) => {
 app.get('/api/news', async (req, res, next) => {
   try {
     const { rows } = await pool.query(newsQuery, [null]);
-    res.json(rows.map(row => ({
-      id: Number(row.id),
-      slug: row.slug,
-      date: normalizeDate(row.published_on),
-      title: row.title,
-      excerpt: row.excerpt,
-      body: row.body || '',
-      link: row.link_path,
-      image: row.image_url || '',
-      tournament_slug: row.tournament_slug || '',
-      tournament_name: row.tournament_name || '',
-    })));
+    const photoMap = await getNewsArticlePhotoMap(pool, rows.map(row => Number(row.id)));
+    res.json(rows.map(row => mapNewsArticleRow(row, photoMap.get(Number(row.id)) || [])));
   } catch (error) {
     next(error);
   }

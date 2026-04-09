@@ -999,6 +999,7 @@ const ADMIN_SOURCES = {
         body: '',
         link: 'news.html',
         image: '',
+        photos: [],
         is_published: true,
       }
     ],
@@ -1012,6 +1013,7 @@ const ADMIN_SOURCES = {
       body: '',
       link: 'news.html',
       image: '',
+      photos: [],
       is_published: true,
     }),
     fields: [
@@ -1315,6 +1317,34 @@ function normalizeAlbumAdminItem(item, index = 0) {
   };
 }
 
+function normalizeNewsAdminItem(item, index = 0) {
+  const normalizedId = Number(item?.id || Date.now() + index) || Date.now() + index;
+  const contentValue = Array.isArray(item?.content)
+    ? item.content.map(part => String(part || '').trim()).filter(Boolean).join('\n\n')
+    : '';
+
+  return {
+    ...item,
+    id: normalizedId,
+    tournament_slug: String(item?.tournament_slug || '').trim(),
+    slug: String(item?.slug || '').trim(),
+    date: String(item?.date || '').trim(),
+    title: String(item?.title || '').trim(),
+    excerpt: String(item?.excerpt || '').trim(),
+    body: String(item?.body || contentValue).trim(),
+    link: String(item?.link || 'news.html').trim() || 'news.html',
+    image: String(item?.image || '').trim(),
+    is_published: item?.is_published !== false,
+    photos: Array.isArray(item?.photos)
+      ? item.photos.map((photo, photoIndex) => ({
+        image_url: String(photo?.image_url || '').trim(),
+        alt_text: String(photo?.alt_text || '').trim(),
+        sort_order: Number(photo?.sort_order || photoIndex + 1) || photoIndex + 1
+      }))
+      : []
+  };
+}
+
 function normalizeEditablePageAdminItem(item, fallbackSlug = '') {
   return {
     slug: String(item?.slug || fallbackSlug).trim() || fallbackSlug,
@@ -1414,6 +1444,9 @@ function normalizeSourceData(sourceName, data) {
   }
   if (sourceName === 'albums') {
     return items.map((item, index) => normalizeAlbumAdminItem(item, index));
+  }
+  if (sourceName === 'news') {
+    return items.map((item, index) => normalizeNewsAdminItem(item, index));
   }
   if (sourceMeta?.filterCategory) {
     return items.filter(item => String(item?.category || 'general') === sourceMeta.filterCategory);
@@ -2141,12 +2174,13 @@ function makeAlbumPhotoImageField(photo, itemIndex, photoIndex) {
   `;
 }
 
-function renderAlbumPhotoEditor(photo, itemIndex, photoIndex) {
+function renderAlbumPhotoEditor(photo, itemIndex, photoIndex, collection = 'album') {
+  const photoLabel = collection === 'news' ? 'Фото новости' : 'Фото';
   return `
     <div class="admin-album-photo-row" data-index="${itemIndex}" data-photo-row="${photoIndex}">
       <div class="admin-album-photo-head">
-        <strong>Фото #${photoIndex + 1}</strong>
-        <button type="button" class="admin-item-remove admin-album-photo-remove" data-remove-album-photo="${photoIndex}" data-index="${itemIndex}">Удалить фото</button>
+        <strong>${photoLabel} #${photoIndex + 1}</strong>
+        <button type="button" class="admin-item-remove admin-album-photo-remove" data-remove-collection-photo="${photoIndex}" data-index="${itemIndex}" data-photo-collection="${collection}">Удалить фото</button>
       </div>
       <div class="admin-form-grid admin-record-grid-2 admin-album-photo-grid">
         ${makeAlbumPhotoImageField(photo, itemIndex, photoIndex)}
@@ -2208,12 +2242,12 @@ function renderAlbumAdminCard(item, index) {
             <div class="admin-inline-actions admin-album-bulk-actions">
               <label class="admin-small-btn">
                 Загрузить много фото
-                <input type="file" accept="image/*" multiple data-upload-album-batch="${index}" style="display:none">
+                <input type="file" accept="image/*" multiple data-upload-collection-batch="${index}" data-photo-collection="album" style="display:none">
               </label>
-              <button type="button" class="admin-add admin-album-photo-add" data-add-album-photo="${index}">+ Добавить фото</button>
+              <button type="button" class="admin-add admin-album-photo-add" data-add-collection-photo="${index}" data-photo-collection="album">+ Добавить фото</button>
             </div>
             ${photos.length
-              ? photos.map((photo, photoIndex) => renderAlbumPhotoEditor(photo, index, photoIndex)).join('')
+              ? photos.map((photo, photoIndex) => renderAlbumPhotoEditor(photo, index, photoIndex, 'album')).join('')
               : '<div class="admin-match-preview-empty">Пока в альбоме нет фотографий. Добавь фото ниже.</div>'
             }
           </div>
@@ -2340,6 +2374,7 @@ function renderClubAdminCard(item, index) {
 }
 
 function renderNewsAdminCard(item, index) {
+  const photos = Array.isArray(item?.photos) ? item.photos : [];
   return renderSectionedAdminCard('Новость', index, [
     {
       title: 'Публикация',
@@ -2355,6 +2390,26 @@ function renderNewsAdminCard(item, index) {
       title: 'Обложка',
       gridClass: 'admin-record-grid-1',
       content: makeFieldsByKeys('news', ['image'], item, index)
+    },
+    {
+      title: 'Фотографии новости',
+      gridClass: 'admin-record-grid-1',
+      content: `
+        <div class="admin-record-note">Загружай фотографии через кнопку «Загрузить файл». Файлы уйдут во внешний storage, а в новость сохранится только их URL.</div>
+        <div class="admin-album-photos">
+          <div class="admin-inline-actions admin-album-bulk-actions">
+            <label class="admin-small-btn">
+              Загрузить много фото
+              <input type="file" accept="image/*" multiple data-upload-collection-batch="${index}" data-photo-collection="news" style="display:none">
+            </label>
+            <button type="button" class="admin-add admin-album-photo-add" data-add-collection-photo="${index}" data-photo-collection="news">+ Добавить фото</button>
+          </div>
+          ${photos.length
+            ? photos.map((photo, photoIndex) => renderAlbumPhotoEditor(photo, index, photoIndex, 'news')).join('')
+            : '<div class="admin-match-preview-empty">Пока у новости нет дополнительных фотографий. Добавь фото ниже.</div>'
+          }
+        </div>
+      `
     }
   ]);
 }
@@ -2546,7 +2601,7 @@ function readFormData(sourceName) {
       item[key] = value;
     });
 
-    if (sourceName === 'albums') {
+    if (sourceName === 'albums' || sourceName === 'news') {
       const photoIndexes = Array.from(new Set(
         Array.from(card.querySelectorAll('[data-photo-index]'))
           .map(node => Number(node.dataset.photoIndex))
@@ -2651,9 +2706,9 @@ function renderForm(sourceName, data) {
     });
   }
 
-  wrap.querySelectorAll('[data-add-album-photo]').forEach(btn => {
+  wrap.querySelectorAll('[data-add-collection-photo]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const index = Number(btn.dataset.addAlbumPhoto);
+      const index = Number(btn.dataset.addCollectionPhoto);
       const next = readFormData(sourceName);
       if (!next[index]) return;
       const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
@@ -2667,16 +2722,19 @@ function renderForm(sourceName, data) {
       ];
       setSourceData(sourceName, next);
       renderForm(sourceName, next);
-      setStatus('Фото добавлено в черновик альбома. Нажми «Сохранить», чтобы отправить изменения в API.');
+      setStatus(sourceName === 'news'
+        ? 'Фото добавлено в черновик новости. Нажми «Сохранить», чтобы отправить изменения в API.'
+        : 'Фото добавлено в черновик альбома. Нажми «Сохранить», чтобы отправить изменения в API.'
+      );
     });
   });
 
-  wrap.querySelectorAll('[data-upload-album-batch]').forEach(input => {
+  wrap.querySelectorAll('[data-upload-collection-batch]').forEach(input => {
     input.addEventListener('change', async event => {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
 
-      const index = Number(event.target.dataset.uploadAlbumBatch);
+      const index = Number(event.target.dataset.uploadCollectionBatch);
       const next = readFormData(sourceName);
       const album = next[index];
       if (!album) {
@@ -2687,7 +2745,10 @@ function renderForm(sourceName, data) {
       const currentPhotos = Array.isArray(album.photos) ? album.photos : [];
       const appendedPhotos = [];
 
-      setStatus(`Загружаю ${files.length} фото в альбом...`);
+      setStatus(sourceName === 'news'
+        ? `Загружаю ${files.length} фото в новость...`
+        : `Загружаю ${files.length} фото в альбом...`
+      );
 
       for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
         const file = files[fileIndex];
@@ -2698,8 +2759,8 @@ function renderForm(sourceName, data) {
           url = String(result?.url || '').trim();
         } catch (error) {
           try {
-            url = await readFileAsDataUrl(file);
-            setStatus(`Storage недоступен для части файлов. Использую fallback base64 (${fileIndex + 1}/${files.length})...`);
+          url = await readFileAsDataUrl(file);
+          setStatus(`Storage недоступен для части файлов. Использую fallback base64 (${fileIndex + 1}/${files.length})...`);
           } catch (readError) {
             continue;
           }
@@ -2724,16 +2785,22 @@ function renderForm(sourceName, data) {
       album.photos = [...currentPhotos, ...appendedPhotos];
       setSourceData(sourceName, next);
       renderForm(sourceName, next);
-      setStatus(`Добавлено фото: ${appendedPhotos.length}. Нажми «Сохранить», чтобы отправить изменения в API.`);
-      showAdminToast(`В альбом добавлено ${appendedPhotos.length} фото.`, 'success');
+      setStatus(sourceName === 'news'
+        ? `Добавлено фото: ${appendedPhotos.length}. Нажми «Сохранить», чтобы отправить изменения в API.`
+        : `Добавлено фото: ${appendedPhotos.length}. Нажми «Сохранить», чтобы отправить изменения в API.`
+      );
+      showAdminToast(sourceName === 'news'
+        ? `В новость добавлено ${appendedPhotos.length} фото.`
+        : `В альбом добавлено ${appendedPhotos.length} фото.`,
+      'success');
       event.target.value = '';
     });
   });
 
-  wrap.querySelectorAll('[data-remove-album-photo]').forEach(btn => {
+  wrap.querySelectorAll('[data-remove-collection-photo]').forEach(btn => {
     btn.addEventListener('click', () => {
       const index = Number(btn.dataset.index);
-      const photoIndex = Number(btn.dataset.removeAlbumPhoto);
+      const photoIndex = Number(btn.dataset.removeCollectionPhoto);
       const next = readFormData(sourceName);
       if (!next[index]) return;
       const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
@@ -2742,10 +2809,13 @@ function renderForm(sourceName, data) {
         .map((photo, currentIndex) => ({
           ...photo,
           sort_order: currentIndex + 1
-        }));
+      }));
       setSourceData(sourceName, next);
       renderForm(sourceName, next);
-      setStatus('Фото удалено из черновика альбома. Нажми «Сохранить», чтобы отправить изменения в API.');
+      setStatus(sourceName === 'news'
+        ? 'Фото удалено из черновика новости. Нажми «Сохранить», чтобы отправить изменения в API.'
+        : 'Фото удалено из черновика альбома. Нажми «Сохранить», чтобы отправить изменения в API.'
+      );
     });
   });
 
@@ -2798,7 +2868,7 @@ function renderForm(sourceName, data) {
               item.logo_bytes = result.bytes ?? null;
             });
           }
-          if (sourceName === 'albums' && isPhotoField) {
+          if ((sourceName === 'albums' || sourceName === 'news') && isPhotoField) {
             const next = readFormData(sourceName);
             const album = next[Number(index)];
             const photo = album?.photos?.[Number(photoIndex)];
@@ -2832,7 +2902,7 @@ function renderForm(sourceName, data) {
                 item.logo_bytes = file.size || null;
               });
             }
-            if (sourceName === 'albums' && isPhotoField) {
+            if ((sourceName === 'albums' || sourceName === 'news') && isPhotoField) {
               const next = readFormData(sourceName);
               const album = next[Number(index)];
               const photo = album?.photos?.[Number(photoIndex)];
