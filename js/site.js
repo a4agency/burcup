@@ -1073,14 +1073,36 @@ const ARCHIVE_TOURNAMENTS = {
       clubs_count: 8,
       matches_count: 5,
       standings: [
-        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
-        { position: 2, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
-        { position: 3, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 3, goals_against: 1, points: 4 },
-        { position: 4, team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 2, goals_against: 1, points: 4 },
-        { position: 5, team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
-        { position: 6, team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 },
-        { position: 7, team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
-        { position: 8, team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
+        { position: 1, group: 'Группа A', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
+        { position: 2, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
+        { position: 3, group: 'Группа B', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 3, goals_against: 1, points: 4 },
+        { position: 4, group: 'Группа B', team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 2, goals_against: 1, points: 4 },
+        { position: 5, group: 'Группа A', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
+        { position: 6, group: 'Группа A', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 },
+        { position: 7, group: 'Группа B', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
+        { position: 8, group: 'Группа B', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
+      ],
+      grouped_standings: [
+        {
+          key: 'A',
+          label: 'Группа A',
+          rows: [
+            { position: 1, group: 'Группа A', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
+            { position: 2, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
+            { position: 3, group: 'Группа A', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
+            { position: 4, group: 'Группа A', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
+          ]
+        },
+        {
+          key: 'B',
+          label: 'Группа B',
+          rows: [
+            { position: 1, group: 'Группа B', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 3, goals_against: 1, points: 4 },
+            { position: 2, group: 'Группа B', team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 2, goals_against: 1, points: 4 },
+            { position: 3, group: 'Группа B', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
+            { position: 4, group: 'Группа B', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
+          ]
+        }
       ],
       playoff: [
         {
@@ -3405,6 +3427,7 @@ function renderArchiveTournamentPage() {
       ...fallbackDetail,
       ...source,
       standings: Array.isArray(source.standings) && source.standings.length ? source.standings : (Array.isArray(fallbackDetail.standings) ? fallbackDetail.standings : []),
+      grouped_standings: Array.isArray(source.grouped_standings) && source.grouped_standings.length ? source.grouped_standings : (Array.isArray(fallbackDetail.grouped_standings) ? fallbackDetail.grouped_standings : []),
       playoff: Array.isArray(source.playoff) && source.playoff.length ? source.playoff : (Array.isArray(fallbackDetail.playoff) ? fallbackDetail.playoff : []),
       matches: Array.isArray(source.matches) && source.matches.length ? source.matches : (Array.isArray(fallbackDetail.matches) ? fallbackDetail.matches : [])
     };
@@ -3539,8 +3562,13 @@ function renderArchiveTournamentPage() {
 
     if (standingsNode) {
       const standings = Array.isArray(resolvedDetail?.standings) ? resolvedDetail.standings : [];
-      standingsNode.innerHTML = standings.length
-        ? renderStandingsTable(standings)
+      const groupedStandings = Array.isArray(resolvedDetail?.grouped_standings) && resolvedDetail.grouped_standings.length
+        ? resolvedDetail.grouped_standings
+        : buildGroupedStandingsFromRows(standings);
+      standingsNode.innerHTML = groupedStandings.length
+        ? renderGroupedStandings(groupedStandings)
+        : standings.length
+          ? renderStandingsTable(standings)
         : '<div class="archive-empty-state">Турнирная таблица появится позднее.</div>';
     }
 
