@@ -7303,7 +7303,15 @@ button,
   aspect-ratio:.73 / 1;
 }
 
-.lev-gallery-item:not(.lev-gallery-item-wide):not(.lev-gallery-item-tall){
+.lev-gallery-item-portrait{
+  aspect-ratio:.78 / 1;
+}
+
+.lev-gallery-item-portrait img{
+  object-position:center 18%;
+}
+
+.lev-gallery-item:not(.lev-gallery-item-wide):not(.lev-gallery-item-tall):not(.lev-gallery-item-portrait){
   aspect-ratio:1 / 1;
 }
 
@@ -7436,6 +7444,10 @@ button,
   .lev-gallery-item-wide,
   .lev-gallery-item-tall{
     aspect-ratio:1.08 / 1;
+  }
+
+  .lev-gallery-item-portrait{
+    aspect-ratio:.82 / 1;
   }
 
   .lev-legacy-quote{
