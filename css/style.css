@@ -8250,18 +8250,18 @@ button,
 }
 
 .archive-podium-card.archive-podium-item-silver{
-  min-height:192px;
+  min-height:192px !important;
   background:linear-gradient(180deg, #f7faff 0%, #eef4fb 100%) !important;
 }
 
 .archive-podium-card.archive-podium-item-gold{
-  min-height:356px;
+  min-height:356px !important;
   background:linear-gradient(180deg, #fff9de 0%, #fff0b7 100%) !important;
   border-color:rgba(230, 194, 82, .42) !important;
 }
 
 .archive-podium-card.archive-podium-item-bronze{
-  min-height:124px;
+  min-height:124px !important;
   background:linear-gradient(180deg, #fae7dc 0%, #f3d3c2 100%) !important;
   border-color:rgba(204, 136, 91, .34) !important;
 }
