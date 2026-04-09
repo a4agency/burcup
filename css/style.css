@@ -7228,17 +7228,15 @@ button,
 }
 
 .lev-story-period{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:88px;
-  padding:8px 14px;
-  border-radius:999px;
-  background:var(--navy);
-  color:#fff;
-  font-size:13px;
+  display:block;
+  min-width:auto;
+  padding:0;
+  border-radius:0;
+  background:none;
+  color:var(--navy);
+  font-size:28px;
   font-weight:800;
-  letter-spacing:.04em;
+  line-height:1.1;
   justify-self:start;
 }
 
@@ -7436,6 +7434,10 @@ button,
 
   .lev-story-head h2{
     font-size:24px;
+  }
+
+  .lev-story-period{
+    font-size:22px;
   }
 
   .lev-gallery-grid{
