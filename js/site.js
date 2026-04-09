@@ -913,6 +913,17 @@ function initStandingsViewSwitch(root) {
   const buttons = Array.from(root.querySelectorAll('[data-standings-switch]'));
   const views = Array.from(root.querySelectorAll('[data-standings-view]'));
   if (!buttons.length || !views.length) return;
+  if (root.dataset.standingsSwitchBound === 'true') {
+    const activeButton = buttons.find(button => button.classList.contains('is-active'));
+    const initialView = activeButton?.dataset.standingsSwitch || 'table';
+    views.forEach(view => {
+      const isActive = view.dataset.standingsView === initialView;
+      view.classList.toggle('is-active', isActive);
+      view.hidden = !isActive;
+    });
+    return;
+  }
+  root.dataset.standingsSwitchBound = 'true';
 
   const setActiveView = (nextView) => {
     buttons.forEach(button => {
@@ -3382,6 +3393,7 @@ function renderArchiveTournamentPage() {
   const descriptionNode = page.querySelector('[data-archive-description]');
   const statusNode = page.querySelector('[data-archive-status]');
   const statsNode = page.querySelector('[data-archive-stats]');
+  const competitionNode = page.querySelector('[data-archive-competition]');
   const teamsNode = page.querySelector('[data-archive-teams]');
   const standingsNode = page.querySelector('[data-archive-standings]');
   const playoffNode = page.querySelector('[data-archive-playoff]');
@@ -3537,6 +3549,10 @@ function renderArchiveTournamentPage() {
       playoffNode.innerHTML = playoff.length
         ? renderPlayoffBracket(playoff)
         : '<div class="archive-empty-state">Сетка плей-офф появится позднее.</div>';
+    }
+
+    if (competitionNode) {
+      initStandingsViewSwitch(competitionNode);
     }
 
     if (matchesNode) {

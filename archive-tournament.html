@@ -94,25 +94,25 @@
 
   <section class="section archive-content-section">
     <div class="container">
-      <section class="archive-content-card archive-standings-card">
+      <section class="archive-content-card archive-standings-card" data-archive-competition>
         <div class="archive-content-head">
           <h2>Турнирная таблица</h2>
         </div>
-        <div data-archive-standings>
-          <div class="archive-empty-state">Турнирная таблица появится позднее.</div>
-        </div>
-      </section>
-    </div>
-  </section>
-
-  <section class="section archive-content-section">
-    <div class="container">
-      <section class="archive-content-card archive-playoff-card">
-        <div class="archive-content-head">
-          <h2>Сетка плей-офф</h2>
-        </div>
-        <div data-archive-playoff>
-          <div class="archive-empty-state">Сетка плей-офф появится позднее.</div>
+        <div class="standings-panel">
+          <div class="standings-switch" role="tablist" aria-label="Выбор формата турнира">
+            <button class="standings-switch-btn is-active" type="button" data-standings-switch="table" aria-selected="true">Турнирная таблица</button>
+            <button class="standings-switch-btn" type="button" data-standings-switch="playoff" aria-selected="false">Сетка плей-офф</button>
+          </div>
+          <div class="standings-view is-active" data-standings-view="table">
+            <div data-archive-standings>
+              <div class="archive-empty-state">Турнирная таблица появится позднее.</div>
+            </div>
+          </div>
+          <div class="standings-view" data-standings-view="playoff" hidden>
+            <div data-archive-playoff>
+              <div class="archive-empty-state">Сетка плей-офф появится позднее.</div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
