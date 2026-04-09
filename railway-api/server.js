@@ -3,6 +3,8 @@ require('dotenv').config();
 const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const { Pool } = require('pg');
 
 const app = express();
@@ -40,6 +42,32 @@ const CATEGORY_NAMES = {
 
 let translationTableEnsured = false;
 let editablePagesTableEnsured = false;
+
+function isStaticSiteRoot(candidatePath) {
+  if (!candidatePath) return false;
+  try {
+    return fs.existsSync(path.join(candidatePath, 'index.html'))
+      && fs.existsSync(path.join(candidatePath, 'css'))
+      && fs.existsSync(path.join(candidatePath, 'js'));
+  } catch (error) {
+    return false;
+  }
+}
+
+function resolveStaticSiteRoot() {
+  const candidates = [
+    process.env.STATIC_ROOT,
+    path.resolve(__dirname, '..'),
+    path.resolve(__dirname, '../site'),
+    path.resolve(process.cwd(), '..'),
+  ]
+    .map(value => String(value || '').trim())
+    .filter(Boolean);
+
+  return candidates.find(isStaticSiteRoot) || '';
+}
+
+const staticSiteRoot = resolveStaticSiteRoot();
 
 app.use(cors({
   origin(origin, callback) {
@@ -2678,37 +2706,6 @@ async function saveAdminResource(client, resource, payload) {
   }
 }
 
-app.get('/', (req, res) => {
-  res.json({
-    service: 'burchalkin-cup-railway-api',
-    status: 'ok',
-    endpoints: [
-      '/health',
-      '/api/tournaments',
-      '/api/tournaments/:slug',
-      '/api/tournaments/:slug/standings',
-      '/api/tournaments/:slug/matches',
-      '/api/tournaments/:slug/news',
-      '/api/tournaments/:slug/partners',
-      '/api/clubs',
-      '/api/clubs/:slug',
-      '/api/clubs/:slug/matches',
-      '/api/standings',
-      '/api/matches',
-      '/api/news',
-      '/api/results',
-      '/api/media/albums',
-      '/api/media/albums/:slug',
-      '/api/pages/:slug',
-      '/api/translate',
-      '/api/admin/session',
-      '/api/admin/:resource',
-      '/api/admin/standings',
-      '/api/admin/uploads/image'
-    ]
-  });
-});
-
 app.get('/health', async (req, res, next) => {
   try {
     await pool.query('SELECT 1');
@@ -3203,6 +3200,50 @@ app.get('/api/results', async (req, res, next) => {
     next(error);
   }
 });
+
+if (staticSiteRoot) {
+  app.use(express.static(staticSiteRoot, {
+    extensions: ['html'],
+    index: false,
+    maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0
+  }));
+
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(staticSiteRoot, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.json({
+      service: 'burchalkin-cup-railway-api',
+      status: 'ok',
+      static_site_root: null,
+      endpoints: [
+        '/health',
+        '/api/tournaments',
+        '/api/tournaments/:slug',
+        '/api/tournaments/:slug/standings',
+        '/api/tournaments/:slug/matches',
+        '/api/tournaments/:slug/news',
+        '/api/tournaments/:slug/partners',
+        '/api/clubs',
+        '/api/clubs/:slug',
+        '/api/clubs/:slug/matches',
+        '/api/standings',
+        '/api/matches',
+        '/api/news',
+        '/api/results',
+        '/api/media/albums',
+        '/api/media/albums/:slug',
+        '/api/pages/:slug',
+        '/api/translate',
+        '/api/admin/session',
+        '/api/admin/:resource',
+        '/api/admin/standings',
+        '/api/admin/uploads/image'
+      ]
+    });
+  });
+}
 
 app.use((error, req, res, next) => {
   const statusCode = error.message === 'Origin not allowed by CORS'

@@ -43,6 +43,8 @@ The API keeps compatibility with the current `data/*.json` shape, and also expos
 
 ## Railway setup
 
+### Option A. API only
+
 1. Create a Railway project.
 2. Add a PostgreSQL service.
 3. Add a second service from this repository.
@@ -59,6 +61,25 @@ The API keeps compatibility with the current `data/*.json` shape, and also expos
    `TRANSLATION_ENABLED=true`
    `TRANSLATION_PROVIDER=google-gtx`
 7. Deploy the service.
+
+### Option B. Unified domain: site + API in one Railway service
+
+If you want the whole site to open from the Railway domain itself, use the repository root as the service root and deploy the root-level [Dockerfile](/Users/kainarbaev_daniar/Downloads/последний%20эталон/Dockerfile).
+
+This mode serves:
+
+- the public site from `/`
+- static assets from `/css`, `/js`, `/images`, etc.
+- the API from `/api/...`
+
+Recommended setup:
+
+1. Create a Railway service from this repository.
+2. Set the service root directory to the repository root.
+3. Use the root-level `Dockerfile`.
+4. Keep the same environment variables as the API-only mode.
+
+In this mode the frontend can use the same origin for API calls, and the current config will automatically prefer the Railway domain itself.
 
 Railway documents:
 
@@ -88,6 +109,12 @@ docker run --rm -p 3000:3000 \
   -e TRANSLATION_ENABLED=true \
   -e TRANSLATION_PROVIDER=google-gtx \
   burcup-api
+```
+
+To build the unified site + API image from the repository root:
+
+```bash
+docker build -t burcup-site .
 ```
 
 ## Docker Compose example
