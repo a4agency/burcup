@@ -8211,10 +8211,11 @@ button,
   display:grid;
   grid-template-columns:repeat(3, minmax(240px, 280px));
   gap:24px;
-  align-items:end;
+  align-items:start;
   justify-content:center;
   max-width:920px;
   margin:0 auto;
+  padding-top:8px;
 }
 
 .archive-podium-item{
@@ -8227,11 +8228,11 @@ button,
 }
 
 .archive-podium-item.archive-podium-item-silver{
-  margin-top:44px;
+  margin-top:56px;
 }
 
 .archive-podium-item.archive-podium-item-bronze{
-  margin-top:86px;
+  margin-top:112px;
 }
 
 .archive-podium-logo-wrap{
@@ -8258,18 +8259,18 @@ button,
 }
 
 .archive-podium-card.archive-podium-item-silver{
-  min-height:300px;
+  min-height:308px;
   background:linear-gradient(180deg, #f7faff 0%, #eef4fb 100%) !important;
 }
 
 .archive-podium-card.archive-podium-item-gold{
-  min-height:340px;
+  min-height:360px;
   background:linear-gradient(180deg, #fff9de 0%, #fff0b7 100%) !important;
   border-color:rgba(230, 194, 82, .42) !important;
 }
 
 .archive-podium-card.archive-podium-item-bronze{
-  min-height:264px;
+  min-height:272px;
   background:linear-gradient(180deg, #fae7dc 0%, #f3d3c2 100%) !important;
   border-color:rgba(204, 136, 91, .34) !important;
 }
