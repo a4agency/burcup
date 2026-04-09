@@ -1072,6 +1072,16 @@ const ARCHIVE_TOURNAMENTS = {
     detail: {
       clubs_count: 8,
       matches_count: 5,
+      clubs: [
+        { position: 1, name: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 2, name: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 3, name: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия' },
+        { position: 4, name: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина' },
+        { position: 5, name: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция' },
+        { position: 6, name: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь' },
+        { position: 7, name: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия' },
+        { position: 8, name: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан' }
+      ],
       standings: [
         { position: 1, group: 'Группа A', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
         { position: 2, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
@@ -1535,6 +1545,20 @@ function buildArchiveTournamentEntries() {
 }
 
 function getArchiveTournamentClubs(detail = {}) {
+  const clubs = Array.isArray(detail.clubs) ? detail.clubs : [];
+  if (clubs.length) {
+    return clubs
+      .map(item => ({
+        slug: item.slug || item.team_slug || '',
+        name: item.team || item.name || '',
+        logo: item.logo || '',
+        city: item.city || '',
+        country: item.country || '',
+        position: Number(item.position || 0) || ''
+      }))
+      .filter(item => item.name);
+  }
+
   const standings = Array.isArray(detail.standings) ? detail.standings : [];
   if (standings.length) {
     return standings
