@@ -7121,12 +7121,11 @@ button,
   gap:20px;
 }
 
-.lev-hero-kicker{
-  color:var(--blue);
-  font-size:13px;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
+.lev-hero-heading{
+  margin:0;
+  color:var(--navy);
+  font-size:30px;
+  line-height:1.15;
 }
 
 .lev-hero-lead{
@@ -7223,10 +7222,8 @@ button,
 }
 
 .lev-story-head{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  flex-wrap:wrap;
+  display:grid;
+  gap:10px;
   margin-bottom:16px;
 }
 
@@ -7242,6 +7239,7 @@ button,
   font-size:13px;
   font-weight:800;
   letter-spacing:.04em;
+  justify-self:start;
 }
 
 .lev-story-head h2{
@@ -7422,6 +7420,10 @@ button,
 
   .lev-hero-lead{
     font-size:18px;
+  }
+
+  .lev-hero-heading{
+    font-size:24px;
   }
 
   .lev-facts-grid{
