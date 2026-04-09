@@ -1393,10 +1393,19 @@ const API_ENDPOINTS = {
 };
 
 function getApiBaseUrl() {
-  const runtimeValue = window.BCUP_CONFIG?.apiBaseUrl;
-  const localValue = localStorage.getItem('bcup_api_base_url');
-  const baseUrl = (runtimeValue || localValue || '').trim();
-  return baseUrl.replace(/\/+$/, '');
+  return getApiBaseCandidates()[0] || '';
+}
+
+function getApiBaseCandidates() {
+  const values = Array.isArray(window.BCUP_CONFIG?.apiBaseCandidates)
+    ? window.BCUP_CONFIG.apiBaseCandidates
+    : [window.BCUP_CONFIG?.apiBaseUrl, ...(window.BCUP_CONFIG?.apiFallbackBaseUrls || [])];
+
+  return Array.from(new Set(
+    values
+      .map(value => String(value || '').trim().replace(/\/+$/, ''))
+      .filter(Boolean)
+  ));
 }
 
 function getCloudinaryAssetMap() {
@@ -1947,24 +1956,33 @@ function handleCloudinaryImageFallback(event) {
 }
 
 async function fetchApi(path) {
-  const apiBaseUrl = getApiBaseUrl();
-  if (!apiBaseUrl) return null;
-  try {
-    const url = new URL(`${apiBaseUrl}${path}`);
-    url.searchParams.set('_ts', String(Date.now()));
-    const response = await fetch(url.toString(), {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache'
+  const apiBaseCandidates = getApiBaseCandidates();
+  if (!apiBaseCandidates.length) return null;
+
+  let lastError = null;
+  for (const apiBaseUrl of apiBaseCandidates) {
+    try {
+      const url = new URL(path, `${apiBaseUrl}/`);
+      url.searchParams.set('_ts', String(Date.now()));
+      const response = await fetch(url.toString(), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache'
+        }
+      });
+      if (!response.ok) {
+        lastError = new Error(`Failed to load ${path} from ${apiBaseUrl} (${response.status})`);
+        continue;
       }
-    });
-    if (!response.ok) throw new Error(`Failed to load ${path}`);
-    return response.json();
-  } catch (error) {
-    console.warn(`Remote API ${path} is unavailable.`, error);
-    return null;
+      return response.json();
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  console.warn(`Remote API ${path} is unavailable.`, lastError);
+  return null;
 }
 
 async function fetchJson(path) {

@@ -515,7 +515,19 @@
   }
 
   function getApiBaseUrl() {
-    return String(window.BCUP_CONFIG?.apiBaseUrl || '').trim();
+    return getApiBaseCandidates()[0] || '';
+  }
+
+  function getApiBaseCandidates() {
+    const values = Array.isArray(window.BCUP_CONFIG?.apiBaseCandidates)
+      ? window.BCUP_CONFIG.apiBaseCandidates
+      : [window.BCUP_CONFIG?.apiBaseUrl, ...(window.BCUP_CONFIG?.apiFallbackBaseUrls || [])];
+
+    return Array.from(new Set(
+      values
+        .map(value => String(value || '').trim().replace(/\/+$/, ''))
+        .filter(Boolean)
+    ));
   }
 
   function canUseAutoTranslation() {
@@ -600,20 +612,38 @@
     autoTranslationInFlight = true;
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/translate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          source_lang: 'ru',
-          target_lang: 'en',
-          texts: batch
-        })
-      });
+      const apiBaseCandidates = getApiBaseCandidates();
+      let response = null;
+      let lastError = null;
 
-      if (!response.ok) {
-        throw new Error(`Translation request failed with status ${response.status}`);
+      for (const apiBaseUrl of apiBaseCandidates) {
+        try {
+          const attempt = await fetch(new URL('/api/translate', `${apiBaseUrl}/`).toString(), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              source_lang: 'ru',
+              target_lang: 'en',
+              texts: batch
+            })
+          });
+
+          if (!attempt.ok) {
+            lastError = new Error(`Translation request failed with status ${attempt.status}`);
+            continue;
+          }
+
+          response = attempt;
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (!response) {
+        throw lastError || new Error('Translation request failed');
       }
 
       const payload = await response.json().catch(() => ({}));

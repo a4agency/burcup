@@ -1098,7 +1098,57 @@ let defaultsCache = {};
 let renderedDataCache = {};
 
 function getApiBaseUrl() {
-  return String(window.BCUP_CONFIG?.apiBaseUrl || '').replace(/\/+$/, '');
+  return getApiBaseCandidates()[0] || '';
+}
+
+function getApiBaseCandidates() {
+  const values = Array.isArray(window.BCUP_CONFIG?.apiBaseCandidates)
+    ? window.BCUP_CONFIG.apiBaseCandidates
+    : [window.BCUP_CONFIG?.apiBaseUrl, ...(window.BCUP_CONFIG?.apiFallbackBaseUrls || [])];
+
+  return Array.from(new Set(
+    values
+      .map(value => String(value || '').trim().replace(/\/+$/, ''))
+      .filter(Boolean)
+  ));
+}
+
+async function fetchAdminApi(path, init = {}) {
+  const apiBaseCandidates = getApiBaseCandidates();
+  if (!apiBaseCandidates.length) {
+    throw new Error('В js/config.js не указан apiBaseUrl');
+  }
+
+  let lastResponse = null;
+  let lastBody = null;
+  let lastError = null;
+
+  for (const apiBaseUrl of apiBaseCandidates) {
+    try {
+      const response = await fetch(new URL(path, `${apiBaseUrl}/`).toString(), init);
+      if (response.ok) {
+        return { response, body: await response.json().catch(() => ({})) };
+      }
+
+      const body = await response.json().catch(() => ({}));
+      lastResponse = response;
+      lastBody = body;
+
+      if ([404, 405, 502, 503, 504].includes(response.status)) {
+        continue;
+      }
+
+      return { response, body };
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastResponse) {
+    return { response: lastResponse, body: lastBody || {} };
+  }
+
+  throw lastError || new Error(`Не удалось выполнить запрос ${path}`);
 }
 
 function getAdminToken() {
@@ -1136,12 +1186,7 @@ function resetAdminSession(message = 'Войди в админ-панель, ч�
 }
 
 async function createAdminSession(password) {
-  const apiBaseUrl = getApiBaseUrl();
-  if (!apiBaseUrl) {
-    throw new Error('В js/config.js не указан apiBaseUrl');
-  }
-
-  const response = await fetch(`${apiBaseUrl}/api/admin/session`, {
+  const { response, body } = await fetchAdminApi('/api/admin/session', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -1150,8 +1195,6 @@ async function createAdminSession(password) {
       password: String(password || '').trim()
     })
   });
-
-  const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(body.error || `Ошибка входа (${response.status})`);
   }
@@ -1379,24 +1422,19 @@ function normalizeSourceData(sourceName, data) {
 }
 
 async function fetchAdminCollection(apiSourceName) {
-  const apiBaseUrl = getApiBaseUrl();
   const token = getAdminToken();
 
-  if (!apiBaseUrl) {
-    throw new Error('В js/config.js не указан apiBaseUrl');
-  }
   if (!token) {
     throw new Error('Сначала войди в админ-панель.');
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/${apiSourceName}`, {
+  const { response, body } = await fetchAdminApi(`/api/admin/${apiSourceName}`, {
     headers: {
       'x-admin-token': token
     }
   });
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
       resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
       throw new Error('Сессия админ-панели завершилась. Войди ещё раз.');
@@ -1404,7 +1442,7 @@ async function fetchAdminCollection(apiSourceName) {
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
 
-  return response.json();
+  return body;
 }
 
 async function fetchAdminSource(sourceName) {
@@ -1483,12 +1521,8 @@ async function resolveLoadedSourceData(sourceName, data) {
 async function pushAdminSource(sourceName, data) {
   const sourceMeta = getAdminSourceMeta(sourceName);
   const apiSourceName = getAdminApiSourceName(sourceName);
-  const apiBaseUrl = getApiBaseUrl();
   const token = getAdminToken();
 
-  if (!apiBaseUrl) {
-    throw new Error('В js/config.js не указан apiBaseUrl');
-  }
   if (!token) {
     throw new Error('Сначала войди в админ-панель.');
   }
@@ -1545,7 +1579,7 @@ async function pushAdminSource(sourceName, data) {
     }));
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/${apiSourceName}`, {
+  const { response, body } = await fetchAdminApi(`/api/admin/${apiSourceName}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -1555,7 +1589,6 @@ async function pushAdminSource(sourceName, data) {
   });
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
       resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
       throw new Error('Сессия админ-панели завершилась. Войди ещё раз.');
@@ -1563,16 +1596,12 @@ async function pushAdminSource(sourceName, data) {
     throw new Error(body.error || `Ошибка API (${response.status})`);
   }
 
-  return response.json();
+  return body;
 }
 
 async function uploadAdminImage({ file, sourceName, key }) {
-  const apiBaseUrl = getApiBaseUrl();
   const token = getAdminToken();
 
-  if (!apiBaseUrl) {
-    throw new Error('В js/config.js не указан apiBaseUrl');
-  }
   if (!token) {
     throw new Error('Сначала войди в админ-панель.');
   }
@@ -1584,7 +1613,7 @@ async function uploadAdminImage({ file, sourceName, key }) {
     reader.readAsDataURL(file);
   });
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/uploads/image`, {
+  const { response, body } = await fetchAdminApi('/api/admin/uploads/image', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1599,7 +1628,6 @@ async function uploadAdminImage({ file, sourceName, key }) {
   });
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
     if (response.status === 401) {
       resetAdminSession('Сессия админ-панели завершилась. Войди ещё раз.');
       throw new Error('Сессия админ-панели завершилась. Войди ещё раз.');
@@ -1607,7 +1635,7 @@ async function uploadAdminImage({ file, sourceName, key }) {
     throw new Error(body.error || `Ошибка upload API (${response.status})`);
   }
 
-  return response.json();
+  return body;
 }
 
 function readFileAsDataUrl(file) {
