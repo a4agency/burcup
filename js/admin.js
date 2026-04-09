@@ -2880,14 +2880,38 @@ function initAdminNav() {
   const nav = document.getElementById('admin-nav');
   if (!nav || adminNavInitialized) return;
 
+  const primaryGroup = document.createElement('div');
+  primaryGroup.className = 'admin-nav-group';
+
+  const primaryTitle = document.createElement('div');
+  primaryTitle.className = 'admin-nav-group-title';
+  primaryTitle.textContent = 'Основные данные';
+  primaryGroup.appendChild(primaryTitle);
+
+  const archiveGroup = document.createElement('div');
+  archiveGroup.className = 'admin-nav-group';
+
+  const archiveTitle = document.createElement('div');
+  archiveTitle.className = 'admin-nav-group-title';
+  archiveTitle.textContent = 'Редактирование архивных данных';
+  archiveGroup.appendChild(archiveTitle);
+
   Object.entries(ADMIN_SOURCES).forEach(([name, meta]) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.dataset.source = name;
     btn.textContent = meta.title;
     btn.addEventListener('click', () => adminShowSource(name));
-    nav.appendChild(btn);
+
+    if (name.startsWith('archive_')) {
+      archiveGroup.appendChild(btn);
+    } else {
+      primaryGroup.appendChild(btn);
+    }
   });
+
+  nav.appendChild(primaryGroup);
+  nav.appendChild(archiveGroup);
 
   adminNavInitialized = true;
 }

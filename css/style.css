@@ -2477,6 +2477,26 @@ object-fit:contain;
   gap:10px;
 }
 
+.admin-nav-group{
+  display:grid;
+  gap:10px;
+}
+
+.admin-nav-group + .admin-nav-group{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid rgba(13,43,99,.08);
+}
+
+.admin-nav-group-title{
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  padding:0 4px 2px;
+}
+
 .admin-nav button{
   text-align:left;
   border:1px solid var(--line);
