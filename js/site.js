@@ -90,8 +90,8 @@ function initHeaderCompactState() {
   }
 
   const desktopBreakpoint = 900;
-  const compactEnterThreshold = 72;
-  const compactExitThreshold = 28;
+  const compactEnterThreshold = 220;
+  const compactExitThreshold = 4;
   let isCompact = header.classList.contains('is-compact');
   let frameId = null;
 
@@ -104,7 +104,7 @@ function initHeaderCompactState() {
       return;
     }
 
-    const scrollY = window.scrollY;
+    const scrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
     const shouldCompact = isCompact
       ? scrollY > compactExitThreshold
       : scrollY > compactEnterThreshold;
