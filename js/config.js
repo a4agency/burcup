@@ -5,6 +5,7 @@
   const isGithubPages = /\.github\.io$/i.test(hostname);
   const cloudinaryOverride = (localStorage.getItem('bcup_cloudinary_cloud_name') || '').trim();
   const apiOverride = (localStorage.getItem('bcup_api_base_url') || '').trim();
+  const allowApiOverride = isLocalPreview || isGithubPages;
   const runtimeConfig = window.BCUP_CONFIG || {};
   const legacyApiBaseUrl = 'https://burcup-production.up.railway.app';
 
@@ -31,7 +32,11 @@
     ? 'http://127.0.0.1:3000'
     : (isGithubPages ? legacyApiBaseUrl : origin);
 
-  appendCandidate(apiBaseCandidates, seenApiBaseCandidates, apiOverride);
+  if (!allowApiOverride && apiOverride) {
+    localStorage.removeItem('bcup_api_base_url');
+  }
+
+  appendCandidate(apiBaseCandidates, seenApiBaseCandidates, allowApiOverride ? apiOverride : '');
   appendCandidate(apiBaseCandidates, seenApiBaseCandidates, runtimeConfig.apiBaseUrl);
   configuredCandidates.forEach(value => appendCandidate(apiBaseCandidates, seenApiBaseCandidates, value));
   appendCandidate(apiBaseCandidates, seenApiBaseCandidates, inferredPrimaryApiBase);
