@@ -81,6 +81,14 @@ function initHeaderCompactState() {
   const header = document.querySelector('.header');
   if (!header) return;
 
+  const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+  const isHomePage = document.body.classList.contains('page-home') || currentFile === 'index.html';
+
+  if (!isHomePage) {
+    header.classList.add('is-compact');
+    return;
+  }
+
   const desktopBreakpoint = 900;
   const compactEnterThreshold = 72;
   const compactExitThreshold = 28;
