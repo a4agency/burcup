@@ -25,7 +25,21 @@ if (!databaseUrl) {
 const allowedOrigins = (() => {
   const raw = (process.env.CORS_ORIGIN || '*').trim();
   if (!raw || raw === '*') return '*';
-  return raw.split(',').map(item => item.trim()).filter(Boolean);
+
+  const values = raw.split(',').map(item => item.trim()).filter(Boolean);
+  const railwayPublicDomain = (process.env.RAILWAY_PUBLIC_DOMAIN || '').trim();
+  const railwayStaticUrl = (process.env.RAILWAY_STATIC_URL || '').trim();
+
+  [
+    'https://burcup-production.up.railway.app',
+    railwayPublicDomain ? `https://${railwayPublicDomain}` : '',
+    railwayStaticUrl,
+  ].forEach((origin) => {
+    const normalized = origin.replace(/\/+$/, '');
+    if (normalized && !values.includes(normalized)) values.push(normalized);
+  });
+
+  return values;
 })();
 
 const pool = new Pool({
