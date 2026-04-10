@@ -3273,7 +3273,18 @@ if (staticSiteRoot) {
   app.use(express.static(staticSiteRoot, {
     extensions: ['html'],
     index: false,
-    maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0
+    maxAge: 0,
+    setHeaders(res, filePath) {
+      const ext = path.extname(filePath).toLowerCase();
+      if (['.html', '.js', '.css'].includes(ext)) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        return;
+      }
+
+      if (['.webp', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.woff', '.woff2'].includes(ext)) {
+        res.setHeader('Cache-Control', 'public, max-age=604800');
+      }
+    }
   }));
 
   app.get('/', (req, res) => {

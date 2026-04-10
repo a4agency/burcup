@@ -1198,6 +1198,12 @@ async function createAdminSession(password) {
     })
   });
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Неверный пароль.');
+    }
+    if (response.status === 503) {
+      throw new Error('Сервер админки не настроен.');
+    }
     throw new Error(body.error || `Ошибка входа (${response.status})`);
   }
 
@@ -3219,9 +3225,14 @@ async function handleAdminLogin(event) {
     setAdminToken(session.token || '');
     setLoginStatus('');
     if (input) input.value = '';
-    await openAdminWorkspace({ forceRemote: true });
+    try {
+      await openAdminWorkspace({ forceRemote: true });
+    } catch (workspaceError) {
+      setLoginStatus('Вход выполнен, но данные админки не загрузились.', true);
+      setStatus('Ошибка загрузки данных: ' + workspaceError.message);
+    }
   } catch (error) {
-    setLoginStatus('Неверный пароль или сервер недоступен.', true);
+    setLoginStatus(error.message || 'Неверный пароль или сервер недоступен.', true);
     setStatus('Ошибка входа: ' + error.message);
   }
 }
