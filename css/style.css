@@ -19,7 +19,7 @@ body{min-height:100vh;display:flex;flex-direction:column}
 a{text-decoration:none;color:inherit}
 img{max-width:100%;display:block}
 .container{width:min(1180px, calc(100% - 32px));margin:0 auto}
-.header{background:linear-gradient(180deg,var(--navy),var(--navy-2));color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+.header{background:linear-gradient(180deg,var(--navy),var(--navy-2));color:#fff;position:relative;top:auto;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.12)}
 .page-home .header{box-shadow:none}
 .nav{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 0}
 .brand{display:flex;align-items:center;gap:14px;font-weight:800;letter-spacing:.02em}
@@ -5632,16 +5632,11 @@ button,
 .header{
   background:linear-gradient(180deg,var(--navy),var(--navy-2));
   color:#fff;
-  position:sticky;
-  top:0;
+  position:relative;
+  top:auto;
   z-index:50;
   box-shadow:0 10px 30px rgba(0,0,0,.12);
   transition:none;
-}
-
-body.page-home .header{
-  position:relative;
-  top:auto;
 }
 
 .header-inner{
