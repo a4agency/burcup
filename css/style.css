@@ -5639,6 +5639,11 @@ button,
   transition:none;
 }
 
+body.page-home .header{
+  position:relative;
+  top:auto;
+}
+
 .header-inner{
   display:flex;
   flex-direction:column;
