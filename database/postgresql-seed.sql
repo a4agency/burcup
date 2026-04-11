@@ -35,7 +35,7 @@ VALUES
     2025,
     'BCUP 2025',
     'images/logo-burchalkin.webp',
-    'Архивный турнир прошлого сезона. Нужен как основа для масштабирования сайта по годам.',
+    'Турнир прошлого сезона. Нужен как основа для масштабирования сайта по годам.',
     DATE '2025-05-16',
     DATE '2025-05-20',
     'Санкт-Петербург',
@@ -71,11 +71,11 @@ VALUES
   ('almaz-antey', 'Алмаз-Антей', 'Алмаз-Антей', 'images/team-almaz-antey.webp', 'Россия', 'Санкт-Петербург', 'Футбольный клуб, регулярно участвующий в турнирах Burchalkin Cup.', TRUE),
   ('zenit', 'Зенит', 'Зенит', 'images/team-zenit.webp', 'Россия', 'Санкт-Петербург', 'Один из ключевых клубов турнирной сетки и истории матчей сайта.', TRUE),
   ('palmeiras', 'Палмейрас', 'Палмейрас', 'images/team-palmeiras.webp', 'Бразилия', NULL, 'Международный участник турнира Burchalkin Cup.', TRUE),
-  ('kairat', 'Кайрат', 'Кайрат', 'images/team-kairat.webp', 'Казахстан', 'Алматы', 'Исторический участник турнира и архивной страницы клуба.', FALSE),
+  ('kairat', 'Кайрат', 'Кайрат', 'images/team-kairat.webp', 'Казахстан', 'Алматы', 'Исторический участник турнира и страницы клуба прошлых розыгрышей.', FALSE),
   ('cruz-azul', 'Крус Асуль', 'Крус Асуль', 'images/team-cruz-azul.webp', 'Мексика', 'Мехико', 'Международный участник текущего розыгрыша Кубка Бурчалкина.', TRUE),
   ('crvena-zvezda', 'Црвена Звезда', 'Црвена Звезда', 'images/team-crvena-zvezda.webp', 'Сербия', 'Белград', 'Участник международного состава турнира.', TRUE),
-  ('fenerbahce', 'Фенербахче', 'Фенербахче', 'images/team-fenerbahce.webp', 'Турция', 'Стамбул', 'Клуб для будущих и архивных сезонов турнира.', TRUE),
-  ('san-lorenzo', 'Сан-Лоренсо', 'Сан-Лоренсо', 'images/team-san-lorenzo.webp', 'Аргентина', 'Буэнос-Айрес', 'Клуб с будущими и архивными матчами в общей истории сайта.', TRUE),
+  ('fenerbahce', 'Фенербахче', 'Фенербахче', 'images/team-fenerbahce.webp', 'Турция', 'Стамбул', 'Клуб для будущих сезонов и прошлых розыгрышей турнира.', TRUE),
+  ('san-lorenzo', 'Сан-Лоренсо', 'Сан-Лоренсо', 'images/team-san-lorenzo.webp', 'Аргентина', 'Буэнос-Айрес', 'Клуб с будущими матчами и матчами прошлых розыгрышей в общей истории сайта.', TRUE),
   ('dinamo-minsk', 'Динамо-Минск', 'Динамо-Минск', 'images/team-dinamo-minsk.webp', 'Беларусь', 'Минск', 'Клуб для турнирной истории и карточки команды.', TRUE),
   ('placeholder-team-1', 'Команда 1', 'Команда 1', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
   ('placeholder-team-2', 'Команда 2', 'Команда 2', 'images/logo-burchalkin.webp', NULL, NULL, 'Временная команда-заглушка для настройки турнирной таблицы и сетки плей-офф.', TRUE),
@@ -113,9 +113,9 @@ FROM (
     ('burchalkin-cup-2026', 'cruz-azul', 'B', 2, ''),
     ('burchalkin-cup-2026', 'fenerbahce', 'B', 3, ''),
     ('burchalkin-cup-2026', 'san-lorenzo', 'B', 4, ''),
-    ('burchalkin-cup-2025', 'almaz-antey', NULL, 1, 'Архивный участник для прошлогоднего турнира'),
-    ('burchalkin-cup-2025', 'zenit', NULL, 2, 'Архивный участник для прошлогоднего турнира'),
-    ('burchalkin-cup-2025', 'kairat', NULL, 3, 'Архивный участник для прошлогоднего турнира')
+    ('burchalkin-cup-2025', 'almaz-antey', NULL, 1, 'Участник прошлого розыгрыша турнира'),
+    ('burchalkin-cup-2025', 'zenit', NULL, 2, 'Участник прошлого розыгрыша турнира'),
+    ('burchalkin-cup-2025', 'kairat', NULL, 3, 'Участник прошлого розыгрыша турнира')
 ) AS data(tournament_slug, club_slug, group_name, seeded_order, notes)
 JOIN tournaments tournament ON tournament.slug = data.tournament_slug
 JOIN clubs club ON club.slug = data.club_slug
@@ -225,7 +225,7 @@ FROM (
     (1773883313332::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'dinamo-minsk', 'palmeiras', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 4),
     (1773883426669::BIGINT, 'burchalkin-cup-2026', 'Группа A', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'almaz-antey', 'zenit', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 5),
     (1773883471638::BIGINT, 'burchalkin-cup-2026', 'Группа B', '2 тур', 'День 2', DATE '2026-05-15', '10:00'::TIME, 'soon', 'Скоро', 'cruz-azul', 'fenerbahce', 0, 0, 'Стадион "Алмаз-Антей"', 'https://vkvideo.ru/video_ext.php?oid=-120721420&id=456239433&hash=bea5fe2662c311f2&hd=4', NULL::TEXT, NULL::TEXT, FALSE, '', 6),
-    (2025051601::BIGINT, 'burchalkin-cup-2025', 'Группа B', '1 тур', 'Архив', DATE '2025-05-16', '12:00'::TIME, 'done', 'Завершен', 'zenit', 'kairat', 2, 0, 'Стадион "Алмаз-Антей"', 'https://www.youtube.com/embed/5qap5aO4i9A', NULL::TEXT, NULL::TEXT, FALSE, 'Архивный матч для проверки сквозной истории клуба.', 1)
+    (2025051601::BIGINT, 'burchalkin-cup-2025', 'Группа B', '1 тур', 'Прошлый розыгрыш', DATE '2025-05-16', '12:00'::TIME, 'done', 'Завершен', 'zenit', 'kairat', 2, 0, 'Стадион "Алмаз-Антей"', 'https://www.youtube.com/embed/5qap5aO4i9A', NULL::TEXT, NULL::TEXT, FALSE, 'Матч прошлого розыгрыша для проверки сквозной истории клуба.', 1)
 ) AS data(id, tournament_slug, stage_name, round_name, matchday_label, match_date, match_time, status, status_label, home_club_slug, away_club_slug, home_score, away_score, venue, video_url, review_video_url, interview_video_url, is_featured_media, summary, sort_order)
 JOIN tournaments tournament ON tournament.slug = data.tournament_slug
 JOIN clubs home_club ON home_club.slug = data.home_club_slug

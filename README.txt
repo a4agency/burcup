@@ -1,6 +1,6 @@
 Burchalkin Cup — white redesign
 
-В архиве:
+В наборе:
 - index.html
 - about-tournament.html
 - about-lev-burchalkin.html

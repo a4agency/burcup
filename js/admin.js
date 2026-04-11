@@ -252,7 +252,7 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_tournaments',
     exportName: 'tournaments.json',
     title: 'Турниры',
-    help: 'Карточки турниров на главной и в архиве. Все изменения отсюда попадают на сайт.',
+    help: 'Карточки турниров на главной и в разделе прошлых розыгрышей. Все изменения отсюда попадают на сайт.',
     defaultData: [
       {
         slug: 'burchalkin-cup-2026',
@@ -310,8 +310,8 @@ const ADMIN_SOURCES = {
   archive_tournaments: {
     key: 'bcup_admin_archive_tournaments',
     exportName: 'archive-tournaments.json',
-    title: 'Архив турниров',
-    help: 'Архивные карточки турниров и страницы прошлых розыгрышей.',
+    title: 'Прошлые розыгрыши турниров',
+    help: 'Карточки прошлых розыгрышей и страницы прошлых сезонов.',
     filterArchived: true,
     defaultData: [
       {
@@ -325,7 +325,7 @@ const ADMIN_SOURCES = {
         end_date: '2025-05-17',
         logo: 'images/logo-burchalkin.webp',
         hero_image: '',
-        description: 'Архивный розыгрыш турнира 2025 года.',
+        description: 'Прошлый розыгрыш турнира 2025 года.',
         is_featured: false,
         countdown_enabled: false,
       },
@@ -340,7 +340,7 @@ const ADMIN_SOURCES = {
         end_date: '2024-05-17',
         logo: 'images/logo-burchalkin.webp',
         hero_image: '',
-        description: 'Архивный розыгрыш турнира 2024 года.',
+        description: 'Прошлый розыгрыш турнира 2024 года.',
         is_featured: false,
         countdown_enabled: false,
       },
@@ -355,7 +355,7 @@ const ADMIN_SOURCES = {
         end_date: '2023-05-17',
         logo: 'images/logo-burchalkin.webp',
         hero_image: '',
-        description: 'Архивный розыгрыш турнира 2023 года.',
+        description: 'Прошлый розыгрыш турнира 2023 года.',
         is_featured: false,
         countdown_enabled: false,
       },
@@ -370,7 +370,7 @@ const ADMIN_SOURCES = {
         end_date: '2019-05-17',
         logo: 'images/logo-burchalkin.webp',
         hero_image: '',
-        description: 'Архивный розыгрыш турнира 2019 года.',
+        description: 'Прошлый розыгрыш турнира 2019 года.',
         is_featured: false,
         countdown_enabled: false,
       },
@@ -385,7 +385,7 @@ const ADMIN_SOURCES = {
         end_date: '2018-05-17',
         logo: 'images/logo-burchalkin.webp',
         hero_image: '',
-        description: 'Архивный розыгрыш турнира 2018 года.',
+        description: 'Прошлый розыгрыш турнира 2018 года.',
         is_featured: false,
         countdown_enabled: false,
       }
@@ -802,7 +802,7 @@ const ADMIN_SOURCES = {
   archive_matches: {
     key: 'bcup_archive_matches',
     exportName: 'archive-matches.json',
-    title: 'Архивные матчи',
+    title: 'Матчи прошлых розыгрышей',
     filterArchiveMatches: true,
     defaultData: [
       {
@@ -881,8 +881,8 @@ const ADMIN_SOURCES = {
   archive_standings: {
     key: 'bcup_archive_standings',
     exportName: 'archive-standings.json',
-    title: 'Архивные таблицы',
-    help: 'Турнирные таблицы прошлых розыгрышей. Эти данные попадают на архивные страницы сезонов.',
+    title: 'Таблицы прошлых розыгрышей',
+    help: 'Турнирные таблицы прошлых розыгрышей. Эти данные попадают на страницы прошлых сезонов.',
     filterArchiveStandings: true,
     defaultData: [
       {
@@ -2310,7 +2310,7 @@ function renderTournamentAdminCard(item, index, sourceName = 'tournaments') {
   const panelNote = isFeatured
     ? 'Эта запись управляет карточкой текущего турнира на главной странице.'
     : seasonYear && seasonYear < 2026
-      ? 'Эта запись управляет архивной карточкой турнира.'
+      ? 'Эта запись управляет карточкой прошлого розыгрыша.'
       : 'Эта запись управляет карточкой турнира на сайте.';
 
   return renderSectionedAdminCard('Турнир', index, [
@@ -3218,7 +3218,7 @@ function initAdminNav() {
 
   const archiveTitle = document.createElement('div');
   archiveTitle.className = 'admin-nav-group-title';
-  archiveTitle.textContent = 'Редактирование архивных данных';
+  archiveTitle.textContent = 'Редактирование прошлых розыгрышей';
   archiveGroup.appendChild(archiveTitle);
 
   Object.entries(ADMIN_SOURCES).forEach(([name, meta]) => {

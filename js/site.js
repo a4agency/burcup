@@ -1016,7 +1016,7 @@ const CLUB_PROFILE_OVERRIDES = {
   },
   krasnodar: {
     participationYears: [2018, 2019, 2023],
-    summary: 'Клуб из Краснодара, не раз появлявшийся в составе участников турнира и его архивной истории.'
+    summary: 'Клуб из Краснодара, не раз появлявшийся в составе участников турнира и его истории прошлых розыгрышей.'
   },
   roma: {
     participationYears: [2018],
@@ -1052,7 +1052,7 @@ const CLUB_PROFILE_OVERRIDES = {
   },
   kairat: {
     participationYears: [2024, 2025],
-    summary: 'Клуб из Алматы, выступавший в международном составе турнира до перехода в раздел архив участников.'
+    summary: 'Клуб из Алматы, выступавший в международном составе турнира до перехода в раздел участников прошлых розыгрышей.'
   },
   'san-lorenzo': {
     participationYears: [2025, 2026],
@@ -1184,7 +1184,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/team-kairat.webp',
     country: 'Казахстан',
     city: 'Алматы',
-    description: 'Участник 2024 - 2025. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2024 - 2025. Страница клуба в истории турнира.',
     matches: []
   },
   villarreal: {
@@ -1193,7 +1193,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-villarreal.png',
     country: 'Испания',
     city: 'Вильярреал',
-    description: 'Участник 2016 - 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016 - 2019. Страница клуба в истории турнира.',
     matches: []
   },
   mtk: {
@@ -1202,7 +1202,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-mtk.webp',
     country: 'Венгрия',
     city: 'Будапешт',
-    description: 'Участник 2017 - 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2017 - 2019. Страница клуба в истории турнира.',
     matches: []
   },
   'cruz-azul': {
@@ -1211,7 +1211,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/team-cruz-azul.webp',
     country: 'Мексика',
     city: 'Мехико',
-    description: 'Участник 2026. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2026. Страница клуба в истории турнира.',
     matches: []
   },
   victoria: {
@@ -1220,7 +1220,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-victoria.webp',
     country: 'Португалия',
     city: 'Гимарайнш',
-    description: 'Участник 2016. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016. Страница клуба в истории турнира.',
     matches: []
   },
   santos: {
@@ -1229,7 +1229,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-santos.webp',
     country: 'Бразилия',
     city: 'Сантус',
-    description: 'Участник 2023. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2023. Страница клуба в истории турнира.',
     matches: []
   },
   atalanta: {
@@ -1238,7 +1238,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-atalanta.webp',
     country: 'Италия',
     city: 'Бергамо',
-    description: 'Участник 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2019. Страница клуба в истории турнира.',
     matches: []
   },
   roma: {
@@ -1247,7 +1247,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-roma.webp',
     country: 'Италия',
     city: 'Рим',
-    description: 'Участник 2018. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2018. Страница клуба в истории турнира.',
     matches: []
   },
   sepahan: {
@@ -1256,7 +1256,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-sepahan.webp',
     country: 'Иран',
     city: 'Исфахан',
-    description: 'Участник 2023 - 2024. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2023 - 2024. Страница клуба в истории турнира.',
     matches: []
   },
   cska: {
@@ -1265,7 +1265,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-cska.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Участник 2016 - 2019, 2023. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016 - 2019, 2023. Страница клуба в истории турнира.',
     matches: []
   },
   lokomotiv: {
@@ -1274,7 +1274,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-lokomotiv.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Участник 2016 - 2017. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016 - 2017. Страница клуба в истории турнира.',
     matches: []
   },
   'dinamo-moscow': {
@@ -1283,7 +1283,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-dinamo-moscow.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Участник 2016. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016. Страница клуба в истории турнира.',
     matches: []
   },
   hjk: {
@@ -1292,7 +1292,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-hjk.png',
     country: 'Финляндия',
     city: 'Хельсинки',
-    description: 'Участник 2016. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016. Страница клуба в истории турнира.',
     matches: []
   },
   brodarac: {
@@ -1301,7 +1301,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-brodarac.png',
     country: 'Сербия',
     city: 'Белград',
-    description: 'Участник 2016. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2016. Страница клуба в истории турнира.',
     matches: []
   },
   partizan: {
@@ -1310,7 +1310,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-partizan.png',
     country: 'Сербия',
     city: 'Белград',
-    description: 'Участник 2017. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2017. Страница клуба в истории турнира.',
     matches: []
   },
   'boca-juniors': {
@@ -1319,7 +1319,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-boca-juniors.png',
     country: 'Аргентина',
     city: 'Буэнос-Айрес',
-    description: 'Участник 2018 - 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2018 - 2019. Страница клуба в истории турнира.',
     matches: []
   },
   krasnodar: {
@@ -1328,7 +1328,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-krasnodar.png',
     country: 'Россия',
     city: 'Краснодар',
-    description: 'Участник 2018 - 2019, 2023. Архивная страница клуба в рамках истории турнира.',
+    description: 'Участник 2018 - 2019, 2023. Страница клуба в истории турнира.',
     matches: []
   }
 };
@@ -1336,8 +1336,8 @@ const ARCHIVE_TOURNAMENTS = {
   '2025': {
     title: 'Кубок Бурчалкина 2025',
     season: 'Розыгрыш 15 - 17 мая 2025',
-    description: 'Позже здесь появятся команды турнира, результаты матчей, сетка, фотографии и архивные материалы розыгрыша 2025 года.',
-    status: 'Страница уже готова как архивная точка входа. Материалы можно будет постепенно добавить позже.',
+    description: 'Позже здесь появятся команды турнира, результаты матчей, сетка, фотографии и материалы розыгрыша 2025 года.',
+    status: 'Страница прошлого розыгрыша уже готова как точка входа. Материалы можно будет постепенно добавить позже.',
     detail: {
       clubs_count: 8,
       matches_count: 20,
@@ -1801,8 +1801,8 @@ const ARCHIVE_TOURNAMENTS = {
   '2024': {
     title: 'Кубок Бурчалкина 2024',
     season: 'Розыгрыш сезона 2024',
-    description: 'Это страница-заглушка под архив 2024 года. Позже здесь можно будет собрать участников, расписание, итоги и медиаматериалы.',
-    status: 'Архив ещё не заполнен, но страница уже подключена и доступна по ссылке.'
+    description: 'Это страница-заглушка под розыгрыш 2024 года. Позже здесь можно будет собрать участников, расписание, итоги и медиаматериалы.',
+    status: 'Розыгрыш 2024 года ещё не заполнен, но страница уже подключена и доступна по ссылке.'
   },
   '2023': {
     title: 'Кубок Бурчалкина 2023',
@@ -1813,14 +1813,14 @@ const ARCHIVE_TOURNAMENTS = {
   '2019': {
     title: 'Кубок Бурчалкина 2019',
     season: 'Розыгрыш сезона 2019',
-    description: 'Страница подготовлена как архив для одного из ранних розыгрышей турнира. Здесь можно будет собрать историю турнира по годам.',
-    status: 'Страница архива уже работает, содержимое добавим позже.'
+    description: 'Страница подготовлена для одного из ранних розыгрышей турнира. Здесь можно будет собрать историю турнира по годам.',
+    status: 'Страница розыгрыша уже работает, содержимое добавим позже.'
   },
   '2018': {
     title: 'Кубок Бурчалкина 2018',
     season: 'Розыгрыш сезона 2018',
-    description: 'Заглушка для архивной страницы 2018 года. Позже здесь появятся команды, результаты и архивные материалы турнира.',
-    status: 'Архив 2018 года пока находится в подготовке.'
+    description: 'Заглушка для страницы розыгрыша 2018 года. Позже здесь появятся команды, результаты и материалы турнира.',
+    status: 'Розыгрыш 2018 года пока находится в подготовке.'
   }
 };
 const ARCHIVE_TOURNAMENT_SLUG_BY_YEAR = {
@@ -1858,7 +1858,7 @@ function formatTournamentStatus(status) {
     upcoming: 'Скоро',
     active: 'Идёт',
     completed: 'Завершён',
-    archived: 'Архив',
+    archived: 'Прошлый розыгрыш',
   };
 
   return labels[normalized] || status || '';
@@ -2070,7 +2070,7 @@ function getClubProfile(item = {}) {
     || extractParticipationLabel(item?.description || fallback.description || '');
   const sourceDescription = String(item?.description || '').trim();
   const isGenericDescription = /^(?:Исторический\s+)?Участник\b/i.test(sourceDescription)
-    || /Архивная страница клуба/i.test(sourceDescription);
+    || /страница клуба.*истории турнира/i.test(sourceDescription);
   const summary = String(
     override.summary
     || (!isGenericDescription ? sourceDescription : '')
@@ -2130,9 +2130,9 @@ function formatMatchCardDateTime(item = {}) {
 function getArchiveTournamentData(year) {
   const normalizedYear = String(year || '').trim();
   return ARCHIVE_TOURNAMENTS[normalizedYear] || {
-    title: `Кубок Бурчалкина ${normalizedYear || 'Архив'}`,
+    title: normalizedYear ? `Кубок Бурчалкина ${normalizedYear}` : 'Прошлые розыгрыши Кубка Бурчалкина',
     season: normalizedYear ? `Розыгрыш сезона ${normalizedYear}` : 'Розыгрыш турнира',
-    description: 'На этой странице позже появятся команды, результаты, фотографии и материалы архивного розыгрыша.',
+    description: 'На этой странице позже появятся команды, результаты, фотографии и материалы прошлого розыгрыша.',
     status: 'Страница-заглушка уже создана и готова для будущего наполнения.'
   };
 }
@@ -2281,7 +2281,7 @@ function formatHeadToHeadDateLabel(item) {
     }
   }
 
-  return joinNonEmpty([dateLabel, time], ' • ') || 'Архив матча';
+  return joinNonEmpty([dateLabel, time], ' • ') || 'Матч прошлых розыгрышей';
 }
 
 function getArchiveFallbackMatches() {
@@ -3031,7 +3031,7 @@ async function renderTournamentsGrid() {
     const actionHref = isArchive
       ? `archive-tournament.html?year=${encodeURIComponent(String(item.season_year || ''))}${item.slug ? `&slug=${encodeURIComponent(item.slug)}` : ''}`
       : `results.html?tournament=${encodeURIComponent(item.slug || '')}`;
-    const actionLabel = isArchive ? 'Открыть архив' : 'Открыть турнир';
+    const actionLabel = isArchive ? 'Открыть розыгрыш' : 'Открыть турнир';
     const datesLabel = translateRuntimeText(formatTournamentDateRange(item.start_date, item.end_date) || String(item.start_date || '').trim());
     const displayName = Number(item.season_year || 0) === 2026
       ? 'Кубок Бурчалкина 2026'
@@ -4183,7 +4183,7 @@ async function renderMatchPageFromJson() {
           return `
             <a class="match-headtohead-row" href="${escapeHtml(getMatchPageUrl(match))}">
               <div class="club-history-datebox">
-                <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime || 'Архив матча')}</div>
+                <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime || 'Матч прошлых розыгрышей')}</div>
                 <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
               </div>
               <div class="match-headtohead-main">
@@ -4414,7 +4414,7 @@ function renderArchiveTournamentPage() {
     return `
       <a class="archive-match-card" href="${escapeHtml(href)}">
         <div class="archive-match-card-top">
-          <span>${escapeHtml(meta || 'Архив матча')}</span>
+          <span>${escapeHtml(meta || 'Матч прошлых розыгрышей')}</span>
           <span class="archive-match-card-status">${escapeHtml(item.status_label || '')}</span>
         </div>
         <div class="archive-match-card-main">
@@ -4512,7 +4512,7 @@ function renderArchiveTournamentPage() {
         : [];
       matchesNode.innerHTML = matches.length
         ? matches.map(renderArchiveMatchCard).join('')
-        : '<div class="archive-empty-state">Архивные матчи будут опубликованы позднее.</div>';
+        : '<div class="archive-empty-state">Матчи розыгрыша будут опубликованы позднее.</div>';
     }
   }
 
@@ -4529,7 +4529,7 @@ function renderArchiveTournamentPage() {
           detail.end_date ? formatMatchDisplayDate(detail.end_date) : ''
         ], ' - ') || archiveFallback.season,
         description: detail.description || archiveFallback.description,
-        status: 'Страница архива подключена к данным турнира и готова к наполнению.'
+        status: 'Страница прошлого розыгрыша подключена к данным турнира и готова к наполнению.'
       };
       applyArchiveData(archive, detail);
     })
