@@ -955,6 +955,114 @@ const CLUB_LOCATION_OVERRIDES = {
     country: 'Бразилия'
   }
 };
+const CURRENT_CLUB_SLUGS = new Set([
+  'almaz-antey',
+  'zenit',
+  'palmeiras',
+  'crvena-zvezda',
+  'fenerbahce',
+  'dinamo-minsk',
+  'san-lorenzo',
+  'cruz-azul'
+]);
+const CLUB_PROFILE_OVERRIDES = {
+  'almaz-antey': {
+    participationYears: [2016, 2017, 2018, 2019, 2023, 2024, 2025, 2026],
+    summary: 'Клуб из Санкт‑Петербурга и один из главных символов Кубка Бурчалкина. Команда регулярно участвует в турнире и хорошо знакома домашней публике.'
+  },
+  zenit: {
+    participationYears: [2016, 2017, 2018, 2019, 2023, 2024, 2025, 2026],
+    summary: 'Представитель Санкт‑Петербурга и один из самых узнаваемых участников международного состава турнира. Команда часто входит в число претендентов на высокие места.'
+  },
+  'dinamo-moscow': {
+    participationYears: [2016],
+    summary: 'Московский клуб, вошедший в число участников одного из первых международных розыгрышей Кубка Бурчалкина.'
+  },
+  hjk: {
+    participationYears: [2016],
+    summary: 'Клуб из Хельсинки, представлявший Финляндию в международной истории турнира.'
+  },
+  villarreal: {
+    participationYears: [2016, 2017, 2018, 2019],
+    summary: 'Испанский клуб из Вильярреала, входивший в международный состав ранних розыгрышей турнира.'
+  },
+  victoria: {
+    participationYears: [2016],
+    summary: 'Португальский клуб из Гимарайнша, участвовавший в одном из первых международных розыгрышей турнира.'
+  },
+  lokomotiv: {
+    participationYears: [2016, 2017],
+    summary: 'Клуб из Москвы, принимавший участие в ранних сезонах Кубка Бурчалкина.'
+  },
+  cska: {
+    participationYears: [2016, 2017, 2018, 2019, 2023],
+    summary: 'Московский клуб, неоднократно входивший в состав участников Кубка Бурчалкина в разные годы.'
+  },
+  brodarac: {
+    participationYears: [2016],
+    summary: 'Сербский клуб из Белграда, участвовавший в раннем международном составе Кубка Бурчалкина.'
+  },
+  mtk: {
+    participationYears: [2017, 2018, 2019],
+    summary: 'Клуб из Будапешта, представлявший Венгрию на Кубке Бурчалкина в нескольких сезонах.'
+  },
+  partizan: {
+    participationYears: [2017],
+    summary: 'Клуб из Белграда, пополнивший сербское представительство в истории турнира.'
+  },
+  'boca-juniors': {
+    participationYears: [2018, 2019],
+    summary: 'Аргентинский клуб из Буэнос‑Айреса, участвовавший в международных розыгрышах турнира в конце 2010-х.'
+  },
+  krasnodar: {
+    participationYears: [2018, 2019, 2023],
+    summary: 'Клуб из Краснодара, не раз появлявшийся в составе участников турнира и его архивной истории.'
+  },
+  roma: {
+    participationYears: [2018],
+    summary: 'Клуб из Рима, представивший Италию в истории международных розыгрышей Кубка Бурчалкина.'
+  },
+  atalanta: {
+    participationYears: [2019],
+    summary: 'Итальянский клуб из Бергамо, оставивший след в истории одного из европейских розыгрышей турнира.'
+  },
+  palmeiras: {
+    participationYears: [2023, 2024, 2025, 2026],
+    summary: 'Бразильский клуб из Сан‑Паулу, который добавляет турниру южноамериканский стиль и темп. Постоянный участник последних розыгрышей.'
+  },
+  santos: {
+    participationYears: [2023],
+    summary: 'Бразильский клуб из Сантуса, вошедший в число участников турнира в одном из последних сезонов.'
+  },
+  sepahan: {
+    participationYears: [2023, 2024],
+    summary: 'Иранский клуб из Исфахана, участвовавший в турнире в середине современной серии розыгрышей.'
+  },
+  'crvena-zvezda': {
+    participationYears: [2023, 2024, 2025, 2026],
+    summary: 'Сербский клуб из Белграда, стабильно представленный в международной географии турнира последних лет.'
+  },
+  fenerbahce: {
+    participationYears: [2024, 2025, 2026],
+    summary: 'Клуб из Стамбула, расширивший международную карту Кубка Бурчалкина в новых розыгрышах.'
+  },
+  'dinamo-minsk': {
+    participationYears: [2024, 2025, 2026],
+    summary: 'Белорусский клуб из Минска, регулярно участвующий в турнире последних сезонов и хорошо знакомый зрителям по матчам группового этапа.'
+  },
+  kairat: {
+    participationYears: [2024, 2025],
+    summary: 'Клуб из Алматы, выступавший в международном составе турнира до перехода в раздел исторических участников.'
+  },
+  'san-lorenzo': {
+    participationYears: [2025, 2026],
+    summary: 'Аргентинский клуб из Буэнос‑Айреса, ставший частью международного состава Кубка Бурчалкина в последних сезонах.'
+  },
+  'cruz-azul': {
+    participationYears: [2026],
+    summary: 'Клуб из Мехико, представляющий Мексику в составе участников нового цикла турнира.'
+  }
+};
 const HISTORICAL_CLUB_FALLBACKS = {
   kairat: {
     slug: 'kairat',
@@ -1517,6 +1625,88 @@ function getClubLocationParts(item = {}) {
 function formatClubLocation(item = {}) {
   const { city, country } = getClubLocationParts(item);
   return joinNonEmpty([city, country], ', ');
+}
+
+function normalizeParticipationYears(years = []) {
+  if (!Array.isArray(years)) return [];
+
+  return Array.from(new Set(
+    years
+      .map(value => Number(value))
+      .filter(value => Number.isFinite(value))
+  )).sort((left, right) => left - right);
+}
+
+function formatParticipationYears(years = []) {
+  const normalized = normalizeParticipationYears(years);
+  if (!normalized.length) return '';
+
+  const ranges = [];
+  let rangeStart = normalized[0];
+  let previous = normalized[0];
+
+  for (let index = 1; index <= normalized.length; index += 1) {
+    const current = normalized[index];
+    if (current === previous + 1) {
+      previous = current;
+      continue;
+    }
+
+    ranges.push(rangeStart === previous ? String(rangeStart) : `${rangeStart} - ${previous}`);
+    rangeStart = current;
+    previous = current;
+  }
+
+  return ranges.join(', ');
+}
+
+function extractParticipationLabel(description = '') {
+  const match = String(description || '').match(/Исторический участник\s+(.+?)(?:\.|$)/i);
+  return match ? String(match[1] || '').trim() : '';
+}
+
+function buildFallbackClubSummary(item = {}, participationLabel = '') {
+  const name = String(item?.name || '').trim();
+  const locationLabel = formatClubLocation(item);
+  const isCurrentClub = CURRENT_CLUB_SLUGS.has(String(item?.slug || '').trim());
+
+  if (isCurrentClub && locationLabel) {
+    return `${name} — участник текущего розыгрыша Кубка Бурчалкина из ${locationLabel}. Команда входит в международный состав турнира сезона 2026.`;
+  }
+
+  if (participationLabel && locationLabel) {
+    return `${name} — клуб из ${locationLabel}, входящий в историю Кубка Бурчалкина. Команда участвовала в турнире в ${participationLabel}.`;
+  }
+
+  if (locationLabel) {
+    return `${name} — клуб из ${locationLabel}, связанный с международной историей Кубка Бурчалкина.`;
+  }
+
+  return `${name} — участник Кубка Бурчалкина разных лет.`;
+}
+
+function getClubProfile(item = {}) {
+  const slug = String(item?.slug || '').trim();
+  const fallback = getHistoricalClubFallback(slug) || {};
+  const override = CLUB_PROFILE_OVERRIDES[slug] || {};
+  const normalizedYears = normalizeParticipationYears(override.participationYears || []);
+  const participationLabel = formatParticipationYears(normalizedYears)
+    || extractParticipationLabel(item?.description || fallback.description || '');
+  const sourceDescription = String(item?.description || '').trim();
+  const isGenericDescription = /^Исторический участник\b/i.test(sourceDescription)
+    || /Архивная страница клуба/i.test(sourceDescription);
+  const summary = String(
+    override.summary
+    || (!isGenericDescription ? sourceDescription : '')
+    || buildFallbackClubSummary({ ...fallback, ...item }, participationLabel)
+  ).trim();
+
+  return {
+    summary,
+    participationYears: normalizedYears,
+    participationLabel,
+    badge: CURRENT_CLUB_SLUGS.has(slug) ? 'Участник сезона 2026' : 'История турнира'
+  };
 }
 
 function formatMatchVenue(item = {}) {
@@ -2530,50 +2720,75 @@ async function renderClubPage() {
     target.setAttribute('aria-busy', 'false');
     return;
   }
+  const clubProfile = getClubProfile(clubData);
   const locationLabel = formatClubLocation(clubData);
   const matches = Array.isArray(clubData.matches) ? clubData.matches : [];
+  const participationYearsMarkup = clubProfile.participationYears.map(year => `
+    <span class="club-year-chip">${escapeHtml(String(year))}</span>
+  `).join('');
   const matchesMarkup = matches.map(item => {
     const parts = String(item.score || '0:0').split(':');
-    const dateTime = joinNonEmpty([item.date, item.time], ' ');
+    const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
     return `
       <a class="club-history-card" href="match.html?id=${item.id}">
         <div class="club-history-top">
-          <span>${escapeHtml(item.tournament_name || '')}</span>
+          <span>${escapeHtml(translateRuntimeText(item.tournament_name || 'Кубок Бурчалкина'))}</span>
           <span>${escapeHtml(dateTime)}</span>
         </div>
         <div class="club-history-match">${escapeHtml(item.home_team)} — ${escapeHtml(item.away_team)}</div>
         <div class="club-history-meta">
-          <span>${escapeHtml(item.stage || '')}</span>
+          <span>${escapeHtml(translateRuntimeText(item.stage || ''))}</span>
           <strong>${escapeHtml(parts[0] || '0')}:${escapeHtml(parts[1] || '0')}</strong>
-          <span>${escapeHtml(item.status_label || '')}</span>
+          <span>${escapeHtml(translateRuntimeText(item.status_label || ''))}</span>
         </div>
       </a>
     `;
   }).join('');
+  document.title = `Burchalkin Cup — ${clubData.name}`;
+  document.documentElement.dataset.bcOriginalTitle = document.title;
   target.innerHTML = `
     <section class="page-head club-head">
       <div class="container club-head-grid">
         <div class="club-head-logo">${renderImageMarkup({ src: clubData.logo, alt: clubData.name, width: 320, loading: 'eager' })}</div>
-        <div>
+        <div class="club-head-panel">
+          <div class="club-head-kicker">${escapeHtml(translateRuntimeText(clubProfile.badge))}</div>
           <h1>${escapeHtml(clubData.name)}</h1>
-          <p>${escapeHtml(clubData.description || '')}</p>
+          <p class="club-head-description">${escapeHtml(translateRuntimeText(clubProfile.summary))}</p>
           <div class="club-head-meta">
-            ${locationLabel ? `<span>${escapeHtml(locationLabel)}</span>` : ''}
-            ${clubData.founded_year ? `<span>${escapeHtml(String(clubData.founded_year))}</span>` : ''}
+            ${locationLabel ? `<span class="club-meta-chip">${escapeHtml(locationLabel)}</span>` : ''}
+            ${clubData.founded_year ? `<span class="club-meta-chip">${escapeHtml(String(clubData.founded_year))}</span>` : ''}
+            ${clubProfile.participationLabel ? `<span class="club-meta-chip">${escapeHtml(translateRuntimeText(`Участие: ${clubProfile.participationLabel}`))}</span>` : ''}
           </div>
         </div>
       </div>
     </section>
     <section class="section">
       <div class="container">
+        <div class="club-overview-grid">
+          <article class="club-info-card">
+            <div class="club-info-eyebrow">${escapeHtml(translateRuntimeText('О клубе'))}</div>
+            <h2>${escapeHtml(translateRuntimeText('Краткое описание'))}</h2>
+            <p>${escapeHtml(translateRuntimeText(clubProfile.summary))}</p>
+          </article>
+          <article class="club-info-card">
+            <div class="club-info-eyebrow">${escapeHtml(translateRuntimeText('История участия'))}</div>
+            <h2>${escapeHtml(translateRuntimeText('Кубок Бурчалкина'))}</h2>
+            <p class="club-participation-note">
+              ${clubProfile.participationLabel
+                ? escapeHtml(translateRuntimeText(`Исторический участник ${clubProfile.participationLabel}.`))
+                : escapeHtml(translateRuntimeText('История участия будет дополняться.'))}
+            </p>
+            ${participationYearsMarkup ? `<div class="club-years">${participationYearsMarkup}</div>` : ''}
+          </article>
+        </div>
         <div class="home-block-head">
           <div>
-            <h2 class="section-title home-block-title">История матчей</h2>
-            <p class="home-block-subtitle">Прошедшие и будущие матчи клуба во всех турнирах сайта.</p>
+            <h2 class="section-title home-block-title">${escapeHtml(translateRuntimeText('История матчей'))}</h2>
+            <p class="home-block-subtitle">${escapeHtml(translateRuntimeText('Прошедшие и будущие матчи клуба во всех турнирах сайта.'))}</p>
           </div>
-          <a class="home-block-link" href="teams.html">Все клубы →</a>
+          <a class="home-block-link" href="teams.html">${escapeHtml(translateRuntimeText('Все клубы →'))}</a>
         </div>
-        <div class="club-history-grid">${matchesMarkup || '<div class="card">У клуба пока нет матчей в базе.</div>'}</div>
+        <div class="club-history-grid">${matchesMarkup || `<div class="club-empty-state">${escapeHtml(translateRuntimeText('У клуба пока нет матчей в базе.'))}</div>`}</div>
       </div>
     </section>
   `;
