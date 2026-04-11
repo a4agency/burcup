@@ -1036,6 +1036,78 @@ const HISTORICAL_CLUB_FALLBACKS = {
     city: 'Исфахан',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
     matches: []
+  },
+  cska: {
+    slug: 'cska',
+    name: 'ЦСКА',
+    logo: 'images/history-cska.png',
+    country: 'Россия',
+    city: 'Москва',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  lokomotiv: {
+    slug: 'lokomotiv',
+    name: 'Локомотив',
+    logo: 'images/history-lokomotiv.png',
+    country: 'Россия',
+    city: 'Москва',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  'dinamo-moscow': {
+    slug: 'dinamo-moscow',
+    name: 'Динамо Москва',
+    logo: 'images/history-dinamo-moscow.png',
+    country: 'Россия',
+    city: 'Москва',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  hjk: {
+    slug: 'hjk',
+    name: 'ХИК',
+    logo: 'images/history-hjk.png',
+    country: 'Финляндия',
+    city: 'Хельсинки',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  brodarac: {
+    slug: 'brodarac',
+    name: 'Бродарац',
+    logo: 'images/history-brodarac.png',
+    country: 'Сербия',
+    city: 'Белград',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  partizan: {
+    slug: 'partizan',
+    name: 'Партизан',
+    logo: 'images/history-partizan.png',
+    country: 'Сербия',
+    city: 'Белград',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  'boca-juniors': {
+    slug: 'boca-juniors',
+    name: 'Бока Хуниорс',
+    logo: 'images/history-boca-juniors.png',
+    country: 'Аргентина',
+    city: 'Буэнос-Айрес',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
+  },
+  krasnodar: {
+    slug: 'krasnodar',
+    name: 'Краснодар',
+    logo: 'images/history-krasnodar.png',
+    country: 'Россия',
+    city: 'Краснодар',
+    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    matches: []
   }
 };
 const ARCHIVE_TOURNAMENTS = {
