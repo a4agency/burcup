@@ -1782,7 +1782,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   padding:9px 14px;
   border-radius:999px;
   background:#f6f9ff;
-  border:1px solid rgba(26,61,131,.08);
+  border:none;
   color:var(--navy);
   font-size:14px;
   font-weight:800;
