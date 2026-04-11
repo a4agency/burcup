@@ -1795,8 +1795,8 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .club-year-chip-silver{
-  background:linear-gradient(180deg, #f7faff 0%, #eef4fb 100%);
-  border-color:rgba(164, 180, 214, .42);
+  background:linear-gradient(180deg, #f4f7fc 0%, #dde6f3 100%);
+  border-color:rgba(132, 151, 188, .58);
 }
 
 .club-year-chip-bronze{
