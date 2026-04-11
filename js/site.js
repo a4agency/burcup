@@ -962,7 +962,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/team-kairat.webp',
     country: 'Казахстан',
     city: 'Алматы',
-    description: 'Исторический участник 2024, 2025. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2024 - 2025. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   villarreal: {
@@ -971,7 +971,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-villarreal.png',
     country: 'Испания',
     city: 'Вильярреал',
-    description: 'Исторический участник 2016, 2017, 2018, 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016 - 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   mtk: {
@@ -980,7 +980,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-mtk.webp',
     country: 'Венгрия',
     city: 'Будапешт',
-    description: 'Исторический участник 2017, 2018, 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2017 - 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   'cruz-azul': {
@@ -1034,7 +1034,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-sepahan.webp',
     country: 'Иран',
     city: 'Исфахан',
-    description: 'Исторический участник 2023, 2024. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2023 - 2024. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   cska: {
@@ -1043,7 +1043,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-cska.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Исторический участник 2016, 2017, 2018, 2019, 2023. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016 - 2019, 2023. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   lokomotiv: {
@@ -1052,7 +1052,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-lokomotiv.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Исторический участник 2016, 2017. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016 - 2017. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   'dinamo-moscow': {
@@ -1097,7 +1097,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-boca-juniors.png',
     country: 'Аргентина',
     city: 'Буэнос-Айрес',
-    description: 'Исторический участник 2018, 2019. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2018 - 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   krasnodar: {
@@ -1106,7 +1106,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-krasnodar.png',
     country: 'Россия',
     city: 'Краснодар',
-    description: 'Исторический участник 2018, 2019, 2023. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2018 - 2019, 2023. Архивная страница клуба в рамках истории турнира.',
     matches: []
   }
 };
