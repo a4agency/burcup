@@ -4125,11 +4125,14 @@ async function renderMatchPageFromJson() {
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
+    const matchTitle = joinNonEmpty([String(item.home_team || '').trim(), String(item.away_team || '').trim()], ' - ') || 'Матч';
     const matchMeta = joinNonEmpty([formatMatchDisplayDate(item.date), String(item.time || '').trim(), formatMatchVenue(item)], ' • ');
     const matchStatus = getMatchStatusState(item);
     const statusClass = matchStatus === 'live' ? 'live' : (matchStatus === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || item.round || 'Матч';
     const matchdayLabel = item.matchday || ((item.stage || item.group) ? item.round : '') || '';
+    document.title = matchTitle;
+    document.documentElement.dataset.bcOriginalTitle = matchTitle;
     const renderMatchPageTeamCard = ({ sideClass = '', badge = '', teamName = '', teamLogo = '', teamSlug = '' } = {}) => {
       const href = getClubPageUrl({ slug: teamSlug, logo: teamLogo });
       const tag = href ? 'a' : 'div';
