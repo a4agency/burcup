@@ -1352,34 +1352,34 @@ const ARCHIVE_TOURNAMENTS = {
         { position: 8, name: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан' }
       ],
       standings: [
-        { position: 1, group: 'Группа A', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
-        { position: 2, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
-        { position: 3, group: 'Группа B', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 3, goals_against: 1, points: 4 },
-        { position: 4, group: 'Группа B', team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 2, goals_against: 1, points: 4 },
-        { position: 5, group: 'Группа A', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
-        { position: 6, group: 'Группа A', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 },
-        { position: 7, group: 'Группа B', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
-        { position: 8, group: 'Группа B', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
+        { position: 1, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 1, lost: 0, goals_for: 7, goals_against: 3, points: 7 },
+        { position: 2, group: 'Группа B', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 1, lost: 0, goals_for: 7, goals_against: 3, points: 7 },
+        { position: 3, group: 'Группа B', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 7, goals_against: 3, points: 6 },
+        { position: 4, group: 'Группа A', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 4, goals_against: 4, points: 6 },
+        { position: 5, group: 'Группа A', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 3, won: 1, drawn: 1, lost: 1, goals_for: 5, goals_against: 3, points: 4 },
+        { position: 6, group: 'Группа B', team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 3, won: 1, drawn: 1, lost: 1, goals_for: 3, goals_against: 4, points: 4 },
+        { position: 7, group: 'Группа A', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 1, goals_against: 7, points: 0 },
+        { position: 8, group: 'Группа B', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 2, goals_against: 9, points: 0 }
       ],
       grouped_standings: [
         {
           key: 'A',
           label: 'Группа A',
           rows: [
-            { position: 1, group: 'Группа A', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 3, goals_against: 1, points: 3 },
-            { position: 2, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 1, won: 1, drawn: 0, lost: 0, goals_for: 2, goals_against: 1, points: 3 },
-            { position: 3, group: 'Группа A', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 2, points: 0 },
-            { position: 4, group: 'Группа A', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 1, goals_against: 3, points: 0 }
+            { position: 1, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 1, lost: 0, goals_for: 7, goals_against: 3, points: 7 },
+            { position: 2, group: 'Группа A', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 4, goals_against: 4, points: 6 },
+            { position: 3, group: 'Группа A', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 3, won: 1, drawn: 1, lost: 1, goals_for: 5, goals_against: 3, points: 4 },
+            { position: 4, group: 'Группа A', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 1, goals_against: 7, points: 0 }
           ]
         },
         {
           key: 'B',
           label: 'Группа B',
           rows: [
-            { position: 1, group: 'Группа B', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 3, goals_against: 1, points: 4 },
-            { position: 2, group: 'Группа B', team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 2, won: 1, drawn: 1, lost: 0, goals_for: 2, goals_against: 1, points: 4 },
-            { position: 3, group: 'Группа B', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 1, points: 0 },
-            { position: 4, group: 'Группа B', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 1, won: 0, drawn: 0, lost: 1, goals_for: 0, goals_against: 2, points: 0 }
+            { position: 1, group: 'Группа B', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 1, lost: 0, goals_for: 7, goals_against: 3, points: 7 },
+            { position: 2, group: 'Группа B', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 7, goals_against: 3, points: 6 },
+            { position: 3, group: 'Группа B', team: 'Сан-Лоренсо', slug: 'san-lorenzo', logo: 'images/team-san-lorenzo.webp', city: 'Буэнос-Айрес', country: 'Аргентина', played: 3, won: 1, drawn: 1, lost: 1, goals_for: 3, goals_against: 4, points: 4 },
+            { position: 4, group: 'Группа B', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 2, goals_against: 9, points: 0 }
           ]
         }
       ],
