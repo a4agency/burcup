@@ -208,6 +208,8 @@
   "Текущий сезон и прошлые розыгрыши турнира по годам.": "Current season and past tournament editions by year.",
   "Прошлые розыгрыши →": "Past editions →",
   "Прошлый розыгрыш": "Past edition",
+  "Открыть все розыгрыши →": "Open all editions →",
+  "Все прошлые розыгрыши турнира в одном разделе.": "All past tournament editions in one section.",
   "Открыть розыгрыш 2025 →": "Open 2025 edition →",
   "Розыгрыш 2024": "2024 edition",
   "Розыгрыш 2023": "2023 edition",
