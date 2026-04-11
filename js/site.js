@@ -4372,7 +4372,6 @@ function renderArchiveTournamentPage() {
       const matchesCount = Number(resolvedDetail?.matches_count || (Array.isArray(resolvedDetail?.matches) ? resolvedDetail.matches.length : 0) || 0);
       if (clubsCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(translateRuntimeText(formatCountLabel(clubsCount, ['клуб', 'клуба', 'клубов'])))}</div>`);
       if (matchesCount) stats.push(`<div class="archive-stat-chip">${escapeHtml(translateRuntimeText(formatCountLabel(matchesCount, ['матч', 'матча', 'матчей'])))}</div>`);
-      stats.push(`<div class="archive-stat-chip">${escapeHtml(translateRuntimeText(archive.season))}</div>`);
       statsNode.innerHTML = stats.join('');
     }
 
