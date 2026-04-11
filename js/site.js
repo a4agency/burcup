@@ -2779,12 +2779,8 @@ async function renderClubPage() {
           <article class="club-info-card">
             <div class="club-info-eyebrow">${escapeHtml(translateRuntimeText('История участия'))}</div>
             <h2>${escapeHtml(translateRuntimeText('Кубок Бурчалкина'))}</h2>
-            <p class="club-participation-note">
-              ${clubProfile.participationLabel
-                ? escapeHtml(translateRuntimeText(`Исторический участник ${clubProfile.participationLabel}.`))
-                : escapeHtml(translateRuntimeText('История участия будет дополняться.'))}
-            </p>
             ${participationYearsMarkup ? `<div class="club-years">${participationYearsMarkup}</div>` : ''}
+            ${!participationYearsMarkup ? `<p class="club-participation-note">${escapeHtml(translateRuntimeText('История участия будет дополняться.'))}</p>` : ''}
           </article>
         </div>
         <div class="home-block-head">
