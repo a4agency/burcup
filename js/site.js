@@ -3885,6 +3885,7 @@ async function renderMediaAlbumPage() {
     }
 
     document.title = `Burchalkin Cup — ${album.title || 'Фотоальбом'}`;
+    document.documentElement.dataset.bcOriginalTitle = document.title;
     const photos = Array.isArray(album.photos) ? album.photos : [];
     const isMobileAlbum = window.innerWidth <= 640;
     const photoPagesMarkup = buildMediaAlbumPhotoPages(photos, isMobileAlbum ? 1 : 16, !isMobileAlbum)
@@ -4013,6 +4014,7 @@ async function renderNewsArticlePage() {
     }
 
     document.title = `Burchalkin Cup — ${item.title || 'Новость'}`;
+    document.documentElement.dataset.bcOriginalTitle = document.title;
     const imageSrc = resolveNewsImage(item);
     const content = getNewsArticleParagraphs(item);
     const articlePhotos = buildNewsArticlePhotos(item, imageSrc);
@@ -4436,7 +4438,8 @@ function renderArchiveTournamentPage() {
     const resolvedDetail = mergeArchiveDetail(detail);
     if (titleNode) titleNode.textContent = translateRuntimeText(archive.title);
     if (seasonNode) seasonNode.textContent = translateRuntimeText(archive.season);
-    document.title = `${archive.title} - Burchalkin Cup`;
+    document.title = `Burchalkin Cup — ${archive.title}`;
+    document.documentElement.dataset.bcOriginalTitle = document.title;
 
     if (statsNode) {
       const stats = [];
