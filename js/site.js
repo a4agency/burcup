@@ -2730,29 +2730,21 @@ async function renderClubPage() {
     const parts = String(item.score || '0:0').split(':');
     const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
     const tournamentLabel = translateRuntimeText(item.tournament_name || 'Кубок Бурчалкина');
-    const stageLabel = translateRuntimeText(item.stage || '');
-    const statusLabel = translateRuntimeText(item.status_label || '');
     return `
       <a class="club-history-row match-headtohead-row" href="match.html?id=${item.id}">
         <div class="club-history-datebox">
           <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime)}</div>
           <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
         </div>
-        <div class="club-history-mainstack">
-          <div class="match-headtohead-main">
-            <div class="match-headtohead-team match-headtohead-team-home">
-              <span class="match-headtohead-name">${escapeHtml(item.home_team)}</span>
-              ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'match-headtohead-logo', width: 96 })}
-            </div>
-            <div class="match-headtohead-score">${escapeHtml(parts[0] || '0')} - ${escapeHtml(parts[1] || '0')}</div>
-            <div class="match-headtohead-team match-headtohead-team-away">
-              ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'match-headtohead-logo', width: 96 })}
-              <span class="match-headtohead-name">${escapeHtml(item.away_team)}</span>
-            </div>
+        <div class="match-headtohead-main">
+          <div class="match-headtohead-team match-headtohead-team-home">
+            <span class="match-headtohead-name">${escapeHtml(item.home_team)}</span>
+            ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'match-headtohead-logo', width: 96 })}
           </div>
-          <div class="club-history-row-meta">
-            ${stageLabel ? `<span class="club-history-row-chip">${escapeHtml(stageLabel)}</span>` : ''}
-            ${statusLabel ? `<span class="club-history-row-chip club-history-row-chip-status">${escapeHtml(statusLabel)}</span>` : ''}
+          <div class="match-headtohead-score">${escapeHtml(parts[0] || '0')} - ${escapeHtml(parts[1] || '0')}</div>
+          <div class="match-headtohead-team match-headtohead-team-away">
+            ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'match-headtohead-logo', width: 96 })}
+            <span class="match-headtohead-name">${escapeHtml(item.away_team)}</span>
           </div>
         </div>
       </a>
