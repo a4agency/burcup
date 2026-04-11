@@ -989,7 +989,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/team-cruz-azul.webp',
     country: 'Мексика',
     city: 'Мехико',
-    description: 'Международный участник текущего розыгрыша Кубка Бурчалкина.',
+    description: 'Исторический участник 2026. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   victoria: {
