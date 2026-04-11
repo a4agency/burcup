@@ -1791,17 +1791,17 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 
 .club-year-chip-gold{
   background:linear-gradient(180deg, #fff9de 0%, #fff0b7 100%);
-  border-color:rgba(230, 194, 82, .42);
+  border:1px solid rgba(230, 194, 82, .42);
 }
 
 .club-year-chip-silver{
   background:linear-gradient(180deg, #f4f7fc 0%, #dde6f3 100%);
-  border-color:rgba(132, 151, 188, .58);
+  border:1px solid rgba(132, 151, 188, .58);
 }
 
 .club-year-chip-bronze{
   background:linear-gradient(180deg, #fae7dc 0%, #f3d3c2 100%);
-  border-color:rgba(204, 136, 91, .34);
+  border:1px solid rgba(204, 136, 91, .34);
 }
 
 .club-participation-result{
