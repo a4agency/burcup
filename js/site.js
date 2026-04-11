@@ -4365,7 +4365,9 @@ function renderArchiveTournamentPage() {
     }
 
     if (matchesNode) {
-      const matches = Array.isArray(resolvedDetail?.matches) ? resolvedDetail.matches : [];
+      const matches = Array.isArray(resolvedDetail?.matches)
+        ? [...resolvedDetail.matches].sort((left, right) => getMatchTimestamp(right) - getMatchTimestamp(left))
+        : [];
       matchesNode.innerHTML = matches.length
         ? matches.map(renderArchiveMatchCard).join('')
         : '<div class="archive-empty-state">Архивные матчи будут опубликованы позднее.</div>';
