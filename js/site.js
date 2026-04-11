@@ -2194,6 +2194,26 @@ function getMatchClubKey(item, side) {
   return nameKey;
 }
 
+function getNormalizedMatchId(item) {
+  return String(item?.id || '').trim();
+}
+
+function getMatchStatusState(item = {}) {
+  const normalizedStatus = String(item?.status || '').trim().toLowerCase();
+  if (normalizedStatus === 'live' || normalizedStatus === 'soon' || normalizedStatus === 'done') {
+    return normalizedStatus;
+  }
+
+  const normalizedLabel = String(item?.status_label || '').trim().toLowerCase();
+  if (normalizedLabel.includes('эфир') || normalizedLabel.includes('live')) return 'live';
+  if (normalizedLabel.includes('заверш')) return 'done';
+  return 'soon';
+}
+
+function isCompletedMatch(item = {}) {
+  return getMatchStatusState(item) === 'done';
+}
+
 function getMatchSortValue(item) {
   const date = String(item?.date || '').trim();
   const time = String(item?.time || '').trim();
@@ -2227,15 +2247,60 @@ function formatHeadToHeadDateLabel(item) {
   return joinNonEmpty([dateLabel, time], ' • ') || 'Архив матча';
 }
 
+function getArchiveFallbackMatches() {
+  return Object.entries(ARCHIVE_TOURNAMENTS).flatMap(([year, archive]) => {
+    const tournamentName = String(archive?.title || `Кубок Бурчалкина ${year}`).trim();
+    const matches = Array.isArray(archive?.detail?.matches) ? archive.detail.matches : [];
+
+    return matches.map(match => ({
+      ...match,
+      tournament_name: String(match?.tournament_name || tournamentName).trim(),
+      archive_year: String(year).trim()
+    }));
+  });
+}
+
+function getAllKnownMatches(currentMatches = []) {
+  const seen = new Set();
+  return [...(Array.isArray(currentMatches) ? currentMatches : []), ...getArchiveFallbackMatches()]
+    .filter(match => {
+      const key = getNormalizedMatchId(match);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function findMatchById(matches = [], requestedId = '') {
+  const normalizedId = String(requestedId || '').trim();
+  if (!normalizedId) return matches[0] || null;
+
+  const exactMatch = matches.find(match => getNormalizedMatchId(match) === normalizedId);
+  if (exactMatch) return exactMatch;
+
+  const numericId = Number(normalizedId);
+  if (Number.isFinite(numericId)) {
+    return matches.find(match => Number(match?.id) === numericId) || null;
+  }
+
+  return null;
+}
+
+function getMatchPageUrl(item = {}) {
+  const id = getNormalizedMatchId(item);
+  return id ? `match.html?id=${encodeURIComponent(id)}` : 'match.html';
+}
+
 function getHeadToHeadMatches(allMatches, currentMatch) {
   const homeKey = getMatchClubKey(currentMatch, 'home');
   const awayKey = getMatchClubKey(currentMatch, 'away');
+  const currentMatchId = getNormalizedMatchId(currentMatch);
   if (!homeKey || !awayKey) return [];
 
   return (Array.isArray(allMatches) ? allMatches : [])
     .filter(match => {
-      if (!match || Number(match.id) === Number(currentMatch.id)) return false;
-      if (String(match.status || '').trim().toLowerCase() !== 'done') return false;
+      if (!match || getNormalizedMatchId(match) === currentMatchId) return false;
+      if (!isCompletedMatch(match)) return false;
 
       const matchHomeKey = getMatchClubKey(match, 'home');
       const matchAwayKey = getMatchClubKey(match, 'away');
@@ -3074,7 +3139,7 @@ async function renderClubPage() {
     const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
     const tournamentLabel = translateRuntimeText(item.tournament_name || 'Кубок Бурчалкина');
     return `
-      <a class="club-history-row match-headtohead-row" href="match.html?id=${item.id}">
+      <a class="club-history-row match-headtohead-row" href="${escapeHtml(getMatchPageUrl(item))}">
         <div class="club-history-datebox">
           <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime)}</div>
           <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
@@ -4012,17 +4077,23 @@ async function renderMatchPageFromJson() {
   try {
     const items = await fetchJson('data/matches.json');
     const params = new URLSearchParams(window.location.search);
-    const id = Number(params.get('id') || '1');
+    const requestedId = String(params.get('id') || '').trim();
     const requestedMediaTab = String(params.get('media') || '').trim().toLowerCase();
-    const item = items.find(x => x.id === id) || items[0];
-    const headToHeadMatches = getHeadToHeadMatches(items, item);
+    const allKnownMatches = getAllKnownMatches(items);
+    const item = findMatchById(allKnownMatches, requestedId) || items[0] || allKnownMatches[0];
+    if (!item) {
+      throw new Error('Match not found');
+    }
+
+    const headToHeadMatches = getHeadToHeadMatches(allKnownMatches, item);
     const parts = String(item.score || '0:0').split(':');
     const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
     const awayScore = item.score ? escapeHtml(parts[1] || '0') : '0';
     const matchMeta = joinNonEmpty([formatMatchDisplayDate(item.date), String(item.time || '').trim(), formatMatchVenue(item)], ' • ');
-    const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
-    const stageLabel = item.stage || item.group || 'Матч';
-    const matchdayLabel = item.matchday || item.round || '';
+    const matchStatus = getMatchStatusState(item);
+    const statusClass = matchStatus === 'live' ? 'live' : (matchStatus === 'done' ? 'done' : 'soon');
+    const stageLabel = item.stage || item.group || item.round || 'Матч';
+    const matchdayLabel = item.matchday || ((item.stage || item.group) ? item.round : '') || '';
     const renderMatchPageTeamCard = ({ sideClass = '', badge = '', teamName = '', teamLogo = '', teamSlug = '' } = {}) => {
       const href = getClubPageUrl({ slug: teamSlug, logo: teamLogo });
       const tag = href ? 'a' : 'div';
@@ -4041,7 +4112,7 @@ async function renderMatchPageFromJson() {
       ? headToHeadMatches.map(match => {
           const scoreParts = String(match.score || '0:0').split(':');
           return `
-            <a class="match-headtohead-row" href="match.html?id=${encodeURIComponent(match.id)}">
+            <a class="match-headtohead-row" href="${escapeHtml(getMatchPageUrl(match))}">
               <div class="match-headtohead-date">${escapeHtml(formatHeadToHeadDateLabel(match))}</div>
               <div class="match-headtohead-main">
                 <div class="match-headtohead-team match-headtohead-team-home">
@@ -4262,7 +4333,7 @@ function renderArchiveTournamentPage() {
   }
 
   function renderArchiveMatchCard(item) {
-    const href = item.id ? `match.html?id=${encodeURIComponent(item.id)}` : '#';
+    const href = getMatchPageUrl(item);
     const meta = joinNonEmpty([
       formatMatchDisplayDate(item.date),
       String(item.time || '').trim(),
