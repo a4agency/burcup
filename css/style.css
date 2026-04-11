@@ -1789,6 +1789,21 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   line-height:1;
 }
 
+.club-year-chip-gold{
+  background:linear-gradient(180deg, #fff9de 0%, #fff0b7 100%);
+  border-color:rgba(230, 194, 82, .42);
+}
+
+.club-year-chip-silver{
+  background:linear-gradient(180deg, #f7faff 0%, #eef4fb 100%);
+  border-color:rgba(164, 180, 214, .42);
+}
+
+.club-year-chip-bronze{
+  background:linear-gradient(180deg, #fae7dc 0%, #f3d3c2 100%);
+  border-color:rgba(204, 136, 91, .34);
+}
+
 .club-participation-result{
   color:var(--navy);
   font-size:18px;

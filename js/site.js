@@ -2035,6 +2035,31 @@ function getClubParticipationEntries(slug, years = []) {
   }));
 }
 
+function getParticipationChipTone(result = '') {
+  const normalizedResult = String(result || '').trim().toLowerCase();
+  const placeMatch = normalizedResult.match(/^(\d+)\s*место\b/);
+
+  if (!placeMatch) {
+    return '';
+  }
+
+  const place = Number(placeMatch[1]);
+
+  if (place === 1) {
+    return 'gold';
+  }
+
+  if (place === 2) {
+    return 'silver';
+  }
+
+  if (place === 3) {
+    return 'bronze';
+  }
+
+  return '';
+}
+
 function getClubProfile(item = {}) {
   const slug = String(item?.slug || '').trim();
   const fallback = getHistoricalClubFallback(slug) || {};
@@ -3164,12 +3189,15 @@ async function renderClubPage() {
     ]),
     clubData
   );
-  const participationYearsMarkup = clubProfile.participationEntries.map(item => `
+  const participationYearsMarkup = clubProfile.participationEntries.map(item => {
+    const tone = getParticipationChipTone(item.result);
+    return `
     <div class="club-participation-row">
-      <span class="club-year-chip">${escapeHtml(String(item.year))}</span>
+      <span class="club-year-chip${tone ? ` club-year-chip-${tone}` : ''}">${escapeHtml(String(item.year))}</span>
       <span class="club-participation-result">${escapeHtml(translateRuntimeText(item.result))}</span>
     </div>
-  `).join('');
+  `;
+  }).join('');
   const matchesMarkup = matches.map(item => {
     const parts = String(item.score || '0:0').split(':');
     const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
