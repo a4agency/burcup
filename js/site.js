@@ -1984,6 +1984,18 @@ function formatParticipationYears(years = []) {
   return ranges.join(', ');
 }
 
+function normalizeTournamentDisplayName(value = '') {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const match = raw.match(/^Burchalkin Cup(?:\s+(\d{4}))?$/i);
+  if (match) {
+    return match[1] ? `Кубок Бурчалкина ${match[1]}` : 'Кубок Бурчалкина';
+  }
+
+  return raw;
+}
+
 function extractParticipationLabel(description = '') {
   const match = String(description || '').match(/(?:Исторический\s+)?Участник\s+(.+?)(?:\.|$)/i);
   return match ? String(match[1] || '').trim() : '';
@@ -3161,7 +3173,7 @@ async function renderClubPage() {
   const matchesMarkup = matches.map(item => {
     const parts = String(item.score || '0:0').split(':');
     const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
-    const tournamentLabel = translateRuntimeText(item.tournament_name || 'Кубок Бурчалкина');
+    const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(item.tournament_name || 'Кубок Бурчалкина'));
     return `
       <a class="club-history-row match-headtohead-row" href="${escapeHtml(getMatchPageUrl(item))}">
         <div class="club-history-datebox">
