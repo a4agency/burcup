@@ -46,6 +46,7 @@ img{max-width:100%;display:block}
 .page-head{padding:34px 0 10px;background:#fff}
 .page-head h1{margin:0 0 10px;font-size:42px;color:var(--navy)}
 .page-head p,.muted{color:var(--muted)}
+.page-head-back{margin-bottom:14px}
 .grid-2{grid-template-columns:repeat(2,1fr)}
 .grid-3{grid-template-columns:repeat(3,1fr)}
 .grid-4{grid-template-columns:repeat(4,1fr)}
