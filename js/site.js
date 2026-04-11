@@ -4147,11 +4147,12 @@ async function renderMatchPageFromJson() {
     const headToHeadMarkup = headToHeadMatches.length
       ? headToHeadMatches.map(match => {
           const scoreParts = String(match.score || '0:0').split(':');
+          const dateTime = joinNonEmpty([formatMatchDisplayDate(match.date), match.time], ' • ');
           const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(match.tournament_name || 'Кубок Бурчалкина'));
           return `
             <a class="match-headtohead-row" href="${escapeHtml(getMatchPageUrl(match))}">
               <div class="club-history-datebox">
-                <div class="match-headtohead-date club-history-date">${escapeHtml(formatHeadToHeadDateLabel(match))}</div>
+                <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime || 'Архив матча')}</div>
                 <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
               </div>
               <div class="match-headtohead-main">
