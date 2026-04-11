@@ -1762,10 +1762,16 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .club-years{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
+  display:grid;
+  gap:12px;
   margin-top:18px;
+}
+
+.club-participation-row{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr);
+  align-items:center;
+  gap:14px;
 }
 
 .club-year-chip{
@@ -1781,6 +1787,13 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   font-size:14px;
   font-weight:800;
   line-height:1;
+}
+
+.club-participation-result{
+  color:var(--navy);
+  font-size:18px;
+  font-weight:700;
+  line-height:1.35;
 }
 
 .club-history-list{
@@ -1864,6 +1877,14 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   .club-year-chip,
   .club-meta-chip{
     font-size:13px;
+  }
+
+  .club-participation-row{
+    gap:12px;
+  }
+
+  .club-participation-result{
+    font-size:16px;
   }
 
   .club-history-date-meta{

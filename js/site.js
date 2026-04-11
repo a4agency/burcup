@@ -1063,6 +1063,120 @@ const CLUB_PROFILE_OVERRIDES = {
     summary: 'Клуб из Мехико, представляющий Мексику в составе участников нового цикла турнира.'
   }
 };
+const CLUB_SEASON_RESULTS = {
+  'almaz-antey': {
+    2016: '7 место',
+    2017: '3 место',
+    2018: '5 место',
+    2019: '4 место',
+    2023: '4 место',
+    2024: '3 место',
+    2025: '1 место',
+    2026: 'Сезон идёт'
+  },
+  zenit: {
+    2016: '2 место',
+    2017: '7 место',
+    2018: '3 место',
+    2019: '2 место',
+    2023: '1 место',
+    2024: '2 место',
+    2025: '2 место',
+    2026: 'Сезон идёт'
+  },
+  'dinamo-moscow': {
+    2016: '4 место'
+  },
+  hjk: {
+    2016: '5 место'
+  },
+  villarreal: {
+    2016: '1 место',
+    2017: '1 место',
+    2018: '1 место',
+    2019: '1 место'
+  },
+  victoria: {
+    2017: '4 место'
+  },
+  lokomotiv: {
+    2016: '6 место',
+    2017: '6 место'
+  },
+  cska: {
+    2016: '3 место',
+    2017: '5 место',
+    2018: '8 место',
+    2019: '5 место',
+    2023: '7 место'
+  },
+  brodarac: {
+    2016: '8 место'
+  },
+  mtk: {
+    2017: '8 место',
+    2018: '7 место',
+    2019: '7 место'
+  },
+  partizan: {
+    2017: '2 место'
+  },
+  'boca-juniors': {
+    2018: '2 место',
+    2019: '3 место'
+  },
+  roma: {
+    2018: '4 место'
+  },
+  krasnodar: {
+    2018: '6 место',
+    2019: '8 место',
+    2023: '3 место'
+  },
+  atalanta: {
+    2019: '6 место'
+  },
+  palmeiras: {
+    2023: '2 место',
+    2024: '1 место',
+    2025: '3 место',
+    2026: 'Сезон идёт'
+  },
+  santos: {
+    2023: '6 место'
+  },
+  sepahan: {
+    2023: '8 место',
+    2024: '8 место'
+  },
+  'crvena-zvezda': {
+    2023: '5 место',
+    2024: '4 место',
+    2025: '4 место',
+    2026: 'Сезон идёт'
+  },
+  fenerbahce: {
+    2024: '6 место',
+    2025: '6 место',
+    2026: 'Сезон идёт'
+  },
+  'dinamo-minsk': {
+    2024: '7 место',
+    2025: '7 место',
+    2026: 'Сезон идёт'
+  },
+  kairat: {
+    2024: '5 место',
+    2025: '8 место'
+  },
+  'san-lorenzo': {
+    2025: '5 место',
+    2026: 'Сезон идёт'
+  },
+  'cruz-azul': {
+    2026: 'Сезон идёт'
+  }
+};
 const HISTORICAL_CLUB_FALLBACKS = {
   kairat: {
     slug: 'kairat',
@@ -1685,11 +1799,26 @@ function buildFallbackClubSummary(item = {}, participationLabel = '') {
   return `${name} — участник Кубка Бурчалкина разных лет.`;
 }
 
+function getClubParticipationEntries(slug, years = []) {
+  const normalizedSlug = String(slug || '').trim();
+  const seasonResults = CLUB_SEASON_RESULTS[normalizedSlug] || {};
+  const seasonYears = Object.keys(seasonResults)
+    .map(value => Number(value))
+    .filter(value => Number.isFinite(value));
+  const finalYears = normalizeParticipationYears([...years, ...seasonYears]);
+
+  return finalYears.map(year => ({
+    year,
+    result: String(seasonResults[year] || 'Участник турнира').trim()
+  }));
+}
+
 function getClubProfile(item = {}) {
   const slug = String(item?.slug || '').trim();
   const fallback = getHistoricalClubFallback(slug) || {};
   const override = CLUB_PROFILE_OVERRIDES[slug] || {};
   const normalizedYears = normalizeParticipationYears(override.participationYears || []);
+  const participationEntries = getClubParticipationEntries(slug, normalizedYears);
   const participationLabel = formatParticipationYears(normalizedYears)
     || extractParticipationLabel(item?.description || fallback.description || '');
   const sourceDescription = String(item?.description || '').trim();
@@ -1704,6 +1833,7 @@ function getClubProfile(item = {}) {
   return {
     summary,
     participationYears: normalizedYears,
+    participationEntries,
     participationLabel,
     badge: CURRENT_CLUB_SLUGS.has(slug) ? 'Участник сезона 2026' : 'История турнира'
   };
@@ -2723,8 +2853,11 @@ async function renderClubPage() {
   const clubProfile = getClubProfile(clubData);
   const locationLabel = formatClubLocation(clubData);
   const matches = Array.isArray(clubData.matches) ? clubData.matches : [];
-  const participationYearsMarkup = clubProfile.participationYears.map(year => `
-    <span class="club-year-chip">${escapeHtml(String(year))}</span>
+  const participationYearsMarkup = clubProfile.participationEntries.map(item => `
+    <div class="club-participation-row">
+      <span class="club-year-chip">${escapeHtml(String(item.year))}</span>
+      <span class="club-participation-result">${escapeHtml(translateRuntimeText(item.result))}</span>
+    </div>
   `).join('');
   const matchesMarkup = matches.map(item => {
     const parts = String(item.score || '0:0').split(':');

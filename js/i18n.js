@@ -191,6 +191,8 @@
   "О клубе": "About the club",
   "История участия": "Participation history",
   "История участия будет дополняться.": "Participation history will be updated.",
+  "Сезон идёт": "Season in progress",
+  "Участник турнира": "Tournament participant",
   "Хозяева": "Home",
   "Гости": "Away",
   "Стадион": "Stadium",
