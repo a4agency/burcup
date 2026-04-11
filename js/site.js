@@ -2313,6 +2313,21 @@ function getHeadToHeadMatches(allMatches, currentMatch) {
     .sort((left, right) => getMatchSortValue(right) - getMatchSortValue(left));
 }
 
+function getMatchesForClub(allMatches = [], club = {}) {
+  const slugKey = String(club?.slug || '').trim().toLowerCase();
+  const nameKey = String(club?.name || '').trim().toLowerCase();
+
+  if (!slugKey && !nameKey) return [];
+
+  return (Array.isArray(allMatches) ? allMatches : [])
+    .filter(match => {
+      const homeKey = getMatchClubKey(match, 'home');
+      const awayKey = getMatchClubKey(match, 'away');
+      return homeKey === slugKey || awayKey === slugKey || homeKey === nameKey || awayKey === nameKey;
+    })
+    .sort((left, right) => getMatchSortValue(right) - getMatchSortValue(left));
+}
+
 function getCloudinaryCloudName() {
   return (window.BCUP_CONFIG?.cloudinaryCloudName || '').trim();
 }
@@ -3118,7 +3133,10 @@ async function renderClubPage() {
     target.setAttribute('aria-busy', 'false');
     return;
   }
-  const club = await fetchApi(`/api/clubs/${encodeURIComponent(slug)}`);
+  const [club, currentSeasonMatches] = await Promise.all([
+    fetchApi(`/api/clubs/${encodeURIComponent(slug)}`),
+    fetchJson('data/matches.json').catch(() => [])
+  ]);
   const clubData = club || getHistoricalClubFallback(slug);
   if (!clubData) {
     target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб недоступен</h2><p class="muted">API ещё не подключён или клуб не найден.</p></div></section>';
@@ -3127,7 +3145,13 @@ async function renderClubPage() {
   }
   const clubProfile = getClubProfile(clubData);
   const locationLabel = formatClubLocation(clubData);
-  const matches = Array.isArray(clubData.matches) ? clubData.matches : [];
+  const matches = getMatchesForClub(
+    getAllKnownMatches([
+      ...(Array.isArray(currentSeasonMatches) ? currentSeasonMatches : []),
+      ...(Array.isArray(clubData.matches) ? clubData.matches : [])
+    ]),
+    clubData
+  );
   const participationYearsMarkup = clubProfile.participationEntries.map(item => `
     <div class="club-participation-row">
       <span class="club-year-chip">${escapeHtml(String(item.year))}</span>
