@@ -968,7 +968,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
   villarreal: {
     slug: 'villarreal',
     name: 'Вильярреал',
-    logo: 'images/history-villarreal.webp',
+    logo: 'images/history-villarreal.png',
     country: 'Испания',
     city: 'Вильярреал',
     description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
