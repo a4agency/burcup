@@ -751,8 +751,46 @@ const ADMIN_SOURCES = {
     empty: () => ({
       slug: 'contacts',
       title: 'Контакты',
-      subtitle: 'Контактные данные для локальной версии сайта.',
-      body_html: '',
+      subtitle: 'Контактная информация турнира и спортивного комплекса «Алмаз-Антей».',
+      body_html: `
+<section class="section">
+  <div class="container grid-2">
+    <div class="card">
+      <h3>Место проведения турнира</h3>
+      <p>
+        <b>Спортивный комплекс «Алмаз-Антей»</b><br>
+        Санкт-Петербург, Пр. Обуховской Обороны, д.130.
+      </p>
+      <h3 style="margin-top:24px">Контактное лицо</h3>
+      <p>
+        <b>Шефтнер Ирина Александровна</b><br>
+        старший менеджер по развитию Спортивного Комплекса «Алмаз-Антей»
+      </p>
+      <p>
+        <b>Тел.:</b> <a href="tel:+78123639760">8 (812) 363-97-60</a><br>
+        <b>Сот.:</b> <a href="tel:+79216393950">8-921-639-39-50</a>
+      </p>
+      <p>
+        <b>E-mail:</b> <a href="mailto:info@fcalmaz-antey.ru">info@fcalmaz-antey.ru</a>
+      </p>
+    </div>
+    <div class="card contact-map-card">
+      <h3>Карта</h3>
+      <div class="contact-map-frame">
+        <iframe
+          src="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130&z=15&output=embed"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen
+          title="Карта ФК Алмаз-Антей"></iframe>
+      </div>
+      <p class="contact-map-note">
+        Если карта не загрузилась, откройте адрес напрямую:
+        <a href="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130" target="_blank" rel="noopener noreferrer">в Google Maps</a>.
+      </p>
+    </div>
+  </div>
+</section>`.trim(),
     }),
     fields: [
       ['slug', 'Slug', 'text'],
