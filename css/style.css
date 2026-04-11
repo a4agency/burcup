@@ -1783,41 +1783,59 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   line-height:1;
 }
 
-.club-history-grid{
+.club-history-list{
   display:grid;
-  gap:16px;
+  gap:0;
 }
 
-.club-history-card{
-  display:block;
-  text-decoration:none;
-  color:inherit;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  padding:18px 20px;
-  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+.club-history-row{
+  transition:background-color .22s ease;
 }
 
-.club-history-card:hover,
-.club-history-card:focus-visible{
-  transform:translateY(-2px);
-  border-color:rgba(45,108,223,.16);
-  box-shadow:0 14px 24px rgba(13,43,99,.08);
+.club-history-datebox{
+  display:grid;
+  gap:8px;
 }
 
-.club-history-match{
-  margin:10px 0;
-  color:var(--navy);
-  font-weight:800;
-  font-size:20px;
+.club-history-date{
+  white-space:nowrap;
 }
 
-.club-history-top,
-.club-history-meta{
+.club-history-date-meta{
   color:var(--muted);
   font-size:14px;
+  line-height:1.4;
+  font-weight:600;
+}
+
+.club-history-mainstack{
+  display:grid;
+  gap:12px;
+  min-width:0;
+}
+
+.club-history-row-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.club-history-row-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:7px 12px;
+  border-radius:999px;
+  background:#f5f8ff;
+  border:1px solid rgba(26,61,131,.10);
+  color:var(--navy);
+  font-size:13px;
+  font-weight:700;
+  line-height:1;
+}
+
+.club-history-row-chip-status{
+  background:#eef4ff;
 }
 
 .club-empty-state{
@@ -1876,6 +1894,19 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   .club-year-chip,
   .club-meta-chip{
     font-size:13px;
+  }
+
+  .club-history-date-meta{
+    font-size:13px;
+  }
+
+  .club-history-row-meta{
+    gap:8px;
+  }
+
+  .club-history-row-chip{
+    font-size:12px;
+    padding:6px 10px;
   }
 }
 
