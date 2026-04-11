@@ -2024,6 +2024,25 @@ object-fit:contain;
   justify-content:space-between;
 }
 
+.match-page-team-link{
+  color:inherit;
+  text-decoration:none;
+  cursor:pointer;
+  transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.match-page-team-link:hover{
+  border-color:rgba(13,43,99,.18);
+  box-shadow:0 14px 28px rgba(13,43,99,.08);
+  transform:translateY(-1px);
+}
+
+.match-page-team-link:focus-visible{
+  outline:none;
+  border-color:rgba(13,43,99,.24);
+  box-shadow:0 0 0 3px rgba(13,43,99,.12), 0 14px 28px rgba(13,43,99,.08);
+}
+
 .match-page-team-home{
   text-align:left;
 }

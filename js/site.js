@@ -3464,6 +3464,20 @@ async function renderMatchPageFromJson() {
     const statusClass = item.status === 'live' ? 'live' : (item.status === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || 'Матч';
     const matchdayLabel = item.matchday || item.round || '';
+    const renderMatchPageTeamCard = ({ sideClass = '', badge = '', teamName = '', teamLogo = '', teamSlug = '' } = {}) => {
+      const href = getClubPageUrl({ slug: teamSlug, logo: teamLogo });
+      const tag = href ? 'a' : 'div';
+
+      return `
+        <${tag} class="match-page-team ${escapeHtml(sideClass)}${href ? ' match-page-team-link' : ''}" ${href ? `href="${escapeHtml(href)}"` : ''}>
+          <div class="match-page-team-badge">${escapeHtml(badge)}</div>
+          <div class="match-page-team-brand">
+            ${renderImageMarkup({ src: teamLogo, alt: teamName, className: 'match-page-team-logo', width: 220 })}
+            <div class="match-page-team-name">${escapeHtml(teamName)}</div>
+          </div>
+        </${tag}>
+      `;
+    };
     const headToHeadMarkup = headToHeadMatches.length
       ? headToHeadMatches.map(match => {
           const scoreParts = String(match.score || '0:0').split(':');
@@ -3502,13 +3516,13 @@ async function renderMatchPageFromJson() {
             </div>
           </div>
           <div class="match-page-scorecard">
-            <div class="match-page-team match-page-team-home">
-              <div class="match-page-team-badge">Хозяева</div>
-              <div class="match-page-team-brand">
-                ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'match-page-team-logo', width: 220 })}
-                <div class="match-page-team-name">${escapeHtml(item.home_team)}</div>
-              </div>
-            </div>
+            ${renderMatchPageTeamCard({
+              sideClass: 'match-page-team-home',
+              badge: 'Хозяева',
+              teamName: item.home_team,
+              teamLogo: item.home_logo,
+              teamSlug: item.home_team_slug
+            })}
             <div class="match-page-scorebox" aria-label="Счёт матча">
               <div class="match-page-scoreline">
                 <span class="match-page-score-digit">${homeScore}</span>
@@ -3516,13 +3530,13 @@ async function renderMatchPageFromJson() {
                 <span class="match-page-score-digit">${awayScore}</span>
               </div>
             </div>
-            <div class="match-page-team match-page-team-away">
-              <div class="match-page-team-badge">Гости</div>
-              <div class="match-page-team-brand">
-                ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'match-page-team-logo', width: 220 })}
-                <div class="match-page-team-name">${escapeHtml(item.away_team)}</div>
-              </div>
-            </div>
+            ${renderMatchPageTeamCard({
+              sideClass: 'match-page-team-away',
+              badge: 'Гости',
+              teamName: item.away_team,
+              teamLogo: item.away_logo,
+              teamSlug: item.away_team_slug
+            })}
           </div>
         </section>
         <div class="match-page-media" data-match-media data-match-media-default-tab="${escapeHtml(requestedMediaTab)}">
