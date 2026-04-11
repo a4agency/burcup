@@ -2763,7 +2763,6 @@ async function renderClubPage() {
           <div class="club-head-meta">
             ${locationLabel ? `<span class="club-meta-chip">${escapeHtml(locationLabel)}</span>` : ''}
             ${clubData.founded_year ? `<span class="club-meta-chip">${escapeHtml(String(clubData.founded_year))}</span>` : ''}
-            ${clubProfile.participationLabel ? `<span class="club-meta-chip">${escapeHtml(clubProfile.participationLabel)}</span>` : ''}
           </div>
         </div>
       </div>
