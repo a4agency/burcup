@@ -2037,7 +2037,7 @@ function getClubParticipationEntries(slug, years = []) {
 
 function getParticipationChipTone(result = '') {
   const normalizedResult = String(result || '').trim().toLowerCase();
-  const placeMatch = normalizedResult.match(/^(\d+)\s*место\b/);
+  const placeMatch = normalizedResult.match(/^(\d+)\s*место(?:\s|$)/);
 
   if (!placeMatch) {
     return '';
