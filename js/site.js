@@ -962,7 +962,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/team-kairat.webp',
     country: 'Казахстан',
     city: 'Алматы',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2024, 2025. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   villarreal: {
@@ -971,7 +971,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-villarreal.png',
     country: 'Испания',
     city: 'Вильярреал',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016, 2017, 2018, 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   mtk: {
@@ -980,7 +980,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-mtk.webp',
     country: 'Венгрия',
     city: 'Будапешт',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2017, 2018, 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   'cruz-azul': {
@@ -998,7 +998,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-victoria.webp',
     country: 'Португалия',
     city: 'Гимарайнш',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   santos: {
@@ -1007,7 +1007,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-santos.webp',
     country: 'Бразилия',
     city: 'Сантус',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2023. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   atalanta: {
@@ -1016,7 +1016,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-atalanta.webp',
     country: 'Италия',
     city: 'Бергамо',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   roma: {
@@ -1025,7 +1025,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-roma.webp',
     country: 'Италия',
     city: 'Рим',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2018. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   sepahan: {
@@ -1034,7 +1034,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-sepahan.webp',
     country: 'Иран',
     city: 'Исфахан',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2023, 2024. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   cska: {
@@ -1043,7 +1043,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-cska.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016, 2017, 2018, 2019, 2023. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   lokomotiv: {
@@ -1052,7 +1052,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-lokomotiv.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016, 2017. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   'dinamo-moscow': {
@@ -1061,7 +1061,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-dinamo-moscow.png',
     country: 'Россия',
     city: 'Москва',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   hjk: {
@@ -1070,7 +1070,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-hjk.png',
     country: 'Финляндия',
     city: 'Хельсинки',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   brodarac: {
@@ -1079,7 +1079,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-brodarac.png',
     country: 'Сербия',
     city: 'Белград',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2016. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   partizan: {
@@ -1088,7 +1088,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-partizan.png',
     country: 'Сербия',
     city: 'Белград',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2017. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   'boca-juniors': {
@@ -1097,7 +1097,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-boca-juniors.png',
     country: 'Аргентина',
     city: 'Буэнос-Айрес',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2018, 2019. Архивная страница клуба в рамках истории турнира.',
     matches: []
   },
   krasnodar: {
@@ -1106,7 +1106,7 @@ const HISTORICAL_CLUB_FALLBACKS = {
     logo: 'images/history-krasnodar.png',
     country: 'Россия',
     city: 'Краснодар',
-    description: 'Исторический участник прошлых розыгрышей Кубка Бурчалкина. Архивная страница клуба в рамках истории турнира.',
+    description: 'Исторический участник 2018, 2019, 2023. Архивная страница клуба в рамках истории турнира.',
     matches: []
   }
 };
