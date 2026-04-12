@@ -4373,6 +4373,7 @@ async function renderMatchPageFromJson() {
     const statusClass = matchStatus === 'live' ? 'live' : (matchStatus === 'done' ? 'done' : 'soon');
     const stageLabel = item.stage || item.group || item.round || 'Матч';
     const matchdayLabel = item.matchday || ((item.stage || item.group) ? item.round : '') || '';
+    const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(item.tournament_name || 'Кубок Бурчалкина'));
     document.title = matchTitle;
     document.documentElement.dataset.bcOriginalTitle = matchTitle;
     const renderMatchPageTeamCard = ({ sideClass = '', badge = '', teamName = '', teamLogo = '', teamSlug = '' } = {}) => {
@@ -4421,7 +4422,7 @@ async function renderMatchPageFromJson() {
           <div class="match-page-topline">
             <div class="match-page-tags">
               <span class="match-page-tag">${escapeHtml(stageLabel)}</span>
-              <span class="match-page-tag match-page-tag-soft">Кубок Бурчалкина</span>
+              <span class="match-page-tag match-page-tag-soft">${escapeHtml(tournamentLabel)}</span>
               ${matchdayLabel ? `<span class="match-page-tag match-page-tag-soft">${escapeHtml(matchdayLabel)}</span>` : ''}
             </div>
             <div class="upcoming-status match-page-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
