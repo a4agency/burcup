@@ -92,6 +92,44 @@ function initHeaderCompactState() {
   header.classList.remove('is-compact');
 }
 
+function initContactsMapToggle() {
+  const card = document.querySelector('.contact-map-card');
+  if (!card) return;
+  const buttons = Array.from(card.querySelectorAll('.contact-map-toggle-btn'));
+  const frame = card.querySelector('.contact-map-frame iframe');
+  const noteLink = card.querySelector('.contact-map-note a');
+  if (!buttons.length || !frame) return;
+
+  function applyProvider(provider) {
+    if (!provider) return;
+    const embed = frame.getAttribute(`data-map-${provider}-embed`);
+    if (embed) {
+      frame.setAttribute('src', embed);
+    }
+    const link = frame.getAttribute(`data-map-${provider}-link`);
+    const label = frame.getAttribute(`data-map-${provider}-label`);
+    if (noteLink && link) {
+      noteLink.setAttribute('href', link);
+      if (label) noteLink.textContent = label;
+    }
+    buttons.forEach((btn) => {
+      const isActive = btn.getAttribute('data-map-provider') === provider;
+      btn.classList.toggle('is-active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyProvider(btn.getAttribute('data-map-provider'));
+    });
+  });
+
+  const initialProvider = card.querySelector('.contact-map-toggle-btn.is-active')?.getAttribute('data-map-provider')
+    || buttons[0].getAttribute('data-map-provider');
+  applyProvider(initialProvider);
+}
+
 function initActiveHeaderLink() {
   const links = Array.from(document.querySelectorAll('.header-menu a[href]'));
   if (!links.length) return;
@@ -197,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function(){
   initActiveHeaderLink();
   initHeaderMenu();
   initHeaderCompactState();
+  initContactsMapToggle();
   initTournamentCountdown();
   upgradeStaticImagesForCloudinary();
 });

@@ -8117,6 +8117,36 @@ button,
   flex-direction:column;
 }
 
+.contact-map-toggle{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+}
+
+.contact-map-toggle-btn{
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:8px 16px;
+  font-size:14px;
+  font-weight:700;
+  color:var(--blue);
+  background:#f2f6ff;
+  cursor:pointer;
+  transition:background .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.contact-map-toggle-btn:hover{
+  border-color:rgba(19,39,94,.35);
+}
+
+.contact-map-toggle-btn.is-active{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+  box-shadow:0 12px 24px rgba(19,39,94,.2);
+}
+
 .contact-map-frame{
   margin-top:12px;
   border:1px solid var(--line);
