@@ -87,7 +87,7 @@ const faviconPath = staticSiteRoot
   ? path.join(staticSiteRoot, 'favicon.png')
   : path.resolve(__dirname, '..', 'favicon.png');
 
-app.get('/favicon.png', (req, res, next) => {
+app.get(['/favicon.png', '/favicon.ico'], (req, res, next) => {
   if (!fs.existsSync(faviconPath)) {
     return next();
   }
