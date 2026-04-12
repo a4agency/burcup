@@ -83,6 +83,17 @@ function resolveStaticSiteRoot() {
 }
 
 const staticSiteRoot = resolveStaticSiteRoot();
+const faviconPath = staticSiteRoot
+  ? path.join(staticSiteRoot, 'favicon.png')
+  : path.resolve(__dirname, '..', 'favicon.png');
+
+app.get('/favicon.png', (req, res, next) => {
+  if (!fs.existsSync(faviconPath)) {
+    return next();
+  }
+
+  res.sendFile(faviconPath);
+});
 
 app.use(cors({
   origin(origin, callback) {
@@ -3306,35 +3317,129 @@ if (staticSiteRoot) {
   });
 } else {
   app.get('/', (req, res) => {
-    res.json({
-      service: 'burchalkin-cup-railway-api',
-      status: 'ok',
-      static_site_root: null,
-      endpoints: [
-        '/health',
-        '/api/tournaments',
-        '/api/tournaments/:slug',
-        '/api/tournaments/:slug/standings',
-        '/api/tournaments/:slug/matches',
-        '/api/tournaments/:slug/news',
-        '/api/tournaments/:slug/partners',
-        '/api/clubs',
-        '/api/clubs/:slug',
-        '/api/clubs/:slug/matches',
-        '/api/standings',
-        '/api/matches',
-        '/api/news',
-        '/api/results',
-        '/api/media/albums',
-        '/api/media/albums/:slug',
-        '/api/pages/:slug',
-        '/api/translate',
-        '/api/admin/session',
-        '/api/admin/:resource',
-        '/api/admin/standings',
-        '/api/admin/uploads/image'
-      ]
-    });
+    const endpoints = [
+      '/health',
+      '/api/tournaments',
+      '/api/tournaments/:slug',
+      '/api/tournaments/:slug/standings',
+      '/api/tournaments/:slug/matches',
+      '/api/tournaments/:slug/news',
+      '/api/tournaments/:slug/partners',
+      '/api/clubs',
+      '/api/clubs/:slug',
+      '/api/clubs/:slug/matches',
+      '/api/standings',
+      '/api/matches',
+      '/api/news',
+      '/api/results',
+      '/api/media/albums',
+      '/api/media/albums/:slug',
+      '/api/pages/:slug',
+      '/api/translate',
+      '/api/admin/session',
+      '/api/admin/:resource',
+      '/api/admin/standings',
+      '/api/admin/uploads/image'
+    ];
+
+    res.type('html').send(`<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burchalkin Cup — API</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f8ff;
+      --panel: #ffffff;
+      --border: #dbe5fb;
+      --text: #183a7a;
+      --muted: #6f83aa;
+      --chip: #eef4ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 32px;
+      box-shadow: 0 20px 45px rgba(24, 58, 122, 0.06);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: var(--chip);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 0.95;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.5;
+    }
+    h2 {
+      margin: 28px 0 14px;
+      font-size: 24px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+    li a {
+      display: block;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: #fbfcff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    li a:hover {
+      background: var(--chip);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <div class="badge">API</div>
+      <h1>Burchalkin Cup</h1>
+      <p>Служебная страница API. Ниже доступны основные эндпоинты сервиса.</p>
+      <h2>Эндпоинты</h2>
+      <ul>
+        ${endpoints.map((endpoint) => `<li><a href="${endpoint}">${endpoint}</a></li>`).join('')}
+      </ul>
+    </section>
+  </main>
+</body>
+</html>`);
   });
 }
 
