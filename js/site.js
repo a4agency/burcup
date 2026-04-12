@@ -949,6 +949,11 @@ const NEWS_IMAGE_FALLBACKS = [
   { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.webp' },
   { id: 3, slug: 'playoff-bracket-coming-soon', src: 'images/news-3.webp' }
 ];
+const NEWS_ARTICLE_ENRICHMENTS = {
+  'promo-rolik-viii-kubka-burchalkina': {
+    video_url: 'https://burchalkin-cup.ru/wp-content/uploads/2026/03/burchalkin-cup-2026-teaser-1920x1080_2.mp4'
+  }
+};
 const CLUB_LOCATION_OVERRIDES = {
   palmeiras: {
     city: 'Сан-Паулу',
@@ -2793,6 +2798,96 @@ function getNewsArticleParagraphs(item) {
     .filter(Boolean);
 }
 
+function getNewsArticleEnrichment(item = {}) {
+  const slug = String(item?.slug || '').trim();
+  return NEWS_ARTICLE_ENRICHMENTS[slug] || null;
+}
+
+function getNewsArticleVideoUrl(item = {}) {
+  const directUrl = String(item?.video_url || item?.video || '').trim();
+  if (directUrl) return directUrl;
+  return String(getNewsArticleEnrichment(item)?.video_url || '').trim();
+}
+
+function formatNewsDisplayDate(value) {
+  return formatTournamentDisplayDate(value) || String(value || '').trim();
+}
+
+function splitLinkSuffix(value) {
+  let core = String(value || '');
+  let suffix = '';
+  while (/[),.;!?]$/.test(core)) {
+    suffix = core.slice(-1) + suffix;
+    core = core.slice(0, -1);
+  }
+  return { core, suffix };
+}
+
+function renderLinkedText(value) {
+  const text = String(value || '');
+  if (!text) return '';
+
+  const pattern = /(https?:\/\/[^\s<>"']+|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/giu;
+  let result = '';
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    const start = match.index;
+    const rawToken = match[0];
+    const { core, suffix } = splitLinkSuffix(rawToken);
+    const end = start + rawToken.length;
+
+    result += escapeHtml(text.slice(lastIndex, start));
+
+    if (core) {
+      const isEmail = !core.startsWith('http://') && !core.startsWith('https://');
+      const href = isEmail ? `mailto:${core}` : core;
+      result += `<a href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(core)}</a>`;
+    }
+
+    if (suffix) {
+      result += escapeHtml(suffix);
+    }
+
+    lastIndex = end;
+  }
+
+  result += escapeHtml(text.slice(lastIndex));
+  return result;
+}
+
+function isDirectVideoFile(url) {
+  return /\.(mp4|webm|ogg|mov)(?:$|\?)/i.test(String(url || '').trim());
+}
+
+function renderNewsArticleMedia(item, imageSrc = '') {
+  const videoUrl = getNewsArticleVideoUrl(item);
+  if (!videoUrl) {
+    const articlePhotos = buildNewsArticlePhotos(item, imageSrc);
+    return articlePhotos[0]
+      ? renderNewsArticlePhotoButton(articlePhotos[0], 0, 'news-article-cover')
+      : renderNewsCoverImage('', item?.title, 'news-article-cover');
+  }
+
+  const poster = imageSrc ? getOptimizedImageUrl(imageSrc, { width: 960 }) : '';
+  if (isDirectVideoFile(videoUrl)) {
+    return `
+      <div class="news-article-video-wrap">
+        <video class="news-article-video" controls preload="metadata" playsinline${poster ? ` poster="${escapeHtml(poster)}"` : ''}>
+          <source src="${escapeHtml(videoUrl)}" type="video/mp4">
+        </video>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="news-article-video-wrap">
+      <iframe class="news-article-video-frame" src="${escapeHtml(videoUrl)}" allowfullscreen></iframe>
+    </div>
+  `;
+}
+
 function renderNewsArticlePhotoButton(photo, index, className = 'news-article-gallery-item') {
   const imageUrl = String(photo?.image_url || '').trim();
   const altText = String(photo?.alt_text || '').trim();
@@ -3568,11 +3663,12 @@ function renderNewsPreviewCard(item) {
   const articleHref = item.slug
     ? `news-article.html?slug=${encodeURIComponent(String(item.slug))}`
     : `news-article.html?id=${encodeURIComponent(String(item.id || ''))}`;
+  const displayDate = formatNewsDisplayDate(item.date);
   return `
     <a class="news-preview-card" href="${escapeHtml(articleHref)}">
       ${renderNewsCoverImage(imageSrc, item.title)}
       <div class="news-preview-content">
-        <div class="news-preview-date">${escapeHtml(item.date)}</div>
+        <div class="news-preview-date">${escapeHtml(displayDate)}</div>
         <h3>${escapeHtml(item.title)}</h3>
         <p>${escapeHtml(item.excerpt)}</p>
       </div>
@@ -4229,20 +4325,21 @@ async function renderNewsArticlePage() {
     document.documentElement.dataset.bcOriginalTitle = document.title;
     const imageSrc = resolveNewsImage(item);
     const content = getNewsArticleParagraphs(item);
-    const articlePhotos = buildNewsArticlePhotos(item, imageSrc);
-    const galleryPhotos = articlePhotos.slice(imageSrc ? 1 : 0);
+    const videoUrl = getNewsArticleVideoUrl(item);
+    const articlePhotos = videoUrl
+      ? buildNewsArticlePhotos(item, '')
+      : buildNewsArticlePhotos(item, imageSrc);
+    const galleryPhotos = videoUrl ? articlePhotos : articlePhotos.slice(imageSrc ? 1 : 0);
+    const displayDate = formatNewsDisplayDate(item.date);
 
     root.innerHTML = `
       <article class="news-article-card">
         <a class="news-article-back" href="news.html">← Все новости</a>
         <h1 class="news-article-title">${escapeHtml(item.title || '')}</h1>
-        ${articlePhotos[0]
-          ? renderNewsArticlePhotoButton(articlePhotos[0], 0, 'news-article-cover')
-          : renderNewsCoverImage('', item.title, 'news-article-cover')
-        }
+        ${renderNewsArticleMedia(item, imageSrc)}
         <div class="news-article-body">
-          ${item.excerpt ? `<p class="news-article-lead">${escapeHtml(item.excerpt)}</p>` : ''}
-          ${content.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join('')}
+          ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
+          ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
         </div>
         ${galleryPhotos.length ? `
           <div class="news-article-gallery">
@@ -4250,7 +4347,7 @@ async function renderNewsArticlePage() {
           </div>
         ` : ''}
         <div class="news-article-footer">
-          <div class="news-article-date">Добавлено: ${escapeHtml(item.date || '')}</div>
+          <div class="news-article-date">Добавлено: ${escapeHtml(displayDate)}</div>
         </div>
       </article>
       ${articlePhotos.length ? `
