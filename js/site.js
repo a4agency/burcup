@@ -926,6 +926,7 @@ function initStandingsViewSwitch(root) {
 document.addEventListener('DOMContentLoaded', () => {
   initResultsUpcomingSlider();
   initHomeUpcomingSlider();
+  initHomeNewsSlider();
   initHomeTournamentsSlider();
   initHeroCarousel();
   renderStandings('#home-standings');
@@ -5039,6 +5040,43 @@ function initHomeUpcomingSlider() {
 
   function getStep() {
     const firstCard = track.querySelector('.upcoming-card');
+    if (!firstCard) return Math.max(track.clientWidth * 0.9, 280);
+    const style = window.getComputedStyle(track);
+    const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
+    return firstCard.getBoundingClientRect().width + gap;
+  }
+
+  function updateButtons() {
+    const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
+    prevBtn.disabled = track.scrollLeft <= 2;
+    nextBtn.disabled = track.scrollLeft >= maxScroll;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+  });
+
+  nextBtn.addEventListener('click', () => {
+    track.scrollBy({ left: getStep(), behavior: 'smooth' });
+  });
+
+  track.addEventListener('scroll', updateButtons, { passive: true });
+  window.addEventListener('resize', updateButtons);
+
+  const observer = new MutationObserver(updateButtons);
+  observer.observe(track, { childList: true, subtree: true });
+
+  setTimeout(updateButtons, 80);
+}
+
+function initHomeNewsSlider() {
+  const track = document.getElementById('home-latest-news');
+  const prevBtn = document.getElementById('home-news-prev');
+  const nextBtn = document.getElementById('home-news-next');
+  if (!track || !prevBtn || !nextBtn) return;
+
+  function getStep() {
+    const firstCard = track.querySelector('.news-preview-card');
     if (!firstCard) return Math.max(track.clientWidth * 0.9, 280);
     const style = window.getComputedStyle(track);
     const gap = parseFloat(style.columnGap || style.gap || '18') || 18;
