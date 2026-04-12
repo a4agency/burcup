@@ -100,7 +100,7 @@ const CONTACT_MAP_DEFAULTS = {
     button: 'Google Maps'
   },
   yandex: {
-    embed: 'https://yandex.ru/map-widget/v1/?ll=30.483708%2C59.849457&mode=whatshere&whatshere%5Bpoint%5D=30.483708%2C59.849457&whatshere%5Bzoom%5D=17&z=17',
+    embed: 'https://yandex.ru/map-widget/v1/?oid=66772896642&ol=biz&ll=30.484223%2C59.849398&z=16.14',
     link: 'https://yandex.com/maps/-/CPrPVS5A',
     label: 'в Яндекс.Картах',
     button: 'Яндекс.Карты'
@@ -125,8 +125,8 @@ function ensureContactsMapCard(card) {
     toggle.setAttribute('role', 'tablist');
     toggle.setAttribute('aria-label', 'Переключение карты');
     toggle.innerHTML = `
-      <button type="button" class="contact-map-toggle-btn" data-map-provider="google" aria-pressed="false">${CONTACT_MAP_DEFAULTS.google.button}</button>
       <button type="button" class="contact-map-toggle-btn is-active" data-map-provider="yandex" aria-pressed="true">${CONTACT_MAP_DEFAULTS.yandex.button}</button>
+      <button type="button" class="contact-map-toggle-btn" data-map-provider="google" aria-pressed="false">${CONTACT_MAP_DEFAULTS.google.button}</button>
     `;
     const frameWrap = card.querySelector('.contact-map-frame');
     if (frameWrap) {
