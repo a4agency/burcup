@@ -1069,7 +1069,7 @@ const CLUB_SEASON_RESULTS = {
     2017: '3 место',
     2018: '5 место',
     2019: '4 место',
-    2023: '4 место',
+    2023: '5 место',
     2024: '3 место',
     2025: '1 место',
     2026: 'Сезон идёт'
@@ -1131,7 +1131,7 @@ const CLUB_SEASON_RESULTS = {
   krasnodar: {
     2018: '6 место',
     2019: '8 место',
-    2023: '3 место'
+    2023: '4 место'
   },
   atalanta: {
     2019: '6 место'
@@ -1150,7 +1150,7 @@ const CLUB_SEASON_RESULTS = {
     2024: '8 место'
   },
   'crvena-zvezda': {
-    2023: '5 место',
+    2023: '3 место',
     2024: '4 место',
     2025: '4 место',
     2026: 'Сезон идёт'
@@ -1800,27 +1800,239 @@ const ARCHIVE_TOURNAMENTS = {
   },
   '2024': {
     title: 'Кубок Бурчалкина 2024',
-    season: 'Розыгрыш сезона 2024',
-    description: 'Это страница-заглушка под розыгрыш 2024 года. Позже здесь можно будет собрать участников, расписание, итоги и медиаматериалы.',
-    status: 'Розыгрыш 2024 года ещё не заполнен, но страница уже подключена и доступна по ссылке.'
+    season: 'Розыгрыш 17 - 19 мая 2024',
+    description: 'Матчи, турнирная таблица и сетка плей-офф розыгрыша 2024 года.',
+    status: 'Страница прошлого розыгрыша заполнена участниками, результатами и итоговой сеткой турнира.',
+    detail: {
+      clubs_count: 8,
+      matches_count: 20,
+      clubs: [
+        { position: 1, name: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия' },
+        { position: 2, name: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 3, name: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 4, name: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия' },
+        { position: 5, name: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан' },
+        { position: 6, name: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция' },
+        { position: 7, name: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь' },
+        { position: 8, name: 'Сепахан', slug: 'sepahan', logo: 'images/history-sepahan.webp', city: 'Исфахан', country: 'Иран' }
+      ],
+      standings: [
+        { position: 1, group: 'Группа A', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 8, goals_against: 2, points: 9 },
+        { position: 2, group: 'Группа B', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 6, goals_against: 1, points: 9 },
+        { position: 3, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 5, goals_against: 6, points: 6 },
+        { position: 4, group: 'Группа B', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 5, goals_against: 2, points: 6 },
+        { position: 5, group: 'Группа A', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 3, won: 0, drawn: 1, lost: 2, goals_for: 1, goals_against: 4, points: 1 },
+        { position: 6, group: 'Группа B', team: 'Сепахан', slug: 'sepahan', logo: 'images/history-sepahan.webp', city: 'Исфахан', country: 'Иран', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 3, goals_against: 6, points: 3 },
+        { position: 7, group: 'Группа A', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 3, won: 0, drawn: 1, lost: 2, goals_for: 2, goals_against: 4, points: 1 },
+        { position: 8, group: 'Группа B', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 2, goals_against: 7, points: 0 }
+      ],
+      grouped_standings: [
+        {
+          key: 'A',
+          label: 'Группа A',
+          rows: [
+            { position: 1, group: 'Группа A', team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 8, goals_against: 2, points: 9 },
+            { position: 2, group: 'Группа A', team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 5, goals_against: 6, points: 6 },
+            { position: 3, group: 'Группа A', team: 'Кайрат', slug: 'kairat', logo: 'images/team-kairat.webp', city: 'Алматы', country: 'Казахстан', played: 3, won: 0, drawn: 1, lost: 2, goals_for: 1, goals_against: 4, points: 1 },
+            { position: 4, group: 'Группа A', team: 'Фенербахче', slug: 'fenerbahce', logo: 'images/team-fenerbahce.webp', city: 'Стамбул', country: 'Турция', played: 3, won: 0, drawn: 1, lost: 2, goals_for: 2, goals_against: 4, points: 1 }
+          ]
+        },
+        {
+          key: 'B',
+          label: 'Группа B',
+          rows: [
+            { position: 1, group: 'Группа B', team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 6, goals_against: 1, points: 9 },
+            { position: 2, group: 'Группа B', team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 5, goals_against: 2, points: 6 },
+            { position: 3, group: 'Группа B', team: 'Сепахан', slug: 'sepahan', logo: 'images/history-sepahan.webp', city: 'Исфахан', country: 'Иран', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 3, goals_against: 6, points: 3 },
+            { position: 4, group: 'Группа B', team: 'Динамо-Минск', slug: 'dinamo-minsk', logo: 'images/team-dinamo-minsk.webp', city: 'Минск', country: 'Беларусь', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 2, goals_against: 7, points: 0 }
+          ]
+        }
+      ],
+      playoff: [
+        { bracket_group: 'top', round_group: 'semifinal', match_key: 'archive_2024_top_sf1', sort_order: 1, label: 'Полуфинал 1–4 №1', home_team: 'Палмейрас', home_team_slug: 'palmeiras', home_logo: 'images/team-palmeiras.webp', away_team: 'Црвена Звезда', away_team_slug: 'crvena-zvezda', away_logo: 'images/team-crvena-zvezda.webp', home_score: 1, away_score: 0 },
+        { bracket_group: 'top', round_group: 'semifinal', match_key: 'archive_2024_top_sf2', sort_order: 2, label: 'Полуфинал 1–4 №2', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Алмаз-Антей', away_team_slug: 'almaz-antey', away_logo: 'images/team-almaz-antey.webp', home_score: 2, away_score: 1 },
+        { bracket_group: 'top', round_group: 'final', match_key: 'archive_2024_top_final', sort_order: 1, label: 'Матч за 1 место', home_team: 'Палмейрас', home_team_slug: 'palmeiras', home_logo: 'images/team-palmeiras.webp', away_team: 'Зенит', away_team_slug: 'zenit', away_logo: 'images/team-zenit.webp', home_score: 3, away_score: 0 },
+        { bracket_group: 'top', round_group: 'final', match_key: 'archive_2024_top_third', sort_order: 2, label: 'Матч за 3 место', home_team: 'Црвена Звезда', home_team_slug: 'crvena-zvezda', home_logo: 'images/team-crvena-zvezda.webp', away_team: 'Алмаз-Антей', away_team_slug: 'almaz-antey', away_logo: 'images/team-almaz-antey.webp', home_score: 0, away_score: 1 },
+        { bracket_group: 'placement', round_group: 'semifinal', match_key: 'archive_2024_place_sf1', sort_order: 1, label: 'Полуфинал 5–8 №1', home_team: 'Кайрат', home_team_slug: 'kairat', home_logo: 'images/team-kairat.webp', away_team: 'Динамо-Минск', away_team_slug: 'dinamo-minsk', away_logo: 'images/team-dinamo-minsk.webp', home_score: 0, away_score: 0 },
+        { bracket_group: 'placement', round_group: 'semifinal', match_key: 'archive_2024_place_sf2', sort_order: 2, label: 'Полуфинал 5–8 №2', home_team: 'Сепахан', home_team_slug: 'sepahan', home_logo: 'images/history-sepahan.webp', away_team: 'Фенербахче', away_team_slug: 'fenerbahce', away_logo: 'images/team-fenerbahce.webp', home_score: 1, away_score: 1 },
+        { bracket_group: 'placement', round_group: 'final', match_key: 'archive_2024_place_fifth', sort_order: 1, label: 'Матч за 5 место', home_team: 'Кайрат', home_team_slug: 'kairat', home_logo: 'images/team-kairat.webp', away_team: 'Фенербахче', away_team_slug: 'fenerbahce', away_logo: 'images/team-fenerbahce.webp', home_score: 0, away_score: 0 },
+        { bracket_group: 'placement', round_group: 'final', match_key: 'archive_2024_place_seventh', sort_order: 2, label: 'Матч за 7 место', home_team: 'Динамо-Минск', home_team_slug: 'dinamo-minsk', home_logo: 'images/team-dinamo-minsk.webp', away_team: 'Сепахан', away_team_slug: 'sepahan', away_logo: 'images/history-sepahan.webp', home_score: 0, away_score: 0 }
+      ],
+      matches: [
+        { id: 'archive-2024-1', date: '2024-05-17', time: '10:45', status_label: 'Завершён', score: '2:1', group: 'Группа A', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Фенербахче', away_team_slug: 'fenerbahce', away_logo: 'images/team-fenerbahce.webp' },
+        { id: 'archive-2024-2', date: '2024-05-17', time: '12:00', status_label: 'Завершён', score: '2:0', group: 'Группа B', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Динамо-Минск', away_team_slug: 'dinamo-minsk', away_logo: 'images/team-dinamo-minsk.webp' },
+        { id: 'archive-2024-3', date: '2024-05-17', time: '13:15', status_label: 'Завершён', score: '0:2', group: 'Группа A', home_team: 'Кайрат', home_team_slug: 'kairat', home_logo: 'images/team-kairat.webp', away_team: 'Палмейрас', away_team_slug: 'palmeiras', away_logo: 'images/team-palmeiras.webp' },
+        { id: 'archive-2024-4', date: '2024-05-17', time: '14:30', status_label: 'Завершён', score: '2:0', group: 'Группа B', home_team: 'Црвена Звезда', home_team_slug: 'crvena-zvezda', home_logo: 'images/team-crvena-zvezda.webp', away_team: 'Сепахан', away_team_slug: 'sepahan', away_logo: 'images/history-sepahan.webp' },
+        { id: 'archive-2024-5', date: '2024-05-17', time: '15:45', status_label: 'Завершён', score: '2:1', group: 'Группа A', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Кайрат', away_team_slug: 'kairat', away_logo: 'images/team-kairat.webp' },
+        { id: 'archive-2024-6', date: '2024-05-17', time: '17:00', status_label: 'Завершён', score: '2:1', group: 'Группа B', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Црвена Звезда', away_team_slug: 'crvena-zvezda', away_logo: 'images/team-crvena-zvezda.webp' },
+        { id: 'archive-2024-7', date: '2024-05-17', time: '18:15', status_label: 'Завершён', score: '1:2', group: 'Группа A', home_team: 'Фенербахче', home_team_slug: 'fenerbahce', home_logo: 'images/team-fenerbahce.webp', away_team: 'Палмейрас', away_team_slug: 'palmeiras', away_logo: 'images/team-palmeiras.webp' },
+        { id: 'archive-2024-8', date: '2024-05-17', time: '19:30', status_label: 'Завершён', score: '2:3', group: 'Группа B', home_team: 'Динамо-Минск', home_team_slug: 'dinamo-minsk', home_logo: 'images/team-dinamo-minsk.webp', away_team: 'Сепахан', away_team_slug: 'sepahan', away_logo: 'images/history-sepahan.webp' },
+        { id: 'archive-2024-9', date: '2024-05-18', time: '10:00', status_label: 'Завершён', score: '1:4', group: 'Группа A', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Палмейрас', away_team_slug: 'palmeiras', away_logo: 'images/team-palmeiras.webp' },
+        { id: 'archive-2024-10', date: '2024-05-18', time: '11:15', status_label: 'Завершён', score: '2:0', group: 'Группа B', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Сепахан', away_team_slug: 'sepahan', away_logo: 'images/history-sepahan.webp' },
+        { id: 'archive-2024-11', date: '2024-05-18', time: '12:30', status_label: 'Завершён', score: '0:0', group: 'Группа A', home_team: 'Фенербахче', home_team_slug: 'fenerbahce', home_logo: 'images/team-fenerbahce.webp', away_team: 'Кайрат', away_team_slug: 'kairat', away_logo: 'images/team-kairat.webp' },
+        { id: 'archive-2024-12', date: '2024-05-18', time: '13:45', status_label: 'Завершён', score: '0:2', group: 'Группа B', home_team: 'Динамо-Минск', home_team_slug: 'dinamo-minsk', home_logo: 'images/team-dinamo-minsk.webp', away_team: 'Црвена Звезда', away_team_slug: 'crvena-zvezda', away_logo: 'images/team-crvena-zvezda.webp' },
+        { id: 'archive-2024-13', date: '2024-05-18', time: '15:00', status_label: 'Завершён', score: '2:1', round: 'Полуфинал 1–4 №2', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Алмаз-Антей', away_team_slug: 'almaz-antey', away_logo: 'images/team-almaz-antey.webp' },
+        { id: 'archive-2024-14', date: '2024-05-18', time: '16:15', status_label: 'Завершён', score: '1:0', round: 'Полуфинал 1–4 №1', home_team: 'Палмейрас', home_team_slug: 'palmeiras', home_logo: 'images/team-palmeiras.webp', away_team: 'Црвена Звезда', away_team_slug: 'crvena-zvezda', away_logo: 'images/team-crvena-zvezda.webp' },
+        { id: 'archive-2024-15', date: '2024-05-18', time: '17:30', status_label: 'Завершён', score: '0:0', round: 'Полуфинал 5–8 №1', home_team: 'Кайрат', home_team_slug: 'kairat', home_logo: 'images/team-kairat.webp', away_team: 'Динамо-Минск', away_team_slug: 'dinamo-minsk', away_logo: 'images/team-dinamo-minsk.webp' },
+        { id: 'archive-2024-16', date: '2024-05-18', time: '18:45', status_label: 'Завершён', score: '1:1', round: 'Полуфинал 5–8 №2', home_team: 'Сепахан', home_team_slug: 'sepahan', home_logo: 'images/history-sepahan.webp', away_team: 'Фенербахче', away_team_slug: 'fenerbahce', away_logo: 'images/team-fenerbahce.webp' },
+        { id: 'archive-2024-17', date: '2024-05-19', time: '10:00', status_label: 'Завершён', score: '0:0', round: 'Матч за 7 место', home_team: 'Динамо-Минск', home_team_slug: 'dinamo-minsk', home_logo: 'images/team-dinamo-minsk.webp', away_team: 'Сепахан', away_team_slug: 'sepahan', away_logo: 'images/history-sepahan.webp' },
+        { id: 'archive-2024-18', date: '2024-05-19', time: '11:15', status_label: 'Завершён', score: '0:0', round: 'Матч за 5 место', home_team: 'Кайрат', home_team_slug: 'kairat', home_logo: 'images/team-kairat.webp', away_team: 'Фенербахче', away_team_slug: 'fenerbahce', away_logo: 'images/team-fenerbahce.webp' },
+        { id: 'archive-2024-19', date: '2024-05-19', time: '12:30', status_label: 'Завершён', score: '0:1', round: 'Матч за 3 место', home_team: 'Црвена Звезда', home_team_slug: 'crvena-zvezda', home_logo: 'images/team-crvena-zvezda.webp', away_team: 'Алмаз-Антей', away_team_slug: 'almaz-antey', away_logo: 'images/team-almaz-antey.webp' },
+        { id: 'archive-2024-20', date: '2024-05-19', time: '13:45', status_label: 'Завершён', score: '3:0', round: 'Финал', home_team: 'Палмейрас', home_team_slug: 'palmeiras', home_logo: 'images/team-palmeiras.webp', away_team: 'Зенит', away_team_slug: 'zenit', away_logo: 'images/team-zenit.webp' }
+      ]
+    }
   },
   '2023': {
     title: 'Кубок Бурчалкина 2023',
-    season: 'Розыгрыш сезона 2023',
-    description: 'На этой странице позже появится информация о розыгрыше 2023 года: команды, результаты, фотографии и памятные материалы.',
-    status: 'Пока это заглушка для будущего наполнения через админ-панель.'
+    season: 'Розыгрыш 19 - 21 мая 2023',
+    description: 'Матчи и турнирная таблица розыгрыша 2023 года.',
+    status: 'Страница прошлого розыгрыша заполнена основными результатами турнира.',
+    detail: {
+      clubs_count: 8,
+      matches_count: 12,
+      clubs: [
+        { position: 1, name: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 2, name: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия' },
+        { position: 3, name: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия' },
+        { position: 4, name: 'Краснодар', slug: 'krasnodar', logo: 'images/history-krasnodar.png', city: 'Краснодар', country: 'Россия' },
+        { position: 5, name: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 6, name: 'Сантос', slug: 'santos', logo: 'images/history-santos.webp', city: 'Сантус', country: 'Бразилия' },
+        { position: 7, name: 'ЦСКА', slug: 'cska', logo: 'images/history-cska.png', city: 'Москва', country: 'Россия' },
+        { position: 8, name: 'Сепахан', slug: 'sepahan', logo: 'images/history-sepahan.webp', city: 'Исфахан', country: 'Иран' }
+      ],
+      standings: [
+        { position: 1, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 6, goals_against: 2, points: 9 },
+        { position: 2, team: 'Палмейрас', slug: 'palmeiras', logo: 'images/team-palmeiras.webp', city: 'Сан-Паулу', country: 'Бразилия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 8, goals_against: 4, points: 6 },
+        { position: 3, team: 'Црвена Звезда', slug: 'crvena-zvezda', logo: 'images/team-crvena-zvezda.webp', city: 'Белград', country: 'Сербия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 5, goals_against: 2, points: 6 },
+        { position: 4, team: 'Краснодар', slug: 'krasnodar', logo: 'images/history-krasnodar.png', city: 'Краснодар', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 2, goals_against: 4, points: 6 },
+        { position: 5, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 6, goals_against: 3, points: 3 },
+        { position: 6, team: 'Сантос', slug: 'santos', logo: 'images/history-santos.webp', city: 'Сантус', country: 'Бразилия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 4, goals_against: 5, points: 3 },
+        { position: 7, team: 'ЦСКА', slug: 'cska', logo: 'images/history-cska.png', city: 'Москва', country: 'Россия', played: 3, won: 0, drawn: 1, lost: 2, goals_for: 3, goals_against: 6, points: 1 },
+        { position: 8, team: 'Сепахан', slug: 'sepahan', logo: 'images/history-sepahan.webp', city: 'Исфахан', country: 'Иран', played: 3, won: 0, drawn: 1, lost: 2, goals_for: 1, goals_against: 9, points: 1 }
+      ],
+      matches: [
+        { id: 'archive-2023-1', date: '2023-05-19', time: '12:30', status_label: 'Завершён', score: '5:0', round: 'Круговой этап', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Сепахан', away_team_slug: 'sepahan', away_logo: 'images/history-sepahan.webp' },
+        { id: 'archive-2023-2', date: '2023-05-19', time: '14:00', status_label: 'Завершён', score: '1:0', round: 'Круговой этап', home_team: 'Краснодар', home_team_slug: 'krasnodar', home_logo: 'images/history-krasnodar.png', away_team: 'Црвена Звезда', away_team_slug: 'crvena-zvezda', away_logo: 'images/team-crvena-zvezda.webp' },
+        { id: 'archive-2023-3', date: '2023-05-19', time: '15:30', status_label: 'Завершён', score: '2:0', round: 'Круговой этап', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Сантос', away_team_slug: 'santos', away_logo: 'images/history-santos.webp' },
+        { id: 'archive-2023-4', date: '2023-05-19', time: '17:00', status_label: 'Завершён', score: '2:3', round: 'Круговой этап', home_team: 'ЦСКА', home_team_slug: 'cska', home_logo: 'images/history-cska.png', away_team: 'Палмейрас', away_team_slug: 'palmeiras', away_logo: 'images/team-palmeiras.webp' },
+        { id: 'archive-2023-5', date: '2023-05-20', time: '10:00', status_label: 'Завершён', score: '1:4', round: 'Круговой этап', home_team: 'Сепахан', home_team_slug: 'sepahan', home_logo: 'images/history-sepahan.webp', away_team: 'Сантос', away_team_slug: 'santos', away_logo: 'images/history-santos.webp' },
+        { id: 'archive-2023-6', date: '2023-05-20', time: '11:30', status_label: 'Завершён', score: '3:1', round: 'Круговой этап', home_team: 'Црвена Звезда', home_team_slug: 'crvena-zvezda', home_logo: 'images/team-crvena-zvezda.webp', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png' },
+        { id: 'archive-2023-7', date: '2023-05-20', time: '13:00', status_label: 'Завершён', score: '1:2', round: 'Круговой этап', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Зенит', away_team_slug: 'zenit', away_logo: 'images/team-zenit.webp' },
+        { id: 'archive-2023-8', date: '2023-05-20', time: '14:30', status_label: 'Завершён', score: '0:4', round: 'Круговой этап', home_team: 'Краснодар', home_team_slug: 'krasnodar', home_logo: 'images/history-krasnodar.png', away_team: 'Палмейрас', away_team_slug: 'palmeiras', away_logo: 'images/team-palmeiras.webp' },
+        { id: 'archive-2023-9', date: '2023-05-21', time: '10:00', status_label: 'Завершён', score: '0:0', round: 'Круговой этап', home_team: 'Сепахан', home_team_slug: 'sepahan', home_logo: 'images/history-sepahan.webp', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png' },
+        { id: 'archive-2023-10', date: '2023-05-21', time: '11:30', status_label: 'Завершён', score: '0:2', round: 'Круговой этап', home_team: 'Сантос', home_team_slug: 'santos', home_logo: 'images/history-santos.webp', away_team: 'Црвена Звезда', away_team_slug: 'crvena-zvezda', away_logo: 'images/team-crvena-zvezda.webp' },
+        { id: 'archive-2023-11', date: '2023-05-21', time: '13:00', status_label: 'Завершён', score: '0:1', round: 'Круговой этап', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png' },
+        { id: 'archive-2023-12', date: '2023-05-21', time: '14:30', status_label: 'Завершён', score: '2:1', round: 'Круговой этап', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Палмейрас', away_team_slug: 'palmeiras', away_logo: 'images/team-palmeiras.webp' }
+      ]
+    }
   },
   '2019': {
     title: 'Кубок Бурчалкина 2019',
-    season: 'Розыгрыш сезона 2019',
-    description: 'Страница подготовлена для одного из ранних розыгрышей турнира. Здесь можно будет собрать историю турнира по годам.',
-    status: 'Страница розыгрыша уже работает, содержимое добавим позже.'
+    season: 'Розыгрыш 17 - 19 мая 2019',
+    description: 'Матчи, итоги и сетка плей-офф розыгрыша 2019 года.',
+    status: 'Страница прошлого розыгрыша заполнена результатами и сеткой турнира.',
+    detail: {
+      clubs_count: 8,
+      matches_count: 12,
+      clubs: [
+        { position: 1, name: 'Вильярреал', slug: 'villarreal', logo: 'images/history-villarreal.png', city: 'Вильярреал', country: 'Испания' },
+        { position: 2, name: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 3, name: 'Бока Хуниорс', slug: 'boca-juniors', logo: 'images/history-boca-juniors.png', city: 'Буэнос-Айрес', country: 'Аргентина' },
+        { position: 4, name: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 5, name: 'ЦСКА', slug: 'cska', logo: 'images/history-cska.png', city: 'Москва', country: 'Россия' },
+        { position: 6, name: 'Аталанта', slug: 'atalanta', logo: 'images/history-atalanta.png', city: 'Бергамо', country: 'Италия' },
+        { position: 7, name: 'МТК', slug: 'mtk', logo: 'images/history-mtk.png', city: 'Будапешт', country: 'Венгрия' },
+        { position: 8, name: 'Краснодар', slug: 'krasnodar', logo: 'images/history-krasnodar.png', city: 'Краснодар', country: 'Россия' }
+      ],
+      standings: [
+        { position: 1, team: 'Вильярреал', slug: 'villarreal', logo: 'images/history-villarreal.png', city: 'Вильярреал', country: 'Испания', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 7, goals_against: 0, points: 9 },
+        { position: 2, team: 'Бока Хуниорс', slug: 'boca-juniors', logo: 'images/history-boca-juniors.png', city: 'Буэнос-Айрес', country: 'Аргентина', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 7, goals_against: 3, points: 6 },
+        { position: 3, team: 'ЦСКА', slug: 'cska', logo: 'images/history-cska.png', city: 'Москва', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 6, goals_against: 2, points: 6 },
+        { position: 4, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 5, goals_against: 4, points: 6 },
+        { position: 5, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 6, goals_against: 7, points: 3 },
+        { position: 6, team: 'МТК', slug: 'mtk', logo: 'images/history-mtk.png', city: 'Будапешт', country: 'Венгрия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 2, goals_against: 6, points: 3 },
+        { position: 7, team: 'Аталанта', slug: 'atalanta', logo: 'images/history-atalanta.png', city: 'Бергамо', country: 'Италия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 2, goals_against: 11, points: 3 },
+        { position: 8, team: 'Краснодар', slug: 'krasnodar', logo: 'images/history-krasnodar.png', city: 'Краснодар', country: 'Россия', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 1, goals_against: 3, points: 0 }
+      ],
+      playoff: [
+        { bracket_group: 'top', round_group: 'semifinal', match_key: 'archive_2019_top_sf1', sort_order: 1, label: 'Полуфинал 1–4 №1', home_team: 'Вильярреал', home_team_slug: 'villarreal', home_logo: 'images/history-villarreal.png', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png', home_score: 3, away_score: 0 },
+        { bracket_group: 'top', round_group: 'semifinal', match_key: 'archive_2019_top_sf2', sort_order: 2, label: 'Полуфинал 1–4 №2', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Зенит', away_team_slug: 'zenit', away_logo: 'images/team-zenit.webp', home_score: 0, away_score: 1 },
+        { bracket_group: 'top', round_group: 'final', match_key: 'archive_2019_top_final', sort_order: 1, label: 'Матч за 1 место', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Вильярреал', away_team_slug: 'villarreal', away_logo: 'images/history-villarreal.png', home_score: 0, away_score: 3 },
+        { bracket_group: 'top', round_group: 'final', match_key: 'archive_2019_top_third', sort_order: 2, label: 'Матч за 3 место', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png', home_score: 0, away_score: 6 },
+        { bracket_group: 'placement', round_group: 'semifinal', match_key: 'archive_2019_place_sf1', sort_order: 1, label: 'Полуфинал 5–8 №1', home_team: 'Аталанта', home_team_slug: 'atalanta', home_logo: 'images/history-atalanta.png', away_team: 'МТК', away_team_slug: 'mtk', away_logo: 'images/history-mtk.png', home_score: 2, away_score: 0 },
+        { bracket_group: 'placement', round_group: 'semifinal', match_key: 'archive_2019_place_sf2', sort_order: 2, label: 'Полуфинал 5–8 №2', home_team: 'Краснодар', home_team_slug: 'krasnodar', home_logo: 'images/history-krasnodar.png', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png', home_score: 1, away_score: 1 },
+        { bracket_group: 'placement', round_group: 'final', match_key: 'archive_2019_place_fifth', sort_order: 1, label: 'Матч за 5 место', home_team: 'Аталанта', home_team_slug: 'atalanta', home_logo: 'images/history-atalanta.png', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png', home_score: 0, away_score: 5 },
+        { bracket_group: 'placement', round_group: 'final', match_key: 'archive_2019_place_seventh', sort_order: 2, label: 'Матч за 7 место', home_team: 'МТК', home_team_slug: 'mtk', home_logo: 'images/history-mtk.png', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png', home_score: 1, away_score: 0 }
+      ],
+      matches: [
+        { id: 'archive-2019-1', date: '2019-05-17', time: '12:30', status_label: 'Завершён', score: '6:0', round: '1/4 финала', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Аталанта', away_team_slug: 'atalanta', away_logo: 'images/history-atalanta.png' },
+        { id: 'archive-2019-2', date: '2019-05-17', time: '14:00', status_label: 'Завершён', score: '4:1', round: '1/4 финала', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'МТК', away_team_slug: 'mtk', away_logo: 'images/history-mtk.png' },
+        { id: 'archive-2019-3', date: '2019-05-17', time: '15:30', status_label: 'Завершён', score: '0:1', round: '1/4 финала', home_team: 'Краснодар', home_team_slug: 'krasnodar', home_logo: 'images/history-krasnodar.png', away_team: 'Вильярреал', away_team_slug: 'villarreal', away_logo: 'images/history-villarreal.png' },
+        { id: 'archive-2019-4', date: '2019-05-17', time: '17:00', status_label: 'Завершён', score: '0:1', round: '1/4 финала', home_team: 'ЦСКА', home_team_slug: 'cska', home_logo: 'images/history-cska.png', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png' },
+        { id: 'archive-2019-5', date: '2019-05-18', time: '10:00', status_label: 'Завершён', score: '2:0', round: 'Полуфинал 5–8 №1', home_team: 'Аталанта', home_team_slug: 'atalanta', home_logo: 'images/history-atalanta.png', away_team: 'МТК', away_team_slug: 'mtk', away_logo: 'images/history-mtk.png' },
+        { id: 'archive-2019-6', date: '2019-05-18', time: '11:30', status_label: 'Завершён', score: '1:1', round: 'Полуфинал 5–8 №2', home_team: 'Краснодар', home_team_slug: 'krasnodar', home_logo: 'images/history-krasnodar.png', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png' },
+        { id: 'archive-2019-7', date: '2019-05-18', time: '13:00', status_label: 'Завершён', score: '0:1', round: 'Полуфинал 1–4 №2', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Зенит', away_team_slug: 'zenit', away_logo: 'images/team-zenit.webp' },
+        { id: 'archive-2019-8', date: '2019-05-18', time: '14:30', status_label: 'Завершён', score: '3:0', round: 'Полуфинал 1–4 №1', home_team: 'Вильярреал', home_team_slug: 'villarreal', home_logo: 'images/history-villarreal.png', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png' },
+        { id: 'archive-2019-9', date: '2019-05-19', time: '10:00', status_label: 'Завершён', score: '1:0', round: 'Матч за 7 место', home_team: 'МТК', home_team_slug: 'mtk', home_logo: 'images/history-mtk.png', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png' },
+        { id: 'archive-2019-10', date: '2019-05-19', time: '11:30', status_label: 'Завершён', score: '0:5', round: 'Матч за 5 место', home_team: 'Аталанта', home_team_slug: 'atalanta', home_logo: 'images/history-atalanta.png', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png' },
+        { id: 'archive-2019-11', date: '2019-05-19', time: '13:00', status_label: 'Завершён', score: '0:6', round: 'Матч за 3 место', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png' },
+        { id: 'archive-2019-12', date: '2019-05-19', time: '14:30', status_label: 'Завершён', score: '0:3', round: 'Финал', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Вильярреал', away_team_slug: 'villarreal', away_logo: 'images/history-villarreal.png' }
+      ]
+    }
   },
   '2018': {
     title: 'Кубок Бурчалкина 2018',
-    season: 'Розыгрыш сезона 2018',
-    description: 'Заглушка для страницы розыгрыша 2018 года. Позже здесь появятся команды, результаты и материалы турнира.',
-    status: 'Розыгрыш 2018 года пока находится в подготовке.'
+    season: 'Розыгрыш 11 - 13 мая 2018',
+    description: 'Матчи, турнирная таблица и сетка плей-офф розыгрыша 2018 года.',
+    status: 'Страница прошлого розыгрыша заполнена участниками, результатами и итогами турнира.',
+    detail: {
+      clubs_count: 8,
+      matches_count: 12,
+      clubs: [
+        { position: 1, name: 'Вильярреал', slug: 'villarreal', logo: 'images/history-villarreal.png', city: 'Вильярреал', country: 'Испания' },
+        { position: 2, name: 'Бока Хуниорс', slug: 'boca-juniors', logo: 'images/history-boca-juniors.png', city: 'Буэнос-Айрес', country: 'Аргентина' },
+        { position: 3, name: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 4, name: 'Рома', slug: 'roma', logo: 'images/history-roma.png', city: 'Рим', country: 'Италия' },
+        { position: 5, name: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия' },
+        { position: 6, name: 'Краснодар', slug: 'krasnodar', logo: 'images/history-krasnodar.png', city: 'Краснодар', country: 'Россия' },
+        { position: 7, name: 'МТК', slug: 'mtk', logo: 'images/history-mtk.png', city: 'Будапешт', country: 'Венгрия' },
+        { position: 8, name: 'ЦСКА', slug: 'cska', logo: 'images/history-cska.png', city: 'Москва', country: 'Россия' }
+      ],
+      standings: [
+        { position: 1, team: 'Вильярреал', slug: 'villarreal', logo: 'images/history-villarreal.png', city: 'Вильярреал', country: 'Испания', played: 3, won: 3, drawn: 0, lost: 0, goals_for: 8, goals_against: 3, points: 9 },
+        { position: 2, team: 'Зенит', slug: 'zenit', logo: 'images/team-zenit.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 8, goals_against: 4, points: 6 },
+        { position: 3, team: 'Бока Хуниорс', slug: 'boca-juniors', logo: 'images/history-boca-juniors.png', city: 'Буэнос-Айрес', country: 'Аргентина', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 6, goals_against: 2, points: 6 },
+        { position: 4, team: 'Алмаз-Антей', slug: 'almaz-antey', logo: 'images/team-almaz-antey.webp', city: 'Санкт-Петербург', country: 'Россия', played: 3, won: 2, drawn: 0, lost: 1, goals_for: 1, goals_against: 5, points: 6 },
+        { position: 5, team: 'Краснодар', slug: 'krasnodar', logo: 'images/history-krasnodar.png', city: 'Краснодар', country: 'Россия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 8, goals_against: 3, points: 3 },
+        { position: 6, team: 'Рома', slug: 'roma', logo: 'images/history-roma.png', city: 'Рим', country: 'Италия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 3, goals_against: 8, points: 3 },
+        { position: 7, team: 'МТК', slug: 'mtk', logo: 'images/history-mtk.png', city: 'Будапешт', country: 'Венгрия', played: 3, won: 1, drawn: 0, lost: 2, goals_for: 2, goals_against: 10, points: 3 },
+        { position: 8, team: 'ЦСКА', slug: 'cska', logo: 'images/history-cska.png', city: 'Москва', country: 'Россия', played: 3, won: 0, drawn: 0, lost: 3, goals_for: 2, goals_against: 3, points: 0 }
+      ],
+      playoff: [
+        { bracket_group: 'top', round_group: 'semifinal', match_key: 'archive_2018_top_sf1', sort_order: 1, label: 'Полуфинал 1–4 №1', home_team: 'Вильярреал', home_team_slug: 'villarreal', home_logo: 'images/history-villarreal.png', away_team: 'Рома', away_team_slug: 'roma', away_logo: 'images/history-roma.png', home_score: 4, away_score: 1 },
+        { bracket_group: 'top', round_group: 'semifinal', match_key: 'archive_2018_top_sf2', sort_order: 2, label: 'Полуфинал 1–4 №2', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png', home_score: 1, away_score: 2 },
+        { bracket_group: 'top', round_group: 'final', match_key: 'archive_2018_top_final', sort_order: 1, label: 'Матч за 1 место', home_team: 'Бока Хуниорс', home_team_slug: 'boca-juniors', home_logo: 'images/history-boca-juniors.png', away_team: 'Вильярреал', away_team_slug: 'villarreal', away_logo: 'images/history-villarreal.png', home_score: 0, away_score: 1 },
+        { bracket_group: 'top', round_group: 'final', match_key: 'archive_2018_top_third', sort_order: 2, label: 'Матч за 3 место', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Рома', away_team_slug: 'roma', away_logo: 'images/history-roma.png', home_score: 4, away_score: 2 },
+        { bracket_group: 'placement', round_group: 'semifinal', match_key: 'archive_2018_place_sf1', sort_order: 1, label: 'Полуфинал 5–8 №1', home_team: 'МТК', home_team_slug: 'mtk', home_logo: 'images/history-mtk.png', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png', home_score: 0, away_score: 6 },
+        { bracket_group: 'placement', round_group: 'semifinal', match_key: 'archive_2018_place_sf2', sort_order: 2, label: 'Полуфинал 5–8 №2', home_team: 'ЦСКА', home_team_slug: 'cska', home_logo: 'images/history-cska.png', away_team: 'Алмаз-Антей', away_team_slug: 'almaz-antey', away_logo: 'images/team-almaz-antey.webp', home_score: 1, away_score: 1 },
+        { bracket_group: 'placement', round_group: 'final', match_key: 'archive_2018_place_fifth', sort_order: 1, label: 'Матч за 5 место', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png', home_score: 0, away_score: 0 },
+        { bracket_group: 'placement', round_group: 'final', match_key: 'archive_2018_place_seventh', sort_order: 2, label: 'Матч за 7 место', home_team: 'МТК', home_team_slug: 'mtk', home_logo: 'images/history-mtk.png', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png', home_score: 2, away_score: 1 }
+      ],
+      matches: [
+        { id: 'archive-2018-1', date: '2018-05-11', time: '12:30', status_label: 'Завершён', score: '0:4', round: '1/4 финала', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png' },
+        { id: 'archive-2018-2', date: '2018-05-11', time: '14:00', status_label: 'Завершён', score: '0:0', round: '1/4 финала', home_team: 'ЦСКА', home_team_slug: 'cska', home_logo: 'images/history-cska.png', away_team: 'Рома', away_team_slug: 'roma', away_logo: 'images/history-roma.png' },
+        { id: 'archive-2018-3', date: '2018-05-11', time: '15:30', status_label: 'Завершён', score: '2:3', round: '1/4 финала', home_team: 'Краснодар', home_team_slug: 'krasnodar', home_logo: 'images/history-krasnodar.png', away_team: 'Вильярреал', away_team_slug: 'villarreal', away_logo: 'images/history-villarreal.png' },
+        { id: 'archive-2018-4', date: '2018-05-11', time: '17:00', status_label: 'Завершён', score: '3:0', round: '1/4 финала', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'МТК', away_team_slug: 'mtk', away_logo: 'images/history-mtk.png' },
+        { id: 'archive-2018-5', date: '2018-05-12', time: '10:00', status_label: 'Завершён', score: '1:1', round: 'Полуфинал 5–8 №2', home_team: 'ЦСКА', home_team_slug: 'cska', home_logo: 'images/history-cska.png', away_team: 'Алмаз-Антей', away_team_slug: 'almaz-antey', away_logo: 'images/team-almaz-antey.webp' },
+        { id: 'archive-2018-6', date: '2018-05-12', time: '11:30', status_label: 'Завершён', score: '0:6', round: 'Полуфинал 5–8 №1', home_team: 'МТК', home_team_slug: 'mtk', home_logo: 'images/history-mtk.png', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png' },
+        { id: 'archive-2018-7', date: '2018-05-12', time: '13:00', status_label: 'Завершён', score: '1:2', round: 'Полуфинал 1–4 №2', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Бока Хуниорс', away_team_slug: 'boca-juniors', away_logo: 'images/history-boca-juniors.png' },
+        { id: 'archive-2018-8', date: '2018-05-12', time: '14:30', status_label: 'Завершён', score: '4:1', round: 'Полуфинал 1–4 №1', home_team: 'Вильярреал', home_team_slug: 'villarreal', home_logo: 'images/history-villarreal.png', away_team: 'Рома', away_team_slug: 'roma', away_logo: 'images/history-roma.png' },
+        { id: 'archive-2018-9', date: '2018-05-13', time: '10:00', status_label: 'Завершён', score: '2:1', round: 'Матч за 7 место', home_team: 'МТК', home_team_slug: 'mtk', home_logo: 'images/history-mtk.png', away_team: 'ЦСКА', away_team_slug: 'cska', away_logo: 'images/history-cska.png' },
+        { id: 'archive-2018-10', date: '2018-05-13', time: '11:30', status_label: 'Завершён', score: '0:0', round: 'Матч за 5 место', home_team: 'Алмаз-Антей', home_team_slug: 'almaz-antey', home_logo: 'images/team-almaz-antey.webp', away_team: 'Краснодар', away_team_slug: 'krasnodar', away_logo: 'images/history-krasnodar.png' },
+        { id: 'archive-2018-11', date: '2018-05-13', time: '13:00', status_label: 'Завершён', score: '4:2', round: 'Матч за 3 место', home_team: 'Зенит', home_team_slug: 'zenit', home_logo: 'images/team-zenit.webp', away_team: 'Рома', away_team_slug: 'roma', away_logo: 'images/history-roma.png' },
+        { id: 'archive-2018-12', date: '2018-05-13', time: '14:30', status_label: 'Завершён', score: '0:1', round: 'Финал', home_team: 'Бока Хуниорс', home_team_slug: 'boca-juniors', home_logo: 'images/history-boca-juniors.png', away_team: 'Вильярреал', away_team_slug: 'villarreal', away_logo: 'images/history-villarreal.png' }
+      ]
+    }
   }
 };
 const ARCHIVE_TOURNAMENT_SLUG_BY_YEAR = {
@@ -4503,6 +4715,13 @@ function renderArchiveTournamentPage() {
       playoffNode.innerHTML = playoff.length
         ? renderPlayoffBracket(playoff)
         : '<div class="archive-empty-state">Сетка плей-офф появится позднее.</div>';
+
+      if (competitionNode) {
+        const playoffSwitchButton = competitionNode.querySelector('[data-standings-switch="playoff"]');
+        if (playoffSwitchButton) {
+          playoffSwitchButton.hidden = !playoff.length;
+        }
+      }
     }
 
     if (competitionNode) {
