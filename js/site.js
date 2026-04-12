@@ -100,8 +100,8 @@ const CONTACT_MAP_DEFAULTS = {
     button: 'Google Maps'
   },
   yandex: {
-    embed: 'https://yandex.ru/map-widget/v1/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%BF%D1%80-%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%20130&z=16',
-    link: 'https://yandex.ru/maps/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%BF%D1%80-%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%20130',
+    embed: 'https://yandex.ru/map-widget/v1/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3&z=16',
+    link: 'https://yandex.ru/maps/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3',
     label: 'в Яндекс.Картах',
     button: 'Яндекс.Карты'
   }
@@ -131,8 +131,8 @@ function ensureContactsMapCard(card) {
     toggle.setAttribute('role', 'tablist');
     toggle.setAttribute('aria-label', 'Переключение карты');
     toggle.innerHTML = `
-      <button type="button" class="contact-map-toggle-btn is-active" data-map-provider="google" aria-pressed="true">${CONTACT_MAP_DEFAULTS.google.button}</button>
-      <button type="button" class="contact-map-toggle-btn" data-map-provider="yandex" aria-pressed="false">${CONTACT_MAP_DEFAULTS.yandex.button}</button>
+      <button type="button" class="contact-map-toggle-btn" data-map-provider="google" aria-pressed="false">${CONTACT_MAP_DEFAULTS.google.button}</button>
+      <button type="button" class="contact-map-toggle-btn is-active" data-map-provider="yandex" aria-pressed="true">${CONTACT_MAP_DEFAULTS.yandex.button}</button>
     `;
     const frameWrap = card.querySelector('.contact-map-frame');
     if (frameWrap) {
@@ -144,7 +144,7 @@ function ensureContactsMapCard(card) {
   if (!note) {
     note = document.createElement('p');
     note.className = 'contact-map-note';
-    note.innerHTML = `Если карта не загрузилась, откройте адрес напрямую: <a href="${CONTACT_MAP_DEFAULTS.google.link}" target="_blank" rel="noopener noreferrer">${CONTACT_MAP_DEFAULTS.google.label}</a>.`;
+    note.innerHTML = `Если карта не загрузилась, откройте адрес напрямую: <a href="${CONTACT_MAP_DEFAULTS.yandex.link}" target="_blank" rel="noopener noreferrer">${CONTACT_MAP_DEFAULTS.yandex.label}</a>.`;
     card.appendChild(note);
   }
 
@@ -187,7 +187,7 @@ function initContactsMapToggle(scope = document) {
   });
 
   const initialProvider = card.querySelector('.contact-map-toggle-btn.is-active')?.getAttribute('data-map-provider')
-    || buttons[0].getAttribute('data-map-provider');
+    || 'yandex';
   applyProvider(initialProvider);
 }
 
