@@ -83,16 +83,31 @@ function resolveStaticSiteRoot() {
 }
 
 const staticSiteRoot = resolveStaticSiteRoot();
-const faviconPath = staticSiteRoot
+const faviconPngPath = staticSiteRoot
   ? path.join(staticSiteRoot, 'favicon.png')
   : path.resolve(__dirname, '..', 'favicon.png');
+const faviconIcoPath = staticSiteRoot
+  ? path.join(staticSiteRoot, 'favicon.ico')
+  : path.resolve(__dirname, '..', 'favicon.ico');
 
-app.get(['/favicon.png', '/favicon.ico'], (req, res, next) => {
-  if (!fs.existsSync(faviconPath)) {
+app.get('/favicon.png', (req, res, next) => {
+  if (!fs.existsSync(faviconPngPath)) {
     return next();
   }
 
-  res.sendFile(faviconPath);
+  res.sendFile(faviconPngPath);
+});
+
+app.get('/favicon.ico', (req, res, next) => {
+  if (fs.existsSync(faviconIcoPath)) {
+    return res.sendFile(faviconIcoPath);
+  }
+
+  if (fs.existsSync(faviconPngPath)) {
+    return res.sendFile(faviconPngPath);
+  }
+
+  return next();
 });
 
 app.use(cors({
