@@ -92,13 +92,74 @@ function initHeaderCompactState() {
   header.classList.remove('is-compact');
 }
 
-function initContactsMapToggle() {
-  const card = document.querySelector('.contact-map-card');
+const CONTACT_MAP_DEFAULTS = {
+  google: {
+    embed: 'https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130&z=15&output=embed',
+    link: 'https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130',
+    label: 'в Google Maps',
+    button: 'Google Maps'
+  },
+  yandex: {
+    embed: 'https://yandex.ru/map-widget/v1/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%BF%D1%80-%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%20130&z=16',
+    link: 'https://yandex.ru/maps/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%BF%D1%80-%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%20130',
+    label: 'в Яндекс.Картах',
+    button: 'Яндекс.Карты'
+  }
+};
+
+function ensureContactsMapCard(card) {
+  if (!card) return null;
+  const frame = card.querySelector('.contact-map-frame iframe');
+  if (!frame) return null;
+
+  Object.entries(CONTACT_MAP_DEFAULTS).forEach(([provider, config]) => {
+    if (!frame.getAttribute(`data-map-${provider}-embed`)) {
+      frame.setAttribute(`data-map-${provider}-embed`, config.embed);
+    }
+    if (!frame.getAttribute(`data-map-${provider}-link`)) {
+      frame.setAttribute(`data-map-${provider}-link`, config.link);
+    }
+    if (!frame.getAttribute(`data-map-${provider}-label`)) {
+      frame.setAttribute(`data-map-${provider}-label`, config.label);
+    }
+  });
+
+  let toggle = card.querySelector('.contact-map-toggle');
+  if (!toggle) {
+    toggle = document.createElement('div');
+    toggle.className = 'contact-map-toggle';
+    toggle.setAttribute('role', 'tablist');
+    toggle.setAttribute('aria-label', 'Переключение карты');
+    toggle.innerHTML = `
+      <button type="button" class="contact-map-toggle-btn is-active" data-map-provider="google" aria-pressed="true">${CONTACT_MAP_DEFAULTS.google.button}</button>
+      <button type="button" class="contact-map-toggle-btn" data-map-provider="yandex" aria-pressed="false">${CONTACT_MAP_DEFAULTS.yandex.button}</button>
+    `;
+    const frameWrap = card.querySelector('.contact-map-frame');
+    if (frameWrap) {
+      card.insertBefore(toggle, frameWrap);
+    }
+  }
+
+  let note = card.querySelector('.contact-map-note');
+  if (!note) {
+    note = document.createElement('p');
+    note.className = 'contact-map-note';
+    note.innerHTML = `Если карта не загрузилась, откройте адрес напрямую: <a href="${CONTACT_MAP_DEFAULTS.google.link}" target="_blank" rel="noopener noreferrer">${CONTACT_MAP_DEFAULTS.google.label}</a>.`;
+    card.appendChild(note);
+  }
+
+  return card;
+}
+
+function initContactsMapToggle(scope = document) {
+  const card = ensureContactsMapCard(scope.querySelector('.contact-map-card'));
   if (!card) return;
   const buttons = Array.from(card.querySelectorAll('.contact-map-toggle-btn'));
   const frame = card.querySelector('.contact-map-frame iframe');
   const noteLink = card.querySelector('.contact-map-note a');
   if (!buttons.length || !frame) return;
+  if (card.dataset.mapToggleBound === 'true') return;
+  card.dataset.mapToggleBound = 'true';
 
   function applyProvider(provider) {
     if (!provider) return;
@@ -3151,6 +3212,7 @@ async function renderEditableStaticPage() {
   if (title) titleNode.textContent = title;
   if (subtitle) subtitleNode.textContent = subtitle;
   if (bodyHtml) bodyNode.innerHTML = bodyHtml;
+  initContactsMapToggle(page);
 
   document.title = `Burchalkin Cup — ${title || titleNode.textContent.trim() || ''}`.trim();
   document.documentElement.dataset.bcOriginalTitle = document.title;

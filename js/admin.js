@@ -776,9 +776,19 @@ const ADMIN_SOURCES = {
     </div>
     <div class="card contact-map-card">
       <h3>Карта</h3>
+      <div class="contact-map-toggle" role="tablist" aria-label="Переключение карты">
+        <button type="button" class="contact-map-toggle-btn is-active" data-map-provider="google" aria-pressed="true">Google Maps</button>
+        <button type="button" class="contact-map-toggle-btn" data-map-provider="yandex" aria-pressed="false">Яндекс.Карты</button>
+      </div>
       <div class="contact-map-frame">
         <iframe
           src="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130&z=15&output=embed"
+          data-map-google-embed="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130&z=15&output=embed"
+          data-map-yandex-embed="https://yandex.ru/map-widget/v1/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%BF%D1%80-%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%20130&z=16"
+          data-map-google-link="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130"
+          data-map-yandex-link="https://yandex.ru/maps/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D0%BF%D1%80-%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%20130"
+          data-map-google-label="в Google Maps"
+          data-map-yandex-label="в Яндекс.Картах"
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
           allowfullscreen
