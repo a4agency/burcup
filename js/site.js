@@ -100,8 +100,8 @@ const CONTACT_MAP_DEFAULTS = {
     button: 'Google Maps'
   },
   yandex: {
-    embed: 'https://yandex.ru/map-widget/v1/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3&z=16',
-    link: 'https://yandex.ru/maps/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3',
+    embed: 'https://yandex.ru/map-widget/v1/?ll=30.483708%2C59.849457&mode=whatshere&whatshere%5Bpoint%5D=30.483708%2C59.849457&whatshere%5Bzoom%5D=17&z=17',
+    link: 'https://yandex.com/maps/-/CPrPVS5A',
     label: 'в Яндекс.Картах',
     button: 'Яндекс.Карты'
   }
@@ -113,15 +113,9 @@ function ensureContactsMapCard(card) {
   if (!frame) return null;
 
   Object.entries(CONTACT_MAP_DEFAULTS).forEach(([provider, config]) => {
-    if (!frame.getAttribute(`data-map-${provider}-embed`)) {
-      frame.setAttribute(`data-map-${provider}-embed`, config.embed);
-    }
-    if (!frame.getAttribute(`data-map-${provider}-link`)) {
-      frame.setAttribute(`data-map-${provider}-link`, config.link);
-    }
-    if (!frame.getAttribute(`data-map-${provider}-label`)) {
-      frame.setAttribute(`data-map-${provider}-label`, config.label);
-    }
+    frame.setAttribute(`data-map-${provider}-embed`, config.embed);
+    frame.setAttribute(`data-map-${provider}-link`, config.link);
+    frame.setAttribute(`data-map-${provider}-label`, config.label);
   });
 
   let toggle = card.querySelector('.contact-map-toggle');
@@ -186,9 +180,7 @@ function initContactsMapToggle(scope = document) {
     });
   });
 
-  const initialProvider = card.querySelector('.contact-map-toggle-btn.is-active')?.getAttribute('data-map-provider')
-    || 'yandex';
-  applyProvider(initialProvider);
+  applyProvider('yandex');
 }
 
 function initActiveHeaderLink() {

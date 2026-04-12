@@ -782,11 +782,11 @@ const ADMIN_SOURCES = {
       </div>
       <div class="contact-map-frame">
         <iframe
-          src="https://yandex.ru/map-widget/v1/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3&z=16"
+          src="https://yandex.ru/map-widget/v1/?ll=30.483708%2C59.849457&mode=whatshere&whatshere%5Bpoint%5D=30.483708%2C59.849457&whatshere%5Bzoom%5D=17&z=17"
           data-map-google-embed="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130&z=15&output=embed"
-          data-map-yandex-embed="https://yandex.ru/map-widget/v1/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3&z=16"
+          data-map-yandex-embed="https://yandex.ru/map-widget/v1/?ll=30.483708%2C59.849457&mode=whatshere&whatshere%5Bpoint%5D=30.483708%2C59.849457&whatshere%5Bzoom%5D=17&z=17"
           data-map-google-link="https://www.google.com/maps?q=%D0%A4%D0%9A%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9,%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3,%20%D0%9F%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%20%D0%9E%D0%B1%D1%83%D1%85%D0%BE%D0%B2%D1%81%D0%BA%D0%BE%D0%B9%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B,%20130"
-          data-map-yandex-link="https://yandex.ru/maps/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3"
+          data-map-yandex-link="https://yandex.com/maps/-/CPrPVS5A"
           data-map-google-label="в Google Maps"
           data-map-yandex-label="в Яндекс.Картах"
           loading="lazy"
@@ -796,7 +796,7 @@ const ADMIN_SOURCES = {
       </div>
       <p class="contact-map-note">
         Если карта не загрузилась, откройте адрес напрямую:
-        <a href="https://yandex.ru/maps/?text=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D1%81%D1%82%D0%B0%D0%B4%D0%B8%D0%BE%D0%BD%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2C%20%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3" target="_blank" rel="noopener noreferrer">в Яндекс.Картах</a>.
+        <a href="https://yandex.com/maps/-/CPrPVS5A" target="_blank" rel="noopener noreferrer">в Яндекс.Картах</a>.
       </p>
     </div>
   </div>
