@@ -4992,13 +4992,29 @@ function initHeroCarousel() {
   if (!root || !dotsWrap) return;
 
   const slides = Array.from(root.querySelectorAll('.hero-carousel-slide'));
-  const dots = Array.from(dotsWrap.querySelectorAll('.hero-carousel-dot'));
   if (!slides.length) return;
+  let dots = [];
 
   function hydrateSlide(indexToLoad) {
     const slide = slides[indexToLoad];
     if (!slide) return;
     hydrateDeferredImage(slide.querySelector('img'));
+  }
+
+  function buildDots() {
+    dotsWrap.innerHTML = '';
+    dots = slides.map((_, i) => {
+      const dot = document.createElement('button');
+      dot.className = `hero-carousel-dot${i === 0 ? ' active' : ''}`;
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `Слайд ${i + 1}`);
+      dot.addEventListener('click', () => {
+        show(i);
+        start();
+      });
+      dotsWrap.appendChild(dot);
+      return dot;
+    });
   }
 
   let index = 0;
@@ -5046,9 +5062,7 @@ function initHeroCarousel() {
   function goPrev() { show(index - 1); start(); }
   function goNext() { show(index + 1); start(); }
 
-  dots.forEach((dot, i) => {
-    dot.addEventListener('click', () => { show(i); start(); });
-  });
+  buildDots();
 
   if (prevBtn) prevBtn.addEventListener('click', goPrev);
   if (nextBtn) nextBtn.addEventListener('click', goNext);
