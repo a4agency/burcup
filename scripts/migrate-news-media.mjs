@@ -62,20 +62,6 @@ async function createSessionToken() {
   return body.token;
 }
 
-async function fetchRemoteAsDataUrl(url) {
-  const response = await fetch(url, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to download ${url}: ${response.status}`);
-  }
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const contentType = response.headers.get('content-type') || '';
-  const mime = contentType.split(';')[0].trim() || 'application/octet-stream';
-  return `data:${mime};base64,${buffer.toString('base64')}`;
-}
-
 function getUploadMeta(remoteUrl, fallbackPrefix, folder) {
   const clean = new URL(remoteUrl);
   const ext = path.extname(clean.pathname).replace('.', '').toLowerCase() || 'bin';
@@ -88,7 +74,7 @@ function getUploadMeta(remoteUrl, fallbackPrefix, folder) {
   };
 }
 
-async function uploadAsset({ token, endpoint, dataUrl, remoteUrl, folder, fallbackPrefix }) {
+async function uploadAsset({ token, endpoint, remoteUrl, folder, fallbackPrefix }) {
   const meta = getUploadMeta(remoteUrl, fallbackPrefix, folder);
   const response = await fetch(`${baseUrl}${endpoint}`, {
     method: 'POST',
@@ -97,7 +83,7 @@ async function uploadAsset({ token, endpoint, dataUrl, remoteUrl, folder, fallba
       'x-admin-token': token,
     },
     body: JSON.stringify({
-      file: dataUrl,
+      remote_url: remoteUrl,
       ...meta,
     }),
   });
@@ -141,11 +127,9 @@ async function main() {
     if (remoteNeedsMigration(nextItem.image)) {
       const remoteUrl = normalizeUrl(nextItem.image);
       if (!state.assets[remoteUrl]) {
-        const dataUrl = await fetchRemoteAsDataUrl(remoteUrl);
         state.assets[remoteUrl] = await uploadAsset({
           token,
           endpoint: '/api/admin/uploads/image',
-          dataUrl,
           remoteUrl,
           folder: `burcup/news/${itemSlug}/images`,
           fallbackPrefix: `${itemSlug}-cover`,
@@ -158,11 +142,9 @@ async function main() {
     if (remoteNeedsMigration(nextItem.video_url)) {
       const remoteUrl = normalizeUrl(nextItem.video_url);
       if (!state.assets[remoteUrl]) {
-        const dataUrl = await fetchRemoteAsDataUrl(remoteUrl);
         state.assets[remoteUrl] = await uploadAsset({
           token,
           endpoint: '/api/admin/uploads/video',
-          dataUrl,
           remoteUrl,
           folder: `burcup/news/${itemSlug}/videos`,
           fallbackPrefix: `${itemSlug}-video`,
@@ -177,11 +159,9 @@ async function main() {
         const remoteUrl = normalizeUrl(photo?.image_url);
         if (!remoteNeedsMigration(remoteUrl)) continue;
         if (!state.assets[remoteUrl]) {
-          const dataUrl = await fetchRemoteAsDataUrl(remoteUrl);
           state.assets[remoteUrl] = await uploadAsset({
             token,
             endpoint: '/api/admin/uploads/image',
-            dataUrl,
             remoteUrl,
             folder: `burcup/news/${itemSlug}/gallery`,
             fallbackPrefix: `${itemSlug}-photo`,

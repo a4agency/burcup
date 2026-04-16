@@ -2926,18 +2926,19 @@ app.get('/api/pages/:slug', async (req, res, next) => {
 app.post('/api/admin/uploads/image', requireAdminAuth, async (req, res, next) => {
   try {
     const file = typeof req.body?.file === 'string' ? req.body.file.trim() : '';
+    const remoteUrl = typeof req.body?.remote_url === 'string' ? req.body.remote_url.trim() : '';
     const folder = normalizeString(req.body?.folder) || 'burcup/uploads';
     const filename = normalizeString(req.body?.filename) || 'image';
     const originalFilename = normalizeString(req.body?.original_filename) || filename;
     const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
     const mimeType = (file.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/) || [])[1] || '';
 
-    if (!file || !file.startsWith('data:image/')) {
-      return res.status(400).json({ error: 'Image payload must be a data URL' });
+    if (!remoteUrl && (!file || !file.startsWith('data:image/'))) {
+      return res.status(400).json({ error: 'Image payload must be a data URL or remote URL' });
     }
 
     const uploaded = await uploadImageToCloudinary({
-      file,
+      file: remoteUrl || file,
       folder,
       publicId,
     });
@@ -2962,18 +2963,19 @@ app.post('/api/admin/uploads/image', requireAdminAuth, async (req, res, next) =>
 app.post('/api/admin/uploads/video', requireAdminAuth, async (req, res, next) => {
   try {
     const file = typeof req.body?.file === 'string' ? req.body.file.trim() : '';
+    const remoteUrl = typeof req.body?.remote_url === 'string' ? req.body.remote_url.trim() : '';
     const folder = normalizeString(req.body?.folder) || 'burcup/uploads';
     const filename = normalizeString(req.body?.filename) || 'video';
     const originalFilename = normalizeString(req.body?.original_filename) || filename;
     const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
     const mimeType = (file.match(/^data:(video\/[a-zA-Z0-9.+-]+);base64,/) || [])[1] || '';
 
-    if (!file || !file.startsWith('data:video/')) {
-      return res.status(400).json({ error: 'Video payload must be a data URL' });
+    if (!remoteUrl && (!file || !file.startsWith('data:video/'))) {
+      return res.status(400).json({ error: 'Video payload must be a data URL or remote URL' });
     }
 
     const uploaded = await uploadVideoToCloudinary({
-      file,
+      file: remoteUrl || file,
       folder,
       publicId,
     });
