@@ -210,7 +210,14 @@ function createCloudinarySignature(params, apiSecret) {
   return crypto.createHash('sha1').update(payload + apiSecret).digest('hex');
 }
 
-async function uploadAssetToCloudinary({ file, folder, publicId, resourceType = 'image' }) {
+async function uploadAssetToCloudinary({
+  file,
+  folder,
+  publicId,
+  resourceType = 'image',
+  fileName = '',
+  mimeType = '',
+}) {
   const config = getCloudinaryConfig();
   if (!config) {
     throw new Error('Cloudinary is not configured on the server');
@@ -224,21 +231,38 @@ async function uploadAssetToCloudinary({ file, folder, publicId, resourceType = 
   };
 
   const signature = createCloudinarySignature(uploadParams, config.apiSecret);
-  const body = new URLSearchParams({
-    file,
-    folder: uploadParams.folder,
-    public_id: uploadParams.public_id,
-    timestamp: String(timestamp),
-    api_key: config.apiKey,
-    signature,
-  });
+  let body;
+  let headers = undefined;
+
+  if (file && typeof file === 'object') {
+    body = new FormData();
+    const binaryMimeType = normalizeString(mimeType) || 'application/octet-stream';
+    const binaryFileName = normalizeString(fileName) || `${uploadParams.public_id}`;
+    const blob = file instanceof Blob ? file : new Blob([file], { type: binaryMimeType });
+    body.append('file', blob, binaryFileName);
+    body.append('folder', uploadParams.folder);
+    body.append('public_id', uploadParams.public_id);
+    body.append('timestamp', String(timestamp));
+    body.append('api_key', config.apiKey);
+    body.append('signature', signature);
+  } else {
+    body = new URLSearchParams({
+      file,
+      folder: uploadParams.folder,
+      public_id: uploadParams.public_id,
+      timestamp: String(timestamp),
+      api_key: config.apiKey,
+      signature,
+    });
+    headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+  }
 
   const normalizedResourceType = normalizeString(resourceType) || 'image';
   const response = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/${normalizedResourceType}/upload`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers,
     body,
   });
 
@@ -2978,6 +3002,81 @@ app.post('/api/admin/uploads/video', requireAdminAuth, async (req, res, next) =>
       file: remoteUrl || file,
       folder,
       publicId,
+    });
+
+    return res.json({
+      ok: true,
+      url: uploaded.url,
+      public_id: uploaded.publicId,
+      storage_provider: uploaded.storageProvider,
+      resource_type: uploaded.resourceType,
+      file_name: originalFilename,
+      mime_type: mimeType,
+      width: uploaded.width,
+      height: uploaded.height,
+      format: uploaded.format,
+      bytes: uploaded.bytes,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post('/api/admin/uploads/image-binary', requireAdminAuth, express.raw({ type: '*/*', limit: '100mb' }), async (req, res, next) => {
+  try {
+    const folder = normalizeString(req.headers['x-upload-folder']) || 'burcup/uploads';
+    const filename = normalizeString(req.headers['x-upload-filename']) || 'image';
+    const originalFilename = normalizeString(req.headers['x-upload-original-filename']) || filename;
+    const mimeType = normalizeString(req.headers['content-type']) || 'application/octet-stream';
+    const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
+
+    if (!req.body || !req.body.length) {
+      return res.status(400).json({ error: 'Binary image payload is required' });
+    }
+
+    const uploaded = await uploadImageToCloudinary({
+      file: req.body,
+      folder,
+      publicId,
+      fileName: originalFilename,
+      mimeType,
+    });
+
+    return res.json({
+      ok: true,
+      url: uploaded.url,
+      public_id: uploaded.publicId,
+      storage_provider: uploaded.storageProvider,
+      file_name: originalFilename,
+      mime_type: mimeType,
+      width: uploaded.width,
+      height: uploaded.height,
+      format: uploaded.format,
+      bytes: uploaded.bytes,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post('/api/admin/uploads/video-binary', requireAdminAuth, express.raw({ type: '*/*', limit: '400mb' }), async (req, res, next) => {
+  try {
+    const folder = normalizeString(req.headers['x-upload-folder']) || 'burcup/uploads';
+    const filename = normalizeString(req.headers['x-upload-filename']) || 'video';
+    const originalFilename = normalizeString(req.headers['x-upload-original-filename']) || filename;
+    const mimeType = normalizeString(req.headers['content-type']) || 'application/octet-stream';
+    const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
+
+    if (!req.body || !req.body.length) {
+      return res.status(400).json({ error: 'Binary video payload is required' });
+    }
+
+    const uploaded = await uploadVideoToCloudinary({
+      file: req.body,
+      folder,
+      publicId,
+      fileName: originalFilename,
+      mimeType,
     });
 
     return res.json({
