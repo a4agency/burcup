@@ -105,7 +105,7 @@ function newsUsesLegacyMedia(item = {}) {
 async function main() {
   await ensureDir(cacheDir);
   const token = await createSessionToken();
-  const state = await readJson(statePath, { assets: {} });
+  const state = await readJson(statePath, { assets: {}, skipped: {} });
   const news = await fetchJson(`${baseUrl}/api/news`);
 
   let migratedCount = 0;
@@ -126,49 +126,61 @@ async function main() {
 
     if (remoteNeedsMigration(nextItem.image)) {
       const remoteUrl = normalizeUrl(nextItem.image);
-      if (!state.assets[remoteUrl]) {
-        state.assets[remoteUrl] = await uploadAsset({
-          token,
-          endpoint: '/api/admin/uploads/image',
-          remoteUrl,
-          folder: `burcup/news/${itemSlug}/images`,
-          fallbackPrefix: `${itemSlug}-cover`,
-        });
+      if (!state.assets[remoteUrl] && !state.skipped[remoteUrl]) {
+        try {
+          state.assets[remoteUrl] = await uploadAsset({
+            token,
+            endpoint: '/api/admin/uploads/image',
+            remoteUrl,
+            folder: `burcup/news/${itemSlug}/images`,
+            fallbackPrefix: `${itemSlug}-cover`,
+          });
+        } catch (error) {
+          state.skipped[remoteUrl] = String(error.message || error);
+        }
         await writeJson(statePath, state);
       }
-      nextItem.image = state.assets[remoteUrl];
+      nextItem.image = state.assets[remoteUrl] || remoteUrl;
     }
 
     if (remoteNeedsMigration(nextItem.video_url)) {
       const remoteUrl = normalizeUrl(nextItem.video_url);
-      if (!state.assets[remoteUrl]) {
-        state.assets[remoteUrl] = await uploadAsset({
-          token,
-          endpoint: '/api/admin/uploads/video',
-          remoteUrl,
-          folder: `burcup/news/${itemSlug}/videos`,
-          fallbackPrefix: `${itemSlug}-video`,
-        });
+      if (!state.assets[remoteUrl] && !state.skipped[remoteUrl]) {
+        try {
+          state.assets[remoteUrl] = await uploadAsset({
+            token,
+            endpoint: '/api/admin/uploads/video',
+            remoteUrl,
+            folder: `burcup/news/${itemSlug}/videos`,
+            fallbackPrefix: `${itemSlug}-video`,
+          });
+        } catch (error) {
+          state.skipped[remoteUrl] = String(error.message || error);
+        }
         await writeJson(statePath, state);
       }
-      nextItem.video_url = state.assets[remoteUrl];
+      nextItem.video_url = state.assets[remoteUrl] || remoteUrl;
     }
 
     if (Array.isArray(nextItem.photos)) {
       for (const photo of nextItem.photos) {
         const remoteUrl = normalizeUrl(photo?.image_url);
         if (!remoteNeedsMigration(remoteUrl)) continue;
-        if (!state.assets[remoteUrl]) {
-          state.assets[remoteUrl] = await uploadAsset({
-            token,
-            endpoint: '/api/admin/uploads/image',
-            remoteUrl,
-            folder: `burcup/news/${itemSlug}/gallery`,
-            fallbackPrefix: `${itemSlug}-photo`,
-          });
+        if (!state.assets[remoteUrl] && !state.skipped[remoteUrl]) {
+          try {
+            state.assets[remoteUrl] = await uploadAsset({
+              token,
+              endpoint: '/api/admin/uploads/image',
+              remoteUrl,
+              folder: `burcup/news/${itemSlug}/gallery`,
+              fallbackPrefix: `${itemSlug}-photo`,
+            });
+          } catch (error) {
+            state.skipped[remoteUrl] = String(error.message || error);
+          }
           await writeJson(statePath, state);
         }
-        photo.image_url = state.assets[remoteUrl];
+        photo.image_url = state.assets[remoteUrl] || remoteUrl;
       }
     }
 
@@ -194,6 +206,8 @@ async function main() {
   }
 
   console.log(`Updated ${body?.count || nextNews.length} news items`);
+  console.log(`Uploaded assets: ${Object.keys(state.assets || {}).length}`);
+  console.log(`Skipped assets: ${Object.keys(state.skipped || {}).length}`);
 }
 
 main().catch(error => {
