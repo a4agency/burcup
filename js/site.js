@@ -2891,6 +2891,10 @@ function getNewsArticleParagraphs(item) {
     .filter(Boolean);
 }
 
+function getNewsArticleBodyHtml(item = {}) {
+  return String(item?.body_html || '').trim();
+}
+
 function getNewsArticleEnrichment(item = {}) {
   const slug = String(item?.slug || '').trim();
   return NEWS_ARTICLE_ENRICHMENTS[slug] || null;
@@ -2948,6 +2952,67 @@ function renderLinkedText(value) {
 
   result += escapeHtml(text.slice(lastIndex));
   return result;
+}
+
+function normalizeNewsInlineImageKey(value = '') {
+  const source = String(value || '').trim();
+  if (!source) return '';
+  const fileName = source.split('?')[0].split('/').pop() || '';
+  return fileName
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/-\d+x\d+$/i, '')
+    .replace(/-\d{10,}$/i, '')
+    .toLowerCase();
+}
+
+function enhanceNewsArticleBody(root, photos = []) {
+  if (!root) return;
+
+  const photoIndexMap = new Map();
+  photos.forEach((photo, index) => {
+    const key = normalizeNewsInlineImageKey(photo?.image_url);
+    if (key && !photoIndexMap.has(key)) {
+      photoIndexMap.set(key, index);
+    }
+  });
+
+  root.querySelectorAll('a[href]').forEach((link) => {
+    const href = String(link.getAttribute('href') || '').trim();
+    if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noreferrer noopener');
+  });
+
+  root.querySelectorAll('img').forEach((image) => {
+    image.classList.add('news-article-inline-image');
+    image.removeAttribute('width');
+    image.removeAttribute('height');
+    image.removeAttribute('srcset');
+    image.removeAttribute('sizes');
+
+    const photoIndex = photoIndexMap.get(normalizeNewsInlineImageKey(image.getAttribute('src') || ''));
+    if (photoIndex == null) return;
+
+    image.dataset.albumPhotoIndex = String(photoIndex);
+    image.setAttribute('role', 'button');
+    image.setAttribute('tabindex', '0');
+    image.setAttribute('aria-label', `Открыть фотографию ${photoIndex + 1}`);
+
+    const openPhoto = (event) => {
+      event.preventDefault();
+      const trigger = document.querySelector(`.news-article-card [data-album-photo-index="${photoIndex}"]`);
+      if (trigger && typeof trigger.click === 'function') {
+        trigger.click();
+      }
+    };
+
+    image.addEventListener('click', openPhoto);
+    image.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        openPhoto(event);
+      }
+    });
+  });
 }
 
 function isDirectVideoFile(url) {
@@ -4419,21 +4484,30 @@ async function renderNewsArticlePage() {
     document.documentElement.dataset.bcOriginalTitle = document.title;
     const imageSrc = resolveNewsImage(item);
     const content = getNewsArticleParagraphs(item);
+    const bodyHtml = getNewsArticleBodyHtml(item);
     const videoUrl = getNewsArticleVideoUrl(item);
     const articlePhotos = videoUrl
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
-    const galleryPhotos = videoUrl ? articlePhotos : articlePhotos.slice(imageSrc ? 1 : 0);
+    const mediaMarkup = bodyHtml && !videoUrl ? '' : renderNewsArticleMedia(item, imageSrc);
+    const galleryPhotos = bodyHtml
+      ? []
+      : (videoUrl ? [] : articlePhotos.slice(imageSrc ? 1 : 0));
     const displayDate = formatNewsDisplayDate(item.date);
 
     root.innerHTML = `
       <article class="news-article-card">
         <a class="news-article-back" href="news.html">← Все новости</a>
         <h1 class="news-article-title">${escapeHtml(item.title || '')}</h1>
-        ${renderNewsArticleMedia(item, imageSrc)}
+        ${mediaMarkup}
         <div class="news-article-body">
-          ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
-          ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
+          ${bodyHtml
+            ? bodyHtml
+            : `
+              ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
+              ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
+            `
+          }
         </div>
         ${galleryPhotos.length ? `
           <div class="news-article-gallery">
@@ -4443,6 +4517,11 @@ async function renderNewsArticlePage() {
         <div class="news-article-footer">
           <div class="news-article-date">Добавлено: ${escapeHtml(displayDate)}</div>
         </div>
+        ${bodyHtml && articlePhotos.length ? `
+          <div class="news-article-lightbox-triggers" hidden>
+            ${articlePhotos.map((photo, index) => renderNewsArticlePhotoButton(photo, index, 'news-article-lightbox-trigger')).join('')}
+          </div>
+        ` : ''}
       </article>
       ${articlePhotos.length ? `
         <div class="media-album-lightbox" id="media-album-lightbox" hidden>
@@ -4460,6 +4539,7 @@ async function renderNewsArticlePage() {
       ` : ''}
     `;
     root.setAttribute('aria-busy', 'false');
+    enhanceNewsArticleBody(root.querySelector('.news-article-body'), articlePhotos);
     if (articlePhotos.length) {
       initMediaAlbumLightbox(articlePhotos);
     }

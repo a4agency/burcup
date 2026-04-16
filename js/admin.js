@@ -1386,6 +1386,7 @@ function normalizeNewsAdminItem(item, index = 0) {
     title: String(item?.title || '').trim(),
     excerpt: String(item?.excerpt || '').trim(),
     body: String(item?.body || contentValue).trim(),
+    body_html: typeof item?.body_html === 'string' ? item.body_html.trim() : '',
     link: String(item?.link || 'news.html').trim() || 'news.html',
     image: String(item?.image || '').trim(),
     is_published: item?.is_published !== false,

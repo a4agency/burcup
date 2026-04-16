@@ -58,6 +58,7 @@ let translationTableEnsured = false;
 let editablePagesTableEnsured = false;
 let newsArticlePhotosTableEnsured = false;
 let newsArticleVideoColumnEnsured = false;
+let newsArticleBodyHtmlColumnEnsured = false;
 
 function isStaticSiteRoot(candidatePath) {
   if (!candidatePath) return false;
@@ -370,6 +371,17 @@ async function ensureNewsArticleVideoColumn(queryable = pool) {
   `);
 
   newsArticleVideoColumnEnsured = true;
+}
+
+async function ensureNewsArticleBodyHtmlColumn(queryable = pool) {
+  if (newsArticleBodyHtmlColumnEnsured) return;
+
+  await queryable.query(`
+    ALTER TABLE news_articles
+    ADD COLUMN IF NOT EXISTS body_html TEXT NOT NULL DEFAULT '';
+  `);
+
+  newsArticleBodyHtmlColumnEnsured = true;
 }
 
 async function translateTextWithGoogleGtx(text, sourceLang, targetLang) {
@@ -1347,6 +1359,7 @@ function mapNewsArticleRow(row, photos = []) {
     title: row.title || '',
     excerpt: row.excerpt || '',
     body,
+    body_html: row.body_html || '',
     content: splitNewsBodyToContent(body),
     link: row.link_path || '',
     image: row.image_url || '',
@@ -1368,6 +1381,7 @@ const newsQuery = `
     n.title,
     n.excerpt,
     n.body,
+    n.body_html,
     n.link_path,
     n.image_url,
     n.video_url,
@@ -1388,6 +1402,7 @@ const adminNewsQuery = `
     n.title,
     n.excerpt,
     n.body,
+    n.body_html,
     n.link_path,
     n.image_url,
     n.video_url,
@@ -1629,6 +1644,7 @@ async function getAdminMatches(client) {
 
 async function getAdminNews(client) {
   await ensureNewsArticleVideoColumn(client);
+  await ensureNewsArticleBodyHtmlColumn(client);
   const { rows } = await client.query(adminNewsQuery);
   const photoMap = await getNewsArticlePhotoMap(client, rows.map(row => Number(row.id)));
   return rows.map(row => mapNewsArticleRow(row, photoMap.get(Number(row.id)) || []));
@@ -2400,6 +2416,7 @@ async function replaceNews(client, payload) {
 
   await ensureNewsArticlePhotosTable(client);
   await ensureNewsArticleVideoColumn(client);
+  await ensureNewsArticleBodyHtmlColumn(client);
 
   for (const item of items) {
     const id = parseInteger(item.id, 0);
@@ -2422,12 +2439,13 @@ async function replaceNews(client, payload) {
         title,
         excerpt,
         body,
+        body_html,
         link_path,
         image_url,
         video_url,
         is_published
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       ON CONFLICT (id) DO UPDATE
       SET
         tournament_id = EXCLUDED.tournament_id,
@@ -2436,6 +2454,7 @@ async function replaceNews(client, payload) {
         title = EXCLUDED.title,
         excerpt = EXCLUDED.excerpt,
         body = EXCLUDED.body,
+        body_html = EXCLUDED.body_html,
         link_path = EXCLUDED.link_path,
         image_url = EXCLUDED.image_url,
         video_url = EXCLUDED.video_url,
@@ -2448,6 +2467,7 @@ async function replaceNews(client, payload) {
       normalizeString(item.title),
       normalizeString(item.excerpt),
       normalizeString(item.body),
+      normalizeHtmlString(item.body_html),
       normalizeString(item.link) || 'news.html',
       nullIfEmpty(item.image),
       nullIfEmpty(item.video_url),
@@ -3236,6 +3256,7 @@ app.get('/api/tournaments', async (req, res, next) => {
 app.get('/api/tournaments/:slug', async (req, res, next) => {
   try {
     await ensureNewsArticleVideoColumn(pool);
+    await ensureNewsArticleBodyHtmlColumn(pool);
     const includeCountdown = await hasTournamentCountdownColumn(pool);
     const includeManualModes = await hasTournamentManualModeColumns(pool);
     const tournamentResult = await pool.query(buildTournamentDetailsQuery(includeCountdown, includeManualModes), [req.params.slug]);
@@ -3331,6 +3352,7 @@ app.get('/api/tournaments/:slug/matches', async (req, res, next) => {
 app.get('/api/tournaments/:slug/news', async (req, res, next) => {
   try {
     await ensureNewsArticleVideoColumn(pool);
+    await ensureNewsArticleBodyHtmlColumn(pool);
     const { rows } = await pool.query(newsQuery, [req.params.slug]);
     const photoMap = await getNewsArticlePhotoMap(pool, rows.map(row => Number(row.id)));
     res.json(rows.map(row => mapNewsArticleRow(row, photoMap.get(Number(row.id)) || [])));
@@ -3449,6 +3471,7 @@ app.get('/api/matches', async (req, res, next) => {
 app.get('/api/news', async (req, res, next) => {
   try {
     await ensureNewsArticleVideoColumn(pool);
+    await ensureNewsArticleBodyHtmlColumn(pool);
     const { rows } = await pool.query(newsQuery, [null]);
     const photoMap = await getNewsArticlePhotoMap(pool, rows.map(row => Number(row.id)));
     res.json(rows.map(row => mapNewsArticleRow(row, photoMap.get(Number(row.id)) || [])));

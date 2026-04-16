@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS news_articles (
   title TEXT NOT NULL,
   excerpt TEXT NOT NULL,
   body TEXT NOT NULL DEFAULT '',
+  body_html TEXT NOT NULL DEFAULT '',
   link_path TEXT NOT NULL,
   image_url TEXT,
   video_url TEXT,
