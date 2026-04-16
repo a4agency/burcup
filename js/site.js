@@ -1044,7 +1044,7 @@ const NEWS_IMAGE_FALLBACKS = [
 ];
 const NEWS_ARTICLE_ENRICHMENTS = {
   'promo-rolik-viii-kubka-burchalkina': {
-    video_url: 'https://burchalkin-cup.ru/wp-content/uploads/2026/03/burchalkin-cup-2026-teaser-1920x1080_2.mp4'
+    video_url: 'https://res.cloudinary.com/dcqvo4aoj/video/upload/v1776365062/burcup/news/promo-rolik-viii-kubka-burchalkina/videos/burchalkin-cup-2026-teaser-1920x1080-2-1776365003533.mp4'
   }
 };
 const CLUB_LOCATION_OVERRIDES = {

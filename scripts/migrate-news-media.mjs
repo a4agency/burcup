@@ -317,6 +317,30 @@ function shouldRetrySkipped(state, remoteUrl) {
   return error.includes('File size too large') || error.includes('Compressed video is still too large');
 }
 
+function removeStandaloneAssetLines(value = '') {
+  const text = String(value || '');
+  if (!text.trim()) return text;
+  return text
+    .split('\n')
+    .filter(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return true;
+      return !/^https?:\/\/\S+\.(?:jpg|jpeg|png|webp|gif|mp4|mov)(?:\?\S*)?$/i.test(trimmed);
+    })
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function replaceAssetUrlsInText(value = '', assets = {}) {
+  let next = String(value || '');
+  for (const [from, to] of Object.entries(assets)) {
+    if (!from || !to || from === to) continue;
+    next = next.split(from).join(to);
+  }
+  return removeStandaloneAssetLines(next);
+}
+
 async function main() {
   await ensureDir(cacheDir);
   const token = await createSessionToken();
@@ -402,6 +426,13 @@ async function main() {
         }
         photo.image_url = state.assets[remoteUrl] || remoteUrl;
       }
+    }
+
+    nextItem.body = replaceAssetUrlsInText(nextItem.body, state.assets);
+    if (Array.isArray(nextItem.content)) {
+      nextItem.content = nextItem.content
+        .map(part => replaceAssetUrlsInText(part, state.assets))
+        .filter(Boolean);
     }
 
     migratedCount += 1;
