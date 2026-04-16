@@ -210,7 +210,7 @@ function createCloudinarySignature(params, apiSecret) {
   return crypto.createHash('sha1').update(payload + apiSecret).digest('hex');
 }
 
-async function uploadImageToCloudinary({ file, folder, publicId }) {
+async function uploadAssetToCloudinary({ file, folder, publicId, resourceType = 'image' }) {
   const config = getCloudinaryConfig();
   if (!config) {
     throw new Error('Cloudinary is not configured on the server');
@@ -233,7 +233,8 @@ async function uploadImageToCloudinary({ file, folder, publicId }) {
     signature,
   });
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`, {
+  const normalizedResourceType = normalizeString(resourceType) || 'image';
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${config.cloudName}/${normalizedResourceType}/upload`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -254,7 +255,16 @@ async function uploadImageToCloudinary({ file, folder, publicId }) {
     format: result.format || '',
     bytes: result.bytes || 0,
     storageProvider: 'cloudinary',
+    resourceType: normalizedResourceType,
   };
+}
+
+async function uploadImageToCloudinary({ file, folder, publicId }) {
+  return uploadAssetToCloudinary({ file, folder, publicId, resourceType: 'image' });
+}
+
+async function uploadVideoToCloudinary({ file, folder, publicId }) {
+  return uploadAssetToCloudinary({ file, folder, publicId, resourceType: 'video' });
 }
 
 async function ensureTranslationCacheTable(queryable = pool) {
@@ -2937,6 +2947,43 @@ app.post('/api/admin/uploads/image', requireAdminAuth, async (req, res, next) =>
       url: uploaded.url,
       public_id: uploaded.publicId,
       storage_provider: uploaded.storageProvider,
+      file_name: originalFilename,
+      mime_type: mimeType,
+      width: uploaded.width,
+      height: uploaded.height,
+      format: uploaded.format,
+      bytes: uploaded.bytes,
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post('/api/admin/uploads/video', requireAdminAuth, async (req, res, next) => {
+  try {
+    const file = typeof req.body?.file === 'string' ? req.body.file.trim() : '';
+    const folder = normalizeString(req.body?.folder) || 'burcup/uploads';
+    const filename = normalizeString(req.body?.filename) || 'video';
+    const originalFilename = normalizeString(req.body?.original_filename) || filename;
+    const publicId = `${filename}-${Date.now()}`.replace(/[^a-z0-9/_-]+/gi, '-').replace(/-+/g, '-');
+    const mimeType = (file.match(/^data:(video\/[a-zA-Z0-9.+-]+);base64,/) || [])[1] || '';
+
+    if (!file || !file.startsWith('data:video/')) {
+      return res.status(400).json({ error: 'Video payload must be a data URL' });
+    }
+
+    const uploaded = await uploadVideoToCloudinary({
+      file,
+      folder,
+      publicId,
+    });
+
+    return res.json({
+      ok: true,
+      url: uploaded.url,
+      public_id: uploaded.publicId,
+      storage_provider: uploaded.storageProvider,
+      resource_type: uploaded.resourceType,
       file_name: originalFilename,
       mime_type: mimeType,
       width: uploaded.width,
