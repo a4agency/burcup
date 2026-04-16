@@ -160,7 +160,6 @@ function parseArticle(html = '') {
 function deriveTournamentSlug(date = '') {
   const year = Number(String(date).slice(0, 4));
   if (year === 2026) return 'burchalkin-cup-2026';
-  if (year === 2025) return 'burchalkin-cup-2025';
   return '';
 }
 
@@ -206,7 +205,7 @@ async function main() {
         : bodyWithoutDuplicateTitle;
       const excerptSource = normalizeText(entry.excerpt).length >= 24
         ? normalizeText(entry.excerpt)
-        : bodyWithoutDuplicateTitle.slice(0, 2).join('\n\n');
+        : finalBodyParts.slice(0, 2).join('\n\n');
       return {
         id: 0,
         tournament_slug: deriveTournamentSlug(entry.date),
