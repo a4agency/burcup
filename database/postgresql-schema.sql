@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS news_articles (
   body TEXT NOT NULL DEFAULT '',
   link_path TEXT NOT NULL,
   image_url TEXT,
+  video_url TEXT,
   is_published BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
