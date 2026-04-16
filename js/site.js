@@ -2962,6 +2962,7 @@ function normalizeNewsInlineImageKey(value = '') {
     .replace(/\.[a-z0-9]+$/i, '')
     .replace(/-\d+x\d+$/i, '')
     .replace(/-\d{10,}$/i, '')
+    .replace(/[_\s-]+/g, '')
     .toLowerCase();
 }
 

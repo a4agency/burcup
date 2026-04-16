@@ -14,6 +14,7 @@ function normalizeAssetKey(value = '') {
     .replace(/\.[a-z0-9]+$/i, '')
     .replace(/-\d+x\d+$/i, '')
     .replace(/-\d{10,}$/i, '')
+    .replace(/[_\s-]+/g, '')
     .toLowerCase();
 }
 
@@ -112,12 +113,14 @@ function cleanupLegacyArticleHtml(html = '', item = {}) {
   let result = String(html);
 
   result = result
+    .replace(/^\s*<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>\s*/i, '')
     .replace(/<div class=['"]yarpp[\s\S]*$/i, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
     .replace(/<video[\s\S]*?<\/video>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<div[^>]*>\s*<\/div>/gi, '')
     .replace(/\s+(?:loading|decoding|srcset|sizes|class|width|height)=("([^"]*)"|'([^']*)')/gi, '')
     .replace(/<a([^>]*?)href=("https?:\/\/burchalkin-cup\.ru\/?"|'https?:\/\/burchalkin-cup\.ru\/?')([^>]*)>/gi, `<a$1href="${
       SITE_URL
