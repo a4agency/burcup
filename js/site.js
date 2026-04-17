@@ -3572,6 +3572,30 @@ async function renderTournamentsGrid() {
 
 const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.webp';
 const PARTNER_FALLBACK_HREF = 'index.html';
+const PARTNER_FALLBACKS = new Map([
+  ['Система спортивной аналитики B-SIGHT', { website_url: 'https://bsight.pro', logo_url: 'images/partners/b-sight.png', logo_alt: 'Система спортивной аналитики B-SIGHT' }],
+  ['АО «Российская промышленная коллегия»', { website_url: 'https://www.rosprom.ru', logo_url: 'images/partners/rossiyskaya-promyshlennaya-kollegiya.png', logo_alt: 'АО «Российская промышленная коллегия»' }],
+  ['БАЗ', { website_url: 'https://baz.ru', logo_url: 'images/partners/baz.png', logo_alt: 'БАЗ' }],
+  ['Медиалига', { website_url: 'https://mfl.life', logo_url: 'images/partners/medialiga.png', logo_alt: 'Медиалига' }],
+  ['БФ «ВТБ Страна»', { website_url: 'https://vtbstrana.ru', logo_url: 'images/partners/vtb-strana.png', logo_alt: 'БФ «ВТБ Страна»' }],
+  ['Банк ВТБ', { website_url: 'https://www.vtb.ru', logo_url: 'images/partners/bank-vtb.png', logo_alt: 'Банк ВТБ' }],
+  ['Ижора Сталь Инвест', { website_url: 'https://izhorastalinvest.ru', logo_url: 'images/partners/izhora-stal-invest.png', logo_alt: 'Ижора Сталь Инвест' }],
+  ['ООО Фирма «Спринг-Центр»', { website_url: 'https://www.spring-centr.ru', logo_url: 'images/partners/spring-center.png', logo_alt: 'ООО Фирма «Спринг-Центр»' }],
+  ['ООО «Новые технологии и материалы»', { website_url: 'https://ntmsp.ru', logo_url: 'images/partners/novye-tekhnologii-materialy.png', logo_alt: 'ООО «Новые технологии и материалы»' }],
+  ['ПАО Сатурн', { website_url: 'https://saturn-omsk.ru', logo_url: 'images/partners/saturn.png', logo_alt: 'ПАО Сатурн' }],
+  ['Банк ПСБ', { website_url: 'https://www.psbank.ru', logo_url: 'images/partners/bank-psb.png', logo_alt: 'Банк ПСБ' }],
+  ['ТехПром', { website_url: '', logo_url: 'images/partners/tekhprom.png', logo_alt: 'ТехПром' }],
+  ['ТАСС', { website_url: 'https://tass.ru', logo_url: 'images/partners/tass.png', logo_alt: 'ТАСС' }],
+  ['Спорт-Экспресс', { website_url: 'https://www.sport-express.ru', logo_url: 'images/partners/sport-express.png', logo_alt: 'Спорт-Экспресс' }],
+  ['РФС', { website_url: 'https://rfs.ru', logo_url: 'images/partners/rfs.png', logo_alt: 'РФС' }],
+  ['Фонтанка.ру', { website_url: 'https://www.fontanka.ru', logo_url: 'images/partners/fontanka.png', logo_alt: 'Фонтанка.ру' }],
+  ['Спорт День за Днем', { website_url: 'https://www.sportsdaily.ru', logo_url: 'images/partners/sport-den-za-dnem.png', logo_alt: 'Спорт День за Днем' }],
+  ['Комсомольская правда', { website_url: 'https://www.spb.kp.ru', logo_url: 'images/partners/komsomolskaya-pravda.png', logo_alt: 'Комсомольская правда' }],
+  ['Радио «Зенит»', { website_url: 'https://www.radiozenit.ru', logo_url: 'images/partners/radio-zenit.png', logo_alt: 'Радио «Зенит»' }],
+  ['Футбол Петербурга', { website_url: 'https://stat.ffspb.org', logo_url: 'images/partners/football-peterburga.png', logo_alt: 'Футбол Петербурга' }],
+  ['Санкт-Петербургские ведомости', { website_url: 'https://spbvedomosti.ru', logo_url: 'images/partners/spb-vedomosti.png', logo_alt: 'Санкт-Петербургские ведомости' }],
+  ['Телеканал «Санкт-Петербург»', { website_url: 'https://tvspb.ru', logo_url: 'images/partners/tv-spb.png', logo_alt: 'Телеканал «Санкт-Петербург»' }],
+]);
 
 function normalizePartnerLookupKey(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
@@ -3668,7 +3692,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     const labelNode = node.querySelector('span');
     const name = (storedName || (labelNode ? labelNode.textContent : node.textContent) || '').trim();
     if (!name) return;
-    const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || null;
+    const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || PARTNER_FALLBACKS.get(name) || null;
     const href = normalizePartnerHref(partner?.website_url || '');
     const logoSrc = String(partner?.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
     const logoAlt = partner?.logo_alt || name;
@@ -3702,13 +3726,21 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
 }
 
 function renderPartnerItem(item) {
-  const logoSrc = String(item.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
-  const href = normalizePartnerHref(item.website_url || '');
+  const fallback = PARTNER_FALLBACKS.get(String(item.name || '').trim()) || {};
+  const partner = {
+    ...fallback,
+    ...item,
+    website_url: String(item.website_url || fallback.website_url || ''),
+    logo_url: String(item.logo_url || fallback.logo_url || ''),
+    logo_alt: String(item.logo_alt || fallback.logo_alt || item.name || fallback.logo_alt || ''),
+  };
+  const logoSrc = String(partner.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
+  const href = normalizePartnerHref(partner.website_url || '');
   const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
-  const labelMeta = getPartnerDisplayNameMeta(item.name);
+  const labelMeta = getPartnerDisplayNameMeta(partner.name);
   return `
-    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" data-partner-name="${escapeHtml(item.name)}" ${externalAttrs}>
-      ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
+    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" data-partner-name="${escapeHtml(partner.name)}" ${externalAttrs}>
+      ${renderPartnerLogoMarkup(partner.name, logoSrc, partner.logo_alt || partner.name)}
       <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${renderPartnerDisplayName(labelMeta)}</span>
     </a>
   `;
