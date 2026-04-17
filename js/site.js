@@ -3577,6 +3577,21 @@ function normalizePartnerLookupKey(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function formatPartnerDisplayName(value) {
+  const name = String(value || '').trim();
+  if (!name) return '';
+
+  if (name === 'ООО Фирма «Спринг-Центр»') {
+    return 'ООО Фирма<br>«Спринг-Центр»';
+  }
+
+  if (name === 'Телеканал «Санкт-Петербург»') {
+    return 'Телеканал<br>«Санкт-Петербург»';
+  }
+
+  return escapeHtml(name);
+}
+
 function normalizePartnerHref(value) {
   const href = String(value || '').trim();
   if (!href) return PARTNER_FALLBACK_HREF;
@@ -3625,7 +3640,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     }
     element.innerHTML = `
       ${renderPartnerLogoMarkup(name, logoSrc, logoAlt)}
-      <span>${escapeHtml(name)}</span>
+      <span>${formatPartnerDisplayName(name)}</span>
     `;
   });
 
@@ -3639,7 +3654,7 @@ function renderPartnerItem(item) {
   return `
     <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" ${externalAttrs}>
       ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
-      <span>${escapeHtml(item.name)}</span>
+      <span>${formatPartnerDisplayName(item.name)}</span>
     </a>
   `;
 }
