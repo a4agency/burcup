@@ -1948,18 +1948,19 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .sponsor-item-logo .partner-name-multiline{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:0;
+  display:inline-grid;
+  grid-auto-rows:max-content;
+  row-gap:2px;
+  width:auto;
+  max-width:100%;
   font-size:.92em;
-  line-height:1.05;
+  line-height:1.08;
 }
 
 .sponsor-item-logo .partner-name-line{
   display:block;
-  width:100%;
+  width:auto;
+  margin:0;
   white-space:nowrap;
 }
 
