@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Railway API for the Burchalkin Cup website",
-  "main": "server.js",
+  "main": "server-mysql.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-mysql.js",
+    "start:legacy": "node server.js",
     "start:mysql": "node server-mysql.js"
   },
   "engines": {

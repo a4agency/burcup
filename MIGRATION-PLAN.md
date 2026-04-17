@@ -9,9 +9,9 @@
 - `frontend`
   Статический сайт в корне репозитория: `index.html`, `css/`, `js/`, `images/`
 - `api`
-  Node/Express API в [railway-api/server.js](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/server.js)
+  Node/Express API в [railway-api/server-mysql.js](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/server-mysql.js)
 - `database`
-  PostgreSQL migrations в [database/migrations](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/README.md), compatibility snapshot в [database/postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql) и стартовые данные в [database/postgresql-seed.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-seed.sql)
+  MySQL схема в [database/mysql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/mysql-schema.sql), а старые PostgreSQL-миграции сохранены только как архив в [database/migrations](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/README.md)
 - `storage`
   Внешнее хранение изображений через Cloudinary, URL сохраняются в базе
 
@@ -23,7 +23,7 @@
 
 - URL фронтенда
 - URL API
-- параметры подключения к PostgreSQL
+- параметры подключения к MySQL
 - storage credentials
 - CORS origin
 
@@ -40,7 +40,6 @@
 
 - `PORT`
 - `DATABASE_URL`
-- `DATABASE_SSL`
 - `CORS_ORIGIN`
 - `ADMIN_TOKEN`
 - `CLOUDINARY_CLOUD_NAME`
@@ -63,14 +62,14 @@ window.BCUP_CONFIG = window.BCUP_CONFIG || {
 };
 ```
 
-При переносе на другой backend меняется только `apiBaseUrl`.
+При переносе на новый backend меняется только `apiBaseUrl`.
 
 ## Что менять при переносе API
 
 API находится в отдельной папке:
 
 - [railway-api/package.json](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/package.json)
-- [railway-api/server.js](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/server.js)
+- [railway-api/server-mysql.js](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/server-mysql.js)
 
 Это обычный Express-сервис. Его можно поднять на:
 
@@ -84,7 +83,7 @@ API находится в отдельной папке:
 Требования:
 
 - Node.js 18+
-- PostgreSQL
+- MySQL 8+ или MariaDB 10.6+
 - env-переменные
 
 Отдельно стоит учесть, что теперь проект поддерживает и объединённый вариант:
@@ -96,13 +95,13 @@ API находится в отдельной папке:
 
 ## Что менять при переносе базы
 
-База должна подниматься не вручную по таблицам, а через SQL-файлы:
+База должна подниматься через MySQL-схему и отдельный миграционный скрипт:
 
-1. Выполнить [database/migrations/apply-all.psql.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/apply-all.psql.sql)
-2. При необходимости выполнить [database/postgresql-seed.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-seed.sql)
+1. Выполнить [database/mysql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/mysql-schema.sql)
+2. Импортировать данные скриптом [scripts/migrate-to-mysql.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/migrate-to-mysql.mjs)
+3. При необходимости прогнать проверку [scripts/check-mysql.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/check-mysql.mjs)
 
-Для уже живого проекта сиды лучше не запускать поверх продакшн-данных без проверки.
-Если нет возможности использовать `psql`, можно временно поднять пустую базу через snapshot [database/postgresql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/postgresql-schema.sql).
+Для уже живого проекта миграцию лучше запускать поверх новой пустой MySQL-базы после проверки бэкапа.
 
 ## Как переносить проект на новый хостинг
 
@@ -118,7 +117,7 @@ API находится в отдельной папке:
 
 Если фронтенд остаётся на месте:
 
-1. Поднять PostgreSQL или использовать текущую базу
+1. Поднять MySQL или использовать текущую базу
 2. Задеплоить папку `railway-api`
 3. Прописать env-переменные
 4. Проверить `/health`
@@ -126,9 +125,9 @@ API находится в отдельной папке:
 
 ### Вариант 3. Полный перенос
 
-1. Поднять новую PostgreSQL-базу
-2. Применить migrations
-3. Перенести боевые данные
+1. Поднять новую MySQL-базу
+2. Применить `mysql-schema.sql`
+3. Перенести боевые данные скриптом миграции
 4. Подключить storage credentials
 5. Задеплоить API
 6. Проверить админку
@@ -161,13 +160,11 @@ API находится в отдельной папке:
 
 ## Что уже добавлено для переносимости базы
 
-Базовая версия migrations уже добавлена:
+Базовая версия MySQL-переноса уже добавлена:
 
-- [database/migrations/0001_create_core_entities.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/0001_create_core_entities.sql)
-- [database/migrations/0002_create_matches_and_news.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/0002_create_matches_and_news.sql)
-- [database/migrations/0003_create_partner_entities.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/0003_create_partner_entities.sql)
-- [database/migrations/apply-all.psql.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/migrations/apply-all.psql.sql)
-- `schema_migrations` table for tracking applied versions
+- [database/mysql-schema.sql](/Users/kainarbaev_daniar/Downloads/последний%20эталон/database/mysql-schema.sql)
+- [scripts/migrate-to-mysql.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/migrate-to-mysql.mjs)
+- [scripts/check-mysql.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/check-mysql.mjs)
 
 ## Что стоит сделать следующим техническим этапом
 
@@ -178,15 +175,9 @@ API находится в отдельной папке:
 2. Резервное копирование базы
 3. Отдельный staging environment
 
-Docker-основа для API уже добавлена:
-
-- [railway-api/Dockerfile](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/Dockerfile)
-- [railway-api/docker-compose.example.yml](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/docker-compose.example.yml)
-- [railway-api/.dockerignore](/Users/kainarbaev_daniar/Downloads/последний%20эталон/railway-api/.dockerignore)
-
 ## Минимальный чек-лист перед переездом
 
-- есть бэкап PostgreSQL
+- есть бэкап MySQL
 - сохранены все env-переменные
 - сохранены Cloudinary credentials
 - известен текущий `ADMIN_TOKEN`
@@ -200,4 +191,4 @@ Docker-основа для API уже добавлена:
 
 Следующий практичный шаг:
 
-добавить отдельную миграцию под следующую реальную доработку схемы и закрепить процесс: любое изменение таблиц сначала идёт в новый migration-файл, а не редактируется прямо в snapshot.
+добавить отдельную миграцию под следующую реальную доработку MySQL-схемы и закрепить процесс: любое изменение таблиц сначала идёт в новый migration-файл, а не редактируется прямо в snapshot.

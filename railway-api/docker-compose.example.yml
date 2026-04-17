@@ -7,27 +7,28 @@ services:
       - "3000:3000"
     environment:
       PORT: 3000
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/railway
-      DATABASE_SSL: "false"
+      DATABASE_URL: mysql://burcup:password@mysql:3306/railway
       CORS_ORIGIN: http://localhost:8000,http://127.0.0.1:8000
       ADMIN_TOKEN: change-me-before-production
       CLOUDINARY_CLOUD_NAME: your-cloud-name
       CLOUDINARY_API_KEY: your-api-key
       CLOUDINARY_API_SECRET: your-api-secret
     depends_on:
-      - db
+      - mysql
 
-  db:
-    image: postgres:16-alpine
+  mysql:
+    image: mysql:8.4
     restart: unless-stopped
     environment:
-      POSTGRES_DB: railway
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_DATABASE: railway
+      MYSQL_USER: burcup
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
     ports:
-      - "5432:5432"
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mysql_data:

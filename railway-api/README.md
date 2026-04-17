@@ -1,16 +1,15 @@
 # Railway API
 
-This folder contains a small Express API for the Burchalkin Cup site.
+This folder contains the Express API for the Burchalkin Cup site.
 
 ## Why this exists
 
-The public site is static and hosted from GitHub. It should not connect directly to PostgreSQL.
-
-This API sits between the static frontend and your PostgreSQL database on Railway.
+The public site is static and should not talk to the database directly.
+This API sits between the frontend and the MySQL database.
 
 ## Run outside Railway
 
-This API is now packaged so it can run on any Docker-capable host, not only Railway.
+This API is packaged so it can run on any Docker-capable host, not only Railway.
 
 Files:
 
@@ -39,20 +38,19 @@ Files:
 - `PUT /api/admin/:resource`
 - `POST /api/admin/uploads/image`
 
-The API keeps compatibility with the current `data/*.json` shape, and also exposes the new entities for tournaments, clubs, club history, and partners.
+The API keeps compatibility with the current site data model and exposes the new entities for tournaments, clubs, club history, partners, albums, and media.
 
 ## Railway setup
 
 ### Option A. API only
 
 1. Create a Railway project.
-2. Add a PostgreSQL service.
+2. Add a MySQL service.
 3. Add a second service from this repository.
 4. Set that service root directory to `railway-api`.
-5. Railway will expose `DATABASE_URL` from the PostgreSQL service.
+5. Railway will expose `DATABASE_URL` from the MySQL service.
 6. In the API service variables, set:
-   `DATABASE_URL=${{Postgres.DATABASE_URL}}`
-   `DATABASE_SSL=true`
+   `DATABASE_URL=${{MySQL.DATABASE_URL}}`
    `CORS_ORIGIN=https://a4agency.github.io`
    `ADMIN_TOKEN=your-strong-secret`
    `CLOUDINARY_CLOUD_NAME=your-cloud-name`
@@ -81,12 +79,6 @@ Recommended setup:
 
 In this mode the frontend can use the same origin for API calls, and the current config will automatically prefer the Railway domain itself.
 
-Railway documents:
-
-- [PostgreSQL](https://docs.railway.com/guides/postgresql)
-- [Deploying a Monorepo](https://docs.railway.com/guides/monorepo)
-- [Using Variables](https://docs.railway.com/develop/variables)
-
 ## Docker build
 
 Build the image from the `railway-api` directory:
@@ -99,8 +91,7 @@ Run it with env variables:
 
 ```bash
 docker run --rm -p 3000:3000 \
-  -e DATABASE_URL=postgresql://postgres:password@host:5432/railway \
-  -e DATABASE_SSL=true \
+  -e DATABASE_URL=mysql://user:password@host:3306/railway \
   -e CORS_ORIGIN=https://your-frontend-domain.com \
   -e ADMIN_TOKEN=your-strong-secret \
   -e CLOUDINARY_CLOUD_NAME=your-cloud-name \
@@ -149,7 +140,7 @@ For new Russian content coming from the database, the frontend can now request a
 
 - `POST /api/translate`
 
-The API caches translated strings in PostgreSQL, so repeated texts do not need to be translated again on every page load.
+The API caches translated strings in the database, so repeated texts do not need to be translated again on every page load.
 
 Current default provider:
 
@@ -161,19 +152,6 @@ Environment variables:
 - `TRANSLATION_PROVIDER=google-gtx`
 
 If translation is unavailable, the site keeps the original Russian content and does not break.
-
-## Run SQL
-
-Recommended path for a fresh database:
-
-```bash
-psql "$DATABASE_URL" -f ../database/migrations/apply-all.psql.sql
-psql "$DATABASE_URL" -f ../database/postgresql-seed.sql
-```
-
-If you run SQL from a GUI client and need one big snapshot instead of versioned migrations, use:
-
-- `../database/postgresql-schema.sql`
 
 ## Frontend switch
 
@@ -218,25 +196,3 @@ Content-Type: application/json
   "password": "agency"
 }
 ```
-
-After that it sends the Railway secret in the request header:
-
-```http
-x-admin-token: your-strong-secret
-```
-
-Set these environment variables on Railway:
-
-- `ADMIN_TOKEN`
-- `ADMIN_PASSWORD`
-
-The working admin page is `admin-almaz.html`. It stores the current session token in the browser session and uses it to read and write data directly through Railway API.
-
-For partner logos and other image fields, the admin page can upload files through Railway API into Cloudinary. The server stores only the resulting public URL in PostgreSQL, which keeps the database cleaner than saving long base64 strings.
-
-## New data model notes
-
-- `GET /api/tournaments` returns yearly tournament cards
-- `GET /api/clubs/:slug` returns club info plus full match history across tournaments
-- `GET /api/tournaments/:slug/partners` returns partners grouped by tournament relation
-- old endpoints still exist so the current site can continue working while the new pages are being built
