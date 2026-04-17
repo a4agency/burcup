@@ -59,6 +59,7 @@ let editablePagesTableEnsured = false;
 let newsArticlePhotosTableEnsured = false;
 let newsArticleVideoColumnEnsured = false;
 let newsArticleBodyHtmlColumnEnsured = false;
+let partnerLogoAssetMetadataColumnsEnsured = false;
 
 function isStaticSiteRoot(candidatePath) {
   if (!candidatePath) return false;
@@ -382,6 +383,23 @@ async function ensureNewsArticleBodyHtmlColumn(queryable = pool) {
   `);
 
   newsArticleBodyHtmlColumnEnsured = true;
+}
+
+async function ensurePartnerLogoAssetMetadataColumns(queryable = pool) {
+  if (partnerLogoAssetMetadataColumnsEnsured) return;
+
+  await queryable.query(`
+    ALTER TABLE partner_logo_assets
+      ADD COLUMN IF NOT EXISTS public_id TEXT,
+      ADD COLUMN IF NOT EXISTS file_name TEXT,
+      ADD COLUMN IF NOT EXISTS mime_type TEXT,
+      ADD COLUMN IF NOT EXISTS asset_format TEXT,
+      ADD COLUMN IF NOT EXISTS width INTEGER,
+      ADD COLUMN IF NOT EXISTS height INTEGER,
+      ADD COLUMN IF NOT EXISTS bytes INTEGER;
+  `);
+
+  partnerLogoAssetMetadataColumnsEnsured = true;
 }
 
 async function translateTextWithGoogleGtx(text, sourceLang, targetLang) {
@@ -1651,6 +1669,7 @@ async function getAdminNews(client) {
 }
 
 async function getAdminPartners(client) {
+  await ensurePartnerLogoAssetMetadataColumns(client);
   const { rows } = await client.query(adminPartnersQuery);
   return rows.map(row => ({
     slug: row.slug,
@@ -2619,6 +2638,7 @@ async function setPartnerLogo(client, partnerId, logoUrl, altText, metadata = {}
 }
 
 async function replacePartners(client, payload) {
+  await ensurePartnerLogoAssetMetadataColumns(client);
   const items = ensureArray(payload);
   const slugs = [];
   const tournaments = await client.query('SELECT id, slug FROM tournaments');

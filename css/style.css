@@ -1917,15 +1917,15 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   text-decoration:none;
   text-align:center;
   position:relative;
-  min-height:88px;
-  padding:14px 18px 14px 84px;
+  min-height:96px;
+  padding:14px 18px 14px 98px;
 }
 
 .sponsor-item-logo img{
-  width:56px;
+  width:72px;
   height:56px;
   position:absolute;
-  left:16px;
+  left:14px;
   top:50%;
   transform:translateY(-50%);
   object-fit:contain;
