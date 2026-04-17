@@ -5,7 +5,7 @@ final class ClubsRepository extends BaseRepository
 {
     public function all(): array
     {
-        $rows = $this->all(
+        $rows = $this->queryAll(
             'SELECT
                 c.id,
                 c.slug,
@@ -29,7 +29,7 @@ final class ClubsRepository extends BaseRepository
 
     public function bySlug(string $slug): ?array
     {
-        $row = $this->one(
+        $row = $this->queryOne(
             'SELECT
                 c.id,
                 c.slug,
@@ -71,4 +71,3 @@ final class ClubsRepository extends BaseRepository
         ];
     }
 }
-

@@ -3,9 +3,20 @@ declare(strict_types=1);
 
 final class PagesRepository extends BaseRepository
 {
+    public function all(): array
+    {
+        $rows = api_query_rows($this->pdo, '
+            SELECT slug, title, subtitle, body_html, content_html, content_json
+            FROM site_pages
+            ORDER BY slug ASC
+        ');
+        return array_map('api_normalize_site_page_row', $rows);
+    }
+
     public function bySlug(string $slug): array
     {
-        $row = $this->one(
+        $row = api_query_one(
+            $this->pdo,
             'SELECT slug, title, subtitle, body_html, content_html, content_json
              FROM site_pages
              WHERE slug = ?
@@ -22,13 +33,6 @@ final class PagesRepository extends BaseRepository
             ];
         }
 
-        return [
-            'slug' => (string) $row['slug'],
-            'title' => (string) ($row['title'] ?? ''),
-            'subtitle' => (string) ($row['subtitle'] ?? ''),
-            'body_html' => (string) ($row['body_html'] ?? ($row['content_html'] ?? '')),
-            'content_json' => $row['content_json'] ?? null,
-        ];
+        return api_normalize_site_page_row($row);
     }
 }
-

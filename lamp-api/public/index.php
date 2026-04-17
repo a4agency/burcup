@@ -6,6 +6,9 @@ header('Content-Type: text/html; charset=utf-8');
 $links = [
     ['/api/health', 'Health'],
     ['/api/tournaments', 'Tournaments'],
+    ['/api/matches', 'Matches'],
+    ['/api/news', 'News'],
+    ['/api/media/albums', 'Media albums'],
     ['/api/clubs', 'Clubs'],
     ['/api/pages/contacts', 'Contacts page'],
 ];

@@ -19,9 +19,26 @@ The first practical migration step is in place:
   - `/health`
   - `/api/tournaments`
   - `/api/tournaments/{slug}`
+  - `/api/tournaments/{slug}/standings`
+  - `/api/tournaments/{slug}/playoff`
+  - `/api/tournaments/{slug}/matches`
+  - `/api/tournaments/{slug}/news`
+  - `/api/tournaments/{slug}/partners`
   - `/api/clubs`
   - `/api/clubs/{slug}`
+  - `/api/clubs/{slug}/matches`
+  - `/api/matches`
+  - `/api/news`
+  - `/api/media/albums`
+  - `/api/media/albums/{slug}`
+  - `/api/standings`
+  - `/api/playoff`
+  - `/api/results`
   - `/api/pages/{slug}`
+- admin login, read and save resources:
+  - `/api/admin/session`
+  - `/api/admin/{resource}` for tournaments, clubs, matches, news, partners, standings, playoff, albums, pages
+  - `PUT` support for the same resources
 
 ## Environment
 
@@ -35,4 +52,3 @@ Optional:
 - `ADMIN_PASSWORD`
 - `ADMIN_TOKEN`
 - `CORS_ORIGIN`
-

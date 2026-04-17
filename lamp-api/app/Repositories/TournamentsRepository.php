@@ -5,7 +5,7 @@ final class TournamentsRepository extends BaseRepository
 {
     public function all(): array
     {
-        $rows = $this->all(
+        $rows = $this->queryAll(
             'SELECT
                 t.id,
                 t.slug,
@@ -34,7 +34,7 @@ final class TournamentsRepository extends BaseRepository
 
     public function bySlug(string $slug): ?array
     {
-        $row = $this->one(
+        $row = $this->queryOne(
             'SELECT
                 t.id,
                 t.slug,
@@ -87,4 +87,3 @@ final class TournamentsRepository extends BaseRepository
         ];
     }
 }
-

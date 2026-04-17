@@ -7,17 +7,16 @@ abstract class BaseRepository
     {
     }
 
-    protected function all(string $sql, array $params = []): array
+    protected function queryAll(string $sql, array $params = []): array
     {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
 
-    protected function one(string $sql, array $params = []): ?array
+    protected function queryOne(string $sql, array $params = []): ?array
     {
-        $rows = $this->all($sql, $params);
+        $rows = $this->queryAll($sql, $params);
         return $rows[0] ?? null;
     }
 }
-
