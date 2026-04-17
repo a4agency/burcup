@@ -2572,6 +2572,9 @@ if (staticSiteRoot) {
       }
     }
   }));
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(staticSiteRoot, 'index.html'));
+  });
 } else {
   app.get('/', (req, res) => {
     const endpoints = [
