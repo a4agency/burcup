@@ -3622,6 +3622,25 @@ function renderPartnerDisplayName(meta) {
     .join('');
 }
 
+function enforcePartnerLabelBreaks(root = document) {
+  root.querySelectorAll('.sponsor-item-logo').forEach((item) => {
+    const labelNode = item.querySelector('.partner-name') || item.lastElementChild;
+    if (!labelNode) return;
+    const text = String(labelNode.textContent || '').trim().replace(/\s+/g, ' ');
+
+    if (text === 'ООО Фирма «Спринг-Центр»') {
+      labelNode.className = 'partner-name partner-name-multiline';
+      labelNode.innerHTML = '<span class="partner-name-line">ООО Фирма</span><span class="partner-name-line">«Спринг-Центр»</span>';
+      return;
+    }
+
+    if (text === 'Телеканал «Санкт-Петербург»') {
+      labelNode.className = 'partner-name partner-name-multiline';
+      labelNode.innerHTML = '<span class="partner-name-line">Телеканал</span><span class="partner-name-line">«Санкт-Петербург»</span>';
+    }
+  });
+}
+
 function normalizePartnerHref(value) {
   const href = String(value || '').trim();
   if (!href) return PARTNER_FALLBACK_HREF;
@@ -3675,6 +3694,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     `;
   });
 
+  enforcePartnerLabelBreaks(root);
   upgradeStaticImagesForCloudinary();
 }
 
@@ -3715,6 +3735,7 @@ async function renderPartnersForFeaturedTournament() {
   if (generalTarget && general) generalTarget.innerHTML = general.items.map(renderPartnerItem).join('');
   if (mediaTarget && media) mediaTarget.innerHTML = media.items.map(renderPartnerItem).join('');
   decorateStaticPartnerItems(document, partnerLookup);
+  requestAnimationFrame(() => enforcePartnerLabelBreaks(document));
 }
 
 async function renderClubPage() {
