@@ -2895,6 +2895,50 @@ function getNewsArticleBodyHtml(item = {}) {
   return String(item?.body_html || '').trim();
 }
 
+function decodeHtmlEntities(value = '') {
+  return String(value || '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#8212;|&mdash;/gi, '—')
+    .replace(/&#171;|&laquo;/gi, '«')
+    .replace(/&#187;|&raquo;/gi, '»')
+    .replace(/&#8211;|&ndash;/gi, '–')
+    .replace(/&#8230;|&hellip;/gi, '...')
+    .replace(/&#(\d+);/g, (_, code) => {
+      const value = Number.parseInt(code, 10);
+      return Number.isFinite(value) ? String.fromCharCode(value) : '';
+    })
+    .replace(/&quot;/gi, '"')
+    .replace(/&amp;/gi, '&');
+}
+
+function stripHtmlToPlainText(value = '') {
+  return decodeHtmlEntities(
+    String(value || '')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<\/p>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+  )
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function shouldHideLowInfoVideoArticleBody(bodyHtml = '', fallbackText = '', videoUrl = '') {
+  if (!videoUrl) return false;
+
+  const plainBody = stripHtmlToPlainText(bodyHtml);
+  const plainFallback = stripHtmlToPlainText(fallbackText);
+  const combined = [plainBody, plainFallback].filter(Boolean).join(' ').trim();
+  if (!combined) return true;
+
+  if (/^https?:\/\//i.test(combined)) return true;
+  if (/^Видео\s*:?\s*/i.test(combined) && combined.length <= 180) return true;
+  if (combined.length <= 90) return true;
+
+  return false;
+}
+
 function getNewsArticleEnrichment(item = {}) {
   const slug = String(item?.slug || '').trim();
   return NEWS_ARTICLE_ENRICHMENTS[slug] || null;
@@ -4487,6 +4531,14 @@ async function renderNewsArticlePage() {
     const content = getNewsArticleParagraphs(item);
     const bodyHtml = getNewsArticleBodyHtml(item);
     const videoUrl = getNewsArticleVideoUrl(item);
+    const fallbackMarkup = `
+      ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
+      ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
+    `.trim();
+    const hideBodyForVideo = shouldHideLowInfoVideoArticleBody(bodyHtml, `${item.excerpt || ''}\n${content.join('\n')}`, videoUrl);
+    const articleBodyMarkup = hideBodyForVideo
+      ? ''
+      : (bodyHtml || fallbackMarkup);
     const articlePhotos = videoUrl
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
@@ -4501,15 +4553,11 @@ async function renderNewsArticlePage() {
         <a class="news-article-back" href="news.html">← Все новости</a>
         <h1 class="news-article-title">${escapeHtml(item.title || '')}</h1>
         ${mediaMarkup}
-        <div class="news-article-body">
-          ${bodyHtml
-            ? bodyHtml
-            : `
-              ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
-              ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
-            `
-          }
-        </div>
+        ${articleBodyMarkup ? `
+          <div class="news-article-body">
+            ${articleBodyMarkup}
+          </div>
+        ` : ''}
         ${galleryPhotos.length ? `
           <div class="news-article-gallery">
             ${galleryPhotos.map((photo, index) => renderNewsArticlePhotoButton(photo, index + 1)).join('')}
