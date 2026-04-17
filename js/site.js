@@ -3582,28 +3582,44 @@ function getPartnerDisplayNameMeta(value) {
   if (!name) {
     return {
       text: '',
+      lines: [],
       multiline: false,
     };
   }
 
   if (name === 'ООО Фирма «Спринг-Центр»') {
     return {
-      text: 'ООО Фирма\n«Спринг-Центр»',
+      text: 'ООО Фирма «Спринг-Центр»',
+      lines: ['ООО Фирма', '«Спринг-Центр»'],
       multiline: true,
     };
   }
 
   if (name === 'Телеканал «Санкт-Петербург»') {
     return {
-      text: 'Телеканал\n«Санкт-Петербург»',
+      text: 'Телеканал «Санкт-Петербург»',
+      lines: ['Телеканал', '«Санкт-Петербург»'],
       multiline: true,
     };
   }
 
   return {
     text: name,
+    lines: [name],
     multiline: false,
   };
+}
+
+const PARTNER_MULTILINE_RENDER_VERSION = '20260417-partner-lines-3';
+
+function renderPartnerDisplayName(meta) {
+  if (!meta?.multiline) {
+    return escapeHtml(meta?.text || '');
+  }
+
+  return (Array.isArray(meta.lines) ? meta.lines : [meta.text || ''])
+    .map(line => `<span class="partner-name-line">${escapeHtml(line)}</span>`)
+    .join('');
 }
 
 function normalizePartnerHref(value) {
@@ -3655,7 +3671,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     }
     element.innerHTML = `
       ${renderPartnerLogoMarkup(name, logoSrc, logoAlt)}
-      <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${escapeHtml(labelMeta.text)}</span>
+      <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${renderPartnerDisplayName(labelMeta)}</span>
     `;
   });
 
@@ -3670,7 +3686,7 @@ function renderPartnerItem(item) {
   return `
     <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" ${externalAttrs}>
       ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
-      <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${escapeHtml(labelMeta.text)}</span>
+      <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${renderPartnerDisplayName(labelMeta)}</span>
     </a>
   `;
 }
