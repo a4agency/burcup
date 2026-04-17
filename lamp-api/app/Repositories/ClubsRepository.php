@@ -19,7 +19,7 @@ final class ClubsRepository extends BaseRepository
                 c.hero_image_url,
                 c.description,
                 c.is_active,
-                (SELECT COUNT(*) FROM matches m WHERE m.home_team_slug = c.slug OR m.away_team_slug = c.slug) AS matches_count
+                (SELECT COUNT(*) FROM matches m WHERE m.home_club_id = c.id OR m.away_club_id = c.id) AS matches_count
              FROM clubs c
              ORDER BY c.name ASC'
         );
@@ -43,7 +43,7 @@ final class ClubsRepository extends BaseRepository
                 c.hero_image_url,
                 c.description,
                 c.is_active,
-                (SELECT COUNT(*) FROM matches m WHERE m.home_team_slug = c.slug OR m.away_team_slug = c.slug) AS matches_count
+                (SELECT COUNT(*) FROM matches m WHERE m.home_club_id = c.id OR m.away_club_id = c.id) AS matches_count
              FROM clubs c
              WHERE c.slug = ?
              LIMIT 1',
