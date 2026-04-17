@@ -3664,8 +3664,9 @@ function renderPartnerLogoMarkup(name, src = PARTNER_PLACEHOLDER_LOGO, alt = '')
 
 function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) {
   root.querySelectorAll('.sponsor-grid .sponsor-item').forEach((node) => {
+    const storedName = node.getAttribute('data-partner-name');
     const labelNode = node.querySelector('span');
-    const name = (labelNode ? labelNode.textContent : node.textContent).trim();
+    const name = (storedName || (labelNode ? labelNode.textContent : node.textContent) || '').trim();
     if (!name) return;
     const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || null;
     const href = normalizePartnerHref(partner?.website_url || '');
@@ -3681,6 +3682,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     }
 
     element.classList.add('sponsor-item-logo');
+    element.setAttribute('data-partner-name', labelMeta.text || name);
     element.setAttribute('href', href);
     if (isExternalPartnerHref(href)) {
       element.setAttribute('target', '_blank');
@@ -3705,7 +3707,7 @@ function renderPartnerItem(item) {
   const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
   const labelMeta = getPartnerDisplayNameMeta(item.name);
   return `
-    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" ${externalAttrs}>
+    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" data-partner-name="${escapeHtml(item.name)}" ${externalAttrs}>
       ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
       <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${renderPartnerDisplayName(labelMeta)}</span>
     </a>
