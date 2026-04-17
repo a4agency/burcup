@@ -60,12 +60,27 @@ try {
             Response::json(['error' => 'Tournament not found'], 404);
         }
         $standings = $matches->standings($m[1]);
+        $groupedStandings = api_group_standings_rows($standings);
         $playoff = $matches->playoff($m[1]);
         $matchRows = $matches->all($m[1]);
         $newsRows = $news->all(false, $m[1]);
         $partnerGroups = $partners->groupedByTournamentSlug($m[1]);
+        $clubs = array_values(array_map(static function (array $standing): array {
+            return [
+                'slug' => (string) ($standing['slug'] ?? ''),
+                'team_slug' => (string) ($standing['slug'] ?? ''),
+                'team' => (string) ($standing['team'] ?? ''),
+                'name' => (string) ($standing['team'] ?? ''),
+                'logo' => (string) ($standing['logo'] ?? ''),
+                'city' => (string) ($standing['city'] ?? ''),
+                'country' => (string) ($standing['country'] ?? ''),
+                'position' => (int) ($standing['position'] ?? 0),
+            ];
+        }, $standings));
         Response::json(array_merge($row, [
             'standings' => $standings,
+            'grouped_standings' => $groupedStandings,
+            'clubs' => $clubs,
             'playoff' => $playoff,
             'matches' => $matchRows,
             'news' => $newsRows,

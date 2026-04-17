@@ -42,14 +42,21 @@ final class ClubsRepository extends BaseRepository
                 c.website_url,
                 c.hero_image_url,
                 c.description,
-                c.is_active
+                c.is_active,
+                (SELECT COUNT(*) FROM matches m WHERE m.home_team_slug = c.slug OR m.away_team_slug = c.slug) AS matches_count
              FROM clubs c
              WHERE c.slug = ?
              LIMIT 1',
             [$slug]
         );
 
-        return $row ? $this->formatClub($row) : null;
+        if (!$row) {
+            return null;
+        }
+
+        $club = $this->formatClub($row);
+        $club['matches'] = $this->loadMatchesByClubSlug($club['slug']);
+        return $club;
     }
 
     private function formatClub(array $row): array
@@ -69,5 +76,48 @@ final class ClubsRepository extends BaseRepository
             'is_active' => (int) (($row['is_active'] ?? 0) !== 0),
             'matches_count' => (int) ($row['matches_count'] ?? 0),
         ];
+    }
+
+    private function loadMatchesByClubSlug(string $slug): array
+    {
+        $rows = $this->queryAll(
+            'SELECT
+                m.id,
+                t.slug AS tournament_slug,
+                t.name AS tournament_name,
+                m.stage_name,
+                m.round_name,
+                m.matchday_label,
+                m.match_date,
+                m.match_time,
+                m.status,
+                m.status_label,
+                home.name AS home_team,
+                home.slug AS home_team_slug,
+                home.logo_path AS home_logo,
+                away.name AS away_team,
+                away.slug AS away_team_slug,
+                away.logo_path AS away_logo,
+                m.home_score,
+                m.away_score,
+                m.venue,
+                m.video_url,
+                m.review_video_url,
+                m.interview_video_url,
+                m.is_featured_media,
+                m.summary
+             FROM matches m
+             JOIN tournaments t ON t.id = m.tournament_id
+             JOIN clubs home ON home.id = m.home_club_id
+             JOIN clubs away ON away.id = m.away_club_id
+             WHERE home.slug = ? OR away.slug = ?
+             ORDER BY m.match_date DESC, m.match_time DESC, m.id DESC',
+            [$slug, $slug]
+        );
+
+        return array_map(static function (array $row): array {
+            $row['events'] = [];
+            return api_format_match_row($row);
+        }, $rows);
     }
 }

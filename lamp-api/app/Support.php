@@ -177,6 +177,24 @@ function api_map_standings_row(array $row): array
     ];
 }
 
+function api_group_standings_rows(array $rows): array
+{
+    $groups = [];
+    foreach ($rows as $row) {
+        $groupKey = (string) ($row['group'] ?? 'overall');
+        if (!isset($groups[$groupKey])) {
+            $groups[$groupKey] = [
+                'key' => $groupKey,
+                'label' => $groupKey ? 'Группа ' . $groupKey : '',
+                'rows' => [],
+            ];
+        }
+        $groups[$groupKey]['rows'][] = $row;
+    }
+
+    return array_values($groups);
+}
+
 function api_map_playoff_row(array $row): array
 {
     return [
