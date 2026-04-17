@@ -1948,7 +1948,16 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
 }
 
 .sponsor-item-logo .partner-name-multiline{
-  white-space:pre-line;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+}
+
+.sponsor-item-logo .partner-name-line{
+  display:block;
+  width:100%;
 }
 
 .sponsor-item:hover,
