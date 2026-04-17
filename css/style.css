@@ -1953,11 +1953,14 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   align-items:center;
   justify-content:center;
   gap:2px;
+  font-size:.92em;
+  line-height:1.18;
 }
 
 .sponsor-item-logo .partner-name-line{
   display:block;
   width:100%;
+  white-space:nowrap;
 }
 
 .sponsor-item:hover,
