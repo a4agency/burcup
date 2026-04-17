@@ -1,4 +1,4 @@
-# PostgreSQL for Burchalkin Cup
+# Database schemas for Burchalkin Cup
 
 This folder now contains the long-term data model for the site.
 
@@ -6,6 +6,7 @@ This folder now contains the long-term data model for the site.
 
 - `migrations/` contains versioned SQL migrations
 - `postgresql-schema.sql` is a compatibility snapshot of the current structure
+- `mysql-schema.sql` is a MySQL 8+ compatibility snapshot for the same structure
 - `postgresql-seed.sql` fills it with the current site content and starter archive data
 
 ## Main entities
@@ -33,7 +34,7 @@ It supports:
 - partner blocks with upload history for logos
 - a future admin panel where data is not tied to one season only
 
-## Suggested order
+## Suggested order for PostgreSQL
 
 1. Create a PostgreSQL database in Railway.
 2. Run `database/migrations/apply-all.psql.sql`.
@@ -43,6 +44,24 @@ It supports:
 6. Connect the frontend pages to the new API endpoints.
 
 If you cannot run `psql` scripts and need to paste SQL into a GUI editor, you can still use `postgresql-schema.sql` as a one-shot snapshot. It also creates `schema_migrations` and marks the current baseline versions as applied.
+
+## Suggested order for MySQL
+
+1. Create a MySQL 8+ or MariaDB 10.6+ database with `utf8mb4`.
+2. Run `mysql-schema.sql`.
+3. Import data with a dedicated migration script or MySQL seed file.
+4. Repoint the API to MySQL only after the imported data has been verified.
+
+Example migration command:
+
+`MYSQL_URL=mysql://user:pass@host:3306/db APPLY_SCHEMA=1 node scripts/migrate-to-mysql.mjs`
+
+Optional source settings:
+
+- `SOURCE_API_BASE_URL=https://burcup-production.up.railway.app`
+- `SOURCE_ADMIN_PASSWORD=agency`
+- `SOURCE_ADMIN_TOKEN=...`
+- `WIPE_TARGET=0` if you want to skip table replacement
 
 ## Migration tracking
 
