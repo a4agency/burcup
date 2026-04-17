@@ -50,6 +50,9 @@ Uploads are stored locally under `public/uploads/` by default and returned as sa
 Set one of these:
 
 - `DATABASE_URL=mysql://user:password@host:3306/database`
+- `MYSQL_URL=mysql://user:password@host:3306/database`
+- `MYSQL_PUBLIC_URL=mysql://user:password@host:3306/database`
+- `DATABASE_PUBLIC_URL=mysql://user:password@host:3306/database`
 - or `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
 
 Optional:

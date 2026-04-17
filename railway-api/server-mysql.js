@@ -9,7 +9,15 @@ const mysql = require('mysql2/promise');
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = [
+  process.env.MYSQL_URL,
+  process.env.MYSQL_PUBLIC_URL,
+  process.env.DATABASE_URL,
+  process.env.DATABASE_PUBLIC_URL,
+  process.env.DB_URL,
+]
+  .map(value => String(value || '').trim())
+  .find(Boolean);
 const adminToken = (process.env.ADMIN_TOKEN || '').trim();
 const adminPassword = (process.env.ADMIN_PASSWORD || 'agency').trim();
 const cloudinaryCloudName = (process.env.CLOUDINARY_CLOUD_NAME || '').trim();
@@ -35,6 +43,7 @@ function createPool(connectionString) {
     charset: 'utf8mb4',
     multipleStatements: true,
     dateStrings: true,
+    connectTimeout: Number(process.env.MYSQL_CONNECT_TIMEOUT || 5000),
   });
 }
 

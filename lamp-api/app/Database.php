@@ -11,7 +11,7 @@ final class Database
             return self::$pdo;
         }
 
-        $dsn = get_env('DATABASE_URL');
+        $dsn = self::getDatabaseUrl();
         if ($dsn !== '') {
             $parts = parse_url($dsn);
             if (!$parts || !isset($parts['host'], $parts['user'], $parts['pass'], $parts['path'])) {
@@ -38,10 +38,28 @@ final class Database
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_TIMEOUT => (int) get_env('MYSQL_CONNECT_TIMEOUT', '5'),
         ]);
 
         self::$pdo = $pdo;
         return self::$pdo;
     }
-}
 
+    private static function getDatabaseUrl(): string
+    {
+        foreach ([
+            'MYSQL_URL',
+            'MYSQL_PUBLIC_URL',
+            'DATABASE_URL',
+            'DATABASE_PUBLIC_URL',
+            'DB_URL',
+        ] as $key) {
+            $value = get_env($key);
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return '';
+    }
+}

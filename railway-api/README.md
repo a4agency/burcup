@@ -51,6 +51,7 @@ The API keeps compatibility with the current site data model and exposes the new
 5. Railway will expose `DATABASE_URL` from the MySQL service.
 6. In the API service variables, set:
    `DATABASE_URL=${{MySQL.DATABASE_URL}}`
+   If your Railway service exposes a separate MySQL URL, `MYSQL_URL` and `MYSQL_PUBLIC_URL` are also supported and take priority if present.
    `CORS_ORIGIN=https://a4agency.github.io`
    `ADMIN_TOKEN=your-strong-secret`
    `CLOUDINARY_CLOUD_NAME=your-cloud-name`
