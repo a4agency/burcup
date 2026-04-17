@@ -472,7 +472,7 @@ const ADMIN_SOURCES = {
     key: 'bcup_matches',
     exportName: 'matches.json',
     title: 'Матчи',
-    help: 'Матчи сохраняются прямо в PostgreSQL и сразу попадают в расписание, результаты и историю клубов.',
+    help: 'Матчи сохраняются прямо в MySQL и сразу попадают в расписание, результаты и историю клубов.',
     defaultData: [
       {
         id: Date.now(),
