@@ -3617,9 +3617,10 @@ function renderPartnerDisplayName(meta) {
     return escapeHtml(meta?.text || '');
   }
 
-  return (Array.isArray(meta.lines) ? meta.lines : [meta.text || ''])
+  const lines = Array.isArray(meta.lines) ? meta.lines : [meta.text || ''];
+  return lines
     .map(line => `<span class="partner-name-line">${escapeHtml(line)}</span>`)
-    .join('');
+    .join('<br>');
 }
 
 function enforcePartnerLabelBreaks(root = document) {
@@ -3630,13 +3631,13 @@ function enforcePartnerLabelBreaks(root = document) {
 
     if (text === 'ООО Фирма «Спринг-Центр»') {
       labelNode.className = 'partner-name partner-name-multiline';
-      labelNode.innerHTML = '<span class="partner-name-line">ООО Фирма</span><span class="partner-name-line">«Спринг-Центр»</span>';
+      labelNode.innerHTML = '<span class="partner-name-line">ООО Фирма</span><br><span class="partner-name-line">«Спринг-Центр»</span>';
       return;
     }
 
     if (text === 'Телеканал «Санкт-Петербург»') {
       labelNode.className = 'partner-name partner-name-multiline';
-      labelNode.innerHTML = '<span class="partner-name-line">Телеканал</span><span class="partner-name-line">«Санкт-Петербург»</span>';
+      labelNode.innerHTML = '<span class="partner-name-line">Телеканал</span><br><span class="partner-name-line">«Санкт-Петербург»</span>';
     }
   });
 }
