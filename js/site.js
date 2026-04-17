@@ -3577,19 +3577,33 @@ function normalizePartnerLookupKey(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-function formatPartnerDisplayName(value) {
+function getPartnerDisplayNameMeta(value) {
   const name = String(value || '').trim();
-  if (!name) return '';
+  if (!name) {
+    return {
+      text: '',
+      multiline: false,
+    };
+  }
 
   if (name === 'ООО Фирма «Спринг-Центр»') {
-    return 'ООО Фирма<br>«Спринг-Центр»';
+    return {
+      text: 'ООО Фирма\n«Спринг-Центр»',
+      multiline: true,
+    };
   }
 
   if (name === 'Телеканал «Санкт-Петербург»') {
-    return 'Телеканал<br>«Санкт-Петербург»';
+    return {
+      text: 'Телеканал\n«Санкт-Петербург»',
+      multiline: true,
+    };
   }
 
-  return escapeHtml(name);
+  return {
+    text: name,
+    multiline: false,
+  };
 }
 
 function normalizePartnerHref(value) {
@@ -3621,6 +3635,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     const href = normalizePartnerHref(partner?.website_url || '');
     const logoSrc = String(partner?.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
     const logoAlt = partner?.logo_alt || name;
+    const labelMeta = getPartnerDisplayNameMeta(name);
 
     let element = node;
     if (node.tagName !== 'A') {
@@ -3640,7 +3655,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     }
     element.innerHTML = `
       ${renderPartnerLogoMarkup(name, logoSrc, logoAlt)}
-      <span>${formatPartnerDisplayName(name)}</span>
+      <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${escapeHtml(labelMeta.text)}</span>
     `;
   });
 
@@ -3651,10 +3666,11 @@ function renderPartnerItem(item) {
   const logoSrc = String(item.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
   const href = normalizePartnerHref(item.website_url || '');
   const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
+  const labelMeta = getPartnerDisplayNameMeta(item.name);
   return `
     <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" ${externalAttrs}>
       ${renderPartnerLogoMarkup(item.name, logoSrc, item.logo_alt || item.name)}
-      <span>${formatPartnerDisplayName(item.name)}</span>
+      <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${escapeHtml(labelMeta.text)}</span>
     </a>
   `;
 }

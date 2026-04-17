@@ -1937,7 +1937,7 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
     transform .28s ease;
 }
 
-.sponsor-item-logo span{
+.sponsor-item-logo .partner-name{
   display:block;
   width:100%;
   line-height:1.35;
@@ -1945,6 +1945,10 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   color:#6c7b95 !important;
   font-weight:400;
   transition:color .24s ease;
+}
+
+.sponsor-item-logo .partner-name-multiline{
+  white-space:pre-line;
 }
 
 .sponsor-item:hover,
@@ -1955,10 +1959,10 @@ iframe.video{width:100%;aspect-ratio:16/9;border:0;border-radius:18px;background
   color:var(--navy);
 }
 
-.sponsor-item:hover .sponsor-item-logo span,
-.sponsor-item:focus-visible .sponsor-item-logo span,
-.sponsor-item-logo:hover span,
-.sponsor-item-logo:focus-visible span{
+.sponsor-item:hover .sponsor-item-logo .partner-name,
+.sponsor-item:focus-visible .sponsor-item-logo .partner-name,
+.sponsor-item-logo:hover .partner-name,
+.sponsor-item-logo:focus-visible .partner-name{
   color:var(--navy) !important;
 }
 
