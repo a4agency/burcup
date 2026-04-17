@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../app/Repositories/MediaRepository.php';
 require_once __DIR__ . '/../../app/Repositories/PartnersRepository.php';
 require_once __DIR__ . '/../../app/Repositories/AdminMutationsRepository.php';
 require_once __DIR__ . '/../../app/Controllers/AdminController.php';
+require_once __DIR__ . '/../../app/Controllers/UploadController.php';
 
 $origin = get_env('CORS_ORIGIN', '*');
 header('Access-Control-Allow-Origin: ' . ($origin === '' ? '*' : $origin));
@@ -42,6 +43,7 @@ $media = new MediaRepository($pdo);
 $partners = new PartnersRepository($pdo);
 $mutations = new AdminMutationsRepository($pdo);
 $admin = new AdminController($pdo, $tournaments, $clubs, $matches, $news, $media, $partners, $pages, $mutations);
+$uploads = new UploadController();
 
 try {
     if ($path === '/health') {
@@ -145,6 +147,27 @@ try {
 
     if ($method === 'POST' && $path === '/admin/session') {
         Response::json($admin->login(json_decode((string) file_get_contents('php://input'), true) ?: []));
+    }
+
+    if ($method === 'POST' && preg_match('#^/admin/uploads/(image|video|raw)$#', $path, $m)) {
+        $token = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
+        if (api_normalize_string($token) === '' || api_normalize_string($token) !== api_normalize_string(get_env('ADMIN_TOKEN'))) {
+            Response::json(['error' => 'Admin token is invalid or missing'], 401);
+        }
+        $payload = json_decode((string) file_get_contents('php://input'), true);
+        if (!is_array($payload)) {
+            Response::json(['error' => 'Payload must be an object'], 400);
+        }
+        try {
+            $result = match ($m[1]) {
+                'image' => $uploads->uploadImage($payload),
+                'video' => $uploads->uploadVideo($payload),
+                default => $uploads->uploadRaw($payload),
+            };
+            Response::json($result);
+        } catch (RuntimeException $error) {
+            Response::json(['error' => $error->getMessage()], 400);
+        }
     }
 
     if ($method === 'GET' && preg_match('#^/admin/([^/]+)$#', $path, $m)) {

@@ -39,6 +39,11 @@ The first practical migration step is in place:
   - `/api/admin/session`
   - `/api/admin/{resource}` for tournaments, clubs, matches, news, partners, standings, playoff, albums, pages
   - `PUT` support for the same resources
+  - `/api/admin/uploads/image`
+  - `/api/admin/uploads/video`
+  - `/api/admin/uploads/raw`
+
+Uploads are stored locally under `public/uploads/` by default and returned as same-host URLs.
 
 ## Environment
 
