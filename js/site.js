@@ -301,17 +301,11 @@ async function renderStandings(selector) {
   if (!target) return;
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = renderStandingsLoadingCard();
-  const [standingsResult, matchesResult, playoffResult] = await Promise.allSettled([
-    fetchJson('data/standings.json'),
-    fetchJson('data/matches.json'),
+  const [standingsData, matchesData, playoffData] = await Promise.all([
+    fetchApi('/api/standings'),
+    fetchApi('/api/matches'),
     fetchApi('/api/playoff')
   ]);
-
-  const standingsData = standingsResult.status === 'fulfilled' ? standingsResult.value : [];
-  const matchesData = matchesResult.status === 'fulfilled' ? matchesResult.value : [];
-  const playoffData = playoffResult.status === 'fulfilled' && Array.isArray(playoffResult.value)
-    ? playoffResult.value
-    : [];
 
   try {
     const groupedStandings = buildGroupedStandings(matchesData, standingsData);
@@ -1037,7 +1031,7 @@ function translateRuntimeText(value) {
 }
 
 const TRANSPARENT_IMAGE_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-const APP_CACHE_VERSION = '2026-04-18-live-data-v3';
+const APP_CACHE_VERSION = '2026-04-18-live-data-v4';
 const NEWS_IMAGE_FALLBACKS = [
   { id: 1, slug: 'applications-open', src: 'images/news-1.webp' },
   { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.webp' },
@@ -3333,9 +3327,10 @@ async function fetchApi(path) {
 
 async function fetchJson(path) {
   const cacheVersionKey = 'bcup_cache_version';
+  const isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
   try {
     const currentVersion = localStorage.getItem(cacheVersionKey);
-    if (currentVersion !== APP_CACHE_VERSION) {
+    if (currentVersion !== APP_CACHE_VERSION || !isLocalDev) {
       Object.keys(localStorage)
         .filter(key => key.startsWith('bcup_') && key !== cacheVersionKey)
         .forEach(key => localStorage.removeItem(key));
@@ -3343,6 +3338,7 @@ async function fetchJson(path) {
     }
   } catch (e) {}
 
+  const allowStaticFallback = isLocalDev;
   const storageKeyMap = {
     'data/standings.json': 'bcup_standings',
     'data/matches.json': 'bcup_matches',
@@ -3356,7 +3352,7 @@ async function fetchJson(path) {
     try {
       const remoteData = await fetchApi(endpoint);
       if (remoteData && (path !== 'data/standings.json' || hasExpandedStandingsFields(remoteData))) {
-        if (storageKey) {
+        if (allowStaticFallback && storageKey) {
           try {
             localStorage.setItem(storageKey, JSON.stringify(remoteData));
           } catch (e) {}
@@ -3364,10 +3360,13 @@ async function fetchJson(path) {
         return remoteData;
       }
     } catch (error) {
-      console.warn(`Remote API ${endpoint} is unavailable, falling back to static file.`, error);
+      console.warn(`Remote API ${endpoint} is unavailable.`, error);
+      if (!allowStaticFallback) {
+        return null;
+      }
     }
   }
-  if (storageKey) {
+  if (allowStaticFallback && storageKey) {
     const local = localStorage.getItem(storageKey);
     if (local) {
       try {
@@ -3377,6 +3376,9 @@ async function fetchJson(path) {
         }
       } catch (e) {}
     }
+  }
+  if (!allowStaticFallback && endpoint) {
+    return null;
   }
   const response = await fetch(path);
   if (!response.ok) throw new Error(`Failed to load ${path}`);
@@ -3876,7 +3878,7 @@ async function renderClubPage() {
   }
   const [club, currentSeasonMatches] = await Promise.all([
     fetchApi(`/api/clubs/${encodeURIComponent(slug)}`),
-    fetchJson('data/matches.json').catch(() => [])
+    fetchApi(`/api/clubs/${encodeURIComponent(slug)}/matches`)
   ]);
   const clubData = club || getHistoricalClubFallback(slug) || getCurrentClubFallback(slug);
   if (!clubData) {
@@ -3998,7 +4000,7 @@ async function renderUpcomingMatches() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 3 }, (_, index) => renderUpcomingCardLoading(index)).join('');
   try {
-    const items = await fetchJson('data/matches.json');
+    const items = await fetchApi('/api/matches');
     target.innerHTML = items.map(item => {
       const parts = String(item.score || '0:0').split(':');
       const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
@@ -4045,7 +4047,7 @@ async function renderHomeNews() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
-    const items = await fetchJson('data/news.json');
+    const items = await fetchApi('/api/news');
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
     target.setAttribute('aria-busy', 'false');
     runAutoFit();
@@ -4079,7 +4081,7 @@ async function renderMatchesPage() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 4 }, (_, index) => renderUpcomingCardLoading(index)).join('');
   try {
-    const items = await fetchJson('data/matches.json');
+    const items = await fetchApi('/api/matches');
     target.innerHTML = items.map(item => {
       const parts = String(item.score || '0:0').split(':');
       const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
@@ -4126,7 +4128,7 @@ async function renderNewsPage() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 6 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
-    const items = await fetchJson('data/news.json');
+    const items = await fetchApi('/api/news');
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
     target.setAttribute('aria-busy', 'false');
     runAutoFit();
@@ -4523,7 +4525,7 @@ async function renderMultimediaPage() {
   storiesTarget.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
 
   try {
-    const matchesRaw = await fetchJson('data/matches.json');
+    const matchesRaw = await fetchApi('/api/matches');
     const albums = await loadRenderableMediaAlbums();
     const allMatches = sortMediaMatches(Array.isArray(matchesRaw) ? matchesRaw : []);
     const featuredMatch = pickFeaturedMediaMatch(allMatches);
@@ -4701,16 +4703,11 @@ async function renderNewsArticlePage() {
   root.innerHTML = renderDetailPageLoading('Загружаем новость...');
 
   try {
-    const items = await fetchJson('data/news.json');
     const params = new URLSearchParams(window.location.search);
     const slug = String(params.get('slug') || '').trim();
     const id = String(params.get('id') || '').trim();
-
-    const item = (Array.isArray(items) ? items : []).find(entry => {
-      if (slug && String(entry?.slug || '').trim() === slug) return true;
-      if (id && String(entry?.id || '').trim() === id) return true;
-      return false;
-    }) || (Array.isArray(items) ? items[0] : null);
+    const lookupKey = slug || id;
+    const item = lookupKey ? await fetchApi(`/api/news/${encodeURIComponent(lookupKey)}`) : null;
 
     if (!item) {
       root.innerHTML = '<div class="card">Не удалось найти новость.</div>';
@@ -4797,7 +4794,7 @@ async function renderResultsList() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 3 }, () => renderLoadingStateCard('Загружаем результаты...')).join('');
   try {
-    const items = await fetchJson('data/results.json');
+    const items = await fetchApi('/api/results');
     target.innerHTML = items.map(item => `
       <div class="result-card">
         <div class="result-stage">${escapeHtml(item.stage)}</div>
@@ -4819,7 +4816,7 @@ async function renderResultsMatches() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 3 }, (_, index) => renderUpcomingCardLoading(index)).join('');
   try {
-    const items = await fetchJson('data/matches.json');
+    const items = await fetchApi('/api/matches');
     target.innerHTML = items.map(item => {
       const parts = String(item.score || '0:0').split(':');
       const homeScore = item.score ? escapeHtml(parts[0] || '0') : '0';
@@ -4866,7 +4863,7 @@ async function renderMatchPageFromJson() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = renderDetailPageLoading('Загружаем страницу матча...');
   try {
-    const items = await fetchJson('data/matches.json');
+    const items = await fetchApi('/api/matches');
     const params = new URLSearchParams(window.location.search);
     const requestedId = String(params.get('id') || '').trim();
     const requestedMediaTab = String(params.get('media') || '').trim().toLowerCase();
