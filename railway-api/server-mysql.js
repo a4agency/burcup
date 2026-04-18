@@ -2089,8 +2089,12 @@ app.put('/api/admin/:resource', requireAdminAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Payload must be an array' });
     }
     await runInTransaction(connection => saveAdminResource(connection, req.params.resource, req.body));
-    const data = await runInTransaction(connection => loadAdminResource(connection, req.params.resource));
-    return res.json({ ok: true, resource: req.params.resource, count: data.length, data });
+    return res.json({
+      ok: true,
+      resource: req.params.resource,
+      count: req.body.length,
+      data: req.body,
+    });
   } catch (error) {
     if (error.message === 'Unknown admin resource') {
       return res.status(404).json({ error: error.message });

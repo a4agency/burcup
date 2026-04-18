@@ -65,7 +65,7 @@ final class AdminController
             'ok' => true,
             'resource' => $resource,
             'count' => $count,
-            'data' => $this->readResource($resource),
+            'data' => $payload,
         ];
     }
 }

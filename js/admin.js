@@ -488,6 +488,7 @@ const ADMIN_SOURCES = {
         away_team_slug: '',
         away_logo: '',
         score: '0:0',
+        sort_order: 0,
         group: '',
         round: '',
         matchday: '',
@@ -513,6 +514,7 @@ const ADMIN_SOURCES = {
       away_team_slug: '',
       away_logo: '',
       score: '0:0',
+      sort_order: 0,
       group: '',
       round: '',
       matchday: '',
@@ -537,6 +539,7 @@ const ADMIN_SOURCES = {
       ['away_team_slug', 'Slug гостей', 'text'],
       ['away_logo', 'Логотип гостей', 'logo'],
       ['score', 'Счёт', 'score'],
+      ['sort_order', 'Порядок', 'number'],
       ['group', 'Группа / стадия', 'text'],
       ['round', 'Раунд', 'text'],
       ['matchday', 'Игровой день', 'text'],
@@ -829,6 +832,7 @@ const ADMIN_SOURCES = {
         away_team_slug: '',
         away_logo: '',
         score: '0:0',
+        sort_order: 0,
         group: '',
         round: '',
         matchday: '',
@@ -854,6 +858,7 @@ const ADMIN_SOURCES = {
       away_team_slug: '',
       away_logo: '',
       score: '0:0',
+      sort_order: 0,
       group: '',
       round: '',
       matchday: '',
@@ -878,6 +883,7 @@ const ADMIN_SOURCES = {
       ['away_team_slug', 'Slug гостей', 'text'],
       ['away_logo', 'Логотип гостей', 'logo'],
       ['score', 'Счёт', 'score'],
+      ['sort_order', 'Порядок', 'number'],
       ['group', 'Группа / стадия', 'text'],
       ['round', 'Раунд', 'text'],
       ['matchday', 'Игровой день', 'text'],
@@ -1301,8 +1307,36 @@ function getAdminMatchStatusLabel(status, fallback = '') {
 function normalizeMatchAdminItem(item) {
   return {
     ...item,
+    sort_order: Number(item?.sort_order || 0) || 0,
     status_label: getAdminMatchStatusLabel(item?.status, item?.status_label),
   };
+}
+
+function compareMatchAdminItems(left, right) {
+  const leftOrder = Number(left?.sort_order || 0);
+  const rightOrder = Number(right?.sort_order || 0);
+  if (leftOrder || rightOrder) {
+    if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+  }
+
+  const leftDateTime = joinNonEmpty([String(left?.date || '').trim(), String(left?.time || '').trim()], ' ');
+  const rightDateTime = joinNonEmpty([String(right?.date || '').trim(), String(right?.time || '').trim()], ' ');
+  const dateCompare = leftDateTime.localeCompare(rightDateTime, 'ru');
+  if (dateCompare !== 0) return dateCompare;
+
+  return Number(left?.id || 0) - Number(right?.id || 0);
+}
+
+function getNextAdminMatchId(sourceName) {
+  const items = normalizeSourceData(sourceName, structuredClone(readFormData(sourceName)));
+  const numericIds = new Set(items
+    .map(item => Number(item?.id || 0) || 0)
+    .filter(id => id > 0));
+  let nextId = 1;
+  while (numericIds.has(nextId)) {
+    nextId += 1;
+  }
+  return nextId;
 }
 
 function normalizeStandingAdminItem(item, index = 0) {
@@ -1429,17 +1463,24 @@ function normalizeSourceData(sourceName, data) {
     return normalizedItems.filter(item => item?.is_featured || Number(item?.season_year || 0) >= 2026);
   }
   if (sourceName === 'matches' || sourceName === 'archive_matches') {
-    const normalizedItems = items.map(normalizeMatchAdminItem);
-    if (sourceMeta?.filterArchiveMatches) {
-      return normalizedItems.filter(item => {
-        const tournamentSlug = String(item?.tournament_slug || '').trim();
-        return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
-      });
-    }
-    return normalizedItems.filter(item => {
+    const normalizedItems = items
+      .map(normalizeMatchAdminItem)
+      .sort(compareMatchAdminItems);
+    const filteredItems = normalizedItems.filter(item => {
       const tournamentSlug = String(item?.tournament_slug || '').trim();
+      if (sourceMeta?.filterArchiveMatches) {
+        return tournamentSlug && tournamentSlug !== 'burchalkin-cup-2026';
+      }
       return !tournamentSlug || tournamentSlug === 'burchalkin-cup-2026';
     });
+    const hasManualOrder = filteredItems.some(item => Number(item?.sort_order || 0) > 0);
+    if (!hasManualOrder) {
+      return filteredItems.map((item, index) => ({
+        ...item,
+        sort_order: index + 1,
+      }));
+    }
+    return filteredItems;
   }
   if (sourceName === 'media') {
     const looksLikeMatchPayload = items.some(item => Object.prototype.hasOwnProperty.call(item || {}, 'home_team') || Object.prototype.hasOwnProperty.call(item || {}, 'video'));
@@ -2079,7 +2120,11 @@ function renderMatchAdminCard(item, index, allItems) {
     <div class="admin-item-card admin-match-card" data-item-index="${index}">
       <div class="admin-item-head">
         <strong>Матч #${index + 1}</strong>
-        <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+        <div class="admin-item-head-actions">
+          <button type="button" class="admin-item-move" data-move-match="up" data-index="${index}" ${index === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" class="admin-item-move" data-move-match="down" data-index="${index}" ${index === allItems.length - 1 ? 'disabled' : ''}>↓</button>
+          <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+        </div>
       </div>
 
       <div class="admin-match-layout">
@@ -2127,12 +2172,7 @@ function renderMatchAdminCard(item, index, allItems) {
 function getCurrentAdminMatchesCatalog() {
   const localMatches = renderedDataCache.matches || getSourceData('matches');
   const base = localMatches || defaultsCache.matches || ADMIN_SOURCES.matches.defaultData || [];
-  return normalizeSourceData('matches', structuredClone(base))
-    .sort((left, right) => {
-      const leftDateTime = `${String(left?.date || '')} ${String(left?.time || '')}`.trim();
-      const rightDateTime = `${String(right?.date || '')} ${String(right?.time || '')}`.trim();
-      return leftDateTime.localeCompare(rightDateTime);
-    });
+  return normalizeSourceData('matches', structuredClone(base));
 }
 
 function formatAdminFeaturedMatchLabel(item) {
@@ -2716,6 +2756,27 @@ function renderForm(sourceName, data) {
     });
   });
 
+  wrap.querySelectorAll('[data-move-match]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const direction = String(btn.dataset.moveMatch || '').trim();
+      const idx = Number(btn.dataset.index);
+      const next = normalizeSourceData(sourceName, readFormData(sourceName));
+      const targetIndex = direction === 'up' ? idx - 1 : idx + 1;
+      if (!next[idx] || !next[targetIndex]) return;
+
+      const [movingItem] = next.splice(idx, 1);
+      next.splice(targetIndex, 0, movingItem);
+      const reindexed = next.map((item, itemIndex) => ({
+        ...item,
+        sort_order: itemIndex + 1,
+      }));
+
+      setSourceData(sourceName, reindexed);
+      adminShowSource(sourceName, { preferLocal: true });
+      setStatus('Порядок матчей обновлён в черновике. Нажми «Сохранить», чтобы отправить изменения в API.');
+    });
+  });
+
   const addDraftItem = (overrides = {}, message = 'Новая запись добавлена в черновик. Нажми «Сохранить», чтобы отправить в API.') => {
     const next = readFormData(sourceName);
     next.push({
@@ -2734,6 +2795,16 @@ function renderForm(sourceName, data) {
         addDraftItem(
           { sort_order: readFormData(sourceName).length + 1 },
           'Новый фотоальбом добавлен в черновик. Нажми «Сохранить», чтобы отправить его в API.'
+        );
+        return;
+      }
+      if (sourceName === 'matches' || sourceName === 'archive_matches') {
+        addDraftItem(
+          {
+            id: getNextAdminMatchId(sourceName),
+            sort_order: readFormData(sourceName).length + 1,
+          },
+          'Новый матч добавлен в черновик. Нажми «Сохранить», чтобы отправить его в API.'
         );
         return;
       }
