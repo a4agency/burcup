@@ -1037,6 +1037,7 @@ function translateRuntimeText(value) {
 }
 
 const TRANSPARENT_IMAGE_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+const APP_CACHE_VERSION = '2026-04-18-live-data-v3';
 const NEWS_IMAGE_FALLBACKS = [
   { id: 1, slug: 'applications-open', src: 'images/news-1.webp' },
   { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.webp' },
@@ -1427,6 +1428,80 @@ const HISTORICAL_CLUB_FALLBACKS = {
     country: 'Россия',
     city: 'Краснодар',
     description: 'Участник 2018 - 2019, 2023. Страница клуба в истории турнира.',
+    matches: []
+  }
+};
+const CURRENT_CLUB_FALLBACKS = {
+  'almaz-antey': {
+    slug: 'almaz-antey',
+    name: 'Алмаз-Антей',
+    logo: 'images/team-almaz-antey.webp',
+    country: 'Россия',
+    city: 'Санкт-Петербург',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  zenit: {
+    slug: 'zenit',
+    name: 'Зенит',
+    logo: 'images/team-zenit.webp',
+    country: 'Россия',
+    city: 'Санкт-Петербург',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  palmeiras: {
+    slug: 'palmeiras',
+    name: 'Палмейрас',
+    logo: 'images/team-palmeiras.webp',
+    country: 'Бразилия',
+    city: 'Сан-Паулу',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  'crvena-zvezda': {
+    slug: 'crvena-zvezda',
+    name: 'Црвена Звезда',
+    logo: 'images/team-crvena-zvezda.webp',
+    country: 'Сербия',
+    city: 'Белград',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  fenerbahce: {
+    slug: 'fenerbahce',
+    name: 'Фенербахче',
+    logo: 'images/team-fenerbahce.webp',
+    country: 'Турция',
+    city: 'Стамбул',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  'dinamo-minsk': {
+    slug: 'dinamo-minsk',
+    name: 'Динамо-Минск',
+    logo: 'images/team-dinamo-minsk.webp',
+    country: 'Беларусь',
+    city: 'Минск',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  'san-lorenzo': {
+    slug: 'san-lorenzo',
+    name: 'Сан-Лоренсо',
+    logo: 'images/team-san-lorenzo.webp',
+    country: 'Аргентина',
+    city: 'Буэнос-Айрес',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
+    matches: []
+  },
+  'cruz-azul': {
+    slug: 'cruz-azul',
+    name: 'Крус Асуль',
+    logo: 'images/team-cruz-azul.webp',
+    country: 'Мексика',
+    city: 'Мехико',
+    description: 'Участник сезона 2026. Страница клуба в текущем розыгрыше.',
     matches: []
   }
 };
@@ -2218,6 +2293,10 @@ function getClubPageUrl(item) {
 
 function getHistoricalClubFallback(slug) {
   return HISTORICAL_CLUB_FALLBACKS[String(slug || '').trim()] || null;
+}
+
+function getCurrentClubFallback(slug) {
+  return CURRENT_CLUB_FALLBACKS[String(slug || '').trim()] || null;
 }
 
 function hasExpandedStandingsFields(data) {
@@ -3253,6 +3332,17 @@ async function fetchApi(path) {
 }
 
 async function fetchJson(path) {
+  const cacheVersionKey = 'bcup_cache_version';
+  try {
+    const currentVersion = localStorage.getItem(cacheVersionKey);
+    if (currentVersion !== APP_CACHE_VERSION) {
+      Object.keys(localStorage)
+        .filter(key => key.startsWith('bcup_') && key !== cacheVersionKey)
+        .forEach(key => localStorage.removeItem(key));
+      localStorage.setItem(cacheVersionKey, APP_CACHE_VERSION);
+    }
+  } catch (e) {}
+
   const storageKeyMap = {
     'data/standings.json': 'bcup_standings',
     'data/matches.json': 'bcup_matches',
@@ -3788,7 +3878,7 @@ async function renderClubPage() {
     fetchApi(`/api/clubs/${encodeURIComponent(slug)}`),
     fetchJson('data/matches.json').catch(() => [])
   ]);
-  const clubData = club || getHistoricalClubFallback(slug);
+  const clubData = club || getHistoricalClubFallback(slug) || getCurrentClubFallback(slug);
   if (!clubData) {
     target.innerHTML = '<section class="section"><div class="container card"><h2>Клуб недоступен</h2><p class="muted">API ещё не подключён или клуб не найден.</p></div></section>';
     target.setAttribute('aria-busy', 'false');
