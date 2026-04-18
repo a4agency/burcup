@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../app/Repositories/MatchesRepository.php';
 require_once __DIR__ . '/../../app/Repositories/NewsRepository.php';
 require_once __DIR__ . '/../../app/Repositories/MediaRepository.php';
 require_once __DIR__ . '/../../app/Repositories/PartnersRepository.php';
+require_once __DIR__ . '/../../app/Repositories/TranslationRepository.php';
 require_once __DIR__ . '/../../app/Repositories/AdminMutationsRepository.php';
 require_once __DIR__ . '/../../app/Controllers/AdminController.php';
 require_once __DIR__ . '/../../app/Controllers/UploadController.php';
@@ -41,6 +42,7 @@ $matches = new MatchesRepository($pdo);
 $news = new NewsRepository($pdo);
 $media = new MediaRepository($pdo);
 $partners = new PartnersRepository($pdo);
+$translations = new TranslationRepository($pdo);
 $mutations = new AdminMutationsRepository($pdo);
 $admin = new AdminController($pdo, $tournaments, $clubs, $matches, $news, $media, $partners, $pages, $mutations);
 $uploads = new UploadController();
@@ -161,7 +163,28 @@ try {
     }
 
     if ($method === 'POST' && $path === '/admin/session') {
-        Response::json($admin->login(json_decode((string) file_get_contents('php://input'), true) ?: []));
+        Response::json($admin->login(api_read_json_body()));
+    }
+
+    if ($method === 'POST' && $path === '/translate') {
+        $body = api_read_json_body();
+        $sourceLang = api_normalize_string($body['source_lang'] ?? '') ?: 'ru';
+        $targetLang = api_normalize_string($body['target_lang'] ?? '') ?: 'en';
+        $texts = api_ensure_array($body['texts'] ?? []);
+        if (!$texts) {
+            Response::json([
+                'ok' => true,
+                'source_lang' => $sourceLang,
+                'target_lang' => $targetLang,
+                'translations' => [],
+            ]);
+        }
+        Response::json([
+            'ok' => true,
+            'source_lang' => $sourceLang,
+            'target_lang' => $targetLang,
+            'translations' => $translations->translateTexts($texts, $sourceLang, $targetLang),
+        ]);
     }
 
     if ($method === 'POST' && preg_match('#^/admin/uploads/(image|video|raw)$#', $path, $m)) {

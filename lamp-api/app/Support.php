@@ -16,6 +16,12 @@ function api_normalize_string(mixed $value): string
     return is_string($value) ? trim($value) : '';
 }
 
+function api_normalize_translation_text(mixed $value): string
+{
+    $normalized = preg_replace('/\s+/u', ' ', (string) $value);
+    return $normalized === null ? '' : trim($normalized);
+}
+
 function api_normalize_html_string(mixed $value): string
 {
     return is_string($value) ? trim($value) : '';
@@ -51,6 +57,11 @@ function api_parse_boolean(mixed $value, bool $fallback = false): bool
     return $fallback;
 }
 
+function api_contains_cyrillic(mixed $value): bool
+{
+    return preg_match('/[А-Яа-яЁё]/u', (string) $value) === 1;
+}
+
 function api_parse_score(mixed $score): array
 {
     $parts = explode(':', (string) ($score ?: '0:0'));
@@ -84,6 +95,17 @@ function api_query_one(PDO $pdo, string $sql, array $params = []): ?array
 {
     $rows = api_query_rows($pdo, $sql, $params);
     return $rows[0] ?? null;
+}
+
+function api_ensure_array(mixed $value): array
+{
+    return is_array($value) ? $value : [];
+}
+
+function api_read_json_body(): array
+{
+    $body = json_decode((string) file_get_contents('php://input'), true);
+    return is_array($body) ? $body : [];
 }
 
 function api_execute(PDO $pdo, string $sql, array $params = []): PDOStatement

@@ -35,6 +35,7 @@ The first practical migration step is in place:
   - `/api/playoff`
   - `/api/results`
   - `/api/pages/{slug}`
+  - `/api/translate`
 - admin login, read and save resources:
   - `/api/admin/session`
   - `/api/admin/{resource}` for tournaments, clubs, matches, news, partners, standings, playoff, albums, pages
@@ -60,3 +61,5 @@ Optional:
 - `ADMIN_PASSWORD`
 - `ADMIN_TOKEN`
 - `CORS_ORIGIN`
+- `TRANSLATION_ENABLED`
+- `TRANSLATION_PROVIDER`
