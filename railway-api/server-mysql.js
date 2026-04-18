@@ -11,19 +11,32 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const databaseConnectionSource = (() => {
   const sources = [
+    ['MYSQLHOST', process.env.MYSQLHOST],
+    ['MYSQL_HOST', process.env.MYSQL_HOST],
+    ['DB_HOST', process.env.DB_HOST],
     ['MYSQL_URL', process.env.MYSQL_URL],
     ['MYSQL_PUBLIC_URL', process.env.MYSQL_PUBLIC_URL],
     ['DATABASE_URL', process.env.DATABASE_URL],
     ['DATABASE_PUBLIC_URL', process.env.DATABASE_PUBLIC_URL],
     ['DB_URL', process.env.DB_URL],
-    ['MYSQLHOST', process.env.MYSQLHOST],
-    ['MYSQL_HOST', process.env.MYSQL_HOST],
-    ['DB_HOST', process.env.DB_HOST],
   ];
   const found = sources.find(([, value]) => String(value || '').trim());
   return found ? found[0] : 'missing';
 })();
 let databaseUrl = [
+  (() => {
+    const host = (process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST || '').trim();
+    const portValue = (process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || '3306').trim();
+    const database = (process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || '').trim();
+    const user = (process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER || '').trim();
+    const password = (process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '').trim();
+    if (host && database && user) {
+      const encodedUser = encodeURIComponent(user);
+      const encodedPassword = encodeURIComponent(password);
+      return `mysql://${encodedUser}:${encodedPassword}@${host}:${portValue || 3306}/${database}`;
+    }
+    return '';
+  })(),
   process.env.MYSQL_URL,
   process.env.MYSQL_PUBLIC_URL,
   process.env.DATABASE_URL,
@@ -41,19 +54,7 @@ const translationEnabled = process.env.TRANSLATION_ENABLED !== 'false';
 const translationProvider = (process.env.TRANSLATION_PROVIDER || 'google-gtx').trim().toLowerCase();
 
 if (!databaseUrl) {
-  const host = (process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST || '').trim();
-  const portValue = (process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || '3306').trim();
-  const database = (process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || '').trim();
-  const user = (process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER || '').trim();
-  const password = (process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '').trim();
-  if (host && database && user) {
-    const encodedUser = encodeURIComponent(user);
-    const encodedPassword = encodeURIComponent(password);
-    databaseUrl = `mysql://${encodedUser}:${encodedPassword}@${host}:${portValue || 3306}/${database}`;
-    process.env.DATABASE_URL = databaseUrl;
-  } else {
-    throw new Error('DATABASE_URL is required');
-  }
+  throw new Error('DATABASE_URL is required');
 }
 
 function createPool(connectionString) {
