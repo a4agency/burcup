@@ -3330,7 +3330,7 @@ async function fetchJson(path) {
   const isLocalDev = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
   try {
     const currentVersion = localStorage.getItem(cacheVersionKey);
-    if (currentVersion !== APP_CACHE_VERSION || !isLocalDev) {
+    if (currentVersion !== APP_CACHE_VERSION) {
       Object.keys(localStorage)
         .filter(key => key.startsWith('bcup_') && key !== cacheVersionKey)
         .forEach(key => localStorage.removeItem(key));

@@ -49,7 +49,11 @@ $uploads = new UploadController();
 
 try {
     if ($path === '/health') {
-        Response::json(['ok' => true]);
+        Response::json([
+            'ok' => true,
+            'runtime' => 'php',
+            'database' => 'mysql',
+        ]);
     }
 
     if ($method === 'GET' && $path === '/tournaments') {
@@ -140,6 +144,14 @@ try {
 
     if ($method === 'GET' && $path === '/news') {
         Response::json($news->all(false, null));
+    }
+
+    if ($method === 'GET' && preg_match('#^/news/([^/]+)$#', $path, $m)) {
+        $item = $news->bySlugOrId(urldecode($m[1]));
+        if (!$item) {
+            Response::json(['error' => 'News article not found'], 404);
+        }
+        Response::json($item);
     }
 
     if ($method === 'GET' && $path === '/media/albums') {

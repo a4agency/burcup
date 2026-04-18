@@ -41,9 +41,6 @@
   configuredCandidates.forEach(value => appendCandidate(apiBaseCandidates, seenApiBaseCandidates, value));
   appendCandidate(apiBaseCandidates, seenApiBaseCandidates, inferredPrimaryApiBase);
   configuredFallbacks.forEach(value => appendCandidate(apiBaseCandidates, seenApiBaseCandidates, value));
-  if (!isLocalPreview && normalizeApiBaseUrl(inferredPrimaryApiBase) !== normalizeApiBaseUrl(legacyApiBaseUrl)) {
-    appendCandidate(apiBaseCandidates, seenApiBaseCandidates, legacyApiBaseUrl);
-  }
 
   window.BCUP_CONFIG = Object.assign({
     cloudinaryCloudName: cloudinaryOverride || 'dcqvo4aoj',
