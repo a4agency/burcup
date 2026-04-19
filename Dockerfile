@@ -3,6 +3,8 @@ FROM php:8.3-apache
 ENV APACHE_DOCUMENT_ROOT=/var/www/html
 
 RUN a2enmod rewrite headers \
+    && a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork \
     && docker-php-ext-install pdo pdo_mysql \
     && printf '%s\n' \
         '<Directory /var/www/html>' \
