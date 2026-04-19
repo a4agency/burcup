@@ -14,6 +14,9 @@ RUN a2enmod rewrite headers \
     && printf '%s\n' \
         '#!/bin/sh' \
         'set -eu' \
+        'if [ -d /var/www/html/lamp-api/public/uploads ]; then' \
+        '  chown -R www-data:www-data /var/www/html/lamp-api/public/uploads || true' \
+        'fi' \
         'PORT="${PORT:-8080}"' \
         'if grep -q "^Listen " /etc/apache2/ports.conf; then' \
         '  sed -i "s/^Listen .*/Listen ${PORT}/" /etc/apache2/ports.conf' \

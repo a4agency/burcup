@@ -74,4 +74,8 @@ The container:
 - routes `/api/*` to PHP
 - keeps uploads available at `/uploads/*`
 
+If you use a Railway volume for persistent uploads, mount it at:
+
+- `/var/www/html/lamp-api/public/uploads`
+
 The runtime reads the same MySQL environment variables listed above, so no separate Node service is needed for the PHP/LAMP path.
