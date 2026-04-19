@@ -44,6 +44,7 @@ let databaseUrl = [
   process.env.DB_URL,
 ]
   .map(value => String(value || '').trim())
+  .filter(value => !value || /^mysql(?:\+mysql)?:\/\//i.test(value) || /^mariadb:\/\//i.test(value))
   .find(Boolean);
 const adminToken = (process.env.ADMIN_TOKEN || '').trim();
 const adminPassword = (process.env.ADMIN_PASSWORD || 'agency').trim();

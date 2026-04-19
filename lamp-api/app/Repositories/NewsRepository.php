@@ -13,6 +13,37 @@ final class NewsRepository extends BaseRepository
         );
     }
 
+    public function bySlugOrId(string $value): ?array
+    {
+        $row = api_query_one($this->pdo, '
+            SELECT
+              n.id,
+              t.slug AS tournament_slug,
+              t.name AS tournament_name,
+              n.slug,
+              n.published_on,
+              n.title,
+              n.excerpt,
+              n.body,
+              n.body_html,
+              n.link_path,
+              n.image_url,
+              n.video_url,
+              n.is_published
+            FROM news_articles n
+            LEFT JOIN tournaments t ON t.id = n.tournament_id
+            WHERE n.slug = ? OR n.id = ?
+            LIMIT 1
+        ', [$value, api_parse_integer($value, 0) ?? 0]);
+
+        if (!$row) {
+            return null;
+        }
+
+        $photoMap = $this->loadPhotoMap([(int) $row['id']]);
+        return api_map_news_article_row($row, $photoMap[(int) $row['id']] ?? []);
+    }
+
     private function queryRows(bool $includeUnpublished, ?string $tournamentSlug): array
     {
         $sql = '
@@ -75,4 +106,3 @@ final class NewsRepository extends BaseRepository
         return $map;
     }
 }
-

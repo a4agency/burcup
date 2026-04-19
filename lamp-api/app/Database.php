@@ -66,7 +66,7 @@ final class Database
             'DB_URL',
         ] as $key) {
             $value = get_env($key);
-            if ($value !== '') {
+            if ($value !== '' && preg_match('/^(?:mysql(?:\+mysql)?|mariadb):\/\//i', $value) === 1) {
                 return $value;
             }
         }
