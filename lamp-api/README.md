@@ -63,3 +63,15 @@ Optional:
 - `CORS_ORIGIN`
 - `TRANSLATION_ENABLED`
 - `TRANSLATION_PROVIDER`
+
+## Railway / Docker
+
+For Railway container deployment, use the root `Dockerfile` in this repository.
+
+The container:
+
+- serves the static site from `/var/www/html`
+- routes `/api/*` to PHP
+- keeps uploads available at `/uploads/*`
+
+The runtime reads the same MySQL environment variables listed above, so no separate Node service is needed for the PHP/LAMP path.
