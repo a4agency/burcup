@@ -1,0 +1,14 @@
+{
+  "name": "burcup-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate:mysql": "node scripts/migrate-to-mysql.mjs"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "mysql2": "^3.22.1",
+    "sharp": "^0.34.4"
+  }
+}

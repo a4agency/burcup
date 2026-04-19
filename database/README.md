@@ -42,7 +42,7 @@ It supports:
 
 Example migration command:
 
-`MYSQL_URL=mysql://user:pass@host:3306/db APPLY_SCHEMA=1 node scripts/migrate-to-mysql.mjs`
+`MYSQL_URL=mysql://user:pass@host:3306/db APPLY_SCHEMA=1 node archive/legacy-tools/scripts/migrate-to-mysql.mjs`
 
 Optional source settings:
 
