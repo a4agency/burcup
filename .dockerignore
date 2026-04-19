@@ -6,7 +6,6 @@ npm-debug.log
 **/npm-debug.log
 .env
 .env.*
-Dockerfile*
 docker-compose*.yml
 archive
 tmp-partners-update.json
