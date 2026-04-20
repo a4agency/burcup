@@ -104,6 +104,69 @@
 - После стабилизации новый продовый сервис начал отвечать через PHP и MySQL.
 - Затем отдельно добивали архивные турниры, чтобы `api/tournaments` возвращал не только `2026`, но и прошлые сезоны.
 
+### Что уже переведено на PHP
+
+- Основной API-роутер:
+  - `lamp-api/public/api/index.php`
+- Публичные GET-ручки:
+  - `/api/health`
+  - `/api/tournaments`
+  - `/api/tournaments/{slug}`
+  - `/api/tournaments/{slug}/standings`
+  - `/api/tournaments/{slug}/playoff`
+  - `/api/tournaments/{slug}/matches`
+  - `/api/tournaments/{slug}/news`
+  - `/api/tournaments/{slug}/partners`
+  - `/api/clubs`
+  - `/api/clubs/{slug}`
+  - `/api/clubs/{slug}/matches`
+  - `/api/matches`
+  - `/api/news`
+  - `/api/news/{slug|id}`
+  - `/api/media/albums`
+  - `/api/media/albums/{slug}`
+  - `/api/standings`
+  - `/api/playoff`
+  - `/api/results`
+  - `/api/pages/{slug}`
+  - `/api/translate`
+- Админ-авторизация:
+  - `/api/admin/session`
+- Админские чтение и сохранение:
+  - `/api/admin/{resource}`
+- Загрузка файлов:
+  - `/api/admin/uploads/image`
+  - `/api/admin/uploads/video`
+  - `/api/admin/uploads/raw`
+- Работа с базой:
+  - PHP API использует MySQL через `pdo_mysql`
+- Фронт:
+  - основные страницы сайта уже ходят в `/api/*`
+  - админка `admin-almaz.html` работает через PHP API
+
+### Что еще осталось добить по LAMP-переносу
+
+- Перевести запуск с текущего Railway PHP router/dev-server на классический Apache/PHP режим без временного CLI-роутера.
+- Подготовить финальную Apache-конфигурацию под обычный LAMP-хостинг:
+  - `DocumentRoot`
+  - `mod_rewrite`
+  - прокидка `/api/*`
+  - корректная раздача статики и `uploads`
+- Проверить, что сайт полностью работает без Railway-специфичных допущений:
+  - без Railway volume-логики
+  - без Railway-specific startup hacks
+  - без зависимости от старого проекта
+- Финально перенести данные в отдельную целевую MySQL на новом хостинге, если Railway MySQL не будет использоваться в проде.
+- Подготовить `.env`/конфиг для типового LAMP-хостинга:
+  - MySQL credentials
+  - admin secrets
+  - CORS
+  - translation
+  - Cloudinary
+- Проверить файловые права на `uploads` в среде Apache/PHP.
+- Прогнать финальную сверку JSON-ответов фронта на новом хостинге.
+- После этого уже можно будет отключать старые Railway/Node/legacy хвосты окончательно.
+
 ### Если чат пропадет
 
 Продолжать нужно с проверки:
@@ -112,6 +175,39 @@
 2. `https://burcup-production.up.railway.app/api/health`
 3. `https://burcup-production.up.railway.app/api/tournaments`
 4. содержимого этого файла
+
+---
+
+## 2026-04-20 01:40
+
+### Что сделали
+
+- Зафиксировали в журнале отдельным блоком текущий статус PHP-переноса.
+- Разложили по пунктам, какие части проекта уже работают через PHP API.
+- Добавили список оставшихся задач именно для LAMP-переноса.
+
+### Что проверили
+
+- По коду фронт уже обращается к `/api/*`.
+- Админка работает через PHP admin endpoints.
+- В проекте есть рабочий PHP API для публичных данных, админки и загрузки файлов.
+- Текущий Railway runtime сейчас уже PHP, но не классический Apache LAMP-режим.
+
+### Что осталось
+
+- Добить именно финальный хостинговый слой под классический LAMP.
+- После этого обновить журнал новым статусом: «LAMP-ready».
+
+### Файлы
+
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний эталон/WORKLOG.md)
+- [lamp-api/public/api/index.php](/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/public/api/index.php)
+- [js/site.js](/Users/kainarbaev_daniar/Downloads/последний эталон/js/site.js)
+- [js/admin.js](/Users/kainarbaev_daniar/Downloads/последний эталон/js/admin.js)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
 
 ---
 
