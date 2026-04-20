@@ -19,6 +19,20 @@
 
 ## Сводка проекта
 
+### Текущее состояние на сейчас
+
+- Новый Railway-проект `BurCup` поднят и отвечает.
+- Основной продовый сайт сейчас работает на:
+  - `https://burcup-production.up.railway.app`
+- PHP health-check отвечает корректно:
+  - `https://burcup-production.up.railway.app/api/health`
+  - подтвержденный ответ:
+    - `{"ok":true,"runtime":"php","database":"mysql"}`
+- Новый MySQL уже подключен к новому Railway-проекту.
+- Volume для загрузок подключен и смонтирован.
+- `api/tournaments` уже возвращает не только сезон `2026`, но и прошлые розыгрыши.
+- Страницы сайта и основные API-ручки открываются.
+
 ### Уже сделано
 
 - Основной сайт переведен с Node/старого API на PHP API в структуре `lamp-api`.
@@ -57,6 +71,22 @@
 - Git branch по умолчанию:
   - `main`
 
+### Текущий Railway-ландшафт
+
+- Railway project:
+  - `BurCup`
+- App service:
+  - `burcup`
+- DB service:
+  - `MySQL`
+- Uploads volume:
+  - `burcup-volume`
+- Текущий проект должен быть независим от старого Railway-проекта.
+- Если снова появятся сомнения по подключению:
+  - сперва смотреть `api/health`
+  - потом смотреть `api/tournaments`
+  - потом сверять Variables у `burcup` и `MySQL`
+
 ### Основные переменные окружения
 
 - `ADMIN_PASSWORD`
@@ -83,6 +113,95 @@
   - открыть service `burcup` -> `Variables`
   - открыть service `MySQL` -> `Variables`
 - В репозиторий коммитим только имена переменных и схему подключения, но не секретные значения.
+
+### Непубличные данные, которые нельзя коммитить
+
+- `ADMIN_PASSWORD`
+- `ADMIN_TOKEN`
+- Cloudinary keys
+- Полные `MYSQL_URL` и `MYSQL_PUBLIC_URL`
+- Пароли MySQL
+- Любые session tokens, cookies и временные доступы
+
+### Что можно безопасно записывать в журнал
+
+- Названия сервисов и переменных
+- Mount path volume
+- Публичные URL сайта и API
+- Имена файлов и папок
+- Список уже переведенных PHP-ручек
+- Порядок действий для восстановления
+
+### Новая MySQL: схема подключения без секрета
+
+- Engine:
+  - `MySQL`
+- Host:
+  - `switchyard.proxy.rlwy.net`
+- Port:
+  - `37018`
+- Database:
+  - `railway`
+- User:
+  - `root`
+- Пароль:
+  - хранится только в Railway Variables, в журнал не записывается
+
+### Что проверять первым делом, если снова что-то сломалось
+
+1. Проверить Railway service `burcup`, что он `Online`.
+2. Открыть:
+   - `https://burcup-production.up.railway.app/api/health`
+3. Открыть:
+   - `https://burcup-production.up.railway.app/api/tournaments`
+4. Открыть:
+   - `https://burcup-production.up.railway.app/api/news`
+   - `https://burcup-production.up.railway.app/api/matches`
+   - `https://burcup-production.up.railway.app/api/clubs`
+5. Если данные не совпадают:
+   - сверить Variables у `burcup`
+   - проверить, что `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER`, `MYSQLPASSWORD` ведут на новую MySQL текущего проекта
+6. Если пропали загрузки:
+   - проверить mount path `/var/www/html/lamp-api/public/uploads`
+7. Если не работает админка:
+   - проверить `ADMIN_PASSWORD`
+   - проверить `ADMIN_TOKEN`
+   - проверить `CORS_ORIGIN`
+
+### Где что лежит в коде
+
+- Главный PHP API router:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/public/api/index.php`
+- PHP-слой работы с БД и сущностями:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/app`
+- Главный фронтовый JS:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/js/site.js`
+- JS админки:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/js/admin.js`
+- HTML админки:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/admin-almaz.html`
+- Конфиг фронта:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/js/config.js`
+- Dockerfile нового PHP runtime:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/Dockerfile`
+- Архив старого кода и миграционных инструментов:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/archive`
+
+### Что уже подтверждено руками
+
+- `api/health` отвечает:
+  - `{"ok":true,"runtime":"php","database":"mysql"}`
+- `api/tournaments` отдает прошлые сезоны
+- Страницы сайта открываются
+- Новый Railway service стартует без старой Apache MPM ошибки
+- Новый volume подключен
+- Новый MySQL создан и подцеплен в новом Railway-проекте
+
+### Важная оговорка по текущему runtime
+
+- Сейчас API уже работает на `PHP + MySQL`.
+- Но финальная цель для обычного LAMP-хостинга все еще требует доведения окружения до полностью классической схемы Apache/PHP/MySQL без Railway-специфичных допущений.
+- Если работа продолжится в новом чате, это нужно держать как основной технический контекст.
 
 ### Важные проверки после деплоя
 
@@ -176,7 +295,49 @@
 3. `https://burcup-production.up.railway.app/api/tournaments`
 4. содержимого этого файла
 
+### Как продолжать работу в новом чате
+
+1. Открыть и прочитать `WORKLOG.md`.
+2. Проверить `api/health`.
+3. Проверить `api/tournaments`.
+4. Если оба ответа корректные, продолжать следующую задачу без восстановления полного чата.
+5. Если ответы не совпадают, сперва сверять:
+   - Railway Variables у `burcup`
+   - Railway Variables у `MySQL`
+   - mount path volume
+   - публичные API-URL, к которым подключен фронт
+
 ---
+
+## 2026-04-20 02:05
+
+### Что сделали
+
+- Расширили `WORKLOG.md` до формата полноценной recovery-точки.
+- Добавили текущее состояние нового Railway-проекта, новой MySQL и volume.
+- Добавили пошаговый чек-лист быстрой диагностики и восстановления.
+- Зафиксировали безопасную схему подключения к новой MySQL без записи секрета в репозиторий.
+- Добавили карту ключевых файлов, публичных URL и текущих подтвержденных проверок.
+
+### Что проверили
+
+- Новый production health отвечает через PHP + MySQL.
+- Новый Railway service `burcup` работает в новом проекте.
+- Новый MySQL создан и подключен на уровне переменных окружения.
+- `api/tournaments` отдает прошлые сезоны.
+
+### Что осталось
+
+- После каждого следующего шага дополнять журнал новой записью сверху.
+- Если будут изменения по деплою, базе, volume или runtime, сразу отражать их в этом файле.
+
+### Файлы
+
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
 
 ## 2026-04-20 01:40
 
