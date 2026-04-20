@@ -31,8 +31,31 @@
 
 - Продовый адрес: `https://burcup-production.up.railway.app`
 - Проверка API: `https://burcup-production.up.railway.app/api/health`
+- Базовый API: `https://burcup-production.up.railway.app/api`
+- Проверка турниров: `https://burcup-production.up.railway.app/api/tournaments`
 - Ожидаемый ответ health:
   - `{"ok":true,"runtime":"php","database":"mysql"}`
+
+### Карта подключений
+
+- Рабочий каталог проекта:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон`
+- Основной PHP API:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api`
+- Архив старых Node-инструментов и миграций:
+  - `/Users/kainarbaev_daniar/Downloads/последний эталон/archive`
+- Railway project:
+  - `BurCup`
+- Railway service:
+  - `burcup`
+- Railway database service:
+  - `MySQL`
+- Railway uploads volume:
+  - `burcup-volume`
+- Mount path для загрузок:
+  - `/var/www/html/lamp-api/public/uploads`
+- Git branch по умолчанию:
+  - `main`
 
 ### Основные переменные окружения
 
@@ -46,6 +69,40 @@
 - `MYSQLPASSWORD`
 - `TRANSLATION_ENABLED`
 - `TRANSLATION_PROVIDER`
+- `CLOUDINARY_CLOUD_NAME`
+- `CLOUDINARY_API_KEY`
+- `CLOUDINARY_API_SECRET`
+
+### Где лежат секреты
+
+- Реальные значения паролей, токенов и connection string в этот файл не записываем.
+- Все секреты хранятся в Railway Variables у сервиса `burcup`.
+- Данные новой MySQL берутся из Railway Variables у сервиса `MySQL`.
+- Если нужно восстановить доступы:
+  - открыть Railway project `BurCup`
+  - открыть service `burcup` -> `Variables`
+  - открыть service `MySQL` -> `Variables`
+- В репозиторий коммитим только имена переменных и схему подключения, но не секретные значения.
+
+### Важные проверки после деплоя
+
+- `https://burcup-production.up.railway.app/`
+- `https://burcup-production.up.railway.app/api/health`
+- `https://burcup-production.up.railway.app/api/tournaments`
+- `https://burcup-production.up.railway.app/api/news`
+- `https://burcup-production.up.railway.app/api/matches`
+- вход в админку
+- загрузка партнеров, новостей, клубов и архивных турниров
+
+### Краткая история миграции
+
+- Сайт изначально работал на статическом фронте и старом Node/Express API.
+- Затем проект перевели с PostgreSQL на MySQL.
+- После этого начали перевод API на PHP для совместимости с будущим LAMP-хостингом.
+- На Railway поднимали новый сервис, отдельно подключали volume для `uploads`.
+- Во время миграции был этап с Apache-конфигурацией и ошибкой `More than one MPM loaded`.
+- После стабилизации новый продовый сервис начал отвечать через PHP и MySQL.
+- Затем отдельно добивали архивные турниры, чтобы `api/tournaments` возвращал не только `2026`, но и прошлые сезоны.
 
 ### Если чат пропадет
 
@@ -55,6 +112,38 @@
 2. `https://burcup-production.up.railway.app/api/health`
 3. `https://burcup-production.up.railway.app/api/tournaments`
 4. содержимого этого файла
+
+---
+
+## 2026-04-20 01:25
+
+### Что сделали
+
+- Расширили рабочий журнал более ранним контекстом миграции.
+- Добавили в журнал карту подключений, сервисов и путей.
+- Зафиксировали, где искать переменные окружения и как восстанавливать подключение к Railway.
+- Зафиксировали правило, что секреты и реальные пароли в репозиторий не записываются.
+- Добавили в журнал контрольные URL и список проверок после деплоя.
+
+### Что проверили
+
+- `api/tournaments` уже отдает не только сезон `2026`, но и прошлые розыгрыши.
+- Текущий health-check продолжает отвечать ожидаемо:
+  - `{"ok":true,"runtime":"php","database":"mysql"}`
+- Для продолжения работ уже достаточно одного `WORKLOG.md`, даже если история чата прервется.
+
+### Что осталось
+
+- После каждого следующего шага дополнять журнал новой записью сверху.
+- При изменении Railway или базы данных обновлять в журнале схему подключений и список проверок.
+
+### Файлы
+
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
 
 ---
 
