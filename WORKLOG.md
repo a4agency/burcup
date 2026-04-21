@@ -2297,3 +2297,35 @@
 - [lamp-api/app/Repositories/TournamentsRepository.php](/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/app/Repositories/TournamentsRepository.php)
 - [lamp-api/app/Database.php](/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/app/Database.php)
 - [archive/legacy-tools/scripts/import-archive-tournaments.mjs](/Users/kainarbaev_daniar/Downloads/последний эталон/archive/legacy-tools/scripts/import-archive-tournaments.mjs)
+
+### Прямое дозаполнение архивных турниров в живую production-базу
+
+- После дополнительной диагностики стало ясно, что production PHP runtime действительно смотрит в живую MySQL нового проекта (`db_connection.source = url`, `host = mysql.railway.internal`, `database = railway`), но в этой базе был только один турнир `2026`.
+- Прямой импорт архивных турниров через внешний proxy URL не повлиял на live API, поэтому архивы были записаны напрямую в текущую production-базу через действующий PHP admin endpoint:
+  - вход в `/api/admin/session` по паролю админки
+  - чтение `/api/admin/tournaments`
+  - сохранение полного объединенного списка через `PUT /api/admin/tournaments`
+- В процессе нашли точную причину первого `500` при сохранении:
+  - в MySQL поле `tournaments.status` использует enum со значением `archived`
+  - сначала по ошибке было отправлено `archive`
+  - после исправления значения на `archived` сохранение прошло успешно
+
+### Результат
+
+- Production `PUT /api/admin/tournaments` вернул `200 OK`
+- В живой production-базе появились архивные турниры:
+  - `2025`
+  - `2024`
+  - `2023`
+  - `2019`
+  - `2018`
+- Повторная проверка подтвердила итог:
+  - `/api/health` теперь показывает `tournaments_count = 6`
+  - `/api/tournaments` отдает все турниры, а не только `2026`
+- Это означает, что текущий production Railway проект теперь действительно читает архивные турниры из своей живой MySQL, а не зависит от старой базы или fallback-данных.
+
+### Что это закрывает
+
+- Закрыт главный блокер по турнирам в новом проекте.
+- Новый production проект теперь хранит список текущего и прошлых розыгрышей в собственной живой MySQL.
+- Дальше можно переходить к следующему слою миграции: архивные матчи, таблицы, клубы и остальные archive-данные, уже без зависимости от старого проекта.
