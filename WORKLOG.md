@@ -2241,6 +2241,19 @@
 
 ## 2026-04-21
 
+### Дополнительная production-диагностика PHP API
+
+- Чтобы быстро понять, почему новый production `/api/tournaments` видит только сезон `2026`, хотя новая MySQL уже содержит архивы `2025, 2024, 2023, 2019, 2018`, в PHP API добавлена безопасная диагностика в `/api/health`.
+- Теперь `/api/health` временно отдает:
+  - `db_connection.source` — откуда PHP собрал подключение (`url` или `legacy_vars`)
+  - `db_connection.host`
+  - `db_connection.port`
+  - `db_connection.database`
+  - `tournaments_count`
+  - `tournaments_preview` — первые строки из таблицы `tournaments`
+- Параллельно в `Database.php` вынесен общий метод `resolvedConfig()`, чтобы `health` и основное подключение использовали одну и ту же логику определения источника БД.
+- Это временный debug-слой для новой Railway production-связки `PHP + MySQL`, чтобы без догадок увидеть, на какую именно базу смотрит runtime и сколько турниров он реально читает.
+
 ### Что сделали
 
 - Досеяли архивные турниры `2018, 2019, 2023, 2024, 2025` в новую Railway MySQL нового проекта.

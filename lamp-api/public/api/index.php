@@ -49,10 +49,17 @@ $uploads = new UploadController();
 
 try {
     if ($path === '/health') {
+        $connection = Database::resolvedConfig();
+        $tournamentsCount = (int) $pdo->query('SELECT COUNT(*) FROM tournaments')->fetchColumn();
+        $preview = $pdo->query('SELECT id, slug, season_year FROM tournaments ORDER BY season_year DESC, id DESC LIMIT 10')
+            ->fetchAll(PDO::FETCH_ASSOC);
         Response::json([
             'ok' => true,
             'runtime' => 'php',
             'database' => 'mysql',
+            'db_connection' => $connection,
+            'tournaments_count' => $tournamentsCount,
+            'tournaments_preview' => $preview,
         ]);
     }
 

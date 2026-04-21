@@ -5,16 +5,52 @@ final class Database
 {
     private static ?PDO $pdo = null;
 
+    public static function resolvedConfig(): array
+    {
+        $dsn = self::getDatabaseUrl();
+        if ($dsn !== '') {
+            $parts = parse_url($dsn);
+            if (!$parts || !isset($parts['host'], $parts['path'])) {
+                throw new RuntimeException('Invalid DATABASE_URL');
+            }
+
+            return [
+                'source' => 'url',
+                'host' => (string) $parts['host'],
+                'port' => isset($parts['port']) ? (int) $parts['port'] : 3306,
+                'database' => ltrim((string) $parts['path'], '/'),
+            ];
+        }
+
+        $host = get_env('DB_HOST');
+        $port = (int) get_env('DB_PORT', '3306');
+        $dbName = get_env('DB_NAME');
+        if ($host === '' || $dbName === '') {
+            throw new RuntimeException('MySQL credentials are required');
+        }
+
+        return [
+            'source' => 'legacy_vars',
+            'host' => $host,
+            'port' => $port,
+            'database' => $dbName,
+        ];
+    }
+
     public static function pdo(): PDO
     {
         if (self::$pdo instanceof PDO) {
             return self::$pdo;
         }
 
+        $resolved = self::resolvedConfig();
         $dsn = self::getDatabaseUrl();
-        if ($dsn !== '') {
+        if ($resolved['source'] === 'url') {
             $parts = parse_url($dsn);
-            if (!$parts || !isset($parts['host'], $parts['user'], $parts['pass'], $parts['path'])) {
+            if (
+                !$parts
+                || !isset($parts['host'], $parts['user'], $parts['pass'], $parts['path'])
+            ) {
                 throw new RuntimeException('Invalid DATABASE_URL');
             }
             $host = $parts['host'];
