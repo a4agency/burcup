@@ -17,6 +17,112 @@
 
 ---
 
+## 2026-04-21 19:05
+
+### Что сделали
+
+- Запустили реальный production-перенос legacy `uploads` в новый Railway PHP-проект через:
+  - [scripts/migrate-legacy-uploads-to-production.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/migrate-legacy-uploads-to-production.mjs)
+- Скрипт авторизовался через новый PHP admin endpoint и загрузил живые старые файлы в новый production volume.
+- Полный отчет сохранили локально во временный файл:
+  - `/tmp/migrate-legacy-uploads-report.json`
+
+### Что проверили
+
+- Всего в manifest было `45` legacy refs.
+- Обработано: `45`
+- Успешно загружено в новый production volume: `40`
+- Уже существующих файлов до запуска не было: `0`
+- Реально отсутствовали на старом сайте: `5`
+- Полностью пустых технических падений при миграции не было: `0`
+
+- Подтвердились как реально битые исходники на старом сайте:
+  - `/uploads/2017/03/туцы.png`
+  - `/uploads/2017/05/RedPhoto_0156.jpg`
+  - `/uploads/2018/06/Бока-Хуниорс.mp4`
+  - `/uploads/burcup/news/image/2026-04-20-19-43-39.jpg`
+  - `/uploads/burcup/news/image_url/2026-04-20-19-43-39.jpg`
+
+- Дополнительно нашли `8` кейсов, где upload API изменил итоговый путь или не вернул legacy URL в ожидаемом виде:
+  - три изображения 2022 года с точками во времени в имени (`0.19.15`, `11.59.55`, `12.00.28`) были загружены, но PHP upload endpoint нормализовал имя файла и заменил точки на дефисы
+  - два mp4 из 2023 года (`1_1692446.mp4`, `rpreplay_final1681578695.mp4`) были приняты upload endpoint, но endpoint не вернул ожидаемый URL и итоговая проверка legacy пути дала `404`
+  - один mp4 из 2023 года (`13_szht-burchalov_hd720.mp4`) тоже попал в список mismatched URLs
+  - два файла `afisha.pngitogi-*` были сведены endpoint к `/uploads/2023/05/afisha.png`
+
+### Что осталось
+
+- Нужно отдельно добить 8 mismatched кейсов, чтобы legacy URL либо:
+  - начали открываться по старому пути
+  - либо были перепривязаны в данных на новый фактический путь
+- После этого стоит точечно проверить страницы:
+  - новости с legacy медиа
+  - фотоальбомы
+  - встроенные видео/материалы старых розыгрышей
+- Если потребуется абсолютная совместимость со старыми путями, возможно придется доработать PHP upload flow или положить часть файлов в volume вручную без slug-нормализации.
+
+### Файлы
+
+- [scripts/migrate-legacy-uploads-to-production.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/migrate-legacy-uploads-to-production.mjs)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+- `/tmp/migrate-legacy-uploads-report.json`
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
+
+---
+
+## 2026-04-21 18:35
+
+### Что сделали
+
+- Продолжили практический перенос legacy `uploads` в новый production PHP-проект.
+- Проверили, как именно устроены текущие PHP endpoints:
+  - [lamp-api/app/Controllers/AdminController.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/app/Controllers/AdminController.php)
+  - [lamp-api/app/Controllers/UploadController.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/app/Controllers/UploadController.php)
+- Подтвердили, что:
+  - логин через `/api/admin/session` возвращает `ADMIN_TOKEN`
+  - upload endpoints `/api/admin/uploads/*` уже умеют писать в новый `lamp-api/public/uploads`
+- Добавили новый production-миграционный скрипт:
+  - [scripts/migrate-legacy-uploads-to-production.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/migrate-legacy-uploads-to-production.mjs)
+- Этот скрипт умеет:
+  - брать manifest старых файлов
+  - логиниться в новый продовый PHP API
+  - проверять, существует ли целевой файл уже на новом сайте
+  - скачивать живой файл со старого сайта
+  - загружать его в новый production через `/api/admin/uploads/raw`
+  - сверять, совпал ли итоговый URL с ожидаемым legacy путём
+  - сохранять подробный JSON-отчет по миграции
+
+### Что проверили
+
+- Для 45 найденных legacy upload refs только 2 проблемных по регистру/кириллице:
+  - `/uploads/2017/05/RedPhoto_0156.jpg`
+  - `/uploads/2018/06/Бока-Хуниорс.mp4`
+- Оба этих файла уже ранее подтвердились как отсутствующие на старом сайте, то есть массовому восстановлению живых файлов они не мешают.
+- Это означает, что большую часть живых legacy uploads можно переносить штатно через текущий PHP upload API без риска массового несовпадения путей.
+
+### Что осталось
+
+- Следующий шаг — запустить новый production migration script по-настоящему и переложить живые legacy uploads в новый volume.
+- После этого нужно:
+  - проверить отчёт по неуспешным файлам
+  - убедиться, что страницы новостей и альбомов перестали отдавать 404 по старым медиа
+  - отдельно решить судьбу реально битых исходников, которых уже нет на старом сайте
+
+### Файлы
+
+- [scripts/migrate-legacy-uploads-to-production.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/migrate-legacy-uploads-to-production.mjs)
+- [lamp-api/app/Controllers/AdminController.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/app/Controllers/AdminController.php)
+- [lamp-api/app/Controllers/UploadController.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/app/Controllers/UploadController.php)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
+
+---
+
 ## 2026-04-21 18:10
 
 ### Что сделали
