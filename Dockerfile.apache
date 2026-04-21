@@ -1,0 +1,23 @@
+FROM php:8.3-apache
+
+RUN a2enmod rewrite headers \
+    && docker-php-ext-install pdo_mysql
+
+WORKDIR /var/www/html
+
+COPY . /var/www/html
+
+RUN set -eux; \
+    mkdir -p /var/www/html/lamp-api/public/uploads; \
+    ln -sfn /var/www/html/lamp-api/public/uploads /var/www/html/uploads; \
+    printf '%s\n' \
+      '<Directory /var/www/html>' \
+      '    AllowOverride All' \
+      '    Require all granted' \
+      '</Directory>' \
+      > /etc/apache2/conf-available/burchalkin.conf; \
+    a2enconf burchalkin
+
+EXPOSE 80
+
+CMD ["apache2-foreground"]

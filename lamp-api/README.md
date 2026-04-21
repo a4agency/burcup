@@ -64,18 +64,42 @@ Optional:
 - `TRANSLATION_ENABLED`
 - `TRANSLATION_PROVIDER`
 
-## Railway / Docker
+## Deployment modes
 
-For Railway container deployment, use the root `Dockerfile` in this repository.
+### 1. Current Railway runtime
 
-The container:
+For the current Railway deployment, use the root `Dockerfile` in this repository.
+
+That runtime:
 
 - serves the static site from `/var/www/html`
-- routes `/api/*` to PHP
+- routes `/api/*` through `router.php`
+- runs PHP via the CLI dev server
 - keeps uploads available at `/uploads/*`
 
 If you use a Railway volume for persistent uploads, mount it at:
 
 - `/var/www/html/lamp-api/public/uploads`
 
-The runtime reads the same MySQL environment variables listed above, so no separate Node service is needed for the PHP/LAMP path.
+### 2. Classic Apache / LAMP runtime
+
+For Apache-style hosting, use:
+
+- the repository root as the site root
+- root `.htaccess`
+- `lamp-api/public/.htaccess`
+- [Dockerfile.apache](/Users/kainarbaev_daniar/Downloads/последний%20эталон/Dockerfile.apache) when you want to test the same layout in Docker
+
+That mode is closer to a normal shared hosting setup:
+
+- Apache serves static HTML directly
+- Apache rewrites `/api/*` into PHP
+- no CLI router is required
+
+Use [lamp-api/.env.example](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/.env.example) as the environment template.
+
+## Next migration target
+
+The PHP API already covers the main production scenarios. The remaining goal is
+to verify every public/admin workflow under the Apache-style runtime so the site
+can move to a typical LAMP host without relying on Railway-specific behavior.

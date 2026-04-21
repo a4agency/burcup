@@ -17,6 +17,54 @@
 
 ---
 
+## 2026-04-21 01:10
+
+### Что сделали
+
+- Перешли к следующему практическому этапу LAMP-переноса: начали готовить проект уже не только под Railway PHP runtime, а под обычный Apache/PHP/MySQL-хостинг.
+- Разобрали текущий runtime и зафиксировали, что сейчас production еще использует CLI-роутер:
+  - корневой `Dockerfile` поднимает `php -S ... router.php`
+- Подготовили отдельный Apache-совместимый контейнер:
+  - добавили [Dockerfile.apache](/Users/kainarbaev_daniar/Downloads/последний%20эталон/Dockerfile.apache)
+- Добавили шаблон переменных окружения для обычного PHP/LAMP-хостинга:
+  - [lamp-api/.env.example](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/.env.example)
+- Добавили отдельную практическую инструкцию по обычному LAMP-хостингу:
+  - [LAMP-HOSTING.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/LAMP-HOSTING.md)
+- Обновили [lamp-api/README.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/README.md), чтобы там явно были разделены:
+  - текущий Railway-режим
+  - классический Apache/LAMP-режим
+
+### Что проверили
+
+- Подтвердили по коду, что для классического Apache-hosting уже есть базовая основа:
+  - корневой [/.htaccess](/Users/kainarbaev_daniar/Downloads/последний%20эталон/.htaccess) маршрутизирует `/api/*` в PHP API
+  - [lamp-api/public/.htaccess](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/public/.htaccess) поддерживает Apache rewrite внутри публичной части API
+  - [js/config.js](/Users/kainarbaev_daniar/Downloads/последний%20эталон/js/config.js) уже работает в same-origin режиме, без старого Node API
+- Подтвердили, что оставшаяся основная Railway-зависимость сейчас именно в runtime-способе запуска, а не в самих API-ручках.
+
+### Что осталось
+
+- Следующий шаг: прогнать проект уже в Apache-совместимом режиме и проверить публичные страницы, админку и загрузки.
+- После этого отдельно добить сценарии:
+  - admin save под Apache
+  - upload flow под Apache
+  - доступность `/uploads/*` без Railway-специфичных предположений
+- Затем можно будет говорить, что структура реально готова к типичному LAMP-хостингу.
+
+### Файлы
+
+- [Dockerfile.apache](/Users/kainarbaev_daniar/Downloads/последний%20эталон/Dockerfile.apache)
+- [LAMP-HOSTING.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/LAMP-HOSTING.md)
+- [lamp-api/.env.example](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/.env.example)
+- [lamp-api/README.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/README.md)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
+
+---
+
 ## 2026-04-21 00:35
 
 ### Что сделали
