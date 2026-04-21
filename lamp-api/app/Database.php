@@ -47,17 +47,6 @@ final class Database
 
     private static function getDatabaseUrl(): string
     {
-        $host = get_env('MYSQLHOST', get_env('MYSQL_HOST', get_env('DB_HOST')));
-        $port = get_env('MYSQLPORT', get_env('MYSQL_PORT', get_env('DB_PORT', '3306')));
-        $dbName = get_env('MYSQLDATABASE', get_env('MYSQL_DATABASE', get_env('DB_NAME')));
-        $user = get_env('MYSQLUSER', get_env('MYSQL_USER', get_env('DB_USER')));
-        $password = get_env('MYSQLPASSWORD', get_env('MYSQL_PASSWORD', get_env('DB_PASSWORD')));
-        if ($host !== '' && $dbName !== '' && $user !== '') {
-            $encodedUser = rawurlencode($user);
-            $encodedPassword = rawurlencode($password);
-            return sprintf('mysql://%s:%s@%s:%s/%s', $encodedUser, $encodedPassword, $host, $port ?: '3306', $dbName);
-        }
-
         foreach ([
             'MYSQL_URL',
             'MYSQL_PUBLIC_URL',
@@ -69,6 +58,17 @@ final class Database
             if ($value !== '' && preg_match('/^(?:mysql(?:\+mysql)?|mariadb):\/\//i', $value) === 1) {
                 return $value;
             }
+        }
+
+        $host = get_env('MYSQLHOST', get_env('MYSQL_HOST', get_env('DB_HOST')));
+        $port = get_env('MYSQLPORT', get_env('MYSQL_PORT', get_env('DB_PORT', '3306')));
+        $dbName = get_env('MYSQLDATABASE', get_env('MYSQL_DATABASE', get_env('DB_NAME')));
+        $user = get_env('MYSQLUSER', get_env('MYSQL_USER', get_env('DB_USER')));
+        $password = get_env('MYSQLPASSWORD', get_env('MYSQL_PASSWORD', get_env('DB_PASSWORD')));
+        if ($host !== '' && $dbName !== '' && $user !== '') {
+            $encodedUser = rawurlencode($user);
+            $encodedPassword = rawurlencode($password);
+            return sprintf('mysql://%s:%s@%s:%s/%s', $encodedUser, $encodedPassword, $host, $port ?: '3306', $dbName);
         }
 
         return '';

@@ -2259,7 +2259,28 @@
 - Источник списка турниров теперь должен быть только один: новая MySQL в новом Railway-проекте.
 - Это закрывает еще один важный хвост миграции "все на новое, ничего на старом".
 
+### Что еще нашли и поправили
+
+- После удаления fallback-а production `/api/tournaments` показал только `2026`, хотя в новой MySQL уже были реальные записи архивов `2025..2018`.
+- Причина оказалась в приоритете переменных окружения в PHP:
+  - раньше `MYSQLHOST/MYSQLDATABASE/...` имели более высокий приоритет, чем явный `MYSQL_URL`
+  - это делало Railway-конфигурацию хрупкой: при оставшихся старых host-based переменных сервис мог смотреть не в ту базу
+- Исправили `lamp-api/app/Database.php`, чтобы сначала использовались явные URL-переменные:
+  - `MYSQL_URL`
+  - `MYSQL_PUBLIC_URL`
+  - `DATABASE_URL`
+  - `DATABASE_PUBLIC_URL`
+  - `DB_URL`
+- Только если URL-переменные не заданы, PHP теперь собирает DSN из `MYSQLHOST/MYSQLDATABASE/...`
+
+### Зачем это сделали
+
+- Чтобы можно было жестко и прозрачно привязать новый Railway/PHP проект к новой MySQL одной переменной `MYSQL_URL`.
+- Чтобы новый проект больше не зависел от скрытых/старых host-based переменных из старой схемы подключения.
+- Это важный шаг именно для цели "все на новое, ничего на старом".
+
 ### Файлы
 
 - [lamp-api/app/Repositories/TournamentsRepository.php](/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/app/Repositories/TournamentsRepository.php)
+- [lamp-api/app/Database.php](/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/app/Database.php)
 - [archive/legacy-tools/scripts/import-archive-tournaments.mjs](/Users/kainarbaev_daniar/Downloads/последний эталон/archive/legacy-tools/scripts/import-archive-tournaments.mjs)
