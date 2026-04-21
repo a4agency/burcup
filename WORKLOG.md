@@ -2236,3 +2236,30 @@
 - [index.html](/Users/kainarbaev_daniar/Downloads/последний эталон/index.html)
 - [admin-almaz.html](/Users/kainarbaev_daniar/Downloads/последний эталон/admin-almaz.html)
 - и остальные публичные HTML-страницы, где подключаются `style.css`, `config.js`, `site.js`
+
+---
+
+## 2026-04-21
+
+### Что сделали
+
+- Досеяли архивные турниры `2018, 2019, 2023, 2024, 2025` в новую Railway MySQL нового проекта.
+- Подтвердили прямым запросом к новой MySQL, что архивные турниры уже существуют как реальные записи в таблице `tournaments`:
+  - `2026 -> id=1`
+  - `2025 -> id=2`
+  - `2024 -> id=3`
+  - `2023 -> id=4`
+  - `2019 -> id=5`
+  - `2018 -> id=6`
+- После этого подготовили production-код к окончательному отказу от hardcoded fallback архивных турниров в PHP-репозитории турниров.
+
+### Что это значит
+
+- Новый проект больше не должен зависеть от старого fallback-массива архивных турниров.
+- Источник списка турниров теперь должен быть только один: новая MySQL в новом Railway-проекте.
+- Это закрывает еще один важный хвост миграции "все на новое, ничего на старом".
+
+### Файлы
+
+- [lamp-api/app/Repositories/TournamentsRepository.php](/Users/kainarbaev_daniar/Downloads/последний эталон/lamp-api/app/Repositories/TournamentsRepository.php)
+- [archive/legacy-tools/scripts/import-archive-tournaments.mjs](/Users/kainarbaev_daniar/Downloads/последний эталон/archive/legacy-tools/scripts/import-archive-tournaments.mjs)
