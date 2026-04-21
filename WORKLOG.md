@@ -17,6 +17,74 @@
 
 ---
 
+## 2026-04-21 01:35
+
+### Что сделали
+
+- Выполнили полную миграцию данных из текущего production API в новую MySQL нового Railway-проекта через архивный импортер:
+  - [archive/legacy-tools/scripts/migrate-to-mysql.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/archive/legacy-tools/scripts/migrate-to-mysql.mjs)
+- Запустили импорт с `APPLY_SCHEMA=1`, чтобы новая база сама получила актуальную схему перед заливкой данных.
+- Перенесли в новую MySQL основные рабочие сущности проекта:
+  - турниры
+  - клубы
+  - связи клубов с турнирами
+  - турнирную таблицу
+  - матчи
+  - события матчей
+  - новости
+  - фотоальбомы
+  - партнеров
+  - сетку плей-офф
+  - редактируемые страницы
+- После импорта проверили уже не сам скрипт, а новый production PHP API нового проекта, чтобы убедиться, что сервис реально читает новую базу.
+
+### Что проверили
+
+- Импорт завершился успешно без падения скрипта.
+- Получили итоговые счетчики переноса:
+  - `tournaments: 6`
+  - `clubs: 17`
+  - `derived_tournament_clubs: 8`
+  - `standings: 8`
+  - `matches: 8`
+  - `news: 250`
+  - `albums: 3`
+  - `partners: 22`
+  - `playoff: 8`
+  - `pages: 1`
+- Новый production endpoint [api/health](https://burcup-production.up.railway.app/api/health) отвечает:
+  - `{"ok":true,"runtime":"php","database":"mysql"}`
+- Новый production endpoint [api/tournaments](https://burcup-production.up.railway.app/api/tournaments) уже отдает не только сезон 2026, но и прошлые розыгрыши:
+  - 2025
+  - 2024
+  - 2023
+  - 2019
+  - 2018
+- Новый production endpoint [api/news](https://burcup-production.up.railway.app/api/news) уже отдает полный набор новостей, включая старые записи, а не только тестовый короткий набор.
+- Новый production endpoint [api/matches](https://burcup-production.up.railway.app/api/matches) отдает актуальные матчи из нового PHP слоя.
+- Это подтверждает, что новый Railway-проект теперь не просто подключен к MySQL формально, а реально читает боевые данные уже из новой базы.
+
+### Что осталось
+
+- Вне этого импорта пока остается `content_translations`: архивный мигратор сам помечает, что этот блок еще не перенесен.
+- Нужно отдельно проверить браузерные пользовательские сценарии на новом проекте:
+  - публичные страницы
+  - админку
+  - сохранение через UI
+  - загрузку файлов
+- После этого можно будет переходить к следующему этапу LAMP-переноса уже с новой независимой MySQL в новом проекте.
+
+### Файлы
+
+- [archive/legacy-tools/scripts/migrate-to-mysql.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/archive/legacy-tools/scripts/migrate-to-mysql.mjs)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
+
+---
+
 ## 2026-04-21 01:10
 
 ### Что сделали
