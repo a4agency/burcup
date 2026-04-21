@@ -17,6 +17,61 @@
 
 ---
 
+## 2026-04-21 18:10
+
+### Что сделали
+
+- Продолжили хвост LAMP-переноса, связанный со старыми медиа в `uploads`.
+- Подтвердили, что в новом проекте каталог загрузок пока практически пустой:
+  - [lamp-api/public/uploads/.gitkeep](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/public/uploads/.gitkeep)
+  - [lamp-api/public/uploads/.htaccess](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/public/uploads/.htaccess)
+- Собрали точную инвентаризацию старых ссылок на `uploads` из уже выгруженных production JSON:
+  - `/tmp/burcup-audit-news.json`
+  - `/tmp/burcup-audit-albums.json`
+- Добавили новый recovery-скрипт:
+  - [scripts/recover-legacy-uploads.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/recover-legacy-uploads.mjs)
+- Скрипт умеет:
+  - собирать старые `/uploads/...` ссылки из JSON
+  - нормализовать “грязные” хвосты из старого контента
+  - строить manifest с `sourceUrl` и `targetPath`
+  - опционально делать `HEAD`-проверку старого сайта
+  - опционально скачивать найденные файлы в новый `lamp-api/public/uploads`
+
+### Что проверили
+
+- Локальный запуск recovery-скрипта без скачивания успешно отработал:
+  - результат сохранен во временный manifest `/tmp/legacy-uploads-manifest.json`
+- Точное число найденных legacy upload refs:
+  - `45`
+- Среди них есть:
+  - старые фото 2024–2026
+  - фото и документы 2023
+  - старые JPG 2022
+  - медиа 2017–2018
+  - отдельные кастомные пути вида `/uploads/burcup/news/...`
+- В manifest видно, что скрипт уже автоматически почистил битые хвосты вроде лишних `'` в mp4-ссылках.
+
+### Что осталось
+
+- Следующий практический шаг — прогнать этот скрипт уже в режиме реального восстановления:
+  - сначала `--check`, чтобы увидеть, какие файлы на старом сайте еще живы
+  - затем `--download`, чтобы переложить живые файлы в новый `uploads`
+- После скачивания нужно будет:
+  - проверить реальные страницы новостей и альбомов
+  - убедиться, что 404 по старым медиа исчезли
+  - отдельно обработать ссылки, которые окажутся реально битымі на старом сайте
+
+### Файлы
+
+- [scripts/recover-legacy-uploads.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/scripts/recover-legacy-uploads.mjs)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
+
+---
+
 ## 2026-04-21 01:35
 
 ### Что сделали
