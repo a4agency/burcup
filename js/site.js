@@ -1031,7 +1031,7 @@ function translateRuntimeText(value) {
 }
 
 const TRANSPARENT_IMAGE_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-const APP_CACHE_VERSION = '2026-04-18-live-data-v4';
+const APP_CACHE_VERSION = '2026-04-21-cache-sync-v1';
 const NEWS_IMAGE_FALLBACKS = [
   { id: 1, slug: 'applications-open', src: 'images/news-1.webp' },
   { id: 2, slug: 'first-day-schedule-published', src: 'images/news-2.webp' },

@@ -2029,3 +2029,49 @@
 - `40c241d` — Add Railway PHP Docker container
 - `4ff5afe` — Archive legacy Node migration tools
 - `5d03da5` — Archive legacy Node Railway backend
+
+---
+
+## 2026-04-21
+
+### Что проверили
+
+- Перепроверили новый production Railway-проект через живые PHP-ручки:
+  - `/api/health`
+  - `/api/tournaments`
+  - `/api/clubs`
+  - `/api/news`
+- Подтвердили, что новый проект уже читает богатые данные из новой MySQL:
+  - есть архивные турниры `2018, 2019, 2023, 2024, 2025, 2026`
+  - есть реальные клубы, исторические клубы и технические placeholder-команды
+  - есть большой список новостей, а не только старые тестовые записи
+
+### Что нашли
+
+- На одном браузере и в другом браузере пользователь видел разные данные на публичных страницах.
+- Код фронта показал, что production больше не должен использовать локальные `data/*.json` fallback'и:
+  - в `js/config.js` localStorage override разрешен только для localhost
+  - в `js/site.js` static fallback разрешен только в local dev
+- Самая вероятная причина расхождения: старые закэшированные версии фронтенд-ассетов (`style.css`, `config.js`, `site.js`, `admin.js`) в разных браузерах.
+
+### Что сделали
+
+- Подняли cache-bust версии на основных HTML-страницах:
+  - `css/style.css?v=20260421-cache-sync-1`
+  - `js/config.js?v=20260421-cache-sync-1`
+  - `js/site.js?v=20260421-cache-sync-1`
+  - `js/admin.js?v=20260421-cache-sync-1`
+- Обновили внутреннюю версию клиентского кэша в `js/site.js`:
+  - `APP_CACHE_VERSION = '2026-04-21-cache-sync-v1'`
+
+### Зачем это сделали
+
+- Чтобы все браузеры принудительно запросили свежие JS/CSS-файлы и перестали показывать разные наборы данных из-за старого кэша.
+- Это особенно важно после перехода фронта на same-origin PHP API и после миграции данных на новый Railway/MySQL проект.
+
+### Файлы
+
+- [js/site.js](/Users/kainarbaev_daniar/Downloads/последний эталон/js/site.js)
+- [index.html](/Users/kainarbaev_daniar/Downloads/последний эталон/index.html)
+- [admin-almaz.html](/Users/kainarbaev_daniar/Downloads/последний эталон/admin-almaz.html)
+- и остальные публичные HTML-страницы, где подключаются `style.css`, `config.js`, `site.js`
