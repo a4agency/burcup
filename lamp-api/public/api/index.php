@@ -57,10 +57,18 @@ try {
         Response::json([
             'ok' => true,
             'runtime' => 'php',
-            'api_build' => 'lamp-health-v4-2026-04-23',
+            'api_build' => 'lamp-health-v5-2026-04-23',
             'database' => 'mysql',
             'db_connection' => $connection,
             'db_env_source' => $sourceMeta,
+            'db_env_presence' => [
+                'BURCUP_MYSQL_URL' => get_env('BURCUP_MYSQL_URL') !== '',
+                'APP_MYSQL_URL' => get_env('APP_MYSQL_URL') !== '',
+                'MYSQL_URL' => get_env('MYSQL_URL') !== '',
+                'MYSQLHOST' => get_env('MYSQLHOST') !== '',
+                'MYSQLDATABASE' => get_env('MYSQLDATABASE') !== '',
+                'MYSQLUSER' => get_env('MYSQLUSER') !== '',
+            ],
             'tournaments_count' => $tournamentsCount,
             'tournaments_preview' => $preview,
         ]);
