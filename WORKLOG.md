@@ -17,6 +17,63 @@
 
 ---
 
+## 2026-04-23 12:40
+
+### Что сделали
+
+- Продолжили перевод проекта на полностью независимую новую Railway MySQL внутри нового проекта BurCup.
+- Поверх новой базы повторно прогнали идемпотентный архивный импорт:
+  - [archive/legacy-tools/scripts/import-archive-details.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/archive/legacy-tools/scripts/import-archive-details.mjs)
+- Импорт повторно обновил архивные розыгрыши:
+  - 2025
+  - 2024
+  - 2023
+  - 2019
+  - 2018
+- Подтвердили, что архивные данные теперь лежат в новой MySQL нового проекта, а не только в старой связке.
+
+### Что проверили
+
+- Прямой запрос к новой MySQL нового проекта показал итоговые счетчики:
+  - `tournaments: 6`
+  - `clubs: 26`
+  - `tournament_clubs: 48`
+  - `tournament_standings: 48`
+  - `tournament_playoff_matches: 40`
+  - `matches: 84`
+  - `news_articles: 250`
+  - `media_albums: 3`
+  - `partners: 22`
+  - `site_pages: 1`
+- Проверили наполнение по сезонам:
+  - `2026`: clubs `8`, standings `8`, playoff `8`, matches `8`
+  - `2025`: clubs `8`, standings `8`, playoff `8`, matches `20`
+  - `2024`: clubs `8`, standings `8`, playoff `8`, matches `20`
+  - `2023`: clubs `8`, standings `8`, playoff `0`, matches `12`
+  - `2019`: clubs `8`, standings `8`, playoff `8`, matches `12`
+  - `2018`: clubs `8`, standings `8`, playoff `8`, matches `12`
+- Пользовательский `health` на production уже показывает PHP + MySQL и шесть турниров в preview.
+- Важно: локальный `curl` до `https://burcup-production.up.railway.app/api/...` из текущей среды по-прежнему иногда возвращает Railway `Application not found`, поэтому опираемся на browser-проверку пользователя и прямую проверку новой MySQL.
+
+### Что осталось
+
+- Добить оставшиеся рабочие сценарии LAMP-переноса уже поверх новой независимой MySQL:
+  - проверить сохранение из админки в новом проекте
+  - проверить загрузку файлов в новый volume
+  - проверить страницы клубов, новости, альбомы и партнеров именно через новый PHP-слой
+- После этого можно будет чистить старые Railway-зависимости и окончательно отрезать проект от старого окружения.
+
+### Файлы
+
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+- [archive/legacy-tools/scripts/import-archive-details.mjs](/Users/kainarbaev_daniar/Downloads/последний%20эталон/archive/legacy-tools/scripts/import-archive-details.mjs)
+
+### Коммиты
+
+- Будет отдельный коммит после обновления журнала.
+
+---
+
 ## 2026-04-21 19:05
 
 ### Что сделали
