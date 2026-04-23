@@ -50,14 +50,17 @@ $uploads = new UploadController();
 try {
     if ($path === '/health') {
         $connection = Database::resolvedConfig();
+        $sourceMeta = Database::resolvedSourceMeta();
         $tournamentsCount = (int) $pdo->query('SELECT COUNT(*) FROM tournaments')->fetchColumn();
         $preview = $pdo->query('SELECT id, slug, season_year FROM tournaments ORDER BY season_year DESC, id DESC LIMIT 10')
             ->fetchAll(PDO::FETCH_ASSOC);
         Response::json([
             'ok' => true,
             'runtime' => 'php',
+            'api_build' => 'lamp-health-v4-2026-04-23',
             'database' => 'mysql',
             'db_connection' => $connection,
+            'db_env_source' => $sourceMeta,
             'tournaments_count' => $tournamentsCount,
             'tournaments_preview' => $preview,
         ]);
