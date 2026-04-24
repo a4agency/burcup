@@ -2974,10 +2974,10 @@ function renderForm(sourceName, data) {
     addBtn.addEventListener('click', () => {
       if (sourceName === 'news') {
         const next = syncAdminNewsDraftFromForm();
-        next.push({
+        next.unshift({
           ...source.empty(),
         });
-        adminPaginationState.news = Math.max(1, Math.ceil(next.length / ADMIN_NEWS_PAGE_SIZE));
+        adminPaginationState.news = 1;
         setSourceData(sourceName, next);
         defaultsCache[sourceName] = structuredClone(next);
         renderForm(sourceName, next);
