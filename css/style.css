@@ -3936,9 +3936,18 @@ h1,h2,h3,h4,p,span,a,div{
   margin-top:24px;
 }
 
+.news-article-gallery--single{
+  grid-template-columns:minmax(0, 1fr);
+}
+
 .news-article-gallery-item{
   display:block;
   width:100%;
+}
+
+.news-article-gallery--single .news-article-gallery-item{
+  width:min(100%, 620px);
+  margin:0 auto;
 }
 
 .news-article-body{

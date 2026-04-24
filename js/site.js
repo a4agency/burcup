@@ -4944,12 +4944,15 @@ async function renderNewsArticlePage() {
     const bodyHasCoverImage = coverUrl ? bodyImageUrls.has(coverUrl) : false;
     const mediaMarkup = videoUrl
       ? renderNewsArticleMedia(item, imageSrc)
-      : (articlePhotos.length <= 1 && !bodyHasCoverImage ? renderNewsArticleMedia(item, imageSrc) : '');
+      : (!bodyHasCoverImage ? renderNewsArticleMedia(item, imageSrc) : '');
     const galleryPhotos = videoUrl
       ? []
       : articlePhotos
         .slice(imageSrc ? 1 : 0)
         .filter(photo => !bodyImageUrls.has(normalizeNewsImageUrl(photo?.image_url || '')));
+    const galleryClassName = galleryPhotos.length === 1
+      ? 'news-article-gallery news-article-gallery--single'
+      : 'news-article-gallery';
     const displayDate = formatNewsDisplayDate(item.date);
 
     root.innerHTML = `
@@ -4963,7 +4966,7 @@ async function renderNewsArticlePage() {
           </div>
         ` : ''}
         ${galleryPhotos.length ? `
-          <div class="news-article-gallery">
+          <div class="${galleryClassName}">
             ${galleryPhotos.map((photo, index) => renderNewsArticlePhotoButton(photo, index + 1)).join('')}
           </div>
         ` : ''}
