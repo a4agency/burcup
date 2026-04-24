@@ -2415,7 +2415,7 @@ function makeAlbumPhotoImageField(photo, itemIndex, photoIndex) {
         </label>
       </div>
       <div class="admin-preview-box admin-album-photo-preview">
-        ${safeValue ? `<img src="${safeValue}" alt="preview">` : '<div>Превью появится здесь</div>'}
+        ${renderAdminPreviewImage(safeValue)}
       </div>
     </div>
   `;
@@ -2442,6 +2442,25 @@ function renderAlbumPhotoEditor(photo, itemIndex, photoIndex, collection = 'albu
       </div>
     </div>
   `;
+}
+
+function renderAdminPreviewImage(src, alt = 'preview', className = 'admin-preview-image') {
+  const safeSrc = String(src || '').trim();
+  if (!safeSrc) {
+    return '<div>Превью появится здесь</div>';
+  }
+
+  if (typeof renderImageMarkup === 'function') {
+    return renderImageMarkup({
+      src: safeSrc,
+      alt,
+      className,
+      width: 960,
+      loading: 'eager',
+    });
+  }
+
+  return `<img src="${escapeHtml(safeSrc)}" alt="${escapeHtml(alt)}" class="${escapeHtml(className)}">`;
 }
 
 function renderAlbumAdminCard(item, index) {
@@ -3209,7 +3228,7 @@ function renderForm(sourceName, data) {
             textInput.value = result.url;
           }
           if (previewBox) {
-            previewBox.innerHTML = `<img src="${result.url}" alt="preview">`;
+            previewBox.innerHTML = renderAdminPreviewImage(result.url);
           }
           if (sourceName === 'partners' && key === 'logo_url') {
             updateRenderedItem(sourceName, Number(index), item => {
@@ -3244,7 +3263,7 @@ function renderForm(sourceName, data) {
               textInput.value = result;
             }
             if (previewBox) {
-              previewBox.innerHTML = `<img src="${result}" alt="preview">`;
+              previewBox.innerHTML = renderAdminPreviewImage(result);
             }
             if (sourceName === 'partners' && key === 'logo_url') {
               updateRenderedItem(sourceName, Number(index), item => {
