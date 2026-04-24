@@ -1461,6 +1461,23 @@ function normalizeNewsAdminItem(item, index = 0) {
   };
 }
 
+function getNewsAdminSortTimestamp(item = {}) {
+  const createdAt = Date.parse(String(item?.created_at || '').trim());
+  if (Number.isFinite(createdAt)) return createdAt;
+
+  const publishedOn = Date.parse(String(item?.date || '').trim());
+  if (Number.isFinite(publishedOn)) return publishedOn;
+
+  const numericId = Number(item?.id);
+  return Number.isFinite(numericId) ? numericId : 0;
+}
+
+function compareNewsAdminItems(left, right) {
+  const timestampDiff = getNewsAdminSortTimestamp(right) - getNewsAdminSortTimestamp(left);
+  if (timestampDiff !== 0) return timestampDiff;
+  return Number(right?.id || 0) - Number(left?.id || 0);
+}
+
 function getAdminWorkingData(sourceName) {
   return normalizeSourceData(sourceName, structuredClone(renderedDataCache[sourceName] || defaultsCache[sourceName] || ADMIN_SOURCES[sourceName]?.defaultData || []));
 }
@@ -1677,7 +1694,9 @@ function normalizeSourceData(sourceName, data) {
     return items.map((item, index) => normalizeAlbumAdminItem(item, index));
   }
   if (sourceName === 'news') {
-    return items.map((item, index) => normalizeNewsAdminItem(item, index));
+    return items
+      .map((item, index) => normalizeNewsAdminItem(item, index))
+      .sort(compareNewsAdminItems);
   }
   if (sourceMeta?.filterCategory) {
     return items.filter(item => String(item?.category || 'general') === sourceMeta.filterCategory);

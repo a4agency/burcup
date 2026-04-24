@@ -4070,7 +4070,7 @@ async function renderHomeNews() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
-    const items = await fetchApi('/api/news?limit=3');
+    const items = sortNewsNewestFirst(await fetchApi('/api/news')).slice(0, 3);
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
     target.setAttribute('aria-busy', 'false');
     runAutoFit();
@@ -4153,25 +4153,20 @@ async function renderNewsPage() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 6 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
-    const response = await fetchApi(`/api/news?page=${encodeURIComponent(currentPage)}&per_page=${NEWS_PAGE_SIZE}`);
-    const items = Array.isArray(response) ? response : Array.isArray(response?.items) ? response.items : [];
-    const pagination = Array.isArray(response)
-      ? {
-          page: currentPage,
-          per_page: NEWS_PAGE_SIZE,
-          total_items: items.length,
-          total_pages: Math.max(1, Math.ceil(items.length / NEWS_PAGE_SIZE)),
-          has_prev: currentPage > 1,
-          has_next: false,
-        }
-      : (response?.pagination || {
-          page: currentPage,
-          per_page: NEWS_PAGE_SIZE,
-          total_items: items.length,
-          total_pages: Math.max(1, Math.ceil(items.length / NEWS_PAGE_SIZE)),
-          has_prev: currentPage > 1,
-          has_next: false,
-        });
+    const allItems = sortNewsNewestFirst(await fetchApi('/api/news'));
+    const totalItems = allItems.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / NEWS_PAGE_SIZE));
+    const page = Math.min(Math.max(1, currentPage), totalPages);
+    const start = (page - 1) * NEWS_PAGE_SIZE;
+    const items = allItems.slice(start, start + NEWS_PAGE_SIZE);
+    const pagination = {
+      page,
+      per_page: NEWS_PAGE_SIZE,
+      total_items: totalItems,
+      total_pages: totalPages,
+      has_prev: page > 1,
+      has_next: page < totalPages,
+    };
 
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
     if (pagination.page && pagination.page !== currentPage) {
@@ -4197,6 +4192,25 @@ async function renderNewsPage() {
 }
 
 const NEWS_PAGE_SIZE = 9;
+
+function getNewsSortTimestamp(item = {}) {
+  const createdAt = Date.parse(String(item?.created_at || '').trim());
+  if (Number.isFinite(createdAt)) return createdAt;
+
+  const publishedOn = Date.parse(String(item?.date || item?.published_on || '').trim());
+  if (Number.isFinite(publishedOn)) return publishedOn;
+
+  const numericId = Number(item?.id);
+  return Number.isFinite(numericId) ? numericId : 0;
+}
+
+function sortNewsNewestFirst(items = []) {
+  return [...(Array.isArray(items) ? items : [])].sort((left, right) => {
+    const timestampDiff = getNewsSortTimestamp(right) - getNewsSortTimestamp(left);
+    if (timestampDiff !== 0) return timestampDiff;
+    return Number(right?.id || 0) - Number(left?.id || 0);
+  });
+}
 
 function renderNewsPaginationControls(pagination = {}) {
   const page = Math.max(1, Number(pagination.page || 1) || 1);

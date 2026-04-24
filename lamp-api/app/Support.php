@@ -256,6 +256,7 @@ function api_map_news_article_row(array $row, array $photos = []): array
     return [
         'id' => (int) ($row['id'] ?? 0),
         'slug' => (string) ($row['slug'] ?? ''),
+        'created_at' => (string) ($row['created_at'] ?? ''),
         'date' => api_normalize_date($row['published_on'] ?? ''),
         'title' => (string) ($row['title'] ?? ''),
         'excerpt' => (string) ($row['excerpt'] ?? ''),
