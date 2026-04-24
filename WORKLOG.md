@@ -3014,3 +3014,8 @@
 - Fixed a deployment mismatch between the stored upload URLs and the Timeweb document root.
 - The upload controller now writes new files to the site-root `uploads/` directory and mirrors them to the legacy `lamp-api/public/uploads/` path for compatibility.
 - Uploaded URLs still resolve as `/uploads/...`, which now maps to a real folder on Timeweb and Railway.
+
+### News article gallery rendering fix
+
+- The news article page was hiding the photo gallery whenever `body_html` existed.
+- Removed that condition so attached news photos render below the article text as well.

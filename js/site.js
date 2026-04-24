@@ -4879,9 +4879,7 @@ async function renderNewsArticlePage() {
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
     const mediaMarkup = bodyHtml && !videoUrl ? '' : renderNewsArticleMedia(item, imageSrc);
-    const galleryPhotos = bodyHtml
-      ? []
-      : (videoUrl ? [] : articlePhotos.slice(imageSrc ? 1 : 0));
+    const galleryPhotos = videoUrl ? [] : articlePhotos.slice(imageSrc ? 1 : 0);
     const displayDate = formatNewsDisplayDate(item.date);
 
     root.innerHTML = `
