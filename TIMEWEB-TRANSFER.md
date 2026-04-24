@@ -10,11 +10,11 @@ This guide covers two cases:
 If you are not editing code and just want to turn the site on:
 
 1. Upload the site files to `public_html`.
-2. Create a MySQL database in Timeweb.
-3. Import `burcup_dump_timeweb.sql`.
-4. Create `public_html/lamp-api/config.local.php`.
-5. Put the database name, user, password, and domain into that file.
-6. Make sure `public_html/lamp-api/public/uploads/` exists.
+2. Open the existing `public_html/lamp-api/config.local.php` file.
+3. Replace the database name, user, password, and domain inside that file.
+4. Make sure `public_html/lamp-api/public/uploads/` exists.
+5. Create a MySQL database in Timeweb.
+6. Import `burcup_dump_timeweb.sql`.
 7. Open `https://<domain>/diag.php`.
 8. Open `https://<domain>/lamp-api/diag.php`.
 9. Open `https://<domain>/api/health`.
@@ -42,13 +42,13 @@ These files are part of the codebase and should stay in sync across hosts.
 
 1. Create the site in Timeweb and point the document root to `public_html`.
 2. Upload the repository contents into `public_html`.
-3. Make sure `public_html/.htaccess` exists.
-4. Make sure `public_html/lamp-api/public/.htaccess` exists.
+3. Keep the existing `public_html/.htaccess` file in place.
+4. Keep the existing `public_html/lamp-api/public/.htaccess` file in place.
 5. Create the MySQL database in Timeweb.
 6. Import `burcup_dump_timeweb.sql` into that database.
-7. Create `public_html/lamp-api/config.local.php`.
+7. Open the existing `public_html/lamp-api/config.local.php` file and edit it.
 8. Add the DB and admin values to `config.local.php`.
-9. Create `public_html/lamp-api/public/uploads/` and make it writable.
+9. Keep `public_html/lamp-api/public/uploads/` present and writable.
 10. Open:
    - `https://<domain>/diag.php`
    - `https://<domain>/lamp-api/diag.php`
@@ -73,6 +73,9 @@ For the current Timeweb setup we used:
 - `DB_PASSWORD = the password you set in Timeweb`
 
 ## What to put in `config.local.php`
+
+This file already exists in the project. Do not create a new one from scratch
+unless it was accidentally removed. Just open the file and edit the values.
 
 ```php
 <?php
@@ -111,6 +114,7 @@ What you usually do not change:
 - the PHP code
 - the `.htaccess` files
 - the upload folder path inside the site tree
+- the presence of `config.local.php` itself
 
 ## What to tell the new account owner
 
@@ -127,7 +131,7 @@ right values into `config.local.php` and upload the files correctly.
 ## Transfer checklist
 
 1. Copy the site files to the new Timeweb account.
-2. Copy or recreate `public_html/lamp-api/config.local.php`.
+2. Open `public_html/lamp-api/config.local.php` and edit only the values.
 3. Create a fresh MySQL database in the new account.
 4. Import `burcup_dump_timeweb.sql`.
 5. Confirm `public_html/lamp-api/public/uploads/` exists.
