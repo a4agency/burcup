@@ -3,6 +3,10 @@
 This file is the practical checklist for moving the current BurCup site from the
 Railway PHP runtime to a regular Apache + PHP + MySQL host.
 
+For the ongoing two-target workflow, also see:
+
+- [DEPLOYMENT.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/DEPLOYMENT.md)
+
 ## What is already ready
 
 - Frontend pages use same-origin API requests.
@@ -23,6 +27,16 @@ Railway PHP runtime to a regular Apache + PHP + MySQL host.
 - Railway uses a mounted volume for uploads at:
   - `/var/www/html/lamp-api/public/uploads`
 - Railway variables currently provide the production secrets and MySQL access.
+
+## Two live targets we maintain
+
+We now keep the same source tree aligned for both:
+
+- Railway: Docker deploy and environment variables
+- Timeweb: shared hosting files plus `config.local.php`
+
+When backend behavior changes, update both runtime paths and document the exact
+Timeweb steps in `WORKLOG.md`.
 
 ## What a normal LAMP host should look like
 

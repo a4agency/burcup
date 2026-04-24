@@ -29,25 +29,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-$pdo = Database::pdo();
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = preg_replace('#^/api#', '', $path);
 $path = '/' . trim($path, '/');
 
-$tournaments = new TournamentsRepository($pdo);
-$clubs = new ClubsRepository($pdo);
-$pages = new PagesRepository($pdo);
-$matches = new MatchesRepository($pdo);
-$news = new NewsRepository($pdo);
-$media = new MediaRepository($pdo);
-$partners = new PartnersRepository($pdo);
-$translations = new TranslationRepository($pdo);
-$mutations = new AdminMutationsRepository($pdo);
-$admin = new AdminController($pdo, $tournaments, $clubs, $matches, $news, $media, $partners, $pages, $mutations);
-$uploads = new UploadController();
-
 try {
+    $pdo = Database::pdo();
+    $tournaments = new TournamentsRepository($pdo);
+    $clubs = new ClubsRepository($pdo);
+    $pages = new PagesRepository($pdo);
+    $matches = new MatchesRepository($pdo);
+    $news = new NewsRepository($pdo);
+    $media = new MediaRepository($pdo);
+    $partners = new PartnersRepository($pdo);
+    $translations = new TranslationRepository($pdo);
+    $mutations = new AdminMutationsRepository($pdo);
+    $admin = new AdminController($pdo, $tournaments, $clubs, $matches, $news, $media, $partners, $pages, $mutations);
+    $uploads = new UploadController();
+
     if ($path === '/health') {
         $connection = Database::resolvedConfig();
         $sourceMeta = Database::resolvedSourceMeta();

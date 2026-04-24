@@ -22,7 +22,8 @@ function load_local_config(): void
             continue;
         }
 
-        if (array_key_exists($key, $_ENV) || array_key_exists($key, $_SERVER) || getenv($key) !== false) {
+        $existing = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+        if ($existing !== false && $existing !== null && trim((string) $existing) !== '') {
             continue;
         }
 

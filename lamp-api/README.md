@@ -2,6 +2,10 @@
 
 This folder contains the PHP/MySQL version of the Burchalkin Cup API that can be deployed on a classic LAMP host.
 
+For the two-target deployment flow, also see:
+
+- [DEPLOYMENT.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/DEPLOYMENT.md)
+
 ## Layout
 
 - `public/` - web root for Apache
@@ -103,6 +107,9 @@ That mode is closer to a normal shared hosting setup:
 - no CLI router is required
 
 Use [lamp-api/.env.example](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/.env.example) as the environment template.
+
+If you are syncing the Timeweb host, keep `config.local.php` in step with the
+same values and re-run `diag.php` + `/api/health` after backend changes.
 
 ## Next migration target
 

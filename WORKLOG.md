@@ -17,6 +17,198 @@
 
 ---
 
+## 2026-04-24 01:00
+
+### Что сделали
+
+- Зафиксировали рабочую схему для двух живых таргетов:
+  - Railway остаётся Docker-целевым деплоем
+  - Timeweb остаётся shared-hosting-целевым деплоем
+- Добавили единый playbook:
+  - `DEPLOYMENT.md`
+- Связали этот playbook с текущими инструкциями:
+  - `LAMP-HOSTING.md`
+  - `lamp-api/README.md`
+
+### Что проверили
+
+- Схема остаётся совместимой с текущими файлами проекта.
+- Для следующего backend-изменения теперь есть понятный порядок:
+  - обновить локальные файлы
+  - записать шаг в `WORKLOG.md`
+  - прогнать синтаксис
+  - отразить изменения на Railway и Timeweb
+
+### Что осталось
+
+- Для новых задач продолжать держать Railway и Timeweb в одной логической ветке
+  и не терять два отдельных сценария публикации.
+
+### Файлы
+
+- [DEPLOYMENT.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/DEPLOYMENT.md)
+- [LAMP-HOSTING.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/LAMP-HOSTING.md)
+- [lamp-api/README.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/README.md)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после проверки новых документов.
+
+---
+
+## 2026-04-24 00:50
+
+### Что сделали
+
+- Довели Timeweb LAMP-подключение до полностью рабочего состояния:
+  - `lamp-api/diag.php` подтвердил, что `config.local.php` читается
+  - `lamp-api/app/bootstrap.php` теперь корректно подставляет значения из
+    локального конфига даже при пустых env-переменных
+  - `https://cu927919.tw1.ru/api/health` начал отвечать JSON-данными
+- Подтвердили, что новая Timeweb MySQL доступна:
+  - `DB_HOST=localhost`
+  - `DB_NAME=cu927919_123`
+  - `DB_USER=cu927919_123`
+  - `PDO: connected`
+- Проверили состав данных:
+  - `tournaments_count = 6`
+  - preview включает `burchalkin-cup-2026`, `2025`, `2024`, `2023`, `2019`, `2018`
+
+### Что проверили
+
+- Корневой `diag.php` работает на Timeweb.
+- `lamp-api/diag.php` показывает заполненные DB-переменные и успешный PDO.
+- `/api/health` возвращает валидный JSON, а не пустой 500.
+
+### Что осталось
+
+- После финальной проверки можно удалить временные диагностические файлы с
+  продакшена:
+  - `public_html/diag.php`
+  - `public_html/lamp-api/diag.php`
+- При желании можно также убрать `api_build`-логику или оставить её как
+  постоянный health-маркер.
+
+### Файлы
+
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/WORKLOG.md)
+- [lamp-api/app/bootstrap.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/bootstrap.php)
+- [lamp-api/diag.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/diag.php)
+- [lamp-api/public/api/index.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/public/api/index.php)
+
+### Коммиты
+
+- Будет отдельный коммит после финальной уборки диагностических файлов.
+
+---
+
+## 2026-04-24 00:40
+
+### Что сделали
+
+- Исправили логику `lamp-api/app/bootstrap.php`:
+  - локальный `config.local.php` теперь подставляется даже если на хостинге
+    уже присутствуют пустые env-значения
+  - реальные непустые env-переменные по-прежнему сохраняют приоритет
+
+### Что проверили
+
+- На Timeweb `lamp-api/diag.php` показывает, что `config.local.php` существует
+  и читается как массив.
+- При этом `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` оставались пустыми, что
+  и подсказало проблему: fallback не должен был пропускать пустые значения.
+
+### Что осталось
+
+- Перезалить обновлённый [lamp-api/app/bootstrap.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/bootstrap.php) на Timeweb.
+- Снова открыть `lamp-api/diag.php` и проверить, появились ли DB-значения.
+
+### Файлы
+
+- [lamp-api/app/bootstrap.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/bootstrap.php)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после следующей проверки.
+
+---
+
+## 2026-04-24 00:30
+
+### Что сделали
+
+- Усилили локальную диагностику Timeweb:
+  - `lamp-api/diag.php` теперь проверяет наличие и читаемость
+    `lamp-api/config.local.php`
+  - диагностический файл показывает, что именно возвращает local config
+- Это поможет отделить проблему пути/прав/содержимого `config.local.php` от
+  проблемы MySQL-подключения.
+
+### Что проверили
+
+- Корневой `diag.php` подтверждает, что PHP исполняется.
+- `lamp-api/diag.php` на сервере пока показывает пустые DB-переменные, значит
+  local config либо не читается, либо не отдаёт значения в текущем виде.
+
+### Что осталось
+
+- Прогнать обновлённый `lamp-api/diag.php` на Timeweb и посмотреть:
+  - существует ли `config.local.php`
+  - читается ли он
+  - что он возвращает
+- После этого уже можно будет точно сказать, что править дальше.
+
+### Файлы
+
+- [lamp-api/diag.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/diag.php)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после следующей проверки.
+
+---
+
+## 2026-04-24 00:20
+
+### Что сделали
+
+- Зафиксировали рабочее правило для дальнейшей синхронной работы:
+  - все новые изменения сразу вносим в локальные файлы проекта
+  - каждый заметный шаг сразу записываем в `WORKLOG.md`
+  - диагностические файлы и временные проверки тоже держим в проекте как
+    актуальные резервные копии
+- Подготовили локальные диагностические копии для Timeweb:
+  - `diag.php`
+  - `lamp-api/diag.php`
+- Продолжаем отладку Timeweb-подключения уже с сохранением всех шагов в логах.
+
+### Что проверили
+
+- Корневой `diag.php` на Timeweb подтверждает, что PHP исполняется.
+- Нужен отдельный `lamp-api/diag.php`, чтобы увидеть `config.local.php` и
+  точную DB-ошибку без участия API-роутинга.
+
+### Что осталось
+
+- Довести `lamp-api/diag.php` на сервере до успешного ответа.
+- После подтверждения подключения убрать временные диагностические файлы с
+  продакшена.
+
+### Файлы
+
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+- [diag.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/diag.php)
+- [lamp-api/diag.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/diag.php)
+
+### Коммиты
+
+- Будет отдельный коммит после следующего этапа проверки.
+
+---
+
 ## 2026-04-24 00:00
 
 ### Что сделали
