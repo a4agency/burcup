@@ -3,3 +3,4 @@ Thumbs.db
 node_modules/
 .env
 .env.*
+lamp-api/config.local.php

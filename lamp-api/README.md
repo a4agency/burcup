@@ -64,6 +64,12 @@ Optional:
 - `TRANSLATION_ENABLED`
 - `TRANSLATION_PROVIDER`
 
+If your host does not keep environment variables, copy
+[`config.local.example.php`](./config.local.example.php) to
+`config.local.php` and fill in the same values there. The bootstrap loads that
+file automatically when present, so the same API code works on shared hosting
+without extra setup.
+
 ## Deployment modes
 
 ### 1. Current Railway runtime

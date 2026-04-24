@@ -44,7 +44,8 @@ public root and keep relative paths unchanged.
 
 ## Required environment values
 
-Set either the `DB_*` variables or the `MYSQL*` variables.
+Set either the `DB_*` variables or the `MYSQL*` variables. For classic shared
+hosting, you can also use a local PHP config file.
 
 Minimum set:
 
@@ -58,6 +59,12 @@ Minimum set:
 - `CORS_ORIGIN`
 
 Use [lamp-api/.env.example](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/.env.example) as the template.
+
+If the host does not support persistent environment variables, copy
+[lamp-api/config.local.example.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/config.local.example.php)
+to `lamp-api/config.local.php` and fill in the values there. The PHP bootstrap
+loads that file automatically when it exists, so the shared-hosting setup works
+without changing the runtime.
 
 ## Apache checklist
 

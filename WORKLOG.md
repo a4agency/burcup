@@ -17,6 +17,49 @@
 
 ---
 
+## 2026-04-24 00:00
+
+### Что сделали
+
+- Добавили fallback для классического shared hosting в PHP-слой:
+  - теперь `lamp-api/app/bootstrap.php` автоматически подхватывает
+    `lamp-api/config.local.php`, если файл есть
+  - локальный конфиг можно хранить отдельно от репозитория и не зависеть от
+    постоянных env-переменных на хостинге
+- Подготовили шаблон локальной конфигурации:
+  - `lamp-api/config.local.example.php`
+- Обновили инструкции для LAMP/Apache и README PHP-слоя:
+  - описали копирование шаблона в `config.local.php`
+  - уточнили, что это работает как удобный fallback для shared hosting
+- Добавили `lamp-api/config.local.php` в `.gitignore`, чтобы рабочие секреты не
+  попадали в репозиторий.
+
+### Что проверили
+
+- Логика загрузки локального конфига осталась совместимой с текущими env-значениями:
+  - реальные переменные окружения не перезаписываются
+  - если локального файла нет, поведение не меняется
+
+### Что осталось
+
+- После этого шага стоит прогнать синтаксическую проверку PHP-файлов и затем
+  уже можно паковать изменения в коммит.
+
+### Файлы
+
+- [lamp-api/app/bootstrap.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/app/bootstrap.php)
+- [lamp-api/config.local.example.php](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/config.local.example.php)
+- [.gitignore](/Users/kainarbaev_daniar/Downloads/последний%20эталон/.gitignore)
+- [LAMP-HOSTING.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/LAMP-HOSTING.md)
+- [lamp-api/README.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/lamp-api/README.md)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последний%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после проверки.
+
+---
+
 ## 2026-04-23 12:40
 
 ### Что сделали
