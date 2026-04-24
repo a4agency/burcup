@@ -117,7 +117,7 @@ final class NewsRepository extends BaseRepository
         if ($conditions) {
             $sql .= ' WHERE ' . implode(' AND ', $conditions);
         }
-        $sql .= ' ORDER BY COALESCE(n.created_at, n.published_on) DESC, n.published_on DESC, n.id DESC';
+        $sql .= ' ORDER BY n.published_on DESC, n.created_at DESC, n.id DESC';
         if ($limit !== null) {
             $sql .= ' LIMIT ' . max(1, (int) $limit);
             if ($offset !== null && (int) $offset > 0) {

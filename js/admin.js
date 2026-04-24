@@ -1462,11 +1462,11 @@ function normalizeNewsAdminItem(item, index = 0) {
 }
 
 function getNewsAdminSortTimestamp(item = {}) {
-  const createdAt = Date.parse(String(item?.created_at || '').trim());
-  if (Number.isFinite(createdAt)) return createdAt;
-
   const publishedOn = Date.parse(String(item?.date || '').trim());
   if (Number.isFinite(publishedOn)) return publishedOn;
+
+  const createdAt = Date.parse(String(item?.created_at || '').trim());
+  if (Number.isFinite(createdAt)) return createdAt;
 
   const numericId = Number(item?.id);
   return Number.isFinite(numericId) ? numericId : 0;

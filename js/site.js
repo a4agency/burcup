@@ -4194,11 +4194,11 @@ async function renderNewsPage() {
 const NEWS_PAGE_SIZE = 9;
 
 function getNewsSortTimestamp(item = {}) {
-  const createdAt = Date.parse(String(item?.created_at || '').trim());
-  if (Number.isFinite(createdAt)) return createdAt;
-
   const publishedOn = Date.parse(String(item?.date || item?.published_on || '').trim());
   if (Number.isFinite(publishedOn)) return publishedOn;
+
+  const createdAt = Date.parse(String(item?.created_at || '').trim());
+  if (Number.isFinite(createdAt)) return createdAt;
 
   const numericId = Number(item?.id);
   return Number.isFinite(numericId) ? numericId : 0;
