@@ -44,6 +44,10 @@ What to verify:
 - `https://<domain>/lamp-api/diag.php` proves `config.local.php` and MySQL.
 - `https://<domain>/api/health` returns JSON.
 
+For a fuller transfer checklist, see:
+
+- [TIMEWEB-TRANSFER.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/TIMEWEB-TRANSFER.md)
+
 ## When we make a code change
 
 1. Update local source files.
@@ -53,4 +57,3 @@ What to verify:
 5. Mirror the same source files to Timeweb if the change affects the shared host.
 6. Re-run the two diagnostic URLs on Timeweb if the backend touched config, DB,
    or PHP bootstrap logic.
-

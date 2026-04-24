@@ -17,6 +17,49 @@
 
 ---
 
+## 2026-04-24 01:10
+
+### Что сделали
+
+- Написали отдельную инструкцию для Timeweb-переноса:
+  - `TIMEWEB-TRANSFER.md`
+- В ней зафиксировали:
+  - первый запуск сайта на Timeweb
+  - перенос сайта в другой Timeweb-аккаунт
+  - какие значения меняются в `config.local.php`
+  - какие файлы и пути остаются одинаковыми
+- Связали новую инструкцию с общим двуххостовым playbook:
+  - `DEPLOYMENT.md`
+
+### Что проверили
+
+- Инструкция покрывает оба сценария:
+  - новый Timeweb-аккаунт
+  - повторный перенос на другой аккаунт
+- Описаны именно те данные, которые реально меняются:
+  - DB host/name/user/password
+  - `CORS_ORIGIN`
+  - admin secrets при необходимости
+
+### Что осталось
+
+- При следующем переносе достаточно будет обновить:
+  - `public_html/lamp-api/config.local.php`
+  - `public_html/lamp-api/public/uploads/`
+  - домен в панели Timeweb
+
+### Файлы
+
+- [TIMEWEB-TRANSFER.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/TIMEWEB-TRANSFER.md)
+- [DEPLOYMENT.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/DEPLOYMENT.md)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после проверки новых инструкций.
+
+---
+
 ## 2026-04-24 01:00
 
 ### Что сделали
