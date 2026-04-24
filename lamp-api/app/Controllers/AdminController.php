@@ -47,7 +47,7 @@ final class AdminController
             'archive_standings' => $this->matches->allStandings(),
             'playoff' => $this->matches->playoff(null),
             'albums' => $this->media->albumsWithPhotos(false),
-            'media' => $this->matches->all(),
+            'media' => $this->readMediaSettings(),
             'media_albums' => $this->media->albumsWithPhotos(false),
             'pages' => $this->pages->all(),
             default => throw new RuntimeException('Unknown admin resource'),
@@ -67,5 +67,29 @@ final class AdminController
             'count' => $count,
             'data' => $payload,
         ];
+    }
+
+    private function readMediaSettings(): array
+    {
+        $tournaments = $this->tournaments->all();
+        $featuredTournament = null;
+        foreach ($tournaments as $tournament) {
+            if ((int) ($tournament['is_featured'] ?? 0) === 1) {
+                $featuredTournament = $tournament;
+                break;
+            }
+        }
+        $featuredMatch = null;
+        foreach ($this->matches->all() as $match) {
+            if (!empty($match['is_featured_media'])) {
+                $featuredMatch = $match;
+                break;
+            }
+        }
+
+        return [[
+            'featured_match_id' => $featuredMatch ? (string) ($featuredMatch['id'] ?? '') : '',
+            'photo_reports_enabled' => $featuredTournament ? ((int) ($featuredTournament['photo_reports_enabled'] ?? 1) !== 0) : true,
+        ]];
     }
 }

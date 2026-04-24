@@ -40,6 +40,8 @@ It supports:
 3. Import data with a dedicated migration script or MySQL seed file.
 4. Repoint the API to MySQL only after the imported data has been verified.
 
+If you already have a live database, apply `mysql-add-media-photo-reports-flag.sql` so the admin toggle for "Фоторепортажи" is available.
+
 Example migration command:
 
 `MYSQL_URL=mysql://user:pass@host:3306/db APPLY_SCHEMA=1 node archive/legacy-tools/scripts/migrate-to-mysql.mjs`

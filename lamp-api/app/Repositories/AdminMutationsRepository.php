@@ -8,7 +8,8 @@ final class AdminMutationsRepository extends BaseRepository
         return match ($resource) {
             'tournaments', 'archive_tournaments' => $this->replaceTournaments($payload),
             'clubs' => $this->replaceClubs($payload),
-            'matches', 'archive_matches', 'media' => $this->replaceMatches($payload),
+            'matches', 'archive_matches' => $this->replaceMatches($payload),
+            'media' => $this->replaceMediaSettings($payload),
             'news' => $this->replaceNews($payload),
             'partners', 'partners_media' => $this->replacePartners($payload),
             'standings', 'archive_standings' => $this->replaceStandings($payload),
@@ -265,6 +266,49 @@ final class AdminMutationsRepository extends BaseRepository
         }
 
         return count($items);
+    }
+
+    private function replaceMediaSettings(array $payload): int
+    {
+        $items = array_values($payload);
+        $item = $items[0] ?? [];
+        $featuredTournament = api_get_target_tournament($this->pdo, null);
+        if (!$featuredTournament) {
+            throw new RuntimeException('Featured tournament not found');
+        }
+
+        $selectedId = api_parse_integer($item['featured_match_id'] ?? null, 0) ?? 0;
+        $photoReportsEnabled = api_parse_boolean($item['photo_reports_enabled'] ?? true) ? 1 : 0;
+
+        $this->pdo->beginTransaction();
+        try {
+            api_execute($this->pdo, 'UPDATE matches SET is_featured_media = 0');
+            if ($selectedId > 0) {
+                $matchRow = api_query_one($this->pdo, 'SELECT id FROM matches WHERE id = ? LIMIT 1', [$selectedId]);
+                if (!$matchRow) {
+                    throw new RuntimeException('Selected featured match was not found');
+                }
+                api_execute($this->pdo, 'UPDATE matches SET is_featured_media = 1 WHERE id = ?', [$selectedId]);
+            }
+
+            api_execute($this->pdo, '
+                UPDATE tournaments
+                SET photo_reports_enabled = ?
+                WHERE id = ?
+            ', [
+                $photoReportsEnabled,
+                (int) $featuredTournament['id'],
+            ]);
+
+            $this->pdo->commit();
+        } catch (Throwable $error) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $error;
+        }
+
+        return 1;
     }
 
     private function replaceNews(array $payload): int

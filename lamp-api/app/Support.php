@@ -314,7 +314,7 @@ function api_get_target_tournament(PDO $pdo, ?string $slug = null): ?array
 {
     if ($slug !== null && $slug !== '') {
         return api_query_one($pdo, '
-            SELECT id, slug, name, season_year, is_featured, standings_mode, playoff_mode
+            SELECT id, slug, name, season_year, is_featured, countdown_enabled, photo_reports_enabled, standings_mode, playoff_mode
             FROM tournaments
             WHERE slug = ?
             LIMIT 1
@@ -322,7 +322,7 @@ function api_get_target_tournament(PDO $pdo, ?string $slug = null): ?array
     }
 
     return api_query_one($pdo, '
-        SELECT id, slug, name, season_year, is_featured, standings_mode, playoff_mode
+        SELECT id, slug, name, season_year, is_featured, countdown_enabled, photo_reports_enabled, standings_mode, playoff_mode
         FROM tournaments
         ORDER BY is_featured DESC, season_year DESC, id DESC
         LIMIT 1

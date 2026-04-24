@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS tournaments (
   status ENUM('draft', 'upcoming', 'active', 'completed', 'archived') NOT NULL DEFAULT 'draft',
   is_featured TINYINT(1) NOT NULL DEFAULT 0,
   countdown_enabled TINYINT(1) NOT NULL DEFAULT 1,
+  photo_reports_enabled TINYINT(1) NOT NULL DEFAULT 1,
   standings_mode ENUM('auto', 'manual') NOT NULL DEFAULT 'auto',
   playoff_mode ENUM('auto', 'manual') NOT NULL DEFAULT 'auto',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

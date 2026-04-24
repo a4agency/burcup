@@ -201,16 +201,39 @@ function initActiveHeaderLink() {
   });
 }
 
+let featuredTournamentSettingsPromise = null;
+
+async function loadFeaturedTournamentSettings() {
+  if (!featuredTournamentSettingsPromise) {
+    featuredTournamentSettingsPromise = fetchApi('/api/tournaments')
+      .then((tournaments) => {
+        if (!Array.isArray(tournaments) || !tournaments.length) return null;
+        return tournaments.find(item => item && item.is_featured) || tournaments[0] || null;
+      })
+      .catch(() => null);
+  }
+
+  return featuredTournamentSettingsPromise;
+}
+
+function isTruthyFlag(value, fallback = false) {
+  if (value === true || value === 1) return true;
+  if (value === false || value === 0) return false;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
 async function initTournamentCountdown() {
   const root = document.querySelector('[data-countdown-target]');
   if (!root) return;
   const section = root.closest('.countdown-section');
-  const tournaments = await fetchApi('/api/tournaments');
-  const featuredTournament = Array.isArray(tournaments)
-    ? tournaments.find(item => item && item.is_featured) || null
-    : null;
+  const featuredTournament = await loadFeaturedTournamentSettings();
 
-  if (featuredTournament && featuredTournament.countdown_enabled === false) {
+  if (featuredTournament && isTruthyFlag(featuredTournament.countdown_enabled, true) === false) {
     if (section) section.hidden = true;
     return;
   }
@@ -4427,10 +4450,28 @@ async function loadRenderableMediaAlbums() {
     : getDefaultMediaAlbums().map((item, index) => normalizeMediaAlbum(item, index));
 }
 
+function setMediaStoriesSectionVisibility(target, visible) {
+  if (!target) return;
+  const section = target.closest('section');
+  if (section) {
+    section.hidden = !visible;
+  }
+  target.setAttribute('aria-busy', visible ? 'true' : 'false');
+  if (!visible) {
+    target.innerHTML = '';
+  }
+}
+
 async function renderMediaAlbumCollection(targetSelector = '#media-stories') {
   const target = document.querySelector(targetSelector);
   if (!target) return;
-  target.setAttribute('aria-busy', 'true');
+  const featuredTournament = await loadFeaturedTournamentSettings();
+  if (featuredTournament && isTruthyFlag(featuredTournament.photo_reports_enabled, true) === false) {
+    setMediaStoriesSectionVisibility(target, false);
+    return;
+  }
+
+  setMediaStoriesSectionVisibility(target, true);
   target.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
 
   try {
@@ -4517,16 +4558,16 @@ async function renderMultimediaPage() {
   const libraryTarget = document.querySelector('#media-library');
   const storiesTarget = document.querySelector('#media-stories');
   if (!featuredTarget || !libraryTarget || !storiesTarget) return;
+  const featuredTournament = await loadFeaturedTournamentSettings();
+  const storiesEnabled = !featuredTournament || isTruthyFlag(featuredTournament.photo_reports_enabled, true);
   featuredTarget.setAttribute('aria-busy', 'true');
   libraryTarget.setAttribute('aria-busy', 'true');
-  storiesTarget.setAttribute('aria-busy', 'true');
+  setMediaStoriesSectionVisibility(storiesTarget, storiesEnabled);
   featuredTarget.innerHTML = renderMediaFeatureLoading();
   libraryTarget.innerHTML = Array.from({ length: 2 }, (_, index) => renderUpcomingCardLoading(index)).join('');
-  storiesTarget.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
 
   try {
     const matchesRaw = await fetchApi('/api/matches');
-    const albums = await loadRenderableMediaAlbums();
     const allMatches = sortMediaMatches(Array.isArray(matchesRaw) ? matchesRaw : []);
     const featuredMatch = pickFeaturedMediaMatch(allMatches);
     const matches = sortMatchesChronologically(allMatches.filter(hasAnyMatchMedia));
@@ -4539,12 +4580,15 @@ async function renderMultimediaPage() {
       ? matches.map(renderMediaMatchCard).join('')
       : '<div class="card media-empty-card">Материалы матчей появятся после публикации первых эфиров.</div>';
 
-    storiesTarget.innerHTML = albums.length
-      ? albums.map(renderMediaAlbumCard).join('')
-      : '<div class="card media-empty-card">Фотоальбомы появятся здесь после публикации первых фотоматериалов.</div>';
+    if (storiesEnabled) {
+      const albums = await loadRenderableMediaAlbums();
+      storiesTarget.innerHTML = albums.length
+        ? albums.map(renderMediaAlbumCard).join('')
+        : '<div class="card media-empty-card">Фотоальбомы появятся здесь после публикации первых фотоматериалов.</div>';
+      storiesTarget.setAttribute('aria-busy', 'false');
+    }
     featuredTarget.setAttribute('aria-busy', 'false');
     libraryTarget.setAttribute('aria-busy', 'false');
-    storiesTarget.setAttribute('aria-busy', 'false');
 
     if (featuredMatch) initMatchMediaTabs(featuredTarget);
     initMediaLibrarySlider();
@@ -4552,10 +4596,12 @@ async function renderMultimediaPage() {
   } catch (error) {
     featuredTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить главный эфир.</div>';
     libraryTarget.innerHTML = '<div class="card media-empty-card">Не удалось загрузить материалы матчей.</div>';
-    storiesTarget.innerHTML = getDefaultMediaAlbums().map(renderMediaAlbumCard).join('');
     featuredTarget.setAttribute('aria-busy', 'false');
     libraryTarget.setAttribute('aria-busy', 'false');
-    storiesTarget.setAttribute('aria-busy', 'false');
+    if (storiesEnabled) {
+      storiesTarget.innerHTML = getDefaultMediaAlbums().map(renderMediaAlbumCard).join('');
+      storiesTarget.setAttribute('aria-busy', 'false');
+    }
   }
 }
 

@@ -17,6 +17,60 @@
 
 ---
 
+## 2026-04-24 02:00
+
+### Что сделали
+
+- Добавили глобальный флаг `photo_reports_enabled` для текущего турнира, чтобы
+  скрывать и снова показывать раздел «Фоторепортажи» на главной странице и на
+  странице «Медиа».
+- Перевели админский раздел `media` на отдельный ресурс `api/admin/media`, где
+  теперь редактируются и главный матч, и видимость фоторепортажей.
+- Обновили фронтенд так, чтобы скрытый раздел не рендерился вообще, а не
+  просто показывал пустые карточки.
+- Синхронизировали MySQL-схему, резервные дампы и инструкцию для Timeweb.
+
+### Что проверили
+
+- `php -l` прошёл для:
+  - `lamp-api/app/Controllers/AdminController.php`
+  - `lamp-api/app/Repositories/AdminMutationsRepository.php`
+  - `lamp-api/app/Repositories/TournamentsRepository.php`
+  - `lamp-api/app/Support.php`
+- `node --check` прошёл для:
+  - `js/admin.js`
+  - `js/site.js`
+
+### Что осталось
+
+- На текущем Timeweb-аккаунте нужно применить SQL-миграцию
+  `database/mysql-add-media-photo-reports-flag.sql`, если колонка ещё не
+  добавлена в живую базу.
+- После этого стоит проверить админку и скрытие блока на главной и на странице
+  «Медиа».
+
+### Файлы
+
+- [js/admin.js](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/js/admin.js)
+- [js/site.js](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/js/site.js)
+- [lamp-api/app/Controllers/AdminController.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/Controllers/AdminController.php)
+- [lamp-api/app/Repositories/AdminMutationsRepository.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/Repositories/AdminMutationsRepository.php)
+- [lamp-api/app/Repositories/TournamentsRepository.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/Repositories/TournamentsRepository.php)
+- [lamp-api/app/Support.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/Support.php)
+- [database/mysql-schema.sql](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/database/mysql-schema.sql)
+- [database/mysql-add-media-photo-reports-flag.sql](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/database/mysql-add-media-photo-reports-flag.sql)
+- [database/README.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/database/README.md)
+- [TIMEWEB-TRANSFER.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/TIMEWEB-TRANSFER.md)
+- [burcup_dump.sql](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/burcup_dump.sql)
+- [burcup_dump_timeweb.sql](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/burcup_dump_timeweb.sql)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/WORKLOG.md)
+
+### Коммиты
+
+- Будет отдельный коммит после финальной проверки и прогонки на сайте.
+
+---
+
 ## 2026-04-24 01:30
 
 ### Что сделали

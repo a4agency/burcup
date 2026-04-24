@@ -651,17 +651,20 @@ const ADMIN_SOURCES = {
     key: 'bcup_admin_media',
     exportName: 'media.json',
     title: 'Медиа',
-    help: 'Выбор матча для главного блока на странице «Медиа».',
+    help: 'Выбор главного матча и переключатель видимости фоторепортажей на главной и в разделе «Медиа».',
     defaultData: [
       {
-        featured_match_id: ''
+        featured_match_id: '',
+        photo_reports_enabled: true,
       }
     ],
     empty: () => ({
-      featured_match_id: ''
+      featured_match_id: '',
+      photo_reports_enabled: true,
     }),
     fields: [
       ['featured_match_id', 'Главный матч', 'text'],
+      ['photo_reports_enabled', 'Показывать фоторепортажи на сайте', 'checkbox'],
     ],
   },
   albums: {
@@ -1278,17 +1281,30 @@ function getAdminApiSourceName(sourceName) {
   if (sourceName === 'archive_tournaments') return 'tournaments';
   if (sourceName === 'archive_matches') return 'matches';
   if (sourceName === 'archive_standings') return 'standings';
-  if (sourceName === 'media') return 'matches';
+  if (sourceName === 'media') return 'media';
   return sourceName;
 }
 
 function normalizeTournamentAdminItem(item) {
   return {
     ...item,
-    countdown_enabled: item?.countdown_enabled !== false,
+    is_featured: toAdminBoolean(item?.is_featured, false),
+    countdown_enabled: toAdminBoolean(item?.countdown_enabled, true),
+    photo_reports_enabled: toAdminBoolean(item?.photo_reports_enabled, true),
     standings_mode: String(item?.standings_mode || 'auto').trim() || 'auto',
     playoff_mode: String(item?.playoff_mode || 'auto').trim() || 'auto',
   };
+}
+
+function toAdminBoolean(value, fallback = false) {
+  if (value === true || value === 1) return true;
+  if (value === false || value === 0) return false;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  }
+  return fallback;
 }
 
 function getAdminMatchStatusLabel(status, fallback = '') {
@@ -1309,6 +1325,13 @@ function normalizeMatchAdminItem(item) {
     ...item,
     sort_order: Number(item?.sort_order || 0) || 0,
     status_label: getAdminMatchStatusLabel(item?.status, item?.status_label),
+  };
+}
+
+function normalizeMediaAdminItem(item) {
+  return {
+    featured_match_id: String(item?.featured_match_id || '').trim(),
+    photo_reports_enabled: toAdminBoolean(item?.photo_reports_enabled, true),
   };
 }
 
@@ -1394,7 +1417,7 @@ function normalizeAlbumAdminItem(item, index = 0) {
     card_excerpt: String(item?.card_excerpt || '').trim(),
     description: String(item?.description || '').trim(),
     sort_order: Number(item?.sort_order || index + 1) || index + 1,
-    is_visible: item?.is_visible !== false,
+    is_visible: toAdminBoolean(item?.is_visible, true),
     photos: Array.isArray(item?.photos)
       ? item.photos.map((photo, photoIndex) => ({
         image_url: String(photo?.image_url || '').trim(),
@@ -1423,7 +1446,7 @@ function normalizeNewsAdminItem(item, index = 0) {
     body_html: typeof item?.body_html === 'string' ? item.body_html.trim() : '',
     link: String(item?.link || 'news.html').trim() || 'news.html',
     image: String(item?.image || '').trim(),
-    is_published: item?.is_published !== false,
+    is_published: toAdminBoolean(item?.is_published, true),
     photos: Array.isArray(item?.photos)
       ? item.photos.map((photo, photoIndex) => ({
         image_url: String(photo?.image_url || '').trim(),
@@ -1483,6 +1506,10 @@ function normalizeSourceData(sourceName, data) {
     return filteredItems;
   }
   if (sourceName === 'media') {
+    const looksLikeMediaSettings = items.some(item => Object.prototype.hasOwnProperty.call(item || {}, 'featured_match_id') || Object.prototype.hasOwnProperty.call(item || {}, 'photo_reports_enabled'));
+    if (looksLikeMediaSettings) {
+      return [normalizeMediaAdminItem(items[0] || {})];
+    }
     const looksLikeMatchPayload = items.some(item => Object.prototype.hasOwnProperty.call(item || {}, 'home_team') || Object.prototype.hasOwnProperty.call(item || {}, 'video'));
     if (looksLikeMatchPayload) {
       const currentMatches = normalizeSourceData('matches', items);
@@ -1491,11 +1518,12 @@ function normalizeSourceData(sourceName, data) {
         || currentMatches[0]
         || null;
       return [{
-        featured_match_id: featuredMatch ? String(featuredMatch.id || '') : ''
+        featured_match_id: featuredMatch ? String(featuredMatch.id || '') : '',
+        photo_reports_enabled: true,
       }];
     }
     return [{
-      featured_match_id: String(items[0]?.featured_match_id || '').trim()
+      ...normalizeMediaAdminItem(items[0] || {}),
     }];
   }
   if (sourceName === 'standings') {
@@ -1700,12 +1728,7 @@ async function pushAdminSource(sourceName, data) {
       ...normalizeSourceData(sourceName, data),
     ];
   } else if (sourceName === 'media') {
-    const allMatches = await fetchAdminCollection(apiSourceName);
-    const selectedId = String(normalizeSourceData(sourceName, data)[0]?.featured_match_id || '').trim();
-    payload = allMatches.map(item => ({
-      ...item,
-      is_featured_media: selectedId ? String(item?.id || '') === selectedId : false,
-    }));
+    payload = normalizeSourceData(sourceName, data);
   }
 
   const { response, body } = await fetchAdminApi(`/api/admin/${apiSourceName}`, {
@@ -2185,20 +2208,21 @@ function formatAdminFeaturedMatchLabel(item) {
 
 function renderMediaAdminCard(item) {
   const selectedId = String(item?.featured_match_id || '').trim();
+  const photoReportsEnabled = toAdminBoolean(item?.photo_reports_enabled, true);
   const matches = getCurrentAdminMatchesCatalog();
   const selectedMatch = matches.find(match => String(match?.id || '') === selectedId) || null;
 
   return `
     <div class="admin-item-card admin-record-card admin-media-card" data-item-index="0">
       <div class="admin-item-head">
-        <strong>Главный эфир</strong>
+        <strong>Главный эфир и фоторепортажи</strong>
       </div>
 
       <div class="admin-record-layout">
         <div class="admin-record-section">
           <div class="admin-record-section-head">Выбор матча</div>
           <div class="admin-form-grid admin-record-grid-1">
-            <div class="admin-record-note">Выбери матч текущего турнира. После сохранения именно он станет главным блоком страницы «Медиа».</div>
+            <div class="admin-record-note">Выбери матч текущего турнира и настрой, показывать ли раздел «Фоторепортажи» на главной и на странице «Медиа».</div>
             <div class="admin-field" style="grid-column:1/-1">
               <label>Главный матч</label>
               <select data-key="featured_match_id" data-index="0">
@@ -2210,6 +2234,7 @@ function renderMediaAdminCard(item) {
                 `).join('')}
               </select>
             </div>
+            ${makeFieldsByKeys('media', ['photo_reports_enabled'], item, 0)}
           </div>
         </div>
 
@@ -2220,6 +2245,7 @@ function renderMediaAdminCard(item) {
               <div class="admin-media-preview">
                 <div class="admin-media-preview-top">
                   <span class="archive-stat-chip">Главный эфир</span>
+                  <span class="archive-stat-chip ${photoReportsEnabled ? '' : 'is-muted'}">${photoReportsEnabled ? 'Фоторепортажи видны' : 'Фоторепортажи скрыты'}</span>
                   <span class="upcoming-status ${escapeHtml(String(selectedMatch.status || 'soon'))}">${escapeHtml(selectedMatch.status_label || 'Скоро')}</span>
                 </div>
                 <div class="admin-media-preview-title">${escapeHtml(joinNonEmpty([selectedMatch.home_team, selectedMatch.away_team], ' — '))}</div>
@@ -3128,12 +3154,12 @@ function renderForm(sourceName, data) {
   }
 
   if (sourceName === 'media') {
-    wrap.querySelectorAll('[data-key="featured_match_id"]').forEach(select => {
+    wrap.querySelectorAll('[data-key="featured_match_id"], [data-key="photo_reports_enabled"]').forEach(select => {
       select.addEventListener('change', () => {
         const next = normalizeSourceData(sourceName, readFormData(sourceName));
         setSourceData(sourceName, next);
         renderForm(sourceName, next);
-        setStatus('Главный эфир обновлён в черновике. Нажми «Сохранить», чтобы отправить изменения в API.');
+        setStatus('Настройки медиа обновлены в черновике. Нажми «Сохранить», чтобы отправить изменения в API.');
       });
     });
   }

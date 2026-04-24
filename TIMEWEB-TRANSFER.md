@@ -46,10 +46,11 @@ These files are part of the codebase and should stay in sync across hosts.
 4. Keep the existing `public_html/lamp-api/public/.htaccess` file in place.
 5. Create the MySQL database in Timeweb.
 6. Import `burcup_dump_timeweb.sql` into that database.
-7. Open the existing `public_html/lamp-api/config.local.php` file and edit it.
-8. Add the DB and admin values to `config.local.php`.
-9. Keep `public_html/lamp-api/public/uploads/` present and writable.
-10. Open:
+7. If the database already existed before this update, run `database/mysql-add-media-photo-reports-flag.sql` in phpMyAdmin.
+8. Open the existing `public_html/lamp-api/config.local.php` file and edit it.
+9. Add the DB and admin values to `config.local.php`.
+10. Keep `public_html/lamp-api/public/uploads/` present and writable.
+11. Open:
    - `https://<domain>/diag.php`
    - `https://<domain>/lamp-api/diag.php`
    - `https://<domain>/api/health`
@@ -134,10 +135,11 @@ right values into `config.local.php` and upload the files correctly.
 2. Open `public_html/lamp-api/config.local.php` and edit only the values.
 3. Create a fresh MySQL database in the new account.
 4. Import `burcup_dump_timeweb.sql`.
-5. Confirm `public_html/lamp-api/public/uploads/` exists.
-6. Check `https://<domain>/lamp-api/diag.php`.
-7. Check `https://<domain>/api/health`.
-8. Re-test admin login and one upload.
+5. Apply `database/mysql-add-media-photo-reports-flag.sql` if the imported dump does not yet include the new column.
+6. Confirm `public_html/lamp-api/public/uploads/` exists.
+7. Check `https://<domain>/lamp-api/diag.php`.
+8. Check `https://<domain>/api/health`.
+9. Re-test admin login and one upload.
 
 ## If something breaks
 
