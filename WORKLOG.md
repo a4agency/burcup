@@ -3033,3 +3033,7 @@
 ### News article body image cleanup
 
 - When a news article already has attached photos, strip inline `<img>`, `<picture>`, and `<figure>` elements from the rendered body so the page does not show the same story image three times.
+
+### News article cover suppression
+
+- If a news article has attached photos, hide the separate cover media block on the article page so the same story does not appear both as a cover and as a gallery image.

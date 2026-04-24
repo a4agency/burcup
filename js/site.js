@@ -4944,7 +4944,7 @@ async function renderNewsArticlePage() {
     const bodyHasCoverImage = coverUrl ? bodyImageUrls.has(coverUrl) : false;
     const mediaMarkup = videoUrl
       ? renderNewsArticleMedia(item, imageSrc)
-      : (!bodyHasCoverImage ? renderNewsArticleMedia(item, imageSrc) : '');
+      : (articlePhotos.length <= 1 && !bodyHasCoverImage ? renderNewsArticleMedia(item, imageSrc) : '');
     const galleryPhotos = videoUrl
       ? []
       : articlePhotos
