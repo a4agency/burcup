@@ -2,7 +2,7 @@
 -- It adds a global toggle for the "Фоторепортажи" section.
 
 ALTER TABLE tournaments
-  ADD COLUMN IF NOT EXISTS photo_reports_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER countdown_enabled;
+  ADD COLUMN photo_reports_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER countdown_enabled;
 
 UPDATE tournaments
 SET photo_reports_enabled = 1

@@ -46,11 +46,13 @@
 
 ### Что осталось
 
-- На текущем Timeweb-аккаунте нужно применить SQL-миграцию
-  `database/mysql-add-media-photo-reports-flag.sql`, только если у DB-пользователя
-  нет права `ALTER TABLE` и автодобавление колонки не сработает.
-- После этого стоит проверить админку и скрытие блока на главной и на странице
-  «Медиа».
+- На текущем Timeweb-аккаунте SQL-миграция для `photo_reports_enabled` уже была
+  применена вручную через phpMyAdmin.
+- Локальный файл
+  [`database/mysql-add-media-photo-reports-flag.sql`](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/database/mysql-add-media-photo-reports-flag.sql)
+  теперь приведён к рабочему варианту без `IF NOT EXISTS` в `ALTER TABLE`.
+- После синхронизации файлов стоит проверить админку и скрытие блока на главной
+  и на странице «Медиа».
 
 ### Файлы
 
