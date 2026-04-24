@@ -4070,7 +4070,7 @@ async function renderHomeNews() {
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 3 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
-    const items = await fetchApi('/api/news');
+    const items = await fetchApi('/api/news?limit=3');
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
     target.setAttribute('aria-busy', 'false');
     runAutoFit();
@@ -4147,18 +4147,104 @@ async function renderMatchesPage() {
 
 async function renderNewsPage() {
   const target = document.querySelector('#news-list');
+  const pager = document.querySelector('#news-pagination');
   if (!target) return;
+  const currentPage = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || 1) || 1);
   target.setAttribute('aria-busy', 'true');
   target.innerHTML = Array.from({ length: 6 }, (_, index) => renderNewsCardLoading(index)).join('');
   try {
-    const items = await fetchApi('/api/news');
+    const response = await fetchApi(`/api/news?page=${encodeURIComponent(currentPage)}&per_page=${NEWS_PAGE_SIZE}`);
+    const items = Array.isArray(response) ? response : Array.isArray(response?.items) ? response.items : [];
+    const pagination = Array.isArray(response)
+      ? {
+          page: currentPage,
+          per_page: NEWS_PAGE_SIZE,
+          total_items: items.length,
+          total_pages: Math.max(1, Math.ceil(items.length / NEWS_PAGE_SIZE)),
+          has_prev: currentPage > 1,
+          has_next: false,
+        }
+      : (response?.pagination || {
+          page: currentPage,
+          per_page: NEWS_PAGE_SIZE,
+          total_items: items.length,
+          total_pages: Math.max(1, Math.ceil(items.length / NEWS_PAGE_SIZE)),
+          has_prev: currentPage > 1,
+          has_next: false,
+        });
+
     target.innerHTML = items.map(renderNewsPreviewCard).join('');
+    if (pagination.page && pagination.page !== currentPage) {
+      const url = new URL(window.location.href);
+      if (pagination.page === 1) {
+        url.searchParams.delete('page');
+      } else {
+        url.searchParams.set('page', String(pagination.page));
+      }
+      history.replaceState({}, '', url);
+    }
+    if (pager) {
+      pager.innerHTML = renderNewsPaginationControls(pagination);
+      bindNewsPaginationControls(pager);
+    }
     target.setAttribute('aria-busy', 'false');
     runAutoFit();
   } catch (e) {
     target.innerHTML = renderLoadingStateCard('Не удалось загрузить новости.');
+    if (pager) pager.innerHTML = '';
     target.setAttribute('aria-busy', 'false');
   }
+}
+
+const NEWS_PAGE_SIZE = 9;
+
+function renderNewsPaginationControls(pagination = {}) {
+  const page = Math.max(1, Number(pagination.page || 1) || 1);
+  const totalPages = Math.max(1, Number(pagination.total_pages || 1) || 1);
+  const totalItems = Math.max(0, Number(pagination.total_items || 0) || 0);
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
+
+  return `
+    <div class="news-pagination-shell">
+      <button type="button" class="news-pagination-btn" data-news-page-direction="prev" ${hasPrev ? '' : 'disabled'}>← Предыдущая</button>
+      <div class="news-pagination-info">Страница ${page} из ${totalPages}${totalItems ? ` · ${totalItems} новостей` : ''}</div>
+      <button type="button" class="news-pagination-btn" data-news-page-direction="next" ${hasNext ? '' : 'disabled'}>Следующая →</button>
+    </div>
+  `;
+}
+
+function bindNewsPaginationControls(root = document) {
+  if (!root || root.dataset.newsPaginationBound === 'true') return;
+  root.dataset.newsPaginationBound = 'true';
+  root.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-news-page-direction]');
+    if (!button || !root.contains(button)) return;
+    const direction = String(button.dataset.newsPageDirection || '');
+    const currentPage = Math.max(1, Number(new URLSearchParams(window.location.search).get('page') || 1) || 1);
+    const nextPage = direction === 'prev' ? currentPage - 1 : currentPage + 1;
+    if (nextPage < 1) return;
+    const url = new URL(window.location.href);
+    if (nextPage === 1) {
+      url.searchParams.delete('page');
+    } else {
+      url.searchParams.set('page', String(nextPage));
+    }
+    history.pushState({}, '', url);
+    renderNewsPage();
+  });
+}
+
+let newsPopstateBound = false;
+
+function initNewsPaginationNavigation() {
+  if (newsPopstateBound) return;
+  newsPopstateBound = true;
+  window.addEventListener('popstate', () => {
+    if (document.querySelector('#news-list')) {
+      renderNewsPage();
+    }
+  });
 }
 
 function getMatchStatusClass(status) {
@@ -5318,6 +5404,7 @@ function renderArchiveTournamentPage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initNewsPaginationNavigation();
   renderUpcomingMatches();
   renderHomeNews();
   renderMediaAlbumCollection('#home-media-stories');

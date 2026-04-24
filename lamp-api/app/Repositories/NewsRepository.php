@@ -13,6 +13,45 @@ final class NewsRepository extends BaseRepository
         );
     }
 
+    public function latest(bool $includeUnpublished = false, ?string $tournamentSlug = null, int $limit = 3): array
+    {
+        $rows = $this->queryRows($includeUnpublished, $tournamentSlug, max(1, $limit), 0);
+        $photoMap = $this->loadPhotoMap(array_map(static fn(array $row): int => (int) $row['id'], $rows));
+        return array_map(
+            static fn(array $row): array => api_map_news_article_row($row, $photoMap[(int) $row['id']] ?? []),
+            $rows
+        );
+    }
+
+    public function page(bool $includeUnpublished = false, ?string $tournamentSlug = null, int $page = 1, int $perPage = 9): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
+        $totalItems = $this->countRows($includeUnpublished, $tournamentSlug);
+        $totalPages = max(1, (int) ceil($totalItems / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
+
+        $rows = $this->queryRows($includeUnpublished, $tournamentSlug, $perPage, $offset);
+        $photoMap = $this->loadPhotoMap(array_map(static fn(array $row): int => (int) $row['id'], $rows));
+        $items = array_map(
+            static fn(array $row): array => api_map_news_article_row($row, $photoMap[(int) $row['id']] ?? []),
+            $rows
+        );
+
+        return [
+            'items' => $items,
+            'pagination' => [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total_items' => $totalItems,
+                'total_pages' => $totalPages,
+                'has_prev' => $page > 1,
+                'has_next' => $page < $totalPages,
+            ],
+        ];
+    }
+
     public function bySlugOrId(string $value): ?array
     {
         $row = api_query_one($this->pdo, '
@@ -44,7 +83,7 @@ final class NewsRepository extends BaseRepository
         return api_map_news_article_row($row, $photoMap[(int) $row['id']] ?? []);
     }
 
-    private function queryRows(bool $includeUnpublished, ?string $tournamentSlug): array
+    private function queryRows(bool $includeUnpublished, ?string $tournamentSlug, ?int $limit = null, ?int $offset = null): array
     {
         $sql = '
             SELECT
@@ -77,7 +116,36 @@ final class NewsRepository extends BaseRepository
             $sql .= ' WHERE ' . implode(' AND ', $conditions);
         }
         $sql .= ' ORDER BY n.published_on DESC, n.id DESC';
+        if ($limit !== null) {
+            $sql .= ' LIMIT ' . max(1, (int) $limit);
+            if ($offset !== null && (int) $offset > 0) {
+                $sql .= ' OFFSET ' . max(0, (int) $offset);
+            }
+        }
         return api_query_rows($this->pdo, $sql, $params);
+    }
+
+    private function countRows(bool $includeUnpublished, ?string $tournamentSlug): int
+    {
+        $sql = '
+            SELECT COUNT(*) AS total
+            FROM news_articles n
+            LEFT JOIN tournaments t ON t.id = n.tournament_id
+        ';
+        $conditions = [];
+        $params = [];
+        if (!$includeUnpublished) {
+            $conditions[] = 'n.is_published = 1';
+        }
+        if ($tournamentSlug) {
+            $conditions[] = 't.slug = ?';
+            $params[] = $tournamentSlug;
+        }
+        if ($conditions) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+        $row = api_query_one($this->pdo, $sql, $params);
+        return (int) ($row['total'] ?? 0);
     }
 
     private function loadPhotoMap(array $articleIds): array

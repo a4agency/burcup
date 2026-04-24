@@ -232,6 +232,10 @@ const DEFAULT_PLAYOFF_ROWS = [
 
 const ADMIN_TOKEN_KEY = 'bcup_admin_session_token';
 const EDITABLE_PAGE_TEMPLATE_CACHE = {};
+const ADMIN_NEWS_PAGE_SIZE = 9;
+const adminPaginationState = {
+  news: 1,
+};
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -1455,6 +1459,109 @@ function normalizeNewsAdminItem(item, index = 0) {
       }))
       : []
   };
+}
+
+function getAdminWorkingData(sourceName) {
+  return normalizeSourceData(sourceName, structuredClone(renderedDataCache[sourceName] || defaultsCache[sourceName] || ADMIN_SOURCES[sourceName]?.defaultData || []));
+}
+
+function getAdminNewsPageInfo(data, page = adminPaginationState.news || 1) {
+  const items = Array.isArray(data) ? data : [];
+  const totalItems = items.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / ADMIN_NEWS_PAGE_SIZE));
+  const safePage = Math.min(Math.max(1, Number(page || 1) || 1), totalPages);
+  const start = (safePage - 1) * ADMIN_NEWS_PAGE_SIZE;
+  const pageItems = items.slice(start, start + ADMIN_NEWS_PAGE_SIZE);
+  return {
+    page: safePage,
+    perPage: ADMIN_NEWS_PAGE_SIZE,
+    totalItems,
+    totalPages,
+    start,
+    end: Math.min(start + ADMIN_NEWS_PAGE_SIZE, totalItems),
+    items: pageItems,
+    hasPrev: safePage > 1,
+    hasNext: safePage < totalPages,
+  };
+}
+
+function renderAdminNewsPagination(pageInfo, position = 'top') {
+  return `
+    <div class="admin-news-pagination ${position === 'bottom' ? 'bottom' : 'top'}">
+      <div class="admin-news-pagination-shell">
+        <div class="admin-news-pagination-info">
+          Страница ${pageInfo.page} из ${pageInfo.totalPages}${pageInfo.totalItems ? ` · ${pageInfo.totalItems} новостей` : ''}
+        </div>
+        <div class="admin-news-pagination-controls">
+          <button type="button" class="admin-news-pagination-btn" data-news-page-direction="prev" ${pageInfo.hasPrev ? '' : 'disabled'}>← Назад</button>
+          <button type="button" class="admin-news-pagination-btn" data-news-page-direction="next" ${pageInfo.hasNext ? '' : 'disabled'}>Вперёд →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function readAdminCardData(sourceName, card, sourceIndex, baseItems = []) {
+  const source = ADMIN_SOURCES[sourceName];
+  if (!source || !card) return null;
+  const item = structuredClone(baseItems[sourceIndex] || {});
+
+  source.fields.forEach(([key, , type]) => {
+    if (type === 'score') {
+      const leftEl = card.querySelector(`[data-key="${key}"][data-score-part="left"][data-index="${sourceIndex}"]`);
+      const rightEl = card.querySelector(`[data-key="${key}"][data-score-part="right"][data-index="${sourceIndex}"]`);
+      item[key] = `${leftEl ? leftEl.value || '0' : '0'}:${rightEl ? rightEl.value || '0' : '0'}`;
+      return;
+    }
+    const el = card.querySelector(`[data-key="${key}"][data-index="${sourceIndex}"]`);
+    if (!el) return;
+    let value = el.value;
+    if (type === 'number') value = value === '' ? '' : Number(value);
+    if (type === 'checkbox') value = value === 'true';
+    item[key] = value;
+  });
+
+  if (sourceName === 'albums' || sourceName === 'news') {
+    const photoIndexes = Array.from(new Set(
+      Array.from(card.querySelectorAll('[data-photo-index]'))
+        .map(node => Number(node.dataset.photoIndex))
+        .filter(index => Number.isFinite(index))
+    )).sort((left, right) => left - right);
+
+    item.photos = photoIndexes.map(photoIndex => {
+      const photoBase = structuredClone((Array.isArray(item.photos) ? item.photos[photoIndex] : null) || {});
+      ['image_url', 'alt_text', 'sort_order'].forEach((key) => {
+        const field = card.querySelector(`[data-photo-key="${key}"][data-index="${sourceIndex}"][data-photo-index="${photoIndex}"]`);
+        if (!field) return;
+        let value = field.value;
+        if (key === 'sort_order') value = value === '' ? photoIndex + 1 : Number(value);
+        photoBase[key] = value;
+      });
+      return photoBase;
+    }).filter(photo => String(photo.image_url || '').trim());
+  }
+
+  return item;
+}
+
+function syncAdminNewsDraftFromForm() {
+  if (currentSource !== 'news') return getAdminWorkingData('news');
+  const wrap = document.getElementById('admin-form-wrap');
+  if (!wrap) return getAdminWorkingData('news');
+
+  const next = getAdminWorkingData('news');
+  wrap.querySelectorAll('.admin-item-card[data-item-index]').forEach(card => {
+    const sourceIndex = Number(card.dataset.itemIndex);
+    if (!Number.isFinite(sourceIndex)) return;
+    next[sourceIndex] = readAdminCardData('news', card, sourceIndex, next) || next[sourceIndex];
+  });
+
+  const normalized = normalizeSourceData('news', next);
+  renderedDataCache.news = structuredClone(normalized);
+  setSourceData('news', normalized);
+  const textarea = document.getElementById('admin-textarea');
+  if (textarea) textarea.value = JSON.stringify(normalized, null, 2);
+  return normalized;
 }
 
 function normalizeEditablePageAdminItem(item, fallbackSlug = '') {
@@ -2700,6 +2807,9 @@ function makeField(field, value, itemIndex) {
 }
 
 function readFormData(sourceName) {
+  if (sourceName === 'news') {
+    return normalizeSourceData('news', structuredClone(renderedDataCache.news || []));
+  }
   const source = ADMIN_SOURCES[sourceName];
   const baseItems = renderedDataCache[sourceName] || [];
   const items = [];
@@ -2751,14 +2861,33 @@ function renderForm(sourceName, data) {
   const source = ADMIN_SOURCES[sourceName];
   const wrap = document.getElementById('admin-form-wrap');
   const hideToolbar = !!source.singleton || sourceName === 'media';
-  setRenderedData(sourceName, data);
+  const sourceData = sourceName === 'news'
+    ? normalizeSourceData('news', data)
+    : data;
+  setRenderedData(sourceName, sourceData);
+
+  const newsPageInfo = sourceName === 'news'
+    ? getAdminNewsPageInfo(sourceData, adminPaginationState.news)
+    : null;
+  if (sourceName === 'news') {
+    adminPaginationState.news = newsPageInfo.page;
+  }
+
   wrap.innerHTML = `
+    ${sourceName === 'news'
+      ? renderAdminNewsPagination(newsPageInfo, 'top')
+      : ''}
     ${sourceName === 'media'
       ? `<div class="admin-form-list">${renderMediaAdminCard(data[0] || source.empty())}</div>`
       : sourceName === 'partners' || sourceName === 'partners_media'
       ? renderPartnerSourceCards(sourceName, data)
+      : sourceName === 'news'
+      ? `<div class="admin-form-list">${newsPageInfo.items.map((item, pageIndex) => renderAdminCardBySource(sourceName, item, newsPageInfo.start + pageIndex, sourceData)).join('')}</div>`
       : `<div class="admin-form-list">${data.map((item, index) => renderAdminCardBySource(sourceName, item, index, data)).join('')}</div>`
     }
+    ${sourceName === 'news'
+      ? renderAdminNewsPagination(newsPageInfo, 'bottom')
+      : ''}
     <div class="admin-toolbar"${hideToolbar ? ' hidden' : ''}>
       ${(sourceName === 'partners' || sourceName === 'partners_media')
         ? (
@@ -2771,9 +2900,35 @@ function renderForm(sourceName, data) {
     </div>
   `;
 
+  if (sourceName === 'news') {
+    wrap.querySelectorAll('[data-news-page-direction]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const direction = String(btn.dataset.newsPageDirection || '');
+        const currentData = syncAdminNewsDraftFromForm();
+        const currentPageInfo = getAdminNewsPageInfo(currentData, adminPaginationState.news);
+        const nextPage = direction === 'prev' ? currentPageInfo.page - 1 : currentPageInfo.page + 1;
+        adminPaginationState.news = Math.min(Math.max(1, nextPage), currentPageInfo.totalPages);
+        renderForm('news', currentData);
+        setStatus(`Показываю страницу ${adminPaginationState.news} из ${currentPageInfo.totalPages}.`);
+      });
+    });
+  }
+
   wrap.querySelectorAll('[data-remove]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = Number(btn.dataset.remove);
+      if (sourceName === 'news') {
+        const next = syncAdminNewsDraftFromForm();
+        if (!next[idx]) return;
+        next.splice(idx, 1);
+        adminPaginationState.news = Math.max(1, Math.min(adminPaginationState.news, Math.ceil(next.length / ADMIN_NEWS_PAGE_SIZE) || 1));
+        setSourceData(sourceName, next);
+        defaultsCache[sourceName] = structuredClone(next);
+        renderedDataCache[sourceName] = structuredClone(next);
+        renderForm(sourceName, next);
+        setStatus('Новость удалена из черновика. Нажми «Сохранить», чтобы отправить в API.');
+        return;
+      }
       const next = readFormData(sourceName);
       next.splice(idx, 1);
       setSourceData(sourceName, next);
@@ -2817,6 +2972,18 @@ function renderForm(sourceName, data) {
   const addBtn = document.getElementById('admin-add-item');
   if (addBtn) {
     addBtn.addEventListener('click', () => {
+      if (sourceName === 'news') {
+        const next = syncAdminNewsDraftFromForm();
+        next.push({
+          ...source.empty(),
+        });
+        adminPaginationState.news = Math.max(1, Math.ceil(next.length / ADMIN_NEWS_PAGE_SIZE));
+        setSourceData(sourceName, next);
+        defaultsCache[sourceName] = structuredClone(next);
+        renderForm(sourceName, next);
+        setStatus('Новая новость добавлена в черновик. Нажми «Сохранить», чтобы отправить её в API.');
+        return;
+      }
       if (sourceName === 'albums') {
         addDraftItem(
           { sort_order: readFormData(sourceName).length + 1 },
@@ -2861,6 +3028,24 @@ function renderForm(sourceName, data) {
   wrap.querySelectorAll('[data-add-collection-photo]').forEach(btn => {
     btn.addEventListener('click', () => {
       const index = Number(btn.dataset.addCollectionPhoto);
+      if (sourceName === 'news') {
+        const next = syncAdminNewsDraftFromForm();
+        if (!next[index]) return;
+        const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
+        next[index].photos = [
+          ...currentPhotos,
+          {
+            image_url: '',
+            alt_text: '',
+            sort_order: currentPhotos.length + 1
+          }
+        ];
+        setSourceData(sourceName, next);
+        defaultsCache[sourceName] = structuredClone(next);
+        renderForm(sourceName, next);
+        setStatus('Фото добавлено в черновик новости. Нажми «Сохранить», чтобы отправить изменения в API.');
+        return;
+      }
       const next = readFormData(sourceName);
       if (!next[index]) return;
       const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
@@ -2887,7 +3072,7 @@ function renderForm(sourceName, data) {
       if (!files.length) return;
 
       const index = Number(event.target.dataset.uploadCollectionBatch);
-      const next = readFormData(sourceName);
+      const next = sourceName === 'news' ? syncAdminNewsDraftFromForm() : readFormData(sourceName);
       const album = next[index];
       if (!album) {
         event.target.value = '';
@@ -2953,7 +3138,7 @@ function renderForm(sourceName, data) {
     btn.addEventListener('click', () => {
       const index = Number(btn.dataset.index);
       const photoIndex = Number(btn.dataset.removeCollectionPhoto);
-      const next = readFormData(sourceName);
+      const next = sourceName === 'news' ? syncAdminNewsDraftFromForm() : readFormData(sourceName);
       if (!next[index]) return;
       const currentPhotos = Array.isArray(next[index].photos) ? next[index].photos : [];
       next[index].photos = currentPhotos
@@ -3021,7 +3206,7 @@ function renderForm(sourceName, data) {
             });
           }
           if ((sourceName === 'albums' || sourceName === 'news') && isPhotoField) {
-            const next = readFormData(sourceName);
+            const next = sourceName === 'news' ? syncAdminNewsDraftFromForm() : readFormData(sourceName);
             const album = next[Number(index)];
             const photo = album?.photos?.[Number(photoIndex)];
             if (photo) {
@@ -3029,6 +3214,7 @@ function renderForm(sourceName, data) {
               if (!photo.alt_text) photo.alt_text = file.name || album.title || '';
             }
             setSourceData(sourceName, next);
+            if (sourceName === 'news') defaultsCache[sourceName] = structuredClone(next);
           }
           setStatus('Изображение загружено в storage. Нажми «Сохранить», чтобы записать URL в базу.');
         })
@@ -3055,7 +3241,7 @@ function renderForm(sourceName, data) {
               });
             }
             if ((sourceName === 'albums' || sourceName === 'news') && isPhotoField) {
-              const next = readFormData(sourceName);
+              const next = sourceName === 'news' ? syncAdminNewsDraftFromForm() : readFormData(sourceName);
               const album = next[Number(index)];
               const photo = album?.photos?.[Number(photoIndex)];
               if (photo) {
@@ -3063,6 +3249,7 @@ function renderForm(sourceName, data) {
                 if (!photo.alt_text) photo.alt_text = file.name || album.title || '';
               }
               setSourceData(sourceName, next);
+              if (sourceName === 'news') defaultsCache[sourceName] = structuredClone(next);
             }
             setStatus(`Storage недоступен: ${error.message}. В форму подставлен base64 как временный fallback.`);
           })
@@ -3205,6 +3392,9 @@ async function loadSourceData(sourceName, options = {}) {
 }
 
 async function adminShowSource(sourceName, options = {}) {
+  if (currentSource === 'news' && sourceName !== 'news') {
+    syncAdminNewsDraftFromForm();
+  }
   currentSource = sourceName;
   const source = ADMIN_SOURCES[sourceName];
 
@@ -3231,6 +3421,9 @@ async function adminShowSource(sourceName, options = {}) {
   }
 
   const data = normalizeSourceData(sourceName, await loadSourceData(sourceName, options));
+  if (sourceName === 'news' && !options.keepNewsPage) {
+    adminPaginationState.news = Math.min(Math.max(1, adminPaginationState.news || 1), Math.max(1, Math.ceil((data.length || 0) / ADMIN_NEWS_PAGE_SIZE)));
+  }
 
   document.getElementById('admin-title').textContent = source.title;
   const textarea = document.getElementById('admin-textarea');
@@ -3241,7 +3434,10 @@ async function adminShowSource(sourceName, options = {}) {
 
 async function adminSave() {
   try {
-    const parsed = normalizeSourceData(currentSource, readFormData(currentSource));
+    const sourceData = currentSource === 'news'
+      ? syncAdminNewsDraftFromForm()
+      : readFormData(currentSource);
+    const parsed = normalizeSourceData(currentSource, sourceData);
     const textarea = document.getElementById('admin-textarea');
     if (textarea) textarea.value = JSON.stringify(parsed, null, 2);
 
@@ -3264,6 +3460,9 @@ async function adminSave() {
 
 async function adminReset() {
   localStorage.removeItem(ADMIN_SOURCES[currentSource].key);
+  if (currentSource === 'news') {
+    adminPaginationState.news = 1;
+  }
   try {
     const data = await loadSourceData(currentSource, { forceRemote: true });
     const textarea = document.getElementById('admin-textarea');
@@ -3281,7 +3480,10 @@ async function adminReset() {
 
 function adminExport() {
   try {
-    const text = JSON.stringify(readFormData(currentSource), null, 2);
+    const exportData = currentSource === 'news'
+      ? syncAdminNewsDraftFromForm()
+      : readFormData(currentSource);
+    const text = JSON.stringify(exportData, null, 2);
     const textarea = document.getElementById('admin-textarea');
     if (textarea) textarea.value = text;
     const source = ADMIN_SOURCES[currentSource];
@@ -3301,6 +3503,9 @@ function adminExport() {
 async function adminReloadFromApi() {
   try {
     setStatus('Обновляю данные...');
+    if (currentSource === 'news') {
+      adminPaginationState.news = 1;
+    }
     await adminShowSource(currentSource, { forceRemote: true });
   } catch (error) {
     setStatus('Ошибка загрузки из API: ' + error.message);

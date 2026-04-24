@@ -33,6 +33,9 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = preg_replace('#^/api#', '', $path);
 $path = '/' . trim($path, '/');
+$newsPage = api_parse_integer($_GET['page'] ?? null, null);
+$newsPerPage = api_parse_integer($_GET['per_page'] ?? null, null);
+$newsLimit = api_parse_integer($_GET['limit'] ?? null, null);
 
 try {
     $pdo = Database::pdo();
@@ -125,6 +128,12 @@ try {
     }
 
     if ($method === 'GET' && preg_match('#^/tournaments/([^/]+)/news$#', $path, $m)) {
+        if ($newsPage !== null || $newsPerPage !== null) {
+            Response::json($news->page(false, $m[1], $newsPage ?? 1, $newsPerPage ?? 9));
+        }
+        if ($newsLimit !== null) {
+            Response::json($news->latest(false, $m[1], $newsLimit));
+        }
         Response::json($news->all(false, $m[1]));
     }
 
@@ -161,6 +170,12 @@ try {
     }
 
     if ($method === 'GET' && $path === '/news') {
+        if ($newsPage !== null || $newsPerPage !== null) {
+            Response::json($news->page(false, null, $newsPage ?? 1, $newsPerPage ?? 9));
+        }
+        if ($newsLimit !== null) {
+            Response::json($news->latest(false, null, $newsLimit));
+        }
         Response::json($news->all(false, null));
     }
 

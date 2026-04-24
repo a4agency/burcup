@@ -76,6 +76,43 @@
 
 ---
 
+## 2026-04-24 02:40
+
+### Что сделали
+
+- Добавили постраничный показ новостей на странице `news.html`: теперь блок
+  показывает по 9 карточек и даёт листать страницы назад и вперёд.
+- Перевели фронтенд новостей на запросы с `limit` и `page/per_page`, чтобы не
+  тянуть весь список новостей, когда это не нужно.
+- Добавили постраничный просмотр новостей и в админке, при этом черновик
+  сохраняет весь список новостей, чтобы кнопка «Сохранить» не теряла записи за
+  пределами текущей страницы.
+
+### Что проверили
+
+- `php -l` прошёл для:
+  - `lamp-api/app/Repositories/NewsRepository.php`
+  - `lamp-api/public/api/index.php`
+- `node --check` прошёл для:
+  - `js/site.js`
+  - `js/admin.js`
+
+### Файлы
+
+- [js/admin.js](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/js/admin.js)
+- [js/site.js](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/js/site.js)
+- [lamp-api/app/Repositories/NewsRepository.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/app/Repositories/NewsRepository.php)
+- [lamp-api/public/api/index.php](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/lamp-api/public/api/index.php)
+- [css/style.css](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/css/style.css)
+- [news.html](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/news.html)
+
+### Коммиты
+
+- Будет отдельный коммит после финальной проверки на странице новостей и в
+  админке.
+
+---
+
 ## 2026-04-24 01:30
 
 ### Что сделали
