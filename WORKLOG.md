@@ -3023,4 +3023,9 @@
 ### News photo dedupe fix
 
 - The news article photo builder was deduping only by exact URL string.
-- Switched dedupe to a normalized image key so the same file does not appear twice when cover and gallery point to the same asset through different URL forms.
+- Switched dedupe to a URL stripped of query/hash fragments so the same file does not appear twice when the source URL has tracking noise.
+
+### News article image rendering balance
+
+- Restored article-side photo rendering for news items that have attached images but also use `body_html`.
+- Gallery images are now filtered against images already present inside the article body, while the cover/media block stays visible unless that exact image is already embedded in the body.

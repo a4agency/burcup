@@ -2958,7 +2958,7 @@ function buildNewsArticlePhotos(item, coverImage = '') {
   const pushPhoto = (src, alt = '') => {
     const imageUrl = String(src || '').trim();
     if (!imageUrl) return;
-    const normalizedKey = normalizeNewsInlineImageKey(imageUrl) || imageUrl;
+    const normalizedKey = normalizeNewsImageUrl(imageUrl) || imageUrl;
     if (seen.has(normalizedKey)) return;
     seen.add(normalizedKey);
     photos.push({
@@ -2976,6 +2976,34 @@ function buildNewsArticlePhotos(item, coverImage = '') {
   }
 
   return photos;
+}
+
+function normalizeNewsImageUrl(value = '') {
+  return String(value || '').trim().split('#')[0].split('?')[0];
+}
+
+function collectNewsBodyImageUrls(bodyHtml = '') {
+  const urls = new Set();
+  const html = String(bodyHtml || '').trim();
+  if (!html) return urls;
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    doc.querySelectorAll('img[src]').forEach((img) => {
+      const src = normalizeNewsImageUrl(img.getAttribute('src') || '');
+      if (src) urls.add(src);
+    });
+  } catch (error) {
+    const pattern = /<img\b[^>]*\bsrc=["']([^"']+)["']/gi;
+    let match;
+    while ((match = pattern.exec(html)) !== null) {
+      const src = normalizeNewsImageUrl(match[1] || '');
+      if (src) urls.add(src);
+    }
+  }
+
+  return urls;
 }
 
 function getNewsArticleParagraphs(item) {
@@ -4869,6 +4897,7 @@ async function renderNewsArticlePage() {
     const content = getNewsArticleParagraphs(item);
     const bodyHtml = getNewsArticleBodyHtml(item);
     const videoUrl = getNewsArticleVideoUrl(item);
+    const bodyImageUrls = collectNewsBodyImageUrls(bodyHtml);
     const fallbackMarkup = `
       ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
       ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
@@ -4880,8 +4909,16 @@ async function renderNewsArticlePage() {
     const articlePhotos = videoUrl
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
-    const mediaMarkup = bodyHtml && !videoUrl ? '' : renderNewsArticleMedia(item, imageSrc);
-    const galleryPhotos = videoUrl ? [] : articlePhotos.slice(imageSrc ? 1 : 0);
+    const coverUrl = normalizeNewsImageUrl(imageSrc);
+    const bodyHasCoverImage = coverUrl ? bodyImageUrls.has(coverUrl) : false;
+    const mediaMarkup = videoUrl
+      ? renderNewsArticleMedia(item, imageSrc)
+      : (!bodyHasCoverImage ? renderNewsArticleMedia(item, imageSrc) : '');
+    const galleryPhotos = videoUrl
+      ? []
+      : articlePhotos
+        .slice(imageSrc ? 1 : 0)
+        .filter(photo => !bodyImageUrls.has(normalizeNewsImageUrl(photo?.image_url || '')));
     const displayDate = formatNewsDisplayDate(item.date);
 
     root.innerHTML = `
