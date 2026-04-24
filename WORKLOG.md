@@ -3019,3 +3019,8 @@
 
 - The news article page was hiding the photo gallery whenever `body_html` existed.
 - Removed that condition so attached news photos render below the article text as well.
+
+### News photo dedupe fix
+
+- The news article photo builder was deduping only by exact URL string.
+- Switched dedupe to a normalized image key so the same file does not appear twice when cover and gallery point to the same asset through different URL forms.

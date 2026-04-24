@@ -2957,8 +2957,10 @@ function buildNewsArticlePhotos(item, coverImage = '') {
 
   const pushPhoto = (src, alt = '') => {
     const imageUrl = String(src || '').trim();
-    if (!imageUrl || seen.has(imageUrl)) return;
-    seen.add(imageUrl);
+    if (!imageUrl) return;
+    const normalizedKey = normalizeNewsInlineImageKey(imageUrl) || imageUrl;
+    if (seen.has(normalizedKey)) return;
+    seen.add(normalizedKey);
     photos.push({
       image_url: imageUrl,
       alt_text: String(alt || '').trim(),
