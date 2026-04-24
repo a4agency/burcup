@@ -5,6 +5,22 @@ This guide covers two cases:
 - first-time deployment of BurCup on Timeweb
 - moving the same site to another Timeweb account later
 
+## Short version for a non-developer
+
+If you are not editing code and just want to turn the site on:
+
+1. Upload the site files to `public_html`.
+2. Create a MySQL database in Timeweb.
+3. Import `burcup_dump_timeweb.sql`.
+4. Create `public_html/lamp-api/config.local.php`.
+5. Put the database name, user, password, and domain into that file.
+6. Make sure `public_html/lamp-api/public/uploads/` exists.
+7. Open `https://<domain>/diag.php`.
+8. Open `https://<domain>/lamp-api/diag.php`.
+9. Open `https://<domain>/api/health`.
+
+If all three open, the site is active.
+
 ## What must stay the same in the repo
 
 - `lamp-api/app/bootstrap.php`
@@ -37,6 +53,24 @@ These files are part of the codebase and should stay in sync across hosts.
    - `https://<domain>/diag.php`
    - `https://<domain>/lamp-api/diag.php`
    - `https://<domain>/api/health`
+
+## What you need from Timeweb
+
+Before filling `config.local.php`, copy these values from the Timeweb panel:
+
+- database host
+- database name
+- database user
+- database password
+- your site domain
+
+For the current Timeweb setup we used:
+
+- `DB_HOST = localhost`
+- `DB_PORT = 3306`
+- `DB_NAME = cu927919_123`
+- `DB_USER = cu927919_123`
+- `DB_PASSWORD = the password you set in Timeweb`
 
 ## What to put in `config.local.php`
 
@@ -78,6 +112,18 @@ What you usually do not change:
 - the `.htaccess` files
 - the upload folder path inside the site tree
 
+## What to tell the new account owner
+
+If someone else receives the site, give them these items:
+
+- the `burcup_dump_timeweb.sql` file
+- the site files
+- the values for `config.local.php`
+- the domain they should point to Timeweb
+
+They do not need to understand the code to activate the site, only to paste the
+right values into `config.local.php` and upload the files correctly.
+
 ## Transfer checklist
 
 1. Copy the site files to the new Timeweb account.
@@ -96,4 +142,3 @@ What you usually do not change:
 - If `lamp-api/diag.php` says `PDO: connected` but `/api/health` fails, the
   problem is likely the API route or a runtime exception.
 - If uploads fail, re-check folder permissions on `lamp-api/public/uploads/`.
-
