@@ -35,6 +35,7 @@ These files are part of the codebase and should stay in sync across hosts.
 
 - `public_html/lamp-api/config.local.php`
 - `public_html/lamp-api/public/uploads/`
+- root `.htaccess` rewrite for `/uploads/*` to `lamp-api/public/uploads/`
 - the domain binding in the Timeweb panel
 - the MySQL database inside the Timeweb account
 
@@ -150,3 +151,4 @@ right values into `config.local.php` and upload the files correctly.
 - If `lamp-api/diag.php` says `PDO: connected` but `/api/health` fails, the
   problem is likely the API route or a runtime exception.
 - If uploads fail, re-check folder permissions on `lamp-api/public/uploads/`.
+- If uploaded photos save successfully but do not display, confirm the root `.htaccess` from the repo is deployed. It rewrites `/uploads/*` to `lamp-api/public/uploads/*` so the browser can read the files.

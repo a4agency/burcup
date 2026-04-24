@@ -3008,3 +3008,9 @@
   - либо удалить и заново создать пустую БД
   - либо очистить все уже импортированные таблицы
   - и только потом импортировать `burcup_dump_timeweb.sql`
+
+### Timeweb image serving fix for uploaded news photos
+
+- Fixed a deployment mismatch between the stored upload URLs and the Timeweb document root.
+- The upload controller stores files under `lamp-api/public/uploads/` and returns URLs like `/uploads/...`.
+- Added a root `.htaccess` rewrite so requests to `/uploads/*` are served from `lamp-api/public/uploads/*` on Timeweb.
