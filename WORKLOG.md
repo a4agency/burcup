@@ -3029,3 +3029,7 @@
 
 - Restored article-side photo rendering for news items that have attached images but also use `body_html`.
 - Gallery images are now filtered against images already present inside the article body, while the cover/media block stays visible unless that exact image is already embedded in the body.
+
+### News article body image cleanup
+
+- When a news article already has attached photos, strip inline `<img>`, `<picture>`, and `<figure>` elements from the rendered body so the page does not show the same story image three times.

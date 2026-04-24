@@ -3021,6 +3021,36 @@ function getNewsArticleBodyHtml(item = {}) {
   return String(item?.body_html || '').trim();
 }
 
+function stripNewsArticleImagesFromBodyHtml(bodyHtml = '') {
+  const html = String(bodyHtml || '').trim();
+  if (!html) return '';
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<div id="news-body-root">${html}</div>`, 'text/html');
+    const root = doc.getElementById('news-body-root');
+    if (!root) return html;
+
+    root.querySelectorAll('img, picture, figure').forEach((node) => node.remove());
+    root.querySelectorAll('p').forEach((paragraph) => {
+      if (stripHtmlToPlainText(paragraph.innerHTML) === '') {
+        paragraph.remove();
+      }
+    });
+
+    const sanitized = root.innerHTML.trim();
+    return sanitized;
+  } catch (error) {
+    return html
+      .replace(/<picture[\s\S]*?<\/picture>/gi, ' ')
+      .replace(/<figure[\s\S]*?<\/figure>/gi, ' ')
+      .replace(/<img\b[^>]*>/gi, ' ')
+      .replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+}
+
 function decodeHtmlEntities(value = '') {
   return String(value || '')
     .replace(/&nbsp;/gi, ' ')
@@ -4903,12 +4933,13 @@ async function renderNewsArticlePage() {
       ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
     `.trim();
     const hideBodyForVideo = shouldHideLowInfoVideoArticleBody(bodyHtml, `${item.excerpt || ''}\n${content.join('\n')}`, videoUrl);
-    const articleBodyMarkup = hideBodyForVideo
-      ? ''
-      : (bodyHtml || fallbackMarkup);
     const articlePhotos = videoUrl
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
+    const bodyMarkupSource = articlePhotos.length ? stripNewsArticleImagesFromBodyHtml(bodyHtml) : bodyHtml;
+    const articleBodyMarkup = hideBodyForVideo
+      ? ''
+      : (bodyMarkupSource || fallbackMarkup);
     const coverUrl = normalizeNewsImageUrl(imageSrc);
     const bodyHasCoverImage = coverUrl ? bodyImageUrls.has(coverUrl) : false;
     const mediaMarkup = videoUrl
