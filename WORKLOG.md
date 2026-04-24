@@ -3012,5 +3012,5 @@
 ### Timeweb image serving fix for uploaded news photos
 
 - Fixed a deployment mismatch between the stored upload URLs and the Timeweb document root.
-- The upload controller stores files under `lamp-api/public/uploads/` and returns URLs like `/uploads/...`.
-- Added a root `.htaccess` rewrite so requests to `/uploads/*` are served from `lamp-api/public/uploads/*` on Timeweb.
+- The upload controller now writes new files to the site-root `uploads/` directory and mirrors them to the legacy `lamp-api/public/uploads/` path for compatibility.
+- Uploaded URLs still resolve as `/uploads/...`, which now maps to a real folder on Timeweb and Railway.

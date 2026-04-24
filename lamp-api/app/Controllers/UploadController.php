@@ -4,10 +4,12 @@ declare(strict_types=1);
 final class UploadController
 {
     private string $uploadRoot;
+    private string $legacyUploadRoot;
 
     public function __construct()
     {
-        $this->uploadRoot = dirname(__DIR__, 2) . '/public/uploads';
+        $this->uploadRoot = dirname(__DIR__, 3) . '/uploads';
+        $this->legacyUploadRoot = dirname(__DIR__, 2) . '/public/uploads';
     }
 
     public function uploadImage(array $body): array
@@ -52,6 +54,7 @@ final class UploadController
 
         $this->ensureDirectory(dirname($absoluteFile));
         file_put_contents($absoluteFile, $bytes);
+        $this->mirrorUploadFile($relativeFile, $bytes);
 
         $metadata = [
             'url' => '/uploads/' . $relativeFile,
@@ -76,6 +79,15 @@ final class UploadController
         }
 
         return $metadata;
+    }
+
+    private function mirrorUploadFile(string $relativeFile, string $bytes): void
+    {
+        $legacyFile = $this->legacyUploadRoot . '/' . $relativeFile;
+        $this->ensureDirectory(dirname($legacyFile));
+        if (!is_file($legacyFile)) {
+            file_put_contents($legacyFile, $bytes);
+        }
     }
 
     private function decodeDataUrl(string $dataUrl): array

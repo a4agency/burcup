@@ -12,7 +12,7 @@ If you are not editing code and just want to turn the site on:
 1. Upload the site files to `public_html`.
 2. Open the existing `public_html/lamp-api/config.local.php` file.
 3. Replace the database name, user, password, and domain inside that file.
-4. Make sure `public_html/lamp-api/public/uploads/` exists.
+4. Make sure `public_html/uploads/` exists.
 5. Create a MySQL database in Timeweb.
 6. Import `burcup_dump_timeweb.sql`.
 7. Open `https://<domain>/diag.php`.
@@ -34,8 +34,7 @@ These files are part of the codebase and should stay in sync across hosts.
 ## What is Timeweb-specific
 
 - `public_html/lamp-api/config.local.php`
-- `public_html/lamp-api/public/uploads/`
-- root `.htaccess` rewrite for `/uploads/*` to `lamp-api/public/uploads/`
+- `public_html/uploads/`
 - the domain binding in the Timeweb panel
 - the MySQL database inside the Timeweb account
 
@@ -49,7 +48,7 @@ These files are part of the codebase and should stay in sync across hosts.
 6. Import `burcup_dump_timeweb.sql` into that database.
 7. Open the existing `public_html/lamp-api/config.local.php` file and edit it.
 8. Add the DB and admin values to `config.local.php`.
-9. Keep `public_html/lamp-api/public/uploads/` present and writable.
+9. Keep `public_html/uploads/` present and writable.
 10. Open the admin panel and save the `Медиа` section once. The app will try to add the new `photo_reports_enabled` column automatically.
 11. If saving still throws `Unknown column photo_reports_enabled`, run `database/mysql-add-media-photo-reports-flag.sql` in phpMyAdmin once.
 12. Open:
@@ -137,7 +136,7 @@ right values into `config.local.php` and upload the files correctly.
 2. Open `public_html/lamp-api/config.local.php` and edit only the values.
 3. Create a fresh MySQL database in the new account.
 4. Import `burcup_dump_timeweb.sql`.
-5. Confirm `public_html/lamp-api/public/uploads/` exists.
+5. Confirm `public_html/uploads/` exists.
 6. Check `https://<domain>/lamp-api/diag.php`.
 7. Check `https://<domain>/api/health`.
 8. Open the admin panel and save `Медиа` once so the app can create the `photo_reports_enabled` column if needed.
@@ -150,5 +149,5 @@ right values into `config.local.php` and upload the files correctly.
   `config.local.php` or database credentials.
 - If `lamp-api/diag.php` says `PDO: connected` but `/api/health` fails, the
   problem is likely the API route or a runtime exception.
-- If uploads fail, re-check folder permissions on `lamp-api/public/uploads/`.
-- If uploaded photos save successfully but do not display, confirm the root `.htaccess` from the repo is deployed. It rewrites `/uploads/*` to `lamp-api/public/uploads/*` so the browser can read the files.
+- If uploads fail, re-check folder permissions on `public_html/uploads/`.
+- If uploaded photos save successfully but do not display, confirm the root `uploads/` folder exists on the server and contains the uploaded file. The app now writes new uploads there directly and mirrors them to the legacy path for compatibility.

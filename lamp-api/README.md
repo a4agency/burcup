@@ -48,7 +48,7 @@ The first practical migration step is in place:
   - `/api/admin/uploads/video`
   - `/api/admin/uploads/raw`
 
-Uploads are stored locally under `public/uploads/` by default and returned as same-host URLs.
+Uploads are stored locally under the site-root `uploads/` directory by default and returned as same-host URLs.
 
 ## Environment
 
@@ -89,7 +89,7 @@ That runtime:
 
 If you use a Railway volume for persistent uploads, mount it at:
 
-- `/var/www/html/lamp-api/public/uploads`
+- `/var/www/html/uploads`
 
 ### 2. Classic Apache / LAMP runtime
 
