@@ -5,6 +5,9 @@ final class TournamentsRepository extends BaseRepository
 {
     public function all(): array
     {
+        $photoReportsSelect = api_has_column($this->pdo, 'tournaments', 'photo_reports_enabled')
+            ? 't.photo_reports_enabled,'
+            : '1 AS photo_reports_enabled,';
         $rows = $this->queryAll(
             'SELECT
                 t.id,
@@ -21,7 +24,7 @@ final class TournamentsRepository extends BaseRepository
                 t.status,
                 t.is_featured,
                 t.countdown_enabled,
-                t.photo_reports_enabled,
+                ' . $photoReportsSelect . '
                 t.standings_mode,
                 t.playoff_mode,
                 (SELECT COUNT(*) FROM tournament_clubs tc WHERE tc.tournament_id = t.id) AS clubs_count,
@@ -35,6 +38,9 @@ final class TournamentsRepository extends BaseRepository
 
     public function bySlug(string $slug): ?array
     {
+        $photoReportsSelect = api_has_column($this->pdo, 'tournaments', 'photo_reports_enabled')
+            ? 't.photo_reports_enabled,'
+            : '1 AS photo_reports_enabled,';
         $row = $this->queryOne(
             'SELECT
                 t.id,
@@ -51,7 +57,7 @@ final class TournamentsRepository extends BaseRepository
                 t.status,
                 t.is_featured,
                 t.countdown_enabled,
-                t.photo_reports_enabled,
+                ' . $photoReportsSelect . '
                 t.standings_mode,
                 t.playoff_mode,
                 (SELECT COUNT(*) FROM tournament_clubs tc WHERE tc.tournament_id = t.id) AS clubs_count,

@@ -149,6 +149,18 @@ function api_has_table(PDO $pdo, string $tableName): bool
     return (int) ($row['count'] ?? 0) > 0;
 }
 
+function api_ensure_tournament_photo_reports_flag(PDO $pdo): void
+{
+    if (api_has_column($pdo, 'tournaments', 'photo_reports_enabled')) {
+        return;
+    }
+
+    api_execute($pdo, '
+        ALTER TABLE tournaments
+          ADD COLUMN photo_reports_enabled TINYINT(1) NOT NULL DEFAULT 1 AFTER countdown_enabled
+    ');
+}
+
 function api_split_news_body_to_content(string $body): array
 {
     $parts = preg_split('/\n\s*\n+/', $body) ?: [];
@@ -312,9 +324,12 @@ function api_build_default_playoff_rows(string $tournamentSlug = 'burchalkin-cup
 
 function api_get_target_tournament(PDO $pdo, ?string $slug = null): ?array
 {
+    $photoReportsSelect = api_has_column($pdo, 'tournaments', 'photo_reports_enabled')
+        ? 'photo_reports_enabled,'
+        : '1 AS photo_reports_enabled,';
     if ($slug !== null && $slug !== '') {
         return api_query_one($pdo, '
-            SELECT id, slug, name, season_year, is_featured, countdown_enabled, photo_reports_enabled, standings_mode, playoff_mode
+            SELECT id, slug, name, season_year, is_featured, countdown_enabled, ' . $photoReportsSelect . ' standings_mode, playoff_mode
             FROM tournaments
             WHERE slug = ?
             LIMIT 1
@@ -322,7 +337,7 @@ function api_get_target_tournament(PDO $pdo, ?string $slug = null): ?array
     }
 
     return api_query_one($pdo, '
-        SELECT id, slug, name, season_year, is_featured, countdown_enabled, photo_reports_enabled, standings_mode, playoff_mode
+        SELECT id, slug, name, season_year, is_featured, countdown_enabled, ' . $photoReportsSelect . ' standings_mode, playoff_mode
         FROM tournaments
         ORDER BY is_featured DESC, season_year DESC, id DESC
         LIMIT 1

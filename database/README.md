@@ -40,7 +40,10 @@ It supports:
 3. Import data with a dedicated migration script or MySQL seed file.
 4. Repoint the API to MySQL only after the imported data has been verified.
 
-If you already have a live database, apply `mysql-add-media-photo-reports-flag.sql` so the admin toggle for "Фоторепортажи" is available.
+If you already have a live database, the app will try to add `photo_reports_enabled`
+automatically when the media settings are saved. If the DB user cannot run
+`ALTER TABLE`, apply `mysql-add-media-photo-reports-flag.sql` manually so the
+admin toggle for "Фоторепортажи" is available.
 
 Example migration command:
 

@@ -282,6 +282,7 @@ final class AdminMutationsRepository extends BaseRepository
 
         $this->pdo->beginTransaction();
         try {
+            api_ensure_tournament_photo_reports_flag($this->pdo);
             api_execute($this->pdo, 'UPDATE matches SET is_featured_media = 0');
             if ($selectedId > 0) {
                 $matchRow = api_query_one($this->pdo, 'SELECT id FROM matches WHERE id = ? LIMIT 1', [$selectedId]);
