@@ -3161,3 +3161,8 @@
 
 - Restored inline article photos inside `body_html` so news posts can display their images in the original story flow again.
 - The gallery is now only used when a news post has attached photos but no inline body images.
+
+### News article baseline rollback
+
+- Rolled news article photo rendering back to the last stable baseline where cover media and the attached photo gallery both render again.
+- This gives us a clean starting point to rework the duplicate-photo handling without losing article images.
