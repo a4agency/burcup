@@ -27,6 +27,43 @@ final class ClubsRepository extends BaseRepository
         return array_map([$this, 'formatClub'], $rows);
     }
 
+    public function currentTournamentClubs(): array
+    {
+        $tournament = api_get_target_tournament($this->pdo, null);
+        if (!$tournament) {
+            return $this->all();
+        }
+
+        $rows = $this->queryAll(
+            'SELECT
+                c.id,
+                c.slug,
+                c.name,
+                c.short_name,
+                c.logo_path,
+                c.country,
+                c.city,
+                c.founded_year,
+                c.website_url,
+                c.hero_image_url,
+                c.description,
+                c.is_active,
+                (SELECT COUNT(*) FROM matches m WHERE m.home_club_id = c.id OR m.away_club_id = c.id) AS matches_count
+             FROM clubs c
+             INNER JOIN tournament_clubs tc ON tc.club_id = c.id
+             INNER JOIN tournaments t ON t.id = tc.tournament_id
+             WHERE t.id = ?
+             ORDER BY tc.group_name ASC, tc.seeded_order ASC, c.name ASC',
+            [(int) $tournament['id']]
+        );
+
+        if (!$rows) {
+            return $this->all();
+        }
+
+        return array_map([$this, 'formatClub'], $rows);
+    }
+
     public function bySlug(string $slug): ?array
     {
         $row = $this->queryOne(

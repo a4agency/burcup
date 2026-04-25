@@ -3196,3 +3196,9 @@
 
 - Expanded `wp-content/uploads/...-300x200.jpg` style thumbnails to their original full-size source when rendering news body images.
 - This fixes the blurry inline photos that were saved from WordPress as tiny previews instead of originals.
+
+### Public clubs endpoint narrowed to current tournament
+
+- Changed the public `/api/clubs` endpoint to return only the clubs linked to the featured tournament.
+- Kept the admin clubs catalog on the full `clubs` table so editorial workflows still see the complete registry.
+- Sorted the public club list by `tournament_clubs.group_name` and `seeded_order` so the 2026 groups render in the intended order.

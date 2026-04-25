@@ -142,7 +142,7 @@ try {
     }
 
     if ($method === 'GET' && $path === '/clubs') {
-        Response::json($clubs->all());
+        Response::json($clubs->currentTournamentClubs());
     }
 
     if ($method === 'GET' && preg_match('#^/clubs/([^/]+)$#', $path, $m)) {
