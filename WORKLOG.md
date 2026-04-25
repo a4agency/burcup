@@ -3171,3 +3171,8 @@
 
 - If a news article already contains inline images in `body_html`, do not render a separate bottom gallery.
 - This keeps photos in the article flow again and reserves the gallery for posts that only have attached photos without inline body images.
+
+### News article no-bottom-gallery reset
+
+- Simplified the news article renderer so `body_html` keeps its inline photos in place and the page does not add a separate photo strip underneath it.
+- Posts without inline images can still fall back to the attached photo gallery.
