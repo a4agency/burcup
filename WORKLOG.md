@@ -3166,3 +3166,8 @@
 
 - Rolled news article photo rendering back to the last stable baseline where cover media and the attached photo gallery both render again.
 - This gives us a clean starting point to rework the duplicate-photo handling without losing article images.
+
+### News article inline photo mode
+
+- If a news article already contains inline images in `body_html`, do not render a separate bottom gallery.
+- This keeps photos in the article flow again and reserves the gallery for posts that only have attached photos without inline body images.

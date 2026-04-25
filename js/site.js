@@ -4987,6 +4987,7 @@ async function renderNewsArticlePage() {
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
     const coverImageKeys = new Set(newsImageKeyVariants(imageSrc));
+    const bodyImageUrls = collectNewsBodyImageUrls(bodyHtml);
     const bodyMarkupSource = stripNewsArticleImagesFromBodyHtml(bodyHtml, coverImageKeys);
     const articleBodyMarkup = hideBodyForVideo
       ? ''
@@ -4996,7 +4997,7 @@ async function renderNewsArticlePage() {
       : renderNewsArticleMedia(item, imageSrc);
     const galleryPhotos = videoUrl
       ? []
-      : articlePhotos.slice(imageSrc ? 1 : 0);
+      : (bodyImageUrls.size ? [] : articlePhotos.slice(imageSrc ? 1 : 0));
     const galleryClassName = galleryPhotos.length === 1
       ? 'news-article-gallery news-article-gallery--single'
       : 'news-article-gallery';
