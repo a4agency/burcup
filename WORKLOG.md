@@ -3151,3 +3151,8 @@
 ### News article cover suppression
 
 - If a news article has attached photos, hide the separate cover media block on the article page so the same story does not appear both as a cover and as a gallery image.
+
+### News article gallery reset
+
+- When a news article has attached photos, render the article body as text-only and show the attached photos in the gallery block instead.
+- This keeps the article readable and preserves all attached photos without relying on inline `<img>` tags inside `body_html`.

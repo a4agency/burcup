@@ -3047,7 +3047,7 @@ function getNewsArticleBodyHtml(item = {}) {
   return String(item?.body_html || '').trim();
 }
 
-function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Set()) {
+function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Set(), removeAllImages = false) {
   const html = String(bodyHtml || '').trim();
   if (!html) return '';
   const keys = excludedKeys instanceof Set ? excludedKeys : new Set();
@@ -3058,25 +3058,29 @@ function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Se
     const root = doc.getElementById('news-body-root');
     if (!root) return html;
 
-    root.querySelectorAll('img[src], picture, figure').forEach((node) => {
-      if (node.tagName === 'IMG') {
-        const src = String(node.getAttribute('src') || '').trim();
+    if (removeAllImages) {
+      root.querySelectorAll('img[src], picture, figure').forEach((node) => node.remove());
+    } else {
+      root.querySelectorAll('img[src], picture, figure').forEach((node) => {
+        if (node.tagName === 'IMG') {
+          const src = String(node.getAttribute('src') || '').trim();
+          if (hasNewsImageKeyMatch(keys, src)) {
+            node.remove();
+          }
+          return;
+        }
+
+        const image = node.querySelector('img[src]');
+        if (!image) {
+          node.remove();
+          return;
+        }
+        const src = String(image.getAttribute('src') || '').trim();
         if (hasNewsImageKeyMatch(keys, src)) {
           node.remove();
         }
-        return;
-      }
-
-      const image = node.querySelector('img[src]');
-      if (!image) {
-        node.remove();
-        return;
-      }
-      const src = String(image.getAttribute('src') || '').trim();
-      if (hasNewsImageKeyMatch(keys, src)) {
-        node.remove();
-      }
-    });
+      });
+    }
     root.querySelectorAll('p').forEach((paragraph) => {
       if (stripHtmlToPlainText(paragraph.innerHTML) === '') {
         paragraph.remove();
@@ -4978,7 +4982,6 @@ async function renderNewsArticlePage() {
     const content = getNewsArticleParagraphs(item);
     const bodyHtml = getNewsArticleBodyHtml(item);
     const videoUrl = getNewsArticleVideoUrl(item);
-    const bodyImageUrls = collectNewsBodyImageUrls(bodyHtml);
     const fallbackMarkup = `
       ${item.excerpt ? `<p class="news-article-lead">${renderLinkedText(item.excerpt)}</p>` : ''}
       ${content.map(paragraph => `<p>${renderLinkedText(paragraph)}</p>`).join('')}
@@ -4988,22 +4991,19 @@ async function renderNewsArticlePage() {
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
     const coverImageKeys = new Set(newsImageKeyVariants(imageSrc));
-    const bodyMarkupSource = stripNewsArticleImagesFromBodyHtml(bodyHtml, coverImageKeys);
+    const bodyHasAttachedPhotos = !videoUrl && articlePhotos.length > 1;
+    const bodyMarkupSource = stripNewsArticleImagesFromBodyHtml(
+      bodyHtml,
+      coverImageKeys,
+      bodyHasAttachedPhotos
+    );
     const articleBodyMarkup = hideBodyForVideo
       ? ''
       : (bodyMarkupSource || fallbackMarkup);
     const mediaMarkup = videoUrl
       ? renderNewsArticleMedia(item, imageSrc)
       : renderNewsArticleMedia(item, imageSrc);
-    const galleryPhotos = videoUrl
-      ? []
-      : articlePhotos
-        .slice(imageSrc ? 1 : 0)
-        .filter(photo => {
-          const photoUrl = String(photo?.image_url || '').trim();
-          if (!photoUrl) return false;
-          return !hasNewsImageKeyMatch(bodyImageUrls, photoUrl);
-        });
+    const galleryPhotos = videoUrl ? [] : articlePhotos.slice(imageSrc ? 1 : 0);
     const galleryClassName = galleryPhotos.length === 1
       ? 'news-article-gallery news-article-gallery--single'
       : 'news-article-gallery';
