@@ -3202,3 +3202,8 @@
 - Changed the public `/api/clubs` endpoint to return only the clubs linked to the featured tournament.
 - Kept the admin clubs catalog on the full `clubs` table so editorial workflows still see the complete registry.
 - Sorted the public club list by `tournament_clubs.group_name` and `seeded_order` so the 2026 groups render in the intended order.
+
+### Club locations backfill
+
+- Filled missing `country` and `city` values for the 2026 tournament clubs in the seed and dump data.
+- Added a one-time MySQL backfill script for existing Railway and Timeweb databases so the public club cards show locations consistently.
