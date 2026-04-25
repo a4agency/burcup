@@ -3181,3 +3181,13 @@
 
 - Do not delete paragraphs that only contain `<img>`, `picture`, or `figure` nodes when sanitizing `body_html`.
 - This prevents inline article photos from disappearing when the paragraph has no text around it.
+
+### News article image quality bump
+
+- Increased the optimized width for article cover/lightbox images so wide news layouts do not stretch a 960px rendition.
+- This keeps the news cover sharper on desktop while leaving the rest of the site unchanged.
+
+### News photo quality tuning
+
+- Increased the render width and quality for news article photos so large featured images do not look soft on desktop.
+- Kept the inline body-photo handling intact so text-in-body images still render where they were originally authored.

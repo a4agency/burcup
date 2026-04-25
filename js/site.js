@@ -3305,6 +3305,8 @@ function renderNewsArticlePhotoButton(photo, index, className = 'news-article-ga
   const imageUrl = String(photo?.image_url || '').trim();
   const altText = String(photo?.alt_text || '').trim();
   if (!imageUrl) return '';
+  const isHeroImage = className === 'news-article-cover' || className === 'news-article-lightbox-trigger';
+  const renderWidth = isHeroImage ? 2400 : 1600;
 
   return `
     <button
@@ -3317,7 +3319,8 @@ function renderNewsArticlePhotoButton(photo, index, className = 'news-article-ga
         src: imageUrl,
         alt: altText,
         className: `${className}-img`,
-        width: 960
+        width: renderWidth,
+        quality: 100
       })}
     </button>
   `;
