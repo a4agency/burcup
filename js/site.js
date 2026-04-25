@@ -4997,7 +4997,13 @@ async function renderNewsArticlePage() {
       : renderNewsArticleMedia(item, imageSrc);
     const galleryPhotos = videoUrl
       ? []
-      : (bodyImageUrls.size ? [] : articlePhotos.slice(imageSrc ? 1 : 0));
+      : articlePhotos
+        .slice(imageSrc ? 1 : 0)
+        .filter(photo => {
+          const photoUrl = String(photo?.image_url || '').trim();
+          if (!photoUrl) return false;
+          return !hasNewsImageKeyMatch(bodyImageUrls, photoUrl);
+        });
     const galleryClassName = galleryPhotos.length === 1
       ? 'news-article-gallery news-article-gallery--single'
       : 'news-article-gallery';
