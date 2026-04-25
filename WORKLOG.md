@@ -3191,3 +3191,8 @@
 
 - Increased the render width and quality for news article photos so large featured images do not look soft on desktop.
 - Kept the inline body-photo handling intact so text-in-body images still render where they were originally authored.
+
+### WordPress thumbnail expansion
+
+- Expanded `wp-content/uploads/...-300x200.jpg` style thumbnails to their original full-size source when rendering news body images.
+- This fixes the blurry inline photos that were saved from WordPress as tiny previews instead of originals.

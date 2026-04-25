@@ -2981,6 +2981,13 @@ function normalizeNewsImageUrl(value = '') {
   return String(value || '').trim().split('#')[0].split('?')[0];
 }
 
+function expandWordPressThumbnailUrl(value = '') {
+  const source = String(value || '').trim();
+  if (!source) return '';
+  if (!/\/wp-content\/uploads\//i.test(source)) return source;
+  return source.replace(/-\d+x\d+(?=\.[a-z0-9]+(?:$|[?#]))/i, '');
+}
+
 function newsImageKeyVariants(value = '') {
   const normalizedUrl = normalizeNewsImageUrl(value);
   const normalizedKey = normalizeNewsInlineImageKey(value);
@@ -3012,8 +3019,9 @@ function collectNewsBodyImageUrls(bodyHtml = '') {
     const doc = parser.parseFromString(html, 'text/html');
     doc.querySelectorAll('img[src]').forEach((img) => {
       const src = String(img.getAttribute('src') || '').trim();
-      const normalizedUrl = normalizeNewsImageUrl(src);
-      const normalizedKey = normalizeNewsInlineImageKey(src);
+      const expandedSrc = expandWordPressThumbnailUrl(src);
+      const normalizedUrl = normalizeNewsImageUrl(expandedSrc || src);
+      const normalizedKey = normalizeNewsInlineImageKey(expandedSrc || src);
       if (normalizedUrl) urls.add(normalizedUrl);
       if (normalizedKey) urls.add(normalizedKey);
     });
@@ -3022,8 +3030,9 @@ function collectNewsBodyImageUrls(bodyHtml = '') {
     let match;
     while ((match = pattern.exec(html)) !== null) {
       const src = String(match[1] || '').trim();
-      const normalizedUrl = normalizeNewsImageUrl(src);
-      const normalizedKey = normalizeNewsInlineImageKey(src);
+      const expandedSrc = expandWordPressThumbnailUrl(src);
+      const normalizedUrl = normalizeNewsImageUrl(expandedSrc || src);
+      const normalizedKey = normalizeNewsInlineImageKey(expandedSrc || src);
       if (normalizedUrl) urls.add(normalizedUrl);
       if (normalizedKey) urls.add(normalizedKey);
     }
@@ -3063,6 +3072,11 @@ function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Se
         const src = String(node.getAttribute('src') || '').trim();
         if (hasNewsImageKeyMatch(keys, src)) {
           node.remove();
+          return;
+        }
+        const expandedSrc = expandWordPressThumbnailUrl(src);
+        if (expandedSrc && expandedSrc !== src) {
+          node.setAttribute('src', expandedSrc);
         }
         return;
       }
@@ -3075,6 +3089,11 @@ function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Se
       const src = String(image.getAttribute('src') || '').trim();
       if (hasNewsImageKeyMatch(keys, src)) {
         node.remove();
+        return;
+      }
+      const expandedSrc = expandWordPressThumbnailUrl(src);
+      if (expandedSrc && expandedSrc !== src) {
+        image.setAttribute('src', expandedSrc);
       }
     });
     root.querySelectorAll('p').forEach((paragraph) => {
@@ -3239,6 +3258,11 @@ function enhanceNewsArticleBody(root, photos = []) {
   });
 
   root.querySelectorAll('img').forEach((image) => {
+    const originalSrc = String(image.getAttribute('src') || '').trim();
+    const expandedSrc = expandWordPressThumbnailUrl(originalSrc);
+    if (expandedSrc && expandedSrc !== originalSrc) {
+      image.setAttribute('src', expandedSrc);
+    }
     image.classList.add('news-article-inline-image');
     image.removeAttribute('width');
     image.removeAttribute('height');
