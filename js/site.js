@@ -4987,16 +4987,8 @@ async function renderNewsArticlePage() {
     const articlePhotos = videoUrl
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
-    const articlePhotoKeys = new Set();
-    articlePhotos.forEach((photo) => {
-      const imageUrl = String(photo?.image_url || '').trim();
-      if (!imageUrl) return;
-      const normalizedUrl = normalizeNewsImageUrl(imageUrl);
-      const normalizedKey = normalizeNewsInlineImageKey(imageUrl);
-      if (normalizedUrl) articlePhotoKeys.add(normalizedUrl);
-      if (normalizedKey) articlePhotoKeys.add(normalizedKey);
-    });
-    const bodyMarkupSource = stripNewsArticleImagesFromBodyHtml(bodyHtml, articlePhotoKeys);
+    const coverImageKeys = new Set(newsImageKeyVariants(imageSrc));
+    const bodyMarkupSource = stripNewsArticleImagesFromBodyHtml(bodyHtml, coverImageKeys);
     const articleBodyMarkup = hideBodyForVideo
       ? ''
       : (bodyMarkupSource || fallbackMarkup);
