@@ -3078,6 +3078,9 @@ function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Se
       }
     });
     root.querySelectorAll('p').forEach((paragraph) => {
+      if (paragraph.querySelector('img, picture, figure')) {
+        return;
+      }
       if (stripHtmlToPlainText(paragraph.innerHTML) === '') {
         paragraph.remove();
       }

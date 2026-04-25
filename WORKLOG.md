@@ -3176,3 +3176,8 @@
 
 - Simplified the news article renderer so `body_html` keeps its inline photos in place and the page does not add a separate photo strip underneath it.
 - Posts without inline images can still fall back to the attached photo gallery.
+
+### News article image paragraphs preserved
+
+- Do not delete paragraphs that only contain `<img>`, `picture`, or `figure` nodes when sanitizing `body_html`.
+- This prevents inline article photos from disappearing when the paragraph has no text around it.
