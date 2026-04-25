@@ -2958,9 +2958,8 @@ function buildNewsArticlePhotos(item, coverImage = '') {
   const pushPhoto = (src, alt = '') => {
     const imageUrl = String(src || '').trim();
     if (!imageUrl) return;
-    const normalizedKey = normalizeNewsImageUrl(imageUrl) || imageUrl;
-    if (seen.has(normalizedKey)) return;
-    seen.add(normalizedKey);
+    if (hasNewsImageKeyMatch(seen, imageUrl)) return;
+    newsImageKeyVariants(imageUrl).forEach((key) => seen.add(key));
     photos.push({
       image_url: imageUrl,
       alt_text: String(alt || '').trim(),
@@ -2982,6 +2981,27 @@ function normalizeNewsImageUrl(value = '') {
   return String(value || '').trim().split('#')[0].split('?')[0];
 }
 
+function newsImageKeyVariants(value = '') {
+  const normalizedUrl = normalizeNewsImageUrl(value);
+  const normalizedKey = normalizeNewsInlineImageKey(value);
+  return [normalizedUrl, normalizedKey].filter(Boolean);
+}
+
+function newsImageKeysMatch(left = '', right = '') {
+  const a = String(left || '').trim();
+  const b = String(right || '').trim();
+  if (!a || !b) return false;
+  if (a === b) return true;
+  return a.startsWith(b) || b.startsWith(a);
+}
+
+function hasNewsImageKeyMatch(keys, value = '') {
+  const list = keys instanceof Set ? Array.from(keys) : Array.isArray(keys) ? keys : [];
+  if (!list.length) return false;
+  const variants = newsImageKeyVariants(value);
+  return list.some((key) => variants.some((variant) => newsImageKeysMatch(key, variant)));
+}
+
 function collectNewsBodyImageUrls(bodyHtml = '') {
   const urls = new Set();
   const html = String(bodyHtml || '').trim();
@@ -2991,15 +3011,21 @@ function collectNewsBodyImageUrls(bodyHtml = '') {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     doc.querySelectorAll('img[src]').forEach((img) => {
-      const src = normalizeNewsImageUrl(img.getAttribute('src') || '');
-      if (src) urls.add(src);
+      const src = String(img.getAttribute('src') || '').trim();
+      const normalizedUrl = normalizeNewsImageUrl(src);
+      const normalizedKey = normalizeNewsInlineImageKey(src);
+      if (normalizedUrl) urls.add(normalizedUrl);
+      if (normalizedKey) urls.add(normalizedKey);
     });
   } catch (error) {
     const pattern = /<img\b[^>]*\bsrc=["']([^"']+)["']/gi;
     let match;
     while ((match = pattern.exec(html)) !== null) {
-      const src = normalizeNewsImageUrl(match[1] || '');
-      if (src) urls.add(src);
+      const src = String(match[1] || '').trim();
+      const normalizedUrl = normalizeNewsImageUrl(src);
+      const normalizedKey = normalizeNewsInlineImageKey(src);
+      if (normalizedUrl) urls.add(normalizedUrl);
+      if (normalizedKey) urls.add(normalizedKey);
     }
   }
 
@@ -3021,9 +3047,10 @@ function getNewsArticleBodyHtml(item = {}) {
   return String(item?.body_html || '').trim();
 }
 
-function stripNewsArticleImagesFromBodyHtml(bodyHtml = '') {
+function stripNewsArticleImagesFromBodyHtml(bodyHtml = '', excludedKeys = new Set()) {
   const html = String(bodyHtml || '').trim();
   if (!html) return '';
+  const keys = excludedKeys instanceof Set ? excludedKeys : new Set();
 
   try {
     const parser = new DOMParser();
@@ -3031,7 +3058,25 @@ function stripNewsArticleImagesFromBodyHtml(bodyHtml = '') {
     const root = doc.getElementById('news-body-root');
     if (!root) return html;
 
-    root.querySelectorAll('img, picture, figure').forEach((node) => node.remove());
+    root.querySelectorAll('img[src], picture, figure').forEach((node) => {
+      if (node.tagName === 'IMG') {
+        const src = String(node.getAttribute('src') || '').trim();
+        if (hasNewsImageKeyMatch(keys, src)) {
+          node.remove();
+        }
+        return;
+      }
+
+      const image = node.querySelector('img[src]');
+      if (!image) {
+        node.remove();
+        return;
+      }
+      const src = String(image.getAttribute('src') || '').trim();
+      if (hasNewsImageKeyMatch(keys, src)) {
+        node.remove();
+      }
+    });
     root.querySelectorAll('p').forEach((paragraph) => {
       if (stripHtmlToPlainText(paragraph.innerHTML) === '') {
         paragraph.remove();
@@ -3044,7 +3089,13 @@ function stripNewsArticleImagesFromBodyHtml(bodyHtml = '') {
     return html
       .replace(/<picture[\s\S]*?<\/picture>/gi, ' ')
       .replace(/<figure[\s\S]*?<\/figure>/gi, ' ')
-      .replace(/<img\b[^>]*>/gi, ' ')
+      .replace(/<img\b[^>]*>/gi, (match) => {
+        const srcMatch = match.match(/\bsrc=["']([^"']+)["']/i);
+        if (!srcMatch) return ' ';
+        const src = String(srcMatch[1] || '').trim();
+        if (hasNewsImageKeyMatch(keys, src)) return ' ';
+        return match;
+      })
       .replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, ' ')
       .replace(/\s+/g, ' ')
       .trim();
@@ -4936,20 +4987,31 @@ async function renderNewsArticlePage() {
     const articlePhotos = videoUrl
       ? buildNewsArticlePhotos(item, '')
       : buildNewsArticlePhotos(item, imageSrc);
-    const bodyMarkupSource = articlePhotos.length ? stripNewsArticleImagesFromBodyHtml(bodyHtml) : bodyHtml;
+    const articlePhotoKeys = new Set();
+    articlePhotos.forEach((photo) => {
+      const imageUrl = String(photo?.image_url || '').trim();
+      if (!imageUrl) return;
+      const normalizedUrl = normalizeNewsImageUrl(imageUrl);
+      const normalizedKey = normalizeNewsInlineImageKey(imageUrl);
+      if (normalizedUrl) articlePhotoKeys.add(normalizedUrl);
+      if (normalizedKey) articlePhotoKeys.add(normalizedKey);
+    });
+    const bodyMarkupSource = stripNewsArticleImagesFromBodyHtml(bodyHtml, articlePhotoKeys);
     const articleBodyMarkup = hideBodyForVideo
       ? ''
       : (bodyMarkupSource || fallbackMarkup);
-    const coverUrl = normalizeNewsImageUrl(imageSrc);
-    const bodyHasCoverImage = coverUrl ? bodyImageUrls.has(coverUrl) : false;
     const mediaMarkup = videoUrl
       ? renderNewsArticleMedia(item, imageSrc)
-      : (!bodyHasCoverImage ? renderNewsArticleMedia(item, imageSrc) : '');
+      : renderNewsArticleMedia(item, imageSrc);
     const galleryPhotos = videoUrl
       ? []
       : articlePhotos
         .slice(imageSrc ? 1 : 0)
-        .filter(photo => !bodyImageUrls.has(normalizeNewsImageUrl(photo?.image_url || '')));
+        .filter(photo => {
+          const photoUrl = String(photo?.image_url || '').trim();
+          if (!photoUrl) return false;
+          return !hasNewsImageKeyMatch(bodyImageUrls, photoUrl);
+        });
     const galleryClassName = galleryPhotos.length === 1
       ? 'news-article-gallery news-article-gallery--single'
       : 'news-article-gallery';
