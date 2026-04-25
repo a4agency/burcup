@@ -3156,3 +3156,8 @@
 
 - When a news article has attached photos, render the article body as text-only and show the attached photos in the gallery block instead.
 - This keeps the article readable and preserves all attached photos without relying on inline `<img>` tags inside `body_html`.
+
+### News article inline photos restored
+
+- Restored inline article photos inside `body_html` so news posts can display their images in the original story flow again.
+- The gallery is now only used when a news post has attached photos but no inline body images.
