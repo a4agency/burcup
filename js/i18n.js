@@ -296,7 +296,7 @@
   "ТехПром": "TechProm",
   "ТАСС": "TASS",
   "Спорт-Экспресс": "Sport-Express",
-  "РФС": "RFU",
+  "РФС": "RFS",
   "Фонтанка.ру": "Fontanka.ru",
   "Спорт День за Днем": "Sport Day by Day",
   "Комсомольская правда": "Komsomolskaya Pravda",
