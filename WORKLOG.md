@@ -3217,3 +3217,10 @@
 
 - Added a quick hide/show action to partner and media-partner cards in the admin UI.
 - Hidden partners remain in the editor, but their public cards stay off the site until re-enabled.
+
+### Hidden partners no longer reappear from static fallbacks
+
+- The public partner renderer no longer restores hidden cards from the static
+  fallback list when a partner is absent from the visible API payload.
+- The featured-tournament partner render now only decorates cards after the API
+  data has loaded, so fully hidden partner sets stay hidden on the site.

@@ -3947,7 +3947,11 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     const labelNode = node.querySelector('span');
     const name = (storedName || (labelNode ? labelNode.textContent : node.textContent) || '').trim();
     if (!name) return;
-    const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || PARTNER_FALLBACKS.get(name) || null;
+    const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || null;
+    if (!partner) {
+      node.remove();
+      return;
+    }
     const href = normalizePartnerHref(partner?.website_url || '');
     const logoSrc = String(partner?.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
     const logoAlt = partner?.logo_alt || name;
@@ -4014,7 +4018,6 @@ function renderPartnerItem(item) {
 async function renderPartnersForFeaturedTournament() {
   const generalTarget = document.querySelector('#partners-general');
   const mediaTarget = document.querySelector('#partners-media');
-  decorateStaticPartnerItems();
   const tournaments = await fetchApi('/api/tournaments');
   if (!tournaments || !tournaments.length) return;
   const featured = tournaments.find(item => item.is_featured) || tournaments[0];
