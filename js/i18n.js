@@ -4,6 +4,7 @@
   const DEFAULT_LANG = 'ru';
   const AUTO_TRANSLATION_CACHE_KEY = 'bc_lang_auto_cache_v1';
   const AUTO_TRANSLATION_BATCH_SIZE = 25;
+  const AUTO_TRANSLATION_PARALLEL_REQUESTS = 3;
   const AUTO_TRANSLATION_MAX_CHARS = 6000;
   const AUTO_TRANSLATION_RETRY_DELAY = 60000;
   const exactMap = {
@@ -602,6 +603,73 @@
     }, 150);
   }
 
+  function collectAutoTranslationBatches() {
+    const batches = [];
+    let currentBatch = [];
+    let currentChars = 0;
+
+    for (const text of pendingAutoTranslations) {
+      const nextChars = currentChars + text.length;
+      const batchOverflow = currentBatch.length >= AUTO_TRANSLATION_BATCH_SIZE || nextChars > AUTO_TRANSLATION_MAX_CHARS;
+
+      if (batchOverflow) {
+        if (currentBatch.length) batches.push(currentBatch);
+        if (batches.length >= AUTO_TRANSLATION_PARALLEL_REQUESTS) break;
+        currentBatch = [];
+        currentChars = 0;
+      }
+
+      if (batches.length >= AUTO_TRANSLATION_PARALLEL_REQUESTS) break;
+
+      currentBatch.push(text);
+      currentChars += text.length;
+    }
+
+    if (currentBatch.length && batches.length < AUTO_TRANSLATION_PARALLEL_REQUESTS) {
+      batches.push(currentBatch);
+    }
+
+    return batches;
+  }
+
+  async function requestAutoTranslationBatch(batch) {
+    const apiBaseCandidates = getApiBaseCandidates();
+    let response = null;
+    let lastError = null;
+
+    for (const apiBaseUrl of apiBaseCandidates) {
+      try {
+        const attempt = await fetch(new URL('/api/translate', `${apiBaseUrl}/`).toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            source_lang: 'ru',
+            target_lang: 'en',
+            texts: batch
+          })
+        });
+
+        if (!attempt.ok) {
+          lastError = new Error(`Translation request failed with status ${attempt.status}`);
+          continue;
+        }
+
+        response = attempt;
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    if (!response) {
+      throw lastError || new Error('Translation request failed');
+    }
+
+    return response.json().catch(() => ({}));
+  }
+
   function rerunTranslationPass() {
     if (getLang() !== 'en') return;
     if (translationRerunTimer) return;
@@ -617,69 +685,40 @@
     if (autoTranslationInFlight || !canUseAutoTranslation()) return;
     if (Date.now() < autoTranslationBlockedUntil || !pendingAutoTranslations.size) return;
 
-    const batch = [];
-    let totalChars = 0;
+    const batches = collectAutoTranslationBatches();
+    if (!batches.length) return;
 
-    for (const text of pendingAutoTranslations) {
-      const nextChars = totalChars + text.length;
-      if (batch.length >= AUTO_TRANSLATION_BATCH_SIZE || nextChars > AUTO_TRANSLATION_MAX_CHARS) break;
-      batch.push(text);
-      totalChars = nextChars;
-    }
+    batches.forEach(batch => {
+      batch.forEach(text => pendingAutoTranslations.delete(text));
+    });
 
-    if (!batch.length) return;
-
-    batch.forEach(text => pendingAutoTranslations.delete(text));
     autoTranslationInFlight = true;
 
     try {
-      const apiBaseCandidates = getApiBaseCandidates();
-      let response = null;
-      let lastError = null;
-
-      for (const apiBaseUrl of apiBaseCandidates) {
-        try {
-          const attempt = await fetch(new URL('/api/translate', `${apiBaseUrl}/`).toString(), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              source_lang: 'ru',
-              target_lang: 'en',
-              texts: batch
-            })
-          });
-
-          if (!attempt.ok) {
-            lastError = new Error(`Translation request failed with status ${attempt.status}`);
-            continue;
-          }
-
-          response = attempt;
-          break;
-        } catch (error) {
-          lastError = error;
-        }
-      }
-
-      if (!response) {
-        throw lastError || new Error('Translation request failed');
-      }
-
-      const payload = await response.json().catch(() => ({}));
-      const translations = payload?.translations && typeof payload.translations === 'object'
-        ? payload.translations
-        : {};
-
       let hasNewTranslations = false;
-      Object.entries(translations).forEach(([source, translated]) => {
-        const normalizedSource = normalizeTranslationText(source);
-        const normalizedTranslation = normalizeTranslationText(translated);
-        if (!normalizedSource || !normalizedTranslation) return;
-        if (autoTranslationCache[normalizedSource] === normalizedTranslation) return;
-        autoTranslationCache[normalizedSource] = normalizedTranslation;
-        hasNewTranslations = true;
+      const results = await Promise.allSettled(
+        batches.map(batch => requestAutoTranslationBatch(batch))
+      );
+
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          batches[index].forEach(text => pendingAutoTranslations.add(text));
+          return;
+        }
+
+        const payload = result.value || {};
+        const translations = payload?.translations && typeof payload.translations === 'object'
+          ? payload.translations
+          : {};
+
+        Object.entries(translations).forEach(([source, translated]) => {
+          const normalizedSource = normalizeTranslationText(source);
+          const normalizedTranslation = normalizeTranslationText(translated);
+          if (!normalizedSource || !normalizedTranslation) return;
+          if (autoTranslationCache[normalizedSource] === normalizedTranslation) return;
+          autoTranslationCache[normalizedSource] = normalizedTranslation;
+          hasNewTranslations = true;
+        });
       });
 
       if (hasNewTranslations) {
@@ -688,7 +727,7 @@
       }
     } catch (error) {
       autoTranslationBlockedUntil = Date.now() + AUTO_TRANSLATION_RETRY_DELAY;
-      batch.forEach(text => pendingAutoTranslations.add(text));
+      batches.forEach(batch => batch.forEach(text => pendingAutoTranslations.add(text)));
       console.warn('Automatic translation is temporarily unavailable.', error);
     } finally {
       autoTranslationInFlight = false;
