@@ -3411,3 +3411,8 @@
 ## 2026-04-26 16:35
 - Added a click interceptor in js/site.js so stale internal .html links are rewritten to clean folder URLs at navigation time.
 - This should protect transitions from folder pages even if some old links remain in cached markup or uploaded copies.
+
+### 2026-04-26 17:10
+- Added an editable homepage hero carousel to the admin UI.
+- The admin now exposes a `hero_carousel` source with desktop and mobile image URLs, alt text, and manual ordering.
+- Public hero slides are served from `/api/hero-carousel`, with a database-backed `homepage_hero_slides` table and a fallback to the existing static slides if the API is unavailable.

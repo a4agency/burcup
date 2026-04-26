@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../app/Repositories/MatchesRepository.php';
 require_once __DIR__ . '/../../app/Repositories/NewsRepository.php';
 require_once __DIR__ . '/../../app/Repositories/MediaRepository.php';
 require_once __DIR__ . '/../../app/Repositories/PartnersRepository.php';
+require_once __DIR__ . '/../../app/Repositories/HomepageHeroCarouselRepository.php';
 require_once __DIR__ . '/../../app/Repositories/TranslationRepository.php';
 require_once __DIR__ . '/../../app/Repositories/AdminMutationsRepository.php';
 require_once __DIR__ . '/../../app/Controllers/AdminController.php';
@@ -46,9 +47,10 @@ try {
     $news = new NewsRepository($pdo);
     $media = new MediaRepository($pdo);
     $partners = new PartnersRepository($pdo);
+    $heroCarousel = new HomepageHeroCarouselRepository($pdo);
     $translations = new TranslationRepository($pdo);
     $mutations = new AdminMutationsRepository($pdo);
-    $admin = new AdminController($pdo, $tournaments, $clubs, $matches, $news, $media, $partners, $pages, $mutations);
+    $admin = new AdminController($pdo, $tournaments, $clubs, $matches, $news, $media, $partners, $heroCarousel, $pages, $mutations);
     $uploads = new UploadController();
 
     if ($path === '/health') {
@@ -177,6 +179,10 @@ try {
             Response::json($news->latest(false, null, $newsLimit));
         }
         Response::json($news->all(false, null));
+    }
+
+    if ($method === 'GET' && $path === '/hero-carousel') {
+        Response::json($heroCarousel->all());
     }
 
     if ($method === 'GET' && preg_match('#^/news/([^/]+)$#', $path, $m)) {

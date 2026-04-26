@@ -12,6 +12,7 @@ final class AdminMutationsRepository extends BaseRepository
             'media' => $this->replaceMediaSettings($payload),
             'news' => $this->replaceNews($payload),
             'partners', 'partners_media' => $this->replacePartners($payload),
+            'hero_carousel' => $this->replaceHeroCarousel($payload),
             'standings', 'archive_standings' => $this->replaceStandings($payload),
             'playoff' => $this->replacePlayoff($payload),
             'albums', 'media_albums' => $this->replaceAlbums($payload),
@@ -88,6 +89,47 @@ final class AdminMutationsRepository extends BaseRepository
         }
 
         return count($items);
+    }
+
+    private function replaceHeroCarousel(array $payload): int
+    {
+        $items = array_values($payload);
+
+        $this->pdo->beginTransaction();
+        try {
+            api_ensure_homepage_hero_carousel($this->pdo);
+            api_execute($this->pdo, 'DELETE FROM homepage_hero_slides');
+
+            $saved = 0;
+            foreach ($items as $index => $item) {
+                $imageUrl = api_normalize_string($item['image_url'] ?? '');
+                if ($imageUrl === '') {
+                    continue;
+                }
+
+                api_execute($this->pdo, '
+                    INSERT INTO homepage_hero_slides (
+                        image_url, mobile_image_url, alt_text, sort_order
+                    )
+                    VALUES (?, ?, ?, ?)
+                ', [
+                    $imageUrl,
+                    api_normalize_string($item['mobile_image_url'] ?? ''),
+                    api_normalize_string($item['alt_text'] ?? ''),
+                    api_parse_integer($item['sort_order'] ?? null, $index + 1),
+                ]);
+                $saved++;
+            }
+
+            $this->pdo->commit();
+        } catch (Throwable $error) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $error;
+        }
+
+        return $saved;
     }
 
     private function replaceClubs(array $payload): int

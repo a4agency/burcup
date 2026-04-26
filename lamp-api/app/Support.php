@@ -161,6 +161,65 @@ function api_ensure_tournament_photo_reports_flag(PDO $pdo): void
     ');
 }
 
+function api_homepage_hero_carousel_defaults(): array
+{
+    $slides = [];
+    for ($index = 1; $index <= 12; $index++) {
+        $slides[] = [
+            'image_url' => "images/hero-carousel-{$index}-1600.jpg",
+            'mobile_image_url' => "images/hero-carousel-{$index}-960.jpg",
+            'alt_text' => 'Кубок Бурчалкина',
+            'sort_order' => $index,
+        ];
+    }
+
+    return $slides;
+}
+
+function api_normalize_homepage_hero_carousel_row(array $row): array
+{
+    return [
+        'id' => api_parse_integer($row['id'] ?? null, 0) ?? 0,
+        'image_url' => (string) ($row['image_url'] ?? ''),
+        'mobile_image_url' => (string) ($row['mobile_image_url'] ?? ''),
+        'alt_text' => (string) ($row['alt_text'] ?? ''),
+        'sort_order' => api_parse_integer($row['sort_order'] ?? 0, 0) ?? 0,
+    ];
+}
+
+function api_ensure_homepage_hero_carousel(PDO $pdo): void
+{
+    api_execute($pdo, '
+        CREATE TABLE IF NOT EXISTS homepage_hero_slides (
+          id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          image_url VARCHAR(255) NOT NULL,
+          mobile_image_url VARCHAR(255) NOT NULL DEFAULT "",
+          alt_text VARCHAR(255) NOT NULL DEFAULT "",
+          sort_order INT NOT NULL DEFAULT 0,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          KEY idx_homepage_hero_slides_sort (sort_order, id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    ');
+
+    $row = api_query_one($pdo, 'SELECT COUNT(*) AS count FROM homepage_hero_slides');
+    if ((int) ($row['count'] ?? 0) > 0) {
+        return;
+    }
+
+    foreach (api_homepage_hero_carousel_defaults() as $slide) {
+        api_execute($pdo, '
+            INSERT INTO homepage_hero_slides (image_url, mobile_image_url, alt_text, sort_order)
+            VALUES (?, ?, ?, ?)
+        ', [
+            api_normalize_string($slide['image_url'] ?? ''),
+            api_normalize_string($slide['mobile_image_url'] ?? ''),
+            api_normalize_string($slide['alt_text'] ?? ''),
+            api_parse_integer($slide['sort_order'] ?? 0, 0) ?? 0,
+        ]);
+    }
+}
+
 function api_split_news_body_to_content(string $body): array
 {
     $parts = preg_split('/\n\s*\n+/', $body) ?: [];

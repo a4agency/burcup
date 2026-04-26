@@ -38,6 +38,17 @@ CREATE TABLE IF NOT EXISTS tournaments (
   KEY idx_tournaments_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS homepage_hero_slides (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  image_url TEXT NOT NULL,
+  mobile_image_url TEXT NULL,
+  alt_text TEXT NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_homepage_hero_slides_order (sort_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS clubs (
   id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   slug VARCHAR(255) NOT NULL,

@@ -5809,9 +5809,87 @@ function initHeroCarousel() {
   const sideRightImg = document.getElementById('hero-carousel-side-right-img');
   if (!root || !dotsWrap) return;
 
-  const slides = Array.from(root.querySelectorAll('.hero-carousel-slide'));
+  let slides = Array.from(root.querySelectorAll('.hero-carousel-slide'));
   if (!slides.length) return;
   let dots = [];
+
+  function getHeroCarouselImageMarkup(slide, index) {
+    const desktopUrl = String(slide?.image_url || '').trim();
+    const mobileUrl = String(slide?.mobile_image_url || '').trim() || desktopUrl;
+    const alt = String(slide?.alt_text || 'Кубок Бурчалкина').trim() || 'Кубок Бурчалкина';
+    const active = index === 0 ? ' active' : '';
+    const loading = index === 0 ? 'eager' : 'lazy';
+    const fetchPriorityAttr = index === 0 ? ' fetchpriority="high"' : '';
+    const desktopSrc = getOptimizedImageUrl(desktopUrl, { width: 1600, height: 1067, crop: 'fill', gravity: 'auto' });
+    const mobileSrc = getOptimizedImageUrl(mobileUrl, { width: 960, height: 640, crop: 'fill', gravity: 'auto' });
+    const srcSet = [
+      mobileSrc ? `${escapeHtml(mobileSrc)} 960w` : '',
+      desktopSrc ? `${escapeHtml(desktopSrc)} 1600w` : ''
+    ].filter(Boolean).join(', ');
+
+    return `
+      <div class="hero-carousel-slide${active}" data-bg="${escapeHtml(desktopUrl || mobileUrl)}">
+        <img
+          src="${escapeHtml(desktopSrc || desktopUrl || mobileUrl || TRANSPARENT_IMAGE_PLACEHOLDER)}"
+          ${srcSet ? `srcset="${srcSet}"` : ''}
+          sizes="(max-width: 900px) 100vw, 72vw"
+          alt="${escapeHtml(alt)}"
+          width="1600"
+          height="1067"
+          loading="${loading}"
+          ${fetchPriorityAttr}
+          decoding="async">
+      </div>
+    `;
+  }
+
+  function normalizeHeroCarouselItems(items = []) {
+    return (Array.isArray(items) ? items : [])
+      .map((item, index) => ({
+        image_url: String(item?.image_url || '').trim(),
+        mobile_image_url: String(item?.mobile_image_url || '').trim(),
+        alt_text: String(item?.alt_text || 'Кубок Бурчалкина').trim() || 'Кубок Бурчалкина',
+        sort_order: Number(item?.sort_order || index + 1) || index + 1,
+      }))
+      .filter(item => String(item.image_url || '').trim())
+      .sort((left, right) => {
+        const orderDiff = Number(left.sort_order || 0) - Number(right.sort_order || 0);
+        if (orderDiff !== 0) return orderDiff;
+        return String(left.image_url || '').localeCompare(String(right.image_url || ''), 'ru');
+      });
+  }
+
+  function getFallbackHeroCarouselItems() {
+    return slides
+      .map((slide, index) => {
+        const img = slide.querySelector('img');
+        const desktopUrl = String(img?.getAttribute('src') || '').trim();
+        const mobileUrl = String(slide?.dataset?.bg || '').trim();
+        const srcSet = String(img?.getAttribute('srcset') || '').trim();
+        const parsedMobileUrl = mobileUrl || srcSet.split(',').map(part => String(part || '').trim().split(' ')[0]).find(Boolean) || desktopUrl;
+        const alt = String(img?.getAttribute('alt') || 'Кубок Бурчалкина').trim() || 'Кубок Бурчалкина';
+
+        return {
+          image_url: desktopUrl,
+          mobile_image_url: parsedMobileUrl,
+          alt_text: alt,
+          sort_order: index + 1,
+        };
+      })
+      .filter(item => String(item.image_url || '').trim());
+  }
+
+  function applyHeroCarouselItems(items) {
+    const normalized = normalizeHeroCarouselItems(items);
+    if (!normalized.length) return false;
+
+    root.innerHTML = normalized.map((item, index) => getHeroCarouselImageMarkup(item, index)).join('');
+    slides = Array.from(root.querySelectorAll('.hero-carousel-slide'));
+    buildDots();
+    show(0);
+    start();
+    return true;
+  }
 
   function hydrateSlide(indexToLoad) {
     const slide = slides[indexToLoad];
@@ -5953,6 +6031,19 @@ function initHeroCarousel() {
   hydrateSlide((index + 1) % slides.length);
   show(0);
   start();
+
+  scheduleAfterFirstPaint(async () => {
+    try {
+      const remoteSlides = await fetchApi('/api/hero-carousel');
+      if (applyHeroCarouselItems(remoteSlides)) {
+        hydrateSlide(0);
+        hydrateSlide(1 % slides.length);
+      }
+    } catch (error) {
+      console.debug('Hero carousel API fallback.', error);
+      applyHeroCarouselItems(getFallbackHeroCarouselItems());
+    }
+  }, 1200);
 }
 
 

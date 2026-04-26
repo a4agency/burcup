@@ -11,6 +11,7 @@ final class AdminController
         private readonly NewsRepository $news,
         private readonly MediaRepository $media,
         private readonly PartnersRepository $partners,
+        private readonly HomepageHeroCarouselRepository $heroCarousel,
         private readonly PagesRepository $pages,
         private readonly AdminMutationsRepository $mutations,
     ) {
@@ -43,6 +44,7 @@ final class AdminController
             'news' => $this->news->all(true),
             'partners' => $this->partners->all(),
             'partners_media' => $this->partners->all(),
+            'hero_carousel' => $this->heroCarousel->all(),
             'standings' => $this->matches->allStandings(),
             'archive_standings' => $this->matches->allStandings(),
             'playoff' => $this->matches->playoff(null),

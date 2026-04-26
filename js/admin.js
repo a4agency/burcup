@@ -91,6 +91,16 @@ const DEFAULT_MEDIA_ALBUMS = [
   }
 ];
 
+const DEFAULT_HERO_CAROUSEL = Array.from({ length: 12 }, (_, index) => {
+  const slideNumber = index + 1;
+  return {
+    image_url: `images/hero-carousel-${slideNumber}-1600.jpg`,
+    mobile_image_url: `images/hero-carousel-${slideNumber}-960.jpg`,
+    alt_text: 'Кубок Бурчалкина',
+    sort_order: slideNumber,
+  };
+});
+
 const DEFAULT_PLAYOFF_ROWS = [
   {
     tournament_slug: 'burchalkin-cup-2026',
@@ -669,6 +679,25 @@ const ADMIN_SOURCES = {
     fields: [
       ['featured_match_id', 'Главный матч', 'text'],
       ['photo_reports_enabled', 'Показывать фоторепортажи на сайте', 'checkbox'],
+    ],
+  },
+  hero_carousel: {
+    key: 'bcup_admin_hero_carousel',
+    exportName: 'hero-carousel.json',
+    title: 'Карусель главной',
+    help: 'Слайды верхней карусели на главной странице. Desktop и mobile картинки можно менять отдельно, порядок задаётся числом.',
+    defaultData: DEFAULT_HERO_CAROUSEL,
+    empty: () => ({
+      image_url: '',
+      mobile_image_url: '',
+      alt_text: 'Кубок Бурчалкина',
+      sort_order: 0,
+    }),
+    fields: [
+      ['image_url', 'Desktop image', 'image'],
+      ['mobile_image_url', 'Mobile image', 'image'],
+      ['alt_text', 'Alt text', 'text'],
+      ['sort_order', 'Порядок', 'number'],
     ],
   },
   albums: {
@@ -1461,6 +1490,16 @@ function normalizeNewsAdminItem(item, index = 0) {
   };
 }
 
+function normalizeHeroCarouselAdminItem(item, index = 0) {
+  return {
+    ...item,
+    image_url: String(item?.image_url || '').trim(),
+    mobile_image_url: String(item?.mobile_image_url || '').trim(),
+    alt_text: String(item?.alt_text || 'Кубок Бурчалкина').trim() || 'Кубок Бурчалкина',
+    sort_order: Number(item?.sort_order || index + 1) || index + 1,
+  };
+}
+
 function getNewsAdminSortTimestamp(item = {}) {
   const publishedOn = Date.parse(String(item?.date || '').trim());
   if (Number.isFinite(publishedOn)) return publishedOn;
@@ -1692,6 +1731,16 @@ function normalizeSourceData(sourceName, data) {
   }
   if (sourceName === 'albums') {
     return items.map((item, index) => normalizeAlbumAdminItem(item, index));
+  }
+  if (sourceName === 'hero_carousel') {
+    return items
+      .map((item, index) => normalizeHeroCarouselAdminItem(item, index))
+      .filter(item => String(item?.image_url || '').trim())
+      .sort((left, right) => {
+        const orderCompare = Number(left.sort_order || 0) - Number(right.sort_order || 0);
+        if (orderCompare !== 0) return orderCompare;
+        return String(left.image_url || '').localeCompare(String(right.image_url || ''), 'ru');
+      });
   }
   if (sourceName === 'news') {
     return items
