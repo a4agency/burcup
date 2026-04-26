@@ -3241,8 +3241,3 @@
   every text-node mutation, which reduces repeated full-page translation passes.
 - Trimmed a couple of hero-image preload/fetch-priority hints to lower initial
   bandwidth pressure on reload.
-
-### RFU to RFS translation fix
-
-- Updated the exact English translation for `РФС` so the language toggle now
-  renders it as `RFS` instead of `RFU`.
