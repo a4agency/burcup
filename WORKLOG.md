@@ -3212,3 +3212,8 @@
 
 - Public partner cards now stay non-clickable when `website_url` is empty.
 - The change applies to both API-rendered partner cards and the static fallback partner blocks.
+
+### Partner visibility toggle in admin
+
+- Added a quick hide/show action to partner and media-partner cards in the admin UI.
+- Hidden partners remain in the editor, but their public cards stay off the site until re-enabled.

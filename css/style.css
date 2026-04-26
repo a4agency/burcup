@@ -3103,6 +3103,46 @@ object-fit:contain;
   flex-wrap:wrap;
 }
 
+.admin-item-card.is-hidden{
+  opacity:.72;
+}
+
+.admin-partner-visibility-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  border:1px solid rgba(26,49,102,.16);
+  background:#edf3ff;
+  color:var(--navy);
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.admin-partner-visibility-badge.is-hidden{
+  background:#f7eef0;
+  color:#a24a55;
+  border-color:rgba(162,74,85,.18);
+}
+
+.admin-item-toggle-visibility{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--navy);
+  border-radius:10px;
+  padding:7px 11px;
+  font-weight:800;
+  cursor:pointer;
+  min-width:92px;
+}
+
+.admin-item-toggle-visibility:hover{
+  background:#f4f8ff;
+}
+
 .admin-item-move{
   border:1px solid var(--line);
   background:#fff;

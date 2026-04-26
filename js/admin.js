@@ -2681,23 +2681,40 @@ function renderNewsAdminCard(item, index) {
 }
 
 function renderPartnerAdminCard(item, index) {
-  return renderSectionedAdminCard('Партнёр', index, [
-    {
-      title: 'Основная информация',
-      gridClass: 'admin-record-grid-3',
-      content: makeFieldsByKeys('partners', ['slug', 'name', 'category', 'tournament_slug', 'sort_order', 'is_visible'], item, index)
-    },
-    {
-      title: 'Логотип и ссылка',
-      gridClass: 'admin-record-grid-2',
-      content: makeFieldsByKeys('partners', ['logo_url', 'website_url', 'alt_text'], item, index)
-    },
-    {
-      title: 'Примечание',
-      gridClass: 'admin-record-grid-1',
-      content: makeFieldsByKeys('partners', ['note'], item, index)
-    }
-  ]);
+  const visible = item.is_visible !== false && String(item.is_visible) !== 'false';
+  return `
+    <div class="admin-item-card admin-record-card${visible ? '' : ' is-hidden'}" data-item-index="${index}" data-partner-visible="${visible ? 'true' : 'false'}">
+      <div class="admin-item-head">
+        <strong>Партнёр #${index + 1}</strong>
+        <div class="admin-item-head-actions">
+          <span class="admin-partner-visibility-badge${visible ? '' : ' is-hidden'}">${visible ? 'Показывается' : 'Скрыт'}</span>
+          <button type="button" class="admin-item-toggle-visibility" data-toggle-partner-visible="${index}" data-visible="${visible ? 'true' : 'false'}">${visible ? 'Скрыть' : 'Показать'}</button>
+          <button type="button" class="admin-item-remove" data-remove="${index}">Удалить</button>
+        </div>
+      </div>
+
+      <div class="admin-record-layout">
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Основная информация</div>
+          <div class="admin-form-grid admin-record-grid-3">
+            ${makeFieldsByKeys('partners', ['slug', 'name', 'category', 'tournament_slug', 'sort_order', 'is_visible'], item, index)}
+          </div>
+        </div>
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Логотип и ссылка</div>
+          <div class="admin-form-grid admin-record-grid-2">
+            ${makeFieldsByKeys('partners', ['logo_url', 'website_url', 'alt_text'], item, index)}
+          </div>
+        </div>
+        <div class="admin-record-section">
+          <div class="admin-record-section-head">Примечание</div>
+          <div class="admin-form-grid admin-record-grid-1">
+            ${makeFieldsByKeys('partners', ['note'], item, index)}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function getPartnerCategoryTitle(category) {
@@ -2972,6 +2989,28 @@ function renderForm(sourceName, data) {
       setSourceData(sourceName, next);
       adminShowSource(sourceName, { preferLocal: true });
       setStatus('Запись удалена из черновика. Нажми «Сохранить», чтобы отправить в API.');
+    });
+  });
+
+  wrap.querySelectorAll('[data-toggle-partner-visible]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.admin-item-card');
+      const select = card?.querySelector('[data-key="is_visible"]');
+      if (!select) return;
+      const nextVisible = !(select.value === 'true');
+      select.value = nextVisible ? 'true' : 'false';
+      btn.dataset.visible = nextVisible ? 'true' : 'false';
+      btn.textContent = nextVisible ? 'Скрыть' : 'Показать';
+      if (card) {
+        card.classList.toggle('is-hidden', !nextVisible);
+        card.dataset.partnerVisible = nextVisible ? 'true' : 'false';
+      }
+      const badge = card?.querySelector('.admin-partner-visibility-badge');
+      if (badge) {
+        badge.textContent = nextVisible ? 'Показывается' : 'Скрыт';
+        badge.classList.toggle('is-hidden', !nextVisible);
+      }
+      setStatus(`Партнёр ${nextVisible ? 'показан' : 'скрыт'} в черновике. Нажми «Сохранить», чтобы отправить изменения в API.`);
     });
   });
 
