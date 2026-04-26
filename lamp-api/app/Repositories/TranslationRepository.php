@@ -3,6 +3,15 @@ declare(strict_types=1);
 
 final class TranslationRepository extends BaseRepository
 {
+    private function resolveTranslationProvider(): string
+    {
+        $provider = api_normalize_string(get_env('TRANSLATION_PROVIDER', 'google-gtx')) ?: 'google-gtx';
+        return match ($provider) {
+            'openai' => 'google-gtx',
+            default => $provider,
+        };
+    }
+
     public function translateTexts(array $texts, string $sourceLang = 'ru', string $targetLang = 'en'): array
     {
         $sourceLang = api_normalize_string($sourceLang) ?: 'ru';
@@ -76,7 +85,7 @@ final class TranslationRepository extends BaseRepository
 
     private function saveTranslations(string $sourceLang, string $targetLang, array $translations): void
     {
-        $provider = api_normalize_string(get_env('TRANSLATION_PROVIDER', 'google-gtx')) ?: 'google-gtx';
+        $provider = $this->resolveTranslationProvider();
         foreach ($translations as $sourceText => $translatedText) {
             $sourceText = api_normalize_translation_text($sourceText);
             $translatedText = api_normalize_translation_text($translatedText);
@@ -99,9 +108,9 @@ final class TranslationRepository extends BaseRepository
 
     private function translateText(string $text, string $sourceLang, string $targetLang): string
     {
-        $provider = api_normalize_string(get_env('TRANSLATION_PROVIDER', 'google-gtx')) ?: 'google-gtx';
+        $provider = $this->resolveTranslationProvider();
         if ($provider !== 'google-gtx') {
-            throw new RuntimeException('Unsupported translation provider: ' . $provider);
+            $provider = 'google-gtx';
         }
 
         $controller = null;

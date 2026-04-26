@@ -11,6 +11,6 @@ return [
     'DB_USER' => 'burcup_user',
     'DB_PASSWORD' => 'change_me',
     'TRANSLATION_ENABLED' => 'true',
-    'TRANSLATION_PROVIDER' => 'openai',
+    'TRANSLATION_PROVIDER' => 'google-gtx',
     'MYSQL_CONNECT_TIMEOUT' => '5',
 ];

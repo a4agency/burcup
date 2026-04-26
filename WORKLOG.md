@@ -3247,3 +3247,9 @@
 - Static sponsor grids now resolve partners by either the original Russian
   label or the translated label, so the English version of `contacts.html` and
   other pages keeps the same partner set as the Russian version.
+
+### Translation provider fallback
+
+- The server-side translation repository now falls back to `google-gtx` even
+  if the config still says `openai`, which keeps long-form page translation from
+  degrading into partial word-by-word fallback on some pages.

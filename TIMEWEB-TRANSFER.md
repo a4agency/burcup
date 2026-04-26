@@ -95,7 +95,7 @@ return [
     'CORS_ORIGIN' => 'https://your-domain.example',
 
     'TRANSLATION_ENABLED' => 'true',
-    'TRANSLATION_PROVIDER' => 'openai',
+    'TRANSLATION_PROVIDER' => 'google-gtx',
     'MYSQL_CONNECT_TIMEOUT' => '5',
 ];
 ```
