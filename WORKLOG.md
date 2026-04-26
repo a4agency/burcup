@@ -3407,3 +3407,7 @@
 - Timeweb/nginx does not honor the previous .htaccess clean-URL redirect for static .html pages.
 - Added folder-based page copies (/<slug>/index.html) with <base href="/"> so clean URLs can work without server rewrites.
 - Kept client-side canonicalization in js/site.js to normalize /page.html -> /page/ and rewrite internal links after load.
+
+## 2026-04-26 16:35
+- Added a click interceptor in js/site.js so stale internal .html links are rewritten to clean folder URLs at navigation time.
+- This should protect transitions from folder pages even if some old links remain in cached markup or uploaded copies.

@@ -125,6 +125,43 @@ function rewriteInternalLinksToCleanUrls(scope = document) {
   });
 }
 
+function interceptCleanUrlNavigation() {
+  if (window.__bcCleanUrlNavigationBound) return;
+  window.__bcCleanUrlNavigationBound = true;
+
+  document.addEventListener('click', (event) => {
+    if (event.defaultPrevented) return;
+    if (event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    const anchor = event.target.closest?.('a[href]');
+    if (!anchor) return;
+    if (anchor.target && anchor.target !== '_self') return;
+    if (anchor.hasAttribute('download')) return;
+    if (anchor.closest?.('[data-no-clean-url="true"]')) return;
+
+    const rawHref = anchor.getAttribute('href');
+    if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:') || rawHref.startsWith('javascript:')) {
+      return;
+    }
+
+    let url;
+    try {
+      url = new URL(rawHref, window.location.href);
+    } catch {
+      return;
+    }
+
+    if (url.origin !== window.location.origin) return;
+
+    const cleanPath = toCleanInternalPath(url.pathname);
+    if (cleanPath === url.pathname) return;
+
+    event.preventDefault();
+    window.location.assign(`${cleanPath}${url.search}${url.hash}`);
+  }, true);
+}
+
 function getCurrentPageFile() {
   const pathname = window.location.pathname.replace(/\/+$/, '');
   const currentSegment = pathname.split('/').pop() || '';
@@ -378,6 +415,7 @@ async function initTournamentCountdown() {
 document.addEventListener('DOMContentLoaded', function(){
   normalizeCurrentUrlToClean();
   rewriteInternalLinksToCleanUrls(document);
+  interceptCleanUrlNavigation();
   initActiveHeaderLink();
   initHeaderMenu();
   initHeaderCompactState();
