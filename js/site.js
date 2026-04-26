@@ -120,9 +120,59 @@ function rewriteInternalLinksToCleanUrls(scope = document) {
 
     if (url.origin !== window.location.origin) return;
 
-    url.pathname = toCleanInternalPath(url.pathname);
-    anchor.setAttribute('href', `${url.pathname}${url.search}${url.hash}`);
+    const cleanPath = toCleanInternalPath(url.pathname);
+    if (cleanPath === url.pathname) return;
+
+    anchor.dataset.originalHref = `${url.pathname}${url.search}${url.hash}`;
+    anchor.setAttribute('href', `${cleanPath}${url.search}${url.hash}`);
   });
+}
+
+const CLEAN_URL_EXISTENCE_CACHE = new Map();
+
+async function pathExists(pathname) {
+  const key = pathname || '/';
+  if (CLEAN_URL_EXISTENCE_CACHE.has(key)) {
+    return CLEAN_URL_EXISTENCE_CACHE.get(key);
+  }
+
+  const origin = window.location.origin;
+  const checkUrl = `${origin}${key}`;
+
+  const headResponse = await fetch(checkUrl, {
+    method: 'HEAD',
+    cache: 'no-store',
+    credentials: 'same-origin',
+  });
+
+  if (headResponse.ok) {
+    CLEAN_URL_EXISTENCE_CACHE.set(key, true);
+    return true;
+  }
+
+  if (headResponse.status === 404) {
+    CLEAN_URL_EXISTENCE_CACHE.set(key, false);
+    return false;
+  }
+
+  if (headResponse.status === 405 || headResponse.status === 501) {
+    try {
+      const getResponse = await fetch(checkUrl, {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
+      const exists = getResponse.ok;
+      CLEAN_URL_EXISTENCE_CACHE.set(key, exists);
+      return exists;
+    } catch {
+      CLEAN_URL_EXISTENCE_CACHE.set(key, false);
+      return false;
+    }
+  }
+
+  CLEAN_URL_EXISTENCE_CACHE.set(key, false);
+  return false;
 }
 
 function interceptCleanUrlNavigation() {
@@ -155,10 +205,16 @@ function interceptCleanUrlNavigation() {
     if (url.origin !== window.location.origin) return;
 
     const cleanPath = toCleanInternalPath(url.pathname);
+    const originalHref = anchor.dataset.originalHref || `${url.pathname}${url.search}${url.hash}`;
+
     if (cleanPath === url.pathname) return;
 
     event.preventDefault();
-    window.location.assign(`${cleanPath}${url.search}${url.hash}`);
+    void (async () => {
+      const targetPath = (await pathExists(cleanPath)) ? cleanPath : url.pathname;
+      const targetHref = `${targetPath}${url.search}${url.hash}`;
+      window.location.assign(targetHref === `${cleanPath}${url.search}${url.hash}` ? targetHref : originalHref);
+    })();
   }, true);
 }
 
