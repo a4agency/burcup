@@ -3871,6 +3871,28 @@ function normalizePartnerLookupKey(value) {
   return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function resolvePartnerLookupItem(partnerLookup = new Map(), rawName = '') {
+  const normalizedName = normalizePartnerLookupKey(rawName);
+  if (!normalizedName) return null;
+
+  const directMatch = partnerLookup.get(normalizedName);
+  if (directMatch) return directMatch;
+
+  const translate = window.BCI18N?.translateString;
+  if (typeof translate !== 'function') return null;
+
+  for (const [key, item] of partnerLookup.entries()) {
+    const candidateName = String(item?.name || key || '').trim();
+    if (!candidateName) continue;
+    const translatedCandidate = normalizePartnerLookupKey(translate(candidateName));
+    if (translatedCandidate === normalizedName) {
+      return item;
+    }
+  }
+
+  return null;
+}
+
 function getPartnerDisplayNameMeta(value) {
   const name = String(value || '').trim();
   if (!name) {
@@ -3962,7 +3984,7 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     const labelNode = node.querySelector('span');
     const name = (storedName || (labelNode ? labelNode.textContent : node.textContent) || '').trim();
     if (!name) return;
-    const partner = partnerLookup.get(normalizePartnerLookupKey(name)) || null;
+    const partner = resolvePartnerLookupItem(partnerLookup, name);
     if (!partner) {
       node.remove();
       return;

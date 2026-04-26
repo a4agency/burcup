@@ -3241,3 +3241,9 @@
   every text-node mutation, which reduces repeated full-page translation passes.
 - Trimmed a couple of hero-image preload/fetch-priority hints to lower initial
   bandwidth pressure on reload.
+
+### Partner lookup across translated pages
+
+- Static sponsor grids now resolve partners by either the original Russian
+  label or the translated label, so the English version of `contacts.html` and
+  other pages keeps the same partner set as the Russian version.
