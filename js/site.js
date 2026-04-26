@@ -77,11 +77,20 @@ function initHeaderMenu() {
   });
 }
 
+function getCurrentPageFile() {
+  const pathname = window.location.pathname.replace(/\/+$/, '');
+  const currentSegment = pathname.split('/').pop() || '';
+
+  if (!currentSegment || pathname === '') return 'index.html';
+  if (currentSegment.includes('.')) return currentSegment;
+  return `${currentSegment}.html`;
+}
+
 function initHeaderCompactState() {
   const header = document.querySelector('.header');
   if (!header) return;
 
-  const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+  const currentFile = getCurrentPageFile();
   const isHomePage = document.body.classList.contains('page-home') || currentFile === 'index.html';
 
   if (!isHomePage) {
@@ -187,7 +196,7 @@ function initActiveHeaderLink() {
   const links = Array.from(document.querySelectorAll('.header-menu a[href]'));
   if (!links.length) return;
 
-  const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+  const currentFile = getCurrentPageFile();
 
   links.forEach((link) => {
     const linkFile = (link.getAttribute('href') || '').split('/').pop();

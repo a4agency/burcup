@@ -17,6 +17,36 @@
 
 ---
 
+## 2026-04-26 01:20
+
+### Что сделали
+
+- Добавили clean URLs без `.html` через Apache rewrite rules.
+- Обновили клиентскую логику определения текущей страницы, чтобы активное меню
+  и компактный заголовок работали и на адресах вроде `/about-lev-burchalkin`.
+
+### Что проверили
+
+- Логика `getCurrentPageFile()` в `js/site.js` теперь нормализует extensionless
+  пути обратно в виртуальные имена страниц.
+
+### Что осталось
+
+- Проверить редиректы и навигацию на Timeweb и Railway после замены
+  `.htaccess` и `js/site.js`.
+
+### Файлы
+
+- [/.htaccess](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/.htaccess)
+- [js/site.js](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20эталон/js/site.js)
+- [WORKLOG.md](/Users/kainarbaev_daniar/Downloads/последнии%E2%80%8B%20этالон/WORKLOG.md)
+
+### Коммиты
+
+- Будет добавлен после финальной проверки.
+
+---
+
 ## 2026-04-26 01:05
 
 ### Что сделали
