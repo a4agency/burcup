@@ -113,7 +113,7 @@ function rewriteInternalLinksToCleanUrls(scope = document) {
 
     let url;
     try {
-      url = new URL(rawHref, window.location.href);
+      url = new URL(rawHref, document.baseURI || window.location.href);
     } catch {
       return;
     }
@@ -197,7 +197,7 @@ function interceptCleanUrlNavigation() {
 
     let url;
     try {
-      url = new URL(rawHref, window.location.href);
+      url = new URL(rawHref, document.baseURI || window.location.href);
     } catch {
       return;
     }
