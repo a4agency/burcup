@@ -3207,3 +3207,8 @@
 
 - Filled missing `country` and `city` values for the 2026 tournament clubs in the seed and dump data.
 - Added a one-time MySQL backfill script for existing Railway and Timeweb databases so the public club cards show locations consistently.
+
+### Partner link fallback
+
+- Public partner cards now stay non-clickable when `website_url` is empty.
+- The change applies to both API-rendered partner cards and the static fallback partner blocks.

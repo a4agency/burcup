@@ -3827,7 +3827,6 @@ async function renderTournamentsGrid() {
 }
 
 const PARTNER_PLACEHOLDER_LOGO = 'images/logo-burchalkin.webp';
-const PARTNER_FALLBACK_HREF = 'index.html';
 const PARTNER_FALLBACKS = new Map([
   ['Система спортивной аналитики B-SIGHT', { website_url: 'https://bsight.pro', logo_url: 'images/partners/b-sight.png', logo_alt: 'Система спортивной аналитики B-SIGHT' }],
   ['АО «Российская промышленная коллегия»', { website_url: 'https://www.rosprom.ru', logo_url: 'images/partners/rossiyskaya-promyshlennaya-kollegiya.png', logo_alt: 'АО «Российская промышленная коллегия»' }],
@@ -3924,7 +3923,7 @@ function enforcePartnerLabelBreaks(root = document) {
 
 function normalizePartnerHref(value) {
   const href = String(value || '').trim();
-  if (!href) return PARTNER_FALLBACK_HREF;
+  if (!href) return '';
   if (/^(https?:)?\/\//i.test(href)) return href;
   if (/^(mailto:|tel:|#|\/|\.\/|\.\.\/)/i.test(href)) return href;
   return `https://${href}`;
@@ -3953,21 +3952,29 @@ function decorateStaticPartnerItems(root = document, partnerLookup = new Map()) 
     const logoSrc = String(partner?.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
     const logoAlt = partner?.logo_alt || name;
     const labelMeta = getPartnerDisplayNameMeta(name);
+    const hasHref = Boolean(href);
 
     let element = node;
-    if (node.tagName !== 'A') {
-      element = document.createElement('a');
+    const expectedTag = hasHref ? 'A' : 'DIV';
+    if (node.tagName !== expectedTag) {
+      element = document.createElement(hasHref ? 'a' : 'div');
       element.className = node.className;
       node.replaceWith(element);
     }
 
     element.classList.add('sponsor-item-logo');
     element.setAttribute('data-partner-name', labelMeta.text || name);
-    element.setAttribute('href', href);
-    if (isExternalPartnerHref(href)) {
-      element.setAttribute('target', '_blank');
-      element.setAttribute('rel', 'noreferrer');
+    if (hasHref) {
+      element.setAttribute('href', href);
+      if (isExternalPartnerHref(href)) {
+        element.setAttribute('target', '_blank');
+        element.setAttribute('rel', 'noreferrer');
+      } else {
+        element.removeAttribute('target');
+        element.removeAttribute('rel');
+      }
     } else {
+      element.removeAttribute('href');
       element.removeAttribute('target');
       element.removeAttribute('rel');
     }
@@ -3992,13 +3999,15 @@ function renderPartnerItem(item) {
   };
   const logoSrc = String(partner.logo_url || '').trim() || PARTNER_PLACEHOLDER_LOGO;
   const href = normalizePartnerHref(partner.website_url || '');
-  const externalAttrs = isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
+  const hasHref = Boolean(href);
+  const externalAttrs = hasHref && isExternalPartnerHref(href) ? 'target="_blank" rel="noreferrer"' : '';
   const labelMeta = getPartnerDisplayNameMeta(partner.name);
+  const tag = hasHref ? 'a' : 'div';
   return `
-    <a class="sponsor-item sponsor-item-logo" href="${escapeHtml(href)}" data-partner-name="${escapeHtml(partner.name)}" ${externalAttrs}>
+    <${tag} class="sponsor-item sponsor-item-logo"${hasHref ? ` href="${escapeHtml(href)}"` : ''} data-partner-name="${escapeHtml(partner.name)}" ${externalAttrs}>
       ${renderPartnerLogoMarkup(partner.name, logoSrc, partner.logo_alt || partner.name)}
       <span class="${labelMeta.multiline ? 'partner-name partner-name-multiline' : 'partner-name'}">${renderPartnerDisplayName(labelMeta)}</span>
-    </a>
+    </${tag}>
   `;
 }
 
