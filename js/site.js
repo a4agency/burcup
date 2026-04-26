@@ -77,6 +77,54 @@ function initHeaderMenu() {
   });
 }
 
+function toCleanInternalPath(pathname) {
+  if (!pathname) return '/';
+  if (pathname === '/index.html') return '/';
+
+  const htmlMatch = pathname.match(/^\/(.+?)\.html$/);
+  if (htmlMatch) {
+    return `/${htmlMatch[1]}/`;
+  }
+
+  return pathname;
+}
+
+function normalizeCurrentUrlToClean() {
+  if (!window.history?.replaceState) return;
+
+  const url = new URL(window.location.href);
+  const cleanPath = toCleanInternalPath(url.pathname);
+
+  if (cleanPath !== url.pathname) {
+    url.pathname = cleanPath;
+    window.history.replaceState({}, '', url.toString());
+  }
+}
+
+function rewriteInternalLinksToCleanUrls(scope = document) {
+  if (!scope?.querySelectorAll) return;
+
+  scope.querySelectorAll('a[href]').forEach((anchor) => {
+    const rawHref = anchor.getAttribute('href');
+    if (!rawHref) return;
+    if (rawHref.startsWith('#') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:') || rawHref.startsWith('javascript:')) {
+      return;
+    }
+
+    let url;
+    try {
+      url = new URL(rawHref, window.location.href);
+    } catch {
+      return;
+    }
+
+    if (url.origin !== window.location.origin) return;
+
+    url.pathname = toCleanInternalPath(url.pathname);
+    anchor.setAttribute('href', `${url.pathname}${url.search}${url.hash}`);
+  });
+}
+
 function getCurrentPageFile() {
   const pathname = window.location.pathname.replace(/\/+$/, '');
   const currentSegment = pathname.split('/').pop() || '';
@@ -328,6 +376,8 @@ async function initTournamentCountdown() {
 
 
 document.addEventListener('DOMContentLoaded', function(){
+  normalizeCurrentUrlToClean();
+  rewriteInternalLinksToCleanUrls(document);
   initActiveHeaderLink();
   initHeaderMenu();
   initHeaderCompactState();

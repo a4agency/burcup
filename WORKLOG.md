@@ -3401,3 +3401,9 @@
 - The server-side translation repository now falls back to `google-gtx` even
   if the config still says `openai`, which keeps long-form page translation from
   degrading into partial word-by-word fallback on some pages.
+
+
+## 2026-04-26 16:20
+- Timeweb/nginx does not honor the previous .htaccess clean-URL redirect for static .html pages.
+- Added folder-based page copies (/<slug>/index.html) with <base href="/"> so clean URLs can work without server rewrites.
+- Kept client-side canonicalization in js/site.js to normalize /page.html -> /page/ and rewrite internal links after load.
