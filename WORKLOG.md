@@ -3224,3 +3224,9 @@
   fallback list when a partner is absent from the visible API payload.
 - The featured-tournament partner render now only decorates cards after the API
   data has loaded, so fully hidden partner sets stay hidden on the site.
+
+### Komsomolskaya Pravda logo swap
+
+- Replaced the shared `images/partners/komsomolskaya-pravda.png` asset with the
+  new provided logo file so every page and partner reference picks up the same
+  image automatically.
