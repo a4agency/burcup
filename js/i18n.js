@@ -495,6 +495,7 @@
   let autoTranslationInFlight = false;
   let autoTranslationBlockedUntil = 0;
   let observer = null;
+  let translationRerunTimer = null;
 
   function getLang() {
     return localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG;
@@ -602,9 +603,14 @@
   }
 
   function rerunTranslationPass() {
-    if (observer) observer.disconnect();
-    translateTextTree(document.body);
-    startObserver();
+    if (getLang() !== 'en') return;
+    if (translationRerunTimer) return;
+    translationRerunTimer = window.setTimeout(() => {
+      translationRerunTimer = null;
+      if (observer) observer.disconnect();
+      translateTextTree(document.body);
+      startObserver();
+    }, 120);
   }
 
   async function flushAutoTranslations() {
@@ -773,14 +779,11 @@
     if (observer) observer.disconnect();
     observer = new MutationObserver(() => {
       if (!observer) return;
-      observer.disconnect();
-      translateTextTree(document.body);
-      startObserver();
+      rerunTranslationPass();
     });
     observer.observe(document.body, {
       childList: true,
-      subtree: true,
-      characterData: true
+      subtree: true
     });
   }
 

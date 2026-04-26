@@ -201,6 +201,17 @@ function initActiveHeaderLink() {
   });
 }
 
+function scheduleAfterFirstPaint(callback, timeout = 1500) {
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(() => callback(), { timeout });
+    return;
+  }
+
+  window.requestAnimationFrame(() => {
+    window.setTimeout(callback, 0);
+  });
+}
+
 let featuredTournamentSettingsPromise = null;
 
 async function loadFeaturedTournamentSettings() {
@@ -313,7 +324,9 @@ document.addEventListener('DOMContentLoaded', function(){
   initHeaderCompactState();
   initContactsMapToggle();
   initTournamentCountdown();
-  upgradeStaticImagesForCloudinary();
+  scheduleAfterFirstPaint(() => {
+    upgradeStaticImagesForCloudinary();
+  });
 });
 
 document.addEventListener('error', handleCloudinaryImageFallback, true);
@@ -1038,8 +1051,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initHomeNewsSlider();
   initHomeTournamentsSlider();
   initHeroCarousel();
-  renderStandings('#home-standings');
-  renderStandings('#results-standings');
+  scheduleAfterFirstPaint(() => {
+    renderStandings('#home-standings');
+    renderStandings('#results-standings');
+  });
 });
 
 
@@ -5579,25 +5594,27 @@ function renderArchiveTournamentPage() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initNewsPaginationNavigation();
-  renderUpcomingMatches();
-  renderHomeNews();
-  renderMediaAlbumCollection('#home-media-stories');
-  renderMultimediaPage();
-  renderMediaAlbumPage();
-  renderMatchesPage();
-  renderNewsPage();
-  renderNewsArticlePage();
-  renderResultsList();
-  renderResultsMatches();
-  renderMatchPageFromJson();
-  renderTournamentsGrid();
-  renderClubsGrid('#clubs-grid-home', 8);
-  renderClubsGrid('#clubs-grid-page');
-  renderPartnersForFeaturedTournament();
-  renderClubPage();
-  renderArchiveTournamentPage();
-  renderEditableStaticPage();
-  runAutoFit();
+  scheduleAfterFirstPaint(() => {
+    renderUpcomingMatches();
+    renderHomeNews();
+    renderMediaAlbumCollection('#home-media-stories');
+    renderMultimediaPage();
+    renderMediaAlbumPage();
+    renderMatchesPage();
+    renderNewsPage();
+    renderNewsArticlePage();
+    renderResultsList();
+    renderResultsMatches();
+    renderMatchPageFromJson();
+    renderTournamentsGrid();
+    renderClubsGrid('#clubs-grid-home', 8);
+    renderClubsGrid('#clubs-grid-page');
+    renderPartnersForFeaturedTournament();
+    renderClubPage();
+    renderArchiveTournamentPage();
+    renderEditableStaticPage();
+    runAutoFit();
+  });
 });
 
 

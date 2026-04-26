@@ -3230,3 +3230,14 @@
 - Replaced the shared `images/partners/komsomolskaya-pravda.png` asset with the
   new provided logo file so every page and partner reference picks up the same
   image automatically.
+
+### Timeweb load and translation smoothing
+
+- Deferred the heaviest page renderers until after the first paint so the home
+  page and inner pages can become interactive sooner on Timeweb.
+- Moved Cloudinary image upgrading off the critical path so the first render
+  does less synchronous image processing.
+- Debounced the English-language DOM observer and stopped it from reacting to
+  every text-node mutation, which reduces repeated full-page translation passes.
+- Trimmed a couple of hero-image preload/fetch-priority hints to lower initial
+  bandwidth pressure on reload.
