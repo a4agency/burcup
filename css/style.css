@@ -6335,6 +6335,86 @@ button,
   line-height:1;
 }
 
+@media (min-width: 901px){
+  .club-history-row.upcoming-card,
+  .match-headtohead .club-history-row.upcoming-card{
+    display:grid;
+    grid-template-columns:minmax(180px, 240px) minmax(0, 1fr);
+    grid-template-areas:"header teams";
+    gap:24px;
+    align-items:stretch;
+    padding:22px 24px;
+    background:#fff;
+    border:1px solid rgba(204,217,242,.88);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+  }
+
+  .club-history-row.upcoming-card .upcoming-header,
+  .match-headtohead .club-history-row.upcoming-card .upcoming-header{
+    grid-area:header;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:0;
+  }
+
+  .club-history-row.upcoming-card .upcoming-teams,
+  .match-headtohead .club-history-row.upcoming-card .upcoming-teams{
+    grid-area:teams;
+    display:grid;
+    align-content:center;
+    gap:18px;
+  }
+
+  .club-history-row.upcoming-card .upcoming-team-row,
+  .match-headtohead .club-history-row.upcoming-card .upcoming-team-row{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) auto;
+    align-items:center;
+    gap:14px;
+  }
+
+  .club-history-row.upcoming-card .team-left,
+  .match-headtohead .club-history-row.upcoming-card .team-left{
+    gap:14px;
+  }
+
+  .club-history-row.upcoming-card .team-logo,
+  .match-headtohead .club-history-row.upcoming-card .team-logo{
+    width:48px;
+    height:48px;
+    flex:0 0 48px;
+  }
+
+  .club-history-row.upcoming-card .team-name,
+  .match-headtohead .club-history-row.upcoming-card .team-name{
+    font-size:22px;
+    white-space:nowrap;
+  }
+
+  .club-history-row.upcoming-card .team-score,
+  .match-headtohead .club-history-row.upcoming-card .team-score{
+    font-size:32px;
+    min-width:28px;
+  }
+
+  .club-history-row.upcoming-card .upcoming-tour,
+  .match-headtohead .club-history-row.upcoming-card .upcoming-tour{
+    font-size:22px;
+    line-height:1.1;
+    white-space:nowrap;
+  }
+
+  .club-history-row.upcoming-card .upcoming-time,
+  .match-headtohead .club-history-row.upcoming-card .upcoming-time{
+    font-size:14px;
+    margin-top:6px;
+  }
+}
+
 /* Mobile adaptation */
 @media (max-width: 900px){
   .upcoming-card{
