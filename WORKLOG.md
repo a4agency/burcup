@@ -3444,3 +3444,7 @@
 ### 2026-04-27 personal meetings mobile polish
 - Forced the mobile `match-headtohead` block to inherit the same row/card treatment as the homepage upcoming matches so the personal-meetings section keeps the same logo-left, name-middle, score-right layout.
 - Hid the status pill in that block and reset the list shell spacing so the head-to-head rows stay visually aligned with the match cards used elsewhere on the site.
+
+### 2026-04-27 mobile match-card override
+- Added a runtime mobile style override in `js/site.js` to force club history, personal-meetings, media match cards, and archive match cards to use the exact same upcoming-match card layout.
+- The override is injected after the page loads so it can beat stale CSS and keep the logo-left, team-name, score-right layout consistent on phones.

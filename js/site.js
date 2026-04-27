@@ -242,6 +242,116 @@ function initHeaderCompactState() {
   header.classList.remove('is-compact');
 }
 
+function ensureMobileMatchCardStyles() {
+  if (document.getElementById('bc-mobile-match-card-overrides')) return;
+
+  const style = document.createElement('style');
+  style.id = 'bc-mobile-match-card-overrides';
+  style.textContent = `
+@media (max-width: 640px){
+  .match-headtohead .club-history-row.upcoming-card,
+  .club-history-row.upcoming-card,
+  .media-match-card.upcoming-card,
+  .archive-match-card.upcoming-card{
+    padding:16px 16px !important;
+    border-radius:16px !important;
+  }
+
+  .match-headtohead .club-history-row .upcoming-header,
+  .club-history-row .upcoming-header,
+  .media-match-card .upcoming-header,
+  .archive-match-card .upcoming-header{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    gap:10px !important;
+    margin-bottom:12px !important;
+  }
+
+  .match-headtohead .club-history-row .upcoming-tour,
+  .club-history-row .upcoming-tour,
+  .media-match-card .upcoming-tour,
+  .archive-match-card .upcoming-tour{
+    font-size:24px !important;
+    line-height:1 !important;
+  }
+
+  .match-headtohead .club-history-row .upcoming-time,
+  .club-history-row .upcoming-time,
+  .media-match-card .upcoming-time,
+  .archive-match-card .upcoming-time{
+    font-size:14px !important;
+    margin-top:6px !important;
+  }
+
+  .match-headtohead .club-history-row .upcoming-status,
+  .club-history-row .upcoming-status,
+  .media-match-card .upcoming-status,
+  .archive-match-card .upcoming-status{
+    display:none !important;
+  }
+
+  .match-headtohead .club-history-row .upcoming-teams,
+  .club-history-row .upcoming-teams,
+  .media-match-card .upcoming-teams,
+  .archive-match-card .upcoming-teams{
+    gap:12px !important;
+  }
+
+  .match-headtohead .club-history-row .upcoming-team-row,
+  .club-history-row .upcoming-team-row,
+  .media-match-card .upcoming-team-row,
+  .archive-match-card .upcoming-team-row{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:12px !important;
+  }
+
+  .match-headtohead .club-history-row .team-left,
+  .club-history-row .team-left,
+  .media-match-card .team-left,
+  .archive-match-card .team-left{
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    gap:10px !important;
+    min-width:0 !important;
+    flex:1 1 auto !important;
+  }
+
+  .match-headtohead .club-history-row .team-logo,
+  .club-history-row .team-logo,
+  .media-match-card .team-logo,
+  .archive-match-card .team-logo{
+    width:30px !important;
+    height:30px !important;
+    flex:0 0 30px !important;
+  }
+
+  .match-headtohead .club-history-row .team-name,
+  .club-history-row .team-name,
+  .media-match-card .team-name,
+  .archive-match-card .team-name{
+    font-size:16px !important;
+    line-height:1.15 !important;
+  }
+
+  .match-headtohead .club-history-row .team-score,
+  .club-history-row .team-score,
+  .media-match-card .team-score,
+  .archive-match-card .team-score{
+    font-size:24px !important;
+    min-width:22px !important;
+    line-height:1 !important;
+    text-align:right !important;
+    flex:0 0 auto !important;
+  }
+}
+  `;
+  document.head.appendChild(style);
+}
+
 const CONTACT_MAP_DEFAULTS = {
   google: {
     embed: 'https://www.google.com/maps?q=%D0%A4%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9%20%D0%BA%D0%BB%D1%83%D0%B1%20%D0%90%D0%BB%D0%BC%D0%B0%D0%B7-%D0%90%D0%BD%D1%82%D0%B5%D0%B9%2059.8498608,30.4842724&z=17&output=embed',
@@ -475,6 +585,7 @@ document.addEventListener('DOMContentLoaded', function(){
   initActiveHeaderLink();
   initHeaderMenu();
   initHeaderCompactState();
+  ensureMobileMatchCardStyles();
   initContactsMapToggle();
   initTournamentCountdown();
   scheduleAfterFirstPaint(() => {
@@ -5411,25 +5522,20 @@ async function renderMatchPageFromJson() {
     };
     const headToHeadMarkup = headToHeadMatches.length
       ? headToHeadMatches.map(match => {
-          const scoreParts = String(match.score || '0:0').split(':');
+          const scoreParts = parseMatchScoreParts(match.score);
           const dateTime = joinNonEmpty([formatMatchDisplayDate(match.date), match.time], ' • ');
           const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(match.tournament_name || 'Кубок Бурчалкина'));
           return `
-            <a class="match-headtohead-row" href="${escapeHtml(getMatchPageUrl(match))}">
-              <div class="club-history-datebox">
-                <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime || 'Матч прошлых розыгрышей')}</div>
-                <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
+            <a class="upcoming-card club-history-row" href="${escapeHtml(getMatchPageUrl(match))}">
+              <div class="upcoming-header">
+                <div>
+                  <div class="upcoming-tour">${escapeHtml(dateTime || 'Матч прошлых розыгрышей')}</div>
+                  <div class="upcoming-time">${escapeHtml(tournamentLabel)}</div>
+                </div>
               </div>
-              <div class="match-headtohead-main">
-                <div class="match-headtohead-team match-headtohead-team-home">
-                  <span class="match-headtohead-name">${escapeHtml(match.home_team)}</span>
-                  ${renderImageMarkup({ src: match.home_logo, alt: match.home_team, className: 'match-headtohead-logo', width: 96 })}
-                </div>
-                <div class="match-headtohead-score">${escapeHtml(scoreParts[0] || '0')} - ${escapeHtml(scoreParts[1] || '0')}</div>
-                <div class="match-headtohead-team match-headtohead-team-away">
-                  ${renderImageMarkup({ src: match.away_logo, alt: match.away_team, className: 'match-headtohead-logo', width: 96 })}
-                  <span class="match-headtohead-name">${escapeHtml(match.away_team)}</span>
-                </div>
+              <div class="upcoming-teams">
+                ${renderMatchTeamRow({ name: match.home_team, logo: match.home_logo }, scoreParts.home)}
+                ${renderMatchTeamRow({ name: match.away_team, logo: match.away_logo }, scoreParts.away)}
               </div>
             </a>
           `;
