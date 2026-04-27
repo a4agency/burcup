@@ -5744,6 +5744,72 @@ function renderArchiveTournamentPage() {
     `;
   }
 
+  function buildArchiveTournamentRanking(detail = {}) {
+    const clubs = getArchiveTournamentClubs(detail);
+    const bySlug = new Map();
+    const byName = new Map();
+    clubs.forEach(club => {
+      if (club.slug) bySlug.set(String(club.slug).toLowerCase(), club);
+      if (club.name) byName.set(String(club.name).toLowerCase(), club);
+    });
+
+    const resolveClub = (ref = {}) => {
+      const slug = String(ref.slug || ref.team_slug || '').toLowerCase();
+      const name = String(ref.team || ref.name || ref.home_team || ref.away_team || '').toLowerCase();
+      return bySlug.get(slug) || byName.get(name) || {
+        slug: slug || name,
+        name: ref.team || ref.name || ref.home_team || ref.away_team || '',
+        logo: ref.logo || ref.home_logo || ref.away_logo || '',
+        city: ref.city || '',
+        country: ref.country || '',
+        position: ''
+      };
+    };
+
+    const ranks = new Map();
+    const assign = (rank, ref) => {
+      const club = resolveClub(ref);
+      if (!club.name) return;
+      ranks.set(rank, { ...club, rank });
+    };
+
+    const playoff = Array.isArray(detail.playoff) ? detail.playoff : [];
+    const finalRows = playoff.filter(row => /Матч за (1|3|5|7) место/i.test(String(row.label || '')));
+    if (finalRows.length) {
+      const getWinnerLoser = (row) => {
+        const homeScore = Number(row.home_score);
+        const awayScore = Number(row.away_score);
+        const home = { team: row.home_team, slug: row.home_team_slug, logo: row.home_logo, city: row.home_city, country: row.home_country };
+        const away = { team: row.away_team, slug: row.away_team_slug, logo: row.away_logo, city: row.away_city, country: row.away_country };
+        if (Number.isFinite(homeScore) && Number.isFinite(awayScore) && homeScore !== awayScore) {
+          return homeScore > awayScore ? [home, away] : [away, home];
+        }
+        return [home, away];
+      };
+
+      finalRows
+        .sort((left, right) => Number(left.sort_order || 0) - Number(right.sort_order || 0))
+        .forEach(row => {
+          const place = Number(String(row.label || '').match(/Матч за (\d) место/i)?.[1] || 0);
+          if (!place) return;
+          const [winner, loser] = getWinnerLoser(row);
+          assign(place, winner);
+          assign(place + 1, loser);
+        });
+    }
+
+    if (ranks.size >= 4) {
+      return Array.from(ranks.values()).sort((left, right) => left.rank - right.rank);
+    }
+
+    return clubs
+      .map((club, index) => ({
+        ...club,
+        rank: Number(club.position || index + 1) || index + 1
+      }))
+      .sort((left, right) => (left.rank || 999) - (right.rank || 999));
+  }
+
   function renderArchiveMatchCard(item) {
     const href = getMatchPageUrl(item);
     const meta = joinNonEmpty([
@@ -5784,14 +5850,11 @@ function renderArchiveTournamentPage() {
     }
 
     if (teamsNode) {
-      const clubs = getArchiveTournamentClubs(resolvedDetail || {});
+      const clubs = buildArchiveTournamentRanking(resolvedDetail || {});
       if (!clubs.length) {
         teamsNode.innerHTML = '<div class="archive-empty-state">Состав участников появится позднее.</div>';
       } else {
-        const rankedClubs = clubs.map((club, index) => ({
-          ...club,
-          rank: Number(club.position || index + 1)
-        })).sort((left, right) => (left.rank || 999) - (right.rank || 999));
+        const rankedClubs = clubs;
         const podiumCandidates = rankedClubs.filter(club => club.rank >= 1 && club.rank <= 3);
         const podiumOrder = [2, 1, 3]
           .map(rank => podiumCandidates.find(club => club.rank === rank))

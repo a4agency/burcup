@@ -3452,3 +3452,7 @@
 ### 2026-04-27 archive teams podium
 - Restored the archive tournament teams block to the 3 + 3 + 2 layout for tournaments with 8 clubs.
 - Split the post-podium teams into a second centered row so the archive page matches the reference screenshot again instead of collapsing the lower teams into a single stretched grid.
+
+### 2026-04-28 archive ranking fix
+- Switched archive tournament team ordering to derive the final 1-8 places from playoff match results instead of grouped-club positions.
+- This restores all 8 clubs on archive pages like 2024 and 2025, where the raw club list only exposed group-stage positions before.
