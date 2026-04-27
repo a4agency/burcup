@@ -3420,3 +3420,7 @@
 ### 2026-04-27
 - Added a guard so the homepage hero carousel does not re-apply identical API data after first paint, which prevents double image reloads on refresh.
 - Rendered hero carousel image labels in the admin from their configured field labels, so desktop and mobile images are easier to distinguish.
+
+### 2026-04-27 mobile match cards
+- Tightened the mobile layout for head-to-head match blocks, archive match cards, and media match cards so they read like compact cards instead of stretched tables.
+- Reduced logo sizes and spacing on small screens to keep team rows and scores aligned in one vertical stack.
