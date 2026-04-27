@@ -2732,7 +2732,10 @@ object-fit:contain;
   }
 
   .match-headtohead-row{
+    grid-template-columns:1fr;
+    gap:12px;
     padding:18px 18px 20px;
+    border-radius:22px;
   }
 
   .match-headtohead-date{
@@ -2741,11 +2744,29 @@ object-fit:contain;
   }
 
   .match-headtohead-main{
+    grid-template-columns:1fr;
     gap:12px;
   }
 
   .match-headtohead-team{
     gap:10px;
+    justify-content:flex-start;
+    text-align:left;
+  }
+
+  .match-headtohead-team-home,
+  .match-headtohead-team-away{
+    justify-content:flex-start;
+    text-align:left;
+  }
+
+  .match-headtohead-team-away span{
+    order:2;
+  }
+
+  .match-headtohead-team-away img{
+    order:1;
+    justify-self:start;
   }
 
   .match-headtohead-logo{
@@ -2759,23 +2780,33 @@ object-fit:contain;
   }
 
   .match-headtohead-score{
+    justify-self:start;
     font-size:28px;
+    line-height:1;
   }
 
   .archive-match-card{
     padding:18px 18px 20px;
+    border-radius:22px;
   }
 
   .archive-match-card-top{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
     margin-bottom:12px;
   }
 
   .archive-match-card-main{
+    grid-template-columns:1fr;
     gap:12px;
   }
 
   .archive-match-card-team{
     gap:10px;
+    justify-content:flex-start;
+    text-align:left;
+    grid-template-columns:40px minmax(0, 1fr);
   }
 
   .archive-match-card-logo{
@@ -2789,7 +2820,9 @@ object-fit:contain;
   }
 
   .archive-match-card-score{
+    justify-self:start;
     font-size:28px;
+    line-height:1;
   }
 
   .media-match-card{
@@ -2823,6 +2856,7 @@ object-fit:contain;
     grid-template-columns:40px minmax(0, 1fr);
     gap:10px;
     text-align:left;
+    justify-content:flex-start;
   }
 
   .media-match-team-away span{
@@ -2847,6 +2881,17 @@ object-fit:contain;
     min-width:auto;
     text-align:left;
     font-size:28px;
+    line-height:1;
+    justify-self:start;
+  }
+
+  .media-match-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .media-action-button{
+    width:100%;
   }
 }
 
@@ -9774,34 +9819,40 @@ button,
   }
 
   .archive-match-card{
-    padding:18px 18px;
+    padding:18px 18px 20px;
+    border-radius:22px;
   }
 
   .archive-match-card-top{
     flex-direction:column;
     align-items:flex-start;
-    margin-bottom:14px;
+    gap:8px;
+    margin-bottom:12px;
   }
 
   .archive-match-card-main{
     grid-template-columns:1fr;
-    gap:14px;
+    gap:12px;
   }
 
   .archive-match-card-team,
   .archive-match-card-team-away{
+    grid-template-columns:40px minmax(0, 1fr);
+    gap:10px;
     justify-content:flex-start;
     text-align:left;
   }
 
   .archive-match-card-score{
     min-width:auto;
+    justify-self:start;
     text-align:left;
-    font-size:30px;
+    font-size:28px;
+    line-height:1;
   }
 
   .archive-team-card h3,
   .archive-match-card-team span{
-    font-size:21px;
+    font-size:19px;
   }
 }

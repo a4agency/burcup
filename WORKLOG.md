@@ -3424,3 +3424,7 @@
 ### 2026-04-27 mobile match cards
 - Tightened the mobile layout for head-to-head match blocks, archive match cards, and media match cards so they read like compact cards instead of stretched tables.
 - Reduced logo sizes and spacing on small screens to keep team rows and scores aligned in one vertical stack.
+
+### 2026-04-27 mobile match card polish
+- Made the mobile head-to-head, archive match, and media match cards closer to the homepage upcoming cards by stacking the content more cleanly and reducing the visual weight of logos and scores.
+- Tightened spacing and action-button width on small screens so the match blocks read like cards instead of nested tables.
