@@ -9556,6 +9556,12 @@ button,
   margin:2px auto 0;
 }
 
+.archive-team-grid-rest-compact{
+  grid-template-columns:repeat(2, minmax(240px, 280px)) !important;
+  justify-content:center;
+  max-width:580px;
+}
+
 .archive-standings-card .standings-table{
   min-width:760px;
 }
@@ -9897,6 +9903,11 @@ button,
   }
 
   .archive-team-grid-rest{
+    grid-template-columns:1fr !important;
+    max-width:none;
+  }
+
+  .archive-team-grid-rest-compact{
     grid-template-columns:1fr !important;
     max-width:none;
   }

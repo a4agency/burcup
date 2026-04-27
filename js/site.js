@@ -5799,15 +5799,23 @@ function renderArchiveTournamentPage() {
         const otherClubs = rankedClubs.filter(club => club.rank > 3);
 
         if (podiumOrder.length === 3) {
+          const renderArchiveRestRow = (clubs, extraClass = '') => {
+            if (!clubs.length) return '';
+            return `
+              <div class="archive-team-grid team-logo-grid archive-team-grid-rest${extraClass ? ` ${extraClass}` : ''}">
+                ${clubs.map(club => renderArchiveClubCard(club, club.rank)).join('')}
+              </div>
+            `;
+          };
+          const upperRest = otherClubs.slice(0, 3);
+          const lowerRest = otherClubs.slice(3);
+
           teamsNode.innerHTML = `
             <div class="archive-podium">
               ${podiumOrder.map(club => renderArchivePodiumCard(club, club.rank)).join('')}
             </div>
-            ${otherClubs.length ? `
-              <div class="archive-team-grid team-logo-grid archive-team-grid-rest">
-                ${otherClubs.map(club => renderArchiveClubCard(club, club.rank)).join('')}
-              </div>
-            ` : ''}
+            ${renderArchiveRestRow(upperRest)}
+            ${renderArchiveRestRow(lowerRest, 'archive-team-grid-rest-compact')}
           `;
         } else {
           teamsNode.innerHTML = `
