@@ -3428,3 +3428,7 @@
 ### 2026-04-27 mobile match card polish
 - Made the mobile head-to-head, archive match, and media match cards closer to the homepage upcoming cards by stacking the content more cleanly and reducing the visual weight of logos and scores.
 - Tightened spacing and action-button width on small screens so the match blocks read like cards instead of nested tables.
+
+### 2026-04-27 mobile match cards 1:1
+- Aligned the mobile history, head-to-head, archive, and media match cards even closer to the homepage upcoming-card pattern by matching padding, radii, logo sizes, and typography scale.
+- Kept the status pill out of these cards while preserving the same visual weight as the homepage match cards.

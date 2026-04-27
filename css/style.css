@@ -2734,8 +2734,8 @@ object-fit:contain;
   .match-headtohead-row{
     grid-template-columns:1fr;
     gap:12px;
-    padding:18px 18px 20px;
-    border-radius:22px;
+    padding:16px 16px;
+    border-radius:16px;
   }
 
   .match-headtohead-date{
@@ -2770,24 +2770,24 @@ object-fit:contain;
   }
 
   .match-headtohead-logo{
-    width:40px;
-    height:40px;
-    flex:0 0 40px;
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
   }
 
   .match-headtohead-name{
-    font-size:19px;
+    font-size:16px;
   }
 
   .match-headtohead-score{
     justify-self:start;
-    font-size:28px;
+    font-size:24px;
     line-height:1;
   }
 
   .archive-match-card{
-    padding:18px 18px 20px;
-    border-radius:22px;
+    padding:16px 16px;
+    border-radius:16px;
   }
 
   .archive-match-card-top{
@@ -2806,27 +2806,28 @@ object-fit:contain;
     gap:10px;
     justify-content:flex-start;
     text-align:left;
-    grid-template-columns:40px minmax(0, 1fr);
+    grid-template-columns:30px minmax(0, 1fr);
   }
 
   .archive-match-card-logo{
-    width:40px;
-    height:40px;
-    flex:0 0 40px;
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
   }
 
   .archive-match-card-team span{
-    font-size:19px;
+    font-size:16px;
   }
 
   .archive-match-card-score{
     justify-self:start;
-    font-size:28px;
+    font-size:24px;
     line-height:1;
   }
 
   .media-match-card{
-    padding:18px 18px 20px;
+    padding:16px 16px;
+    border-radius:16px;
   }
 
   .media-match-top{
@@ -2853,7 +2854,7 @@ object-fit:contain;
 
   .media-match-team,
   .media-match-team-away{
-    grid-template-columns:40px minmax(0, 1fr);
+    grid-template-columns:30px minmax(0, 1fr);
     gap:10px;
     text-align:left;
     justify-content:flex-start;
@@ -2869,18 +2870,18 @@ object-fit:contain;
   }
 
   .media-match-logo{
-    width:40px;
-    height:40px;
+    width:30px;
+    height:30px;
   }
 
   .media-match-team span{
-    font-size:18px;
+    font-size:16px;
   }
 
   .media-match-score{
     min-width:auto;
     text-align:left;
-    font-size:28px;
+    font-size:24px;
     line-height:1;
     justify-self:start;
   }
@@ -9819,8 +9820,8 @@ button,
   }
 
   .archive-match-card{
-    padding:18px 18px 20px;
-    border-radius:22px;
+    padding:16px 16px;
+    border-radius:16px;
   }
 
   .archive-match-card-top{
@@ -9837,7 +9838,7 @@ button,
 
   .archive-match-card-team,
   .archive-match-card-team-away{
-    grid-template-columns:40px minmax(0, 1fr);
+    grid-template-columns:30px minmax(0, 1fr);
     gap:10px;
     justify-content:flex-start;
     text-align:left;
@@ -9847,12 +9848,12 @@ button,
     min-width:auto;
     justify-self:start;
     text-align:left;
-    font-size:28px;
+    font-size:24px;
     line-height:1;
   }
 
   .archive-team-card h3,
   .archive-match-card-team span{
-    font-size:19px;
+    font-size:16px;
   }
 }
