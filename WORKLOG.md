@@ -3436,3 +3436,7 @@
 ### 2026-04-27 mobile history cards refine
 - Made the mobile history cards render as standalone cards instead of one shared list shell.
 - Enforced a larger date line and hid status badges on archive/media match cards so they read closer to the homepage upcoming-match cards.
+
+### 2026-04-27 mobile match cards 1:1
+- Reused the homepage upcoming-card row structure for mobile club history, archive match cards, and media match cards so logos, team names, and scores line up consistently.
+- Removed the older table-like inner wrappers from those cards so the mobile layout stays visually identical across sections.

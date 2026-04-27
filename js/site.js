@@ -3817,6 +3817,36 @@ function renderUpcomingCardLoading(index = 0) {
   `;
 }
 
+function parseMatchScoreParts(score = '0:0') {
+  const parts = String(score || '0:0').split(':');
+  return {
+    home: parts[0] || '0',
+    away: parts[1] || '0'
+  };
+}
+
+function renderMatchTeamRow(team = {}, score = '0', options = {}) {
+  const {
+    logoWidth = 96,
+    logoClassName = 'team-logo',
+    nameClassName = 'team-name',
+    teamClassName = '',
+    fallbackLogo = 'images/logo-burchalkin.webp'
+  } = options;
+
+  const logo = team.logo || fallbackLogo;
+  const name = team.name || '';
+  return `
+    <div class="${['upcoming-team-row', teamClassName].filter(Boolean).join(' ')}">
+      <div class="team-left">
+        ${renderImageMarkup({ src: logo, alt: name, className: logoClassName, width: logoWidth })}
+        <div class="${nameClassName}">${escapeHtml(name)}</div>
+      </div>
+      <div class="team-score">${escapeHtml(score)}</div>
+    </div>
+  `;
+}
+
 function renderNewsCardLoading(index = 0) {
   return `
     <div class="news-preview-card site-loading-card" aria-hidden="true">
@@ -4271,25 +4301,20 @@ async function renderClubPage() {
   `;
   }).join('');
   const matchesMarkup = matches.map(item => {
-    const parts = String(item.score || '0:0').split(':');
     const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
     const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(item.tournament_name || 'Кубок Бурчалкина'));
+    const scoreParts = parseMatchScoreParts(item.score);
     return `
-      <a class="club-history-row match-headtohead-row" href="${escapeHtml(getMatchPageUrl(item))}">
-        <div class="club-history-datebox">
-          <div class="match-headtohead-date club-history-date">${escapeHtml(dateTime)}</div>
-          <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
+      <a class="upcoming-card club-history-row" href="${escapeHtml(getMatchPageUrl(item))}">
+        <div class="upcoming-header">
+          <div>
+            <div class="upcoming-tour">${escapeHtml(dateTime)}</div>
+            <div class="upcoming-time">${escapeHtml(tournamentLabel)}</div>
+          </div>
         </div>
-        <div class="match-headtohead-main">
-          <div class="match-headtohead-team match-headtohead-team-home">
-            <span class="match-headtohead-name">${escapeHtml(item.home_team)}</span>
-            ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'match-headtohead-logo', width: 96 })}
-          </div>
-          <div class="match-headtohead-score">${escapeHtml(parts[0] || '0')} - ${escapeHtml(parts[1] || '0')}</div>
-          <div class="match-headtohead-team match-headtohead-team-away">
-            ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'match-headtohead-logo', width: 96 })}
-            <span class="match-headtohead-name">${escapeHtml(item.away_team)}</span>
-          </div>
+        <div class="upcoming-teams">
+          ${renderMatchTeamRow({ name: item.home_team, logo: item.home_logo }, scoreParts.home)}
+          ${renderMatchTeamRow({ name: item.away_team, logo: item.away_logo }, scoreParts.away)}
         </div>
       </a>
     `;
@@ -4961,32 +4986,20 @@ function renderMediaOverviewCards(matches = [], storiesCount = 0) {
 }
 
 function renderMediaMatchCard(item) {
-  const statusClass = getMatchStatusClass(item.status);
   const links = getMatchMediaLinks(item);
-  const scoreParts = String(item.score || '0:0').split(':');
-  const score = item.status === 'soon'
-    ? '—'
-    : `${escapeHtml(scoreParts[0] || '0')}:${escapeHtml(scoreParts[1] || '0')}`;
+  const scoreParts = parseMatchScoreParts(item.score);
 
   return `
-    <article class="card media-match-card">
-      <div class="media-match-top">
+    <article class="card media-match-card upcoming-card">
+      <div class="upcoming-header">
         <div>
-          <div class="media-match-stage">${escapeHtml(item.group || item.stage || 'Матч')}</div>
-          <div class="media-match-date">${escapeHtml(formatMatchCardDateTime(item))}</div>
+          <div class="upcoming-tour">${escapeHtml(item.group || item.stage || 'Матч')}</div>
+          <div class="upcoming-time">${escapeHtml(formatMatchCardDateTime(item))}</div>
         </div>
-        <div class="upcoming-status media-match-status ${statusClass}">${escapeHtml(item.status_label || 'Скоро')}</div>
       </div>
-      <a class="media-match-main" href="match.html?id=${encodeURIComponent(item.id)}">
-        <div class="media-match-team">
-          ${renderImageMarkup({ src: item.home_logo, alt: item.home_team, className: 'media-match-logo', width: 120 })}
-          <span>${escapeHtml(item.home_team)}</span>
-        </div>
-        <div class="media-match-score">${score}</div>
-        <div class="media-match-team media-match-team-away">
-          ${renderImageMarkup({ src: item.away_logo, alt: item.away_team, className: 'media-match-logo', width: 120 })}
-          <span>${escapeHtml(item.away_team)}</span>
-        </div>
+      <a class="upcoming-teams" href="match.html?id=${encodeURIComponent(item.id)}">
+        ${renderMatchTeamRow({ name: item.home_team, logo: item.home_logo }, scoreParts.home)}
+        ${renderMatchTeamRow({ name: item.away_team, logo: item.away_logo }, scoreParts.away)}
       </a>
       <div class="media-match-actions">
         <a class="media-action-button is-primary" href="match.html?id=${encodeURIComponent(item.id)}">Страница матча</a>
@@ -5632,22 +5645,17 @@ function renderArchiveTournamentPage() {
       String(item.time || '').trim(),
       String(item.group || item.round || '').trim()
     ], ' • ');
+    const scoreParts = parseMatchScoreParts(item.score);
     return `
-      <a class="archive-match-card" href="${escapeHtml(href)}">
-        <div class="archive-match-card-top">
-          <span>${escapeHtml(meta || 'Матч прошлых розыгрышей')}</span>
-          <span class="archive-match-card-status">${escapeHtml(item.status_label || '')}</span>
+      <a class="archive-match-card upcoming-card" href="${escapeHtml(href)}">
+        <div class="upcoming-header">
+          <div>
+            <div class="upcoming-tour">${escapeHtml(meta || 'Матч прошлых розыгрышей')}</div>
+          </div>
         </div>
-        <div class="archive-match-card-main">
-          <div class="archive-match-card-team">
-            ${renderImageMarkup({ src: item.home_logo || 'images/logo-burchalkin.webp', alt: item.home_team || '', className: 'archive-match-card-logo', width: 112 })}
-            <span>${escapeHtml(item.home_team || '')}</span>
-          </div>
-          <div class="archive-match-card-score">${escapeHtml(item.score || '0:0')}</div>
-          <div class="archive-match-card-team archive-match-card-team-away">
-            ${renderImageMarkup({ src: item.away_logo || 'images/logo-burchalkin.webp', alt: item.away_team || '', className: 'archive-match-card-logo', width: 112 })}
-            <span>${escapeHtml(item.away_team || '')}</span>
-          </div>
+        <div class="upcoming-teams">
+          ${renderMatchTeamRow({ name: item.home_team || '', logo: item.home_logo || 'images/logo-burchalkin.webp' }, scoreParts.home)}
+          ${renderMatchTeamRow({ name: item.away_team || '', logo: item.away_logo || 'images/logo-burchalkin.webp' }, scoreParts.away)}
         </div>
       </a>
     `;
