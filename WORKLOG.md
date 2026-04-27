@@ -3440,3 +3440,7 @@
 ### 2026-04-27 mobile match cards 1:1
 - Reused the homepage upcoming-card row structure for mobile club history, archive match cards, and media match cards so logos, team names, and scores line up consistently.
 - Removed the older table-like inner wrappers from those cards so the mobile layout stays visually identical across sections.
+
+### 2026-04-27 personal meetings mobile polish
+- Forced the mobile `match-headtohead` block to inherit the same row/card treatment as the homepage upcoming matches so the personal-meetings section keeps the same logo-left, name-middle, score-right layout.
+- Hid the status pill in that block and reset the list shell spacing so the head-to-head rows stay visually aligned with the match cards used elsewhere on the site.
