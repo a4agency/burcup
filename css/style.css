@@ -9550,10 +9550,14 @@ button,
 }
 
 .archive-team-grid-rest{
-  grid-template-columns:repeat(3, minmax(240px, 280px)) !important;
+  grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)) !important;
   justify-content:center;
-  max-width:880px;
+  max-width:1380px;
   margin:2px auto 0;
+}
+
+.archive-team-grid-rest .archive-team-card{
+  min-height:260px;
 }
 
 .archive-standings-card .standings-table{
