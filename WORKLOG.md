@@ -3448,3 +3448,7 @@
 ### 2026-04-27 mobile match-card override
 - Added a runtime mobile style override in `js/site.js` to force club history, personal-meetings, media match cards, and archive match cards to use the exact same upcoming-match card layout.
 - The override is injected after the page loads so it can beat stale CSS and keep the logo-left, team-name, score-right layout consistent on phones.
+
+### 2026-04-27 archive podium layout
+- Tightened the archive tournament podium layout so the top three cards share the same visual height and the supporting teams center cleanly underneath.
+- Adjusted the archive team grid to use an auto-fit layout for the remaining clubs, which avoids the empty right-side gap when there are only one or two cards in the lower row.
