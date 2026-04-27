@@ -3416,3 +3416,7 @@
 - Added an editable homepage hero carousel to the admin UI.
 - The admin now exposes a `hero_carousel` source with desktop and mobile image URLs, alt text, and manual ordering.
 - Public hero slides are served from `/api/hero-carousel`, with a database-backed `homepage_hero_slides` table and a fallback to the existing static slides if the API is unavailable.
+
+### 2026-04-27
+- Added a guard so the homepage hero carousel does not re-apply identical API data after first paint, which prevents double image reloads on refresh.
+- Rendered hero carousel image labels in the admin from their configured field labels, so desktop and mobile images are easier to distinguish.

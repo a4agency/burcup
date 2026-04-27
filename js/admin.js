@@ -2177,11 +2177,11 @@ function makeLogoPicker(value, key, index) {
   `;
 }
 
-function makeImageField(value, key, index) {
+function makeImageField(value, key, index, label = 'Картинка') {
   const safeValue = value || '';
   return `
     <div class="admin-field">
-      <label>Картинка</label>
+      <label>${label}</label>
       <input type="text" value="${safeValue}" data-key="${key}" data-index="${index}" class="admin-image-input">
       <div class="admin-inline-actions">
         <label class="admin-small-btn">
@@ -2887,7 +2887,7 @@ function makeField(field, value, itemIndex) {
       </div>`;
   }
   if (type === 'logo') return makeLogoPicker(value, key, itemIndex);
-  if (type === 'image') return makeImageField(value, key, itemIndex);
+  if (type === 'image') return makeImageField(value, key, itemIndex, label);
   if (type === 'score') {
     const safe = (value || '0:0').split(':');
     const left = safe[0] ?? '0';

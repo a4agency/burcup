@@ -5859,6 +5859,17 @@ function initHeroCarousel() {
       });
   }
 
+  function heroCarouselItemsSignature(items = []) {
+    return normalizeHeroCarouselItems(items)
+      .map(item => [
+        item.image_url,
+        item.mobile_image_url,
+        item.alt_text,
+        item.sort_order,
+      ].join('|'))
+      .join('||');
+  }
+
   function getFallbackHeroCarouselItems() {
     return slides
       .map((slide, index) => {
@@ -6035,6 +6046,9 @@ function initHeroCarousel() {
   scheduleAfterFirstPaint(async () => {
     try {
       const remoteSlides = await fetchApi('/api/hero-carousel');
+      if (heroCarouselItemsSignature(remoteSlides) === heroCarouselItemsSignature(getFallbackHeroCarouselItems())) {
+        return;
+      }
       if (applyHeroCarouselItems(remoteSlides)) {
         hydrateSlide(0);
         hydrateSlide(1 % slides.length);
