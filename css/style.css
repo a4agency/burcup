@@ -2731,16 +2731,45 @@ object-fit:contain;
     flex:1 1 180px;
   }
 
-  .match-headtohead-row{
-    grid-template-columns:1fr;
+  .match-headtohead-list{
+    background:transparent;
+    border:none;
+    box-shadow:none;
+    overflow:visible;
     gap:12px;
-    padding:16px 16px;
+  }
+
+  .match-headtohead-row{
+    display:block;
+    grid-template-columns:1fr;
+    gap:0;
+    padding:16px 16px 14px;
+    background:#fff;
+    border:1px solid rgba(204,217,242,.88);
     border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+
+  .match-headtohead-row + .match-headtohead-row{
+    border-top:0;
+  }
+
+  .club-history-datebox{
+    gap:6px;
+    margin-bottom:12px;
   }
 
   .match-headtohead-date{
-    font-size:15px;
+    font-size:18px;
+    line-height:1.1;
+    font-weight:800;
     white-space:normal;
+  }
+
+  .club-history-date-meta{
+    font-size:14px;
+    line-height:1.35;
+    font-weight:600;
   }
 
   .match-headtohead-main{
@@ -2797,6 +2826,17 @@ object-fit:contain;
     margin-bottom:12px;
   }
 
+  .archive-match-card-top > span:first-child{
+    font-size:18px;
+    line-height:1.1;
+    font-weight:800;
+  }
+
+  .archive-match-card-status,
+  .archive-match-card-top > span:last-child{
+    display:none;
+  }
+
   .archive-match-card-main{
     grid-template-columns:1fr;
     gap:12px;
@@ -2838,12 +2878,17 @@ object-fit:contain;
   }
 
   .media-match-stage{
-    font-size:12px;
+    font-size:18px;
+    line-height:1.1;
   }
 
   .media-match-date{
     margin-top:0;
     font-size:14px;
+  }
+
+  .media-match-status{
+    display:none;
   }
 
   .media-match-main{
@@ -9829,6 +9874,17 @@ button,
     align-items:flex-start;
     gap:8px;
     margin-bottom:12px;
+  }
+
+  .archive-match-card-top > span:first-child{
+    font-size:18px;
+    line-height:1.1;
+    font-weight:800;
+  }
+
+  .archive-match-card-status,
+  .archive-match-card-top > span:last-child{
+    display:none;
   }
 
   .archive-match-card-main{

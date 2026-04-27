@@ -3432,3 +3432,7 @@
 ### 2026-04-27 mobile match cards 1:1
 - Aligned the mobile history, head-to-head, archive, and media match cards even closer to the homepage upcoming-card pattern by matching padding, radii, logo sizes, and typography scale.
 - Kept the status pill out of these cards while preserving the same visual weight as the homepage match cards.
+
+### 2026-04-27 mobile history cards refine
+- Made the mobile history cards render as standalone cards instead of one shared list shell.
+- Enforced a larger date line and hid status badges on archive/media match cards so they read closer to the homepage upcoming-match cards.
