@@ -9959,8 +9959,101 @@ button,
     line-height:1;
   }
 
-  .archive-team-card h3,
-  .archive-match-card-team span{
-    font-size:16px;
+.archive-team-card h3,
+.archive-match-card-team span{
+  font-size:16px;
+}
+}
+
+/* Force club history / media / archive match cards to match upcoming cards on mobile */
+@media (max-width: 640px){
+  .club-history-row.upcoming-card,
+  .media-match-card.upcoming-card,
+  .archive-match-card.upcoming-card{
+    padding:16px 16px !important;
+    border-radius:22px !important;
+  }
+
+  .club-history-row .upcoming-header,
+  .media-match-card .upcoming-header,
+  .archive-match-card .upcoming-header{
+    display:flex !important;
+    flex-direction:row !important;
+    justify-content:space-between !important;
+    align-items:flex-start !important;
+    gap:12px !important;
+    margin-bottom:16px !important;
+  }
+
+  .club-history-row .upcoming-tour,
+  .media-match-card .upcoming-tour,
+  .archive-match-card .upcoming-tour{
+    font-size:clamp(24px, 7vw, 32px) !important;
+    line-height:1 !important;
+    white-space:nowrap !important;
+  }
+
+  .club-history-row .upcoming-time,
+  .media-match-card .upcoming-time,
+  .archive-match-card .upcoming-time{
+    font-size:14px !important;
+    margin-top:8px !important;
+  }
+
+  .club-history-row .upcoming-status,
+  .media-match-card .upcoming-status,
+  .archive-match-card .upcoming-status{
+    display:none !important;
+  }
+
+  .club-history-row .upcoming-teams,
+  .media-match-card .upcoming-teams,
+  .archive-match-card .upcoming-teams{
+    gap:14px !important;
+  }
+
+  .club-history-row .upcoming-team-row,
+  .media-match-card .upcoming-team-row,
+  .archive-match-card .upcoming-team-row{
+    display:flex !important;
+    justify-content:space-between !important;
+    align-items:center !important;
+    gap:12px !important;
+  }
+
+  .club-history-row .team-left,
+  .media-match-card .team-left,
+  .archive-match-card .team-left{
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    gap:14px !important;
+    min-width:0 !important;
+    flex:1 1 auto !important;
+  }
+
+  .club-history-row .team-logo,
+  .media-match-card .team-logo,
+  .archive-match-card .team-logo{
+    width:36px !important;
+    height:36px !important;
+    flex:0 0 36px !important;
+  }
+
+  .club-history-row .team-name,
+  .media-match-card .team-name,
+  .archive-match-card .team-name{
+    font-size:20px !important;
+    line-height:1.15 !important;
+  }
+
+  .club-history-row .team-score,
+  .media-match-card .team-score,
+  .archive-match-card .team-score{
+    font-size:30px !important;
+    min-width:28px !important;
+    line-height:1 !important;
+    text-align:right !important;
+    flex:0 0 auto !important;
   }
 }
