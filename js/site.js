@@ -3958,6 +3958,52 @@ function renderMatchTeamRow(team = {}, score = '0', options = {}) {
   `;
 }
 
+function isDesktopMatchHistoryLayout() {
+  return window.matchMedia('(min-width: 901px)').matches;
+}
+
+function renderLegacyMatchHistoryRow({
+  href,
+  dateText,
+  tournamentLabel,
+  homeTeam,
+  homeLogo,
+  awayTeam,
+  awayLogo,
+  scoreParts,
+  includeMeta = false,
+  stageLabel = '',
+  statusLabel = ''
+}) {
+  return `
+    <a class="club-history-row match-headtohead-row" href="${escapeHtml(href)}">
+      <div class="club-history-datebox">
+        <div class="match-headtohead-date club-history-date">${escapeHtml(dateText)}</div>
+        <div class="club-history-date-meta">${escapeHtml(tournamentLabel)}</div>
+      </div>
+      <div class="club-history-mainstack">
+        <div class="match-headtohead-main">
+          <div class="match-headtohead-team match-headtohead-team-home">
+            <span class="match-headtohead-name">${escapeHtml(homeTeam || '')}</span>
+            ${renderImageMarkup({ src: homeLogo || 'images/logo-burchalkin.webp', alt: homeTeam || '', className: 'match-headtohead-logo', width: 96 })}
+          </div>
+          <div class="match-headtohead-score">${escapeHtml(scoreParts.home || '0')} - ${escapeHtml(scoreParts.away || '0')}</div>
+          <div class="match-headtohead-team match-headtohead-team-away">
+            ${renderImageMarkup({ src: awayLogo || 'images/logo-burchalkin.webp', alt: awayTeam || '', className: 'match-headtohead-logo', width: 96 })}
+            <span class="match-headtohead-name">${escapeHtml(awayTeam || '')}</span>
+          </div>
+        </div>
+        ${includeMeta ? `
+          <div class="club-history-row-meta">
+            ${stageLabel ? `<span class="club-history-row-chip">${escapeHtml(stageLabel)}</span>` : ''}
+            ${statusLabel ? `<span class="club-history-row-chip club-history-row-chip-status">${escapeHtml(statusLabel)}</span>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    </a>
+  `;
+}
+
 function renderNewsCardLoading(index = 0) {
   return `
     <div class="news-preview-card site-loading-card" aria-hidden="true">
@@ -4415,6 +4461,21 @@ async function renderClubPage() {
     const dateTime = joinNonEmpty([formatMatchDisplayDate(item.date), item.time], ' • ');
     const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(item.tournament_name || 'Кубок Бурчалкина'));
     const scoreParts = parseMatchScoreParts(item.score);
+    if (isDesktopMatchHistoryLayout()) {
+      return renderLegacyMatchHistoryRow({
+        href: getMatchPageUrl(item),
+        dateText: dateTime,
+        tournamentLabel,
+        homeTeam: item.home_team,
+        homeLogo: item.home_logo,
+        awayTeam: item.away_team,
+        awayLogo: item.away_logo,
+        scoreParts,
+        includeMeta: true,
+        stageLabel: translateRuntimeText(item.stage || ''),
+        statusLabel: translateRuntimeText(item.status_label || '')
+      });
+    }
     return `
       <a class="upcoming-card club-history-row" href="${escapeHtml(getMatchPageUrl(item))}">
         <div class="upcoming-header">
@@ -5525,6 +5586,18 @@ async function renderMatchPageFromJson() {
           const scoreParts = parseMatchScoreParts(match.score);
           const dateTime = joinNonEmpty([formatMatchDisplayDate(match.date), match.time], ' • ');
           const tournamentLabel = translateRuntimeText(normalizeTournamentDisplayName(match.tournament_name || 'Кубок Бурчалкина'));
+          if (isDesktopMatchHistoryLayout()) {
+            return renderLegacyMatchHistoryRow({
+              href: getMatchPageUrl(match),
+              dateText: formatHeadToHeadDateLabel(match) || dateTime || 'Матч прошлых розыгрышей',
+              tournamentLabel,
+              homeTeam: match.home_team,
+              homeLogo: match.home_logo,
+              awayTeam: match.away_team,
+              awayLogo: match.away_logo,
+              scoreParts
+            });
+          }
           return `
             <a class="upcoming-card club-history-row" href="${escapeHtml(getMatchPageUrl(match))}">
               <div class="upcoming-header">

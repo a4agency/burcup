@@ -3456,3 +3456,7 @@
 ### 2026-04-28 archive ranking fix
 - Switched archive tournament team ordering to derive the final 1-8 places from playoff match results instead of grouped-club positions.
 - This restores all 8 clubs on archive pages like 2024 and 2025, where the raw club list only exposed group-stage positions before.
+
+### 2026-04-28 desktop history restore
+- Restored the desktop rendering of club history and head-to-head blocks back to the older pre-yesterday layout.
+- Kept the mobile match-card layout unchanged by switching the markup based on viewport width instead of changing the shared CSS again.
