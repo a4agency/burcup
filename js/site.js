@@ -4470,10 +4470,7 @@ async function renderClubPage() {
         homeLogo: item.home_logo,
         awayTeam: item.away_team,
         awayLogo: item.away_logo,
-        scoreParts,
-        includeMeta: true,
-        stageLabel: translateRuntimeText(item.stage || ''),
-        statusLabel: translateRuntimeText(item.status_label || '')
+        scoreParts
       });
     }
     return `
